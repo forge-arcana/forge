@@ -1,6 +1,6 @@
 # Stack Guide
 
-A reference architecture for new projects. Derived from production decisions across Jeepi (transit platform) and House of Angels (hiring marketplace), refined through two full rewrites each.
+A reference architecture for new projects. Derived from production decisions across multiple projects, refined through full rewrites.
 
 **Core bias:** We favor technologies that Claude AI has deep familiarity with — maximizing AI-assisted development velocity. We will not sacrifice solution quality for this, but when two options are comparable, we pick the one Claude knows best.
 
@@ -12,7 +12,7 @@ A reference architecture for new projects. Derived from production decisions acr
 |---|---|---|
 | **Language** | TypeScript | Type safety DB-to-UI. Claude generates far better TS than JS — catches errors at write time, not runtime. |
 | **Runtime** | Node.js | Stable, mature, universal tooling. Capacitor-compatible. Claude's strongest backend runtime. |
-| **Backend** | Hono | ESM-native, 14KB, typed routes, Zod middleware built-in. Express is legacy — Hono uses Web Standard APIs (portable to CF Workers, Deno, Bun). Claude knows Hono deeply from both projects. |
+| **Backend** | Hono | ESM-native, 14KB, typed routes, Zod middleware built-in. Express is legacy — Hono uses Web Standard APIs (portable to CF Workers, Deno, Bun). Claude knows Hono deeply. |
 | **ORM** | Drizzle | No codegen, no engine binary (50KB vs Prisma's 2-3MB), SQL-like API, native pgvector support, faster cold starts. Schema-as-code in TypeScript. |
 | **Auth** | Better Auth | Framework-agnostic, Drizzle adapter, signed sessions, refresh rotation, CSRF, plugins for 2FA/passkeys/RBAC/bearer. Replaces hand-rolled auth and NextAuth alike. |
 | **Database** | PostgreSQL | Neon (dev/staging/CI — free tier, serverless), Cloud SQL (production — always-on, VPC peering, SLA). Drizzle abstracts the provider — only the connection string changes. Add pgvector when you need embeddings. |
@@ -32,7 +32,7 @@ A reference architecture for new projects. Derived from production decisions acr
 | **PWA** | vite-plugin-pwa | Service worker + manifest generation. Works inside Capacitor WebView too. Network-first caching for 3G resilience. |
 | **Package Manager** | pnpm | Faster, stricter (no phantom deps), disk-efficient. Monorepo workspaces built-in. |
 | **Testing** | Vitest + Playwright | Vitest for unit + integration (fast, ESM-native, same config as Vite). Playwright for E2E (cross-browser, reliable). |
-| **Hosting** | GCP Cloud Run | Single deployment serves API + static build (no CORS). asia-southeast1 for PH apps. Split to CDN later if needed. |
+| **Hosting** | GCP Cloud Run | Single deployment serves API + static build (no CORS). pick the region closest to your users. Split to CDN later if needed. |
 | **CI/CD** | GitHub Actions | Tests, Docker build, push to Artifact Registry, canary deploy to Cloud Run, smoke test, promote. WIF for keyless GCP auth. |
 
 ---
@@ -49,16 +49,16 @@ packages/
   web/       — Vite + React frontend, TanStack Router, components
 ```
 
-For multi-role apps (e.g., passenger + driver + admin), the `web/` package can be split:
+For multi-role apps (e.g., customer + staff + admin), the `web/` package can be split:
 
 ```
 packages/
   shared/
   database/
   server/
-  passenger/   — React + Capacitor (native mobile)
-  driver/      — React + Capacitor (native mobile)
-  admin/       — React + PWA (browser-only, no Capacitor)
+  customer/   — React + Capacitor (native mobile)
+  staff/      — React + Capacitor (native mobile)
+  admin/      — React + PWA (browser-only, no Capacitor)
 ```
 
 ---
