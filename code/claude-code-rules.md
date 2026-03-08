@@ -101,6 +101,50 @@ No separate task/context/todo files are created in the repo — everything lives
 
 ---
 
+## Bash Permissions — Avoiding Prompts
+
+### Command Chaining Breaks Permission Matching
+
+Claude Code's permission system matches commands by their **first token**. Chaining with `&&` or `;` means the first token is `cd`, not the actual command you want auto-allowed:
+
+```bash
+# ❌ BAD — starts with `cd`, won't match `git commit` allow pattern
+cd packages/server && git commit -m "fix"
+
+# ✅ GOOD — separate tool calls, each matches its own pattern
+# Call 1: cd packages/server
+# Call 2: git commit -m "fix"
+```
+
+**Rule**: Use **separate Bash tool calls** for each command so each one matches its own allow pattern.
+
+### Auto-Allowed Commands
+
+These commands are harmless and should run without prompting:
+
+| Category | Commands |
+|----------|----------|
+| **Shell basics** | `cd`, `ls`, `pwd`, `cat`, `head`, `tail`, `echo`, `printf`, `wc`, `sort`, `uniq`, `tr`, `cut`, `tee` |
+| **File inspection** | `file`, `stat`, `diff`, `which`, `whereis`, `type` |
+| **Search** | `find`, `grep`, `rg`, `ag` |
+| **Node.js** | `node`, `npm`, `npx`, `pnpm`, `tsx`, `tsc` |
+| **Build/test** | `vitest`, `playwright`, `eslint`, `prettier` |
+| **Network** | `curl`, `wget` |
+| **Process** | `ps`, `kill`, `lsof` |
+| **WSL/Docker** | `wsl`, `docker` |
+| **Git (safe)** | `git status`, `git diff`, `git log`, `git add`, `git commit`, `git branch`, `git checkout`, `git switch`, `git stash`, `git fetch`, `git rebase`, `git merge`, `git cherry-pick`, `git show`, `git tag` |
+
+### Git Commands That Prompt
+
+The following git commands are **excluded** because they are destructive or affect shared state:
+
+- `git push` — triggers deploys, affects remote
+- `git reset` — can discard commits/work
+- `git clean` — deletes untracked files permanently
+- `git restore` — can discard uncommitted changes
+
+---
+
 ## Core Principles
 
 | Principle | Description |
