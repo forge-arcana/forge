@@ -88,8 +88,27 @@ No separate task/context/todo files are created in the repo — everything lives
 
 | Command | Meaning |
 |---------|---------|
-| **wow** | "What's outstanding work?" — Lists remaining tasks from the project's current context |
+| **wow** | "What's outstanding work?" — See details below |
 | **wrap** | Full pre-commit ritual: update learnings, save context, update docs, lint, stage, commit, ask before push |
+
+### `wow` — What's Outstanding Work?
+
+Outputs a structured status summary with **no prose preamble** — just data:
+
+1. **Re-read first**: Always re-reads the project's `CLAUDE.md` Current Context section AND any active plan file before generating the table. Never relies on conversation memory — it goes stale. Cross-references completed items against plan items.
+2. **Status line**: Branch, last commit, test counts (unit + E2E), type/lint errors.
+3. **Outstanding work table**:
+
+   | # | Category | Task | Priority | Status | Notes |
+   |---|----------|------|----------|--------|-------|
+   | 1 | Phase work | ... | High | ... | ... |
+   | 2 | Deferred | ... | Low | ... | ... |
+   | 3 | Tech debt | ... | Medium | ... | ... |
+
+   Categories group rows into:
+   - **Phase work** — active/next planned phases from the execution plan
+   - **Deferred** — items explicitly deferred in the Current Context section
+   - **Tech debt** — known divergences, migrations, or cleanup tasks
 
 ---
 
