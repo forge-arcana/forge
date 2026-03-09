@@ -122,20 +122,31 @@ Outputs a structured status summary with **no prose preamble** — just data:
 
 ## Bash Permissions — Avoiding Prompts
 
-### Command Chaining Breaks Permission Matching
+### HARD RULE: No Command Chaining — EVER
 
-Claude Code's permission system matches commands by their **first token**. Chaining with `&&` or `;` means the first token is `cd`, not the actual command you want auto-allowed:
+> **This is a non-negotiable rule. Claude has repeatedly violated it. Zero tolerance.**
+
+Claude Code's permission system matches commands by their **first token**. Chaining with `&&`, `;`, or `||` means the first token is `cd` (or whatever comes first), not the actual command you want auto-allowed. This triggers unnecessary permission prompts and annoys the user.
 
 ```bash
-# ❌ BAD — starts with `cd`, won't match `git commit` allow pattern
+# ❌ BAD — starts with `cd`, triggers permission prompt
 cd packages/server && git commit -m "fix"
+cd d:/dev/_git/forge && git status
 
-# ✅ GOOD — separate tool calls, each matches its own pattern
+# ✅ GOOD — separate Bash tool calls, each matches its own pattern
+# Call 1: git -C d:/dev/_git/forge status
+# Call 2: git -C d:/dev/_git/forge log --oneline -3
+
+# ✅ GOOD — for non-git commands, use separate tool calls
 # Call 1: cd packages/server
-# Call 2: git commit -m "fix"
+# Call 2: npm run build
 ```
 
-**Rule**: Use **separate Bash tool calls** for each command so each one matches its own allow pattern.
+**Rules**:
+1. **NEVER chain commands with `&&`, `;`, or `||`** in Bash tool calls
+2. **For git commands in other directories**: Use `git -C <path>` — single command, no chaining
+3. **For non-git commands**: Use separate Bash tool calls, one command each
+4. **Subagents must follow this too** — explicitly instruct them in the prompt
 
 ### Auto-Allowed Tools
 
