@@ -184,7 +184,7 @@ These commands are harmless and should run without prompting:
 |----------|----------|
 | **Shell basics** | `cd`, `ls`, `pwd`, `cat`, `head`, `tail`, `echo`, `printf`, `wc`, `sort`, `uniq`, `tr`, `cut`, `tee`, `test` |
 | **File operations** | `mkdir`, `cp`, `mv`, `touch`, `chmod`, `basename`, `dirname`, `realpath` |
-| **File inspection** | `file`, `stat`, `diff`, `which`, `whereis`, `type` |
+| **File inspection** | `file`, `stat`, `diff`, `which`, `where`, `whereis`, `type` |
 | **Text processing** | `sed`, `awk`, `xargs` |
 | **Search** | `find`, `grep`, `rg`, `ag` |
 | **Node.js** | `node`, `npm`, `npx`, `pnpm`, `tsx`, `tsc` |
