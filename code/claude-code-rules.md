@@ -4,6 +4,21 @@ These are the global instructions configured in `~/.claude/CLAUDE.md` that apply
 
 ---
 
+## HARD RULE — No Command Chaining in Bash — EVER
+
+> **NEVER use `&&`, `;`, or `||` to chain commands in a single Bash tool call.**
+> This applies to the main agent AND all subagents. Zero exceptions. Zero tolerance.
+
+This is the **first rule** because Claude has repeatedly violated it. It must be internalized before any work begins.
+
+- `git -C <path> <cmd>` for git commands in other directories
+- Separate Bash tool calls for everything else
+- When spawning subagents, copy this rule verbatim into the prompt
+
+See [Bash Permissions](#bash-permissions--avoiding-prompts) for details and examples.
+
+---
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default
