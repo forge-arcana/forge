@@ -118,30 +118,52 @@ cd packages/server && git commit -m "fix"
 
 **Rule**: Use **separate Bash tool calls** for each command so each one matches its own allow pattern.
 
+### Auto-Allowed Tools
+
+These tools run without prompting:
+
+| Tool | Purpose |
+|------|---------|
+| **Read** | Read file contents |
+| **Glob** | Find files by pattern |
+| **Grep** | Search file contents |
+| **WebSearch** | Search the web |
+
 ### Auto-Allowed Commands
 
 These commands are harmless and should run without prompting:
 
 | Category | Commands |
 |----------|----------|
-| **Shell basics** | `cd`, `ls`, `pwd`, `cat`, `head`, `tail`, `echo`, `printf`, `wc`, `sort`, `uniq`, `tr`, `cut`, `tee` |
+| **Shell basics** | `cd`, `ls`, `pwd`, `cat`, `head`, `tail`, `echo`, `printf`, `wc`, `sort`, `uniq`, `tr`, `cut`, `tee`, `test` |
+| **File operations** | `mkdir`, `cp`, `mv`, `touch`, `chmod`, `basename`, `dirname`, `realpath` |
 | **File inspection** | `file`, `stat`, `diff`, `which`, `whereis`, `type` |
+| **Text processing** | `sed`, `awk`, `xargs` |
 | **Search** | `find`, `grep`, `rg`, `ag` |
 | **Node.js** | `node`, `npm`, `npx`, `pnpm`, `tsx`, `tsc` |
 | **Build/test** | `vitest`, `playwright`, `eslint`, `prettier` |
-| **Network** | `curl`, `wget` |
-| **Process** | `ps`, `kill`, `lsof` |
-| **WSL/Docker** | `wsl`, `docker` |
-| **Git (safe)** | `git status`, `git diff`, `git log`, `git add`, `git commit`, `git branch`, `git checkout`, `git switch`, `git stash`, `git fetch`, `git rebase`, `git merge`, `git cherry-pick`, `git show`, `git tag` |
+| **Network** | `curl`, `wget`, `ping`, `ipconfig`, `ip`, `ss`, `netstat` |
+| **Process** | `ps`, `kill`, `lsof`, `tasklist` |
+| **WSL/Docker** | `wsl`, `docker`, `powershell`, `powershell.exe`, `cmd` |
+| **Git (safe)** | `git status`, `git diff`, `git log`, `git add`, `git commit`, `git branch`, `git checkout`, `git switch`, `git stash`, `git fetch`, `git rebase`, `git merge`, `git cherry-pick`, `git show`, `git tag`, `git rm`, `git mv`, `git check-ignore`, `git config`, `git remote`, `git rev-parse`, `git ls-files`, `git blame`, `git shortlog`, `git describe`, `git -C` |
+| **Other** | `gh`, `bc`, `python`, `python3`, `bash`, `source`, `timeout`, `for`, `du`, `start`, `pandoc` |
+| **Env vars** | `DATABASE_URL=`, `PORT=`, `CI=`, `DEBUG=`, `NODE_OPTIONS=`, `TMPDIR=`, `E2E_DATABASE_URL=`, `set`, `export` |
 
-### Git Commands That Prompt
+### Commands That Prompt
 
-The following git commands are **excluded** because they are destructive or affect shared state:
+The following are **excluded** from auto-allow because they are destructive or affect shared state:
 
-- `git push` — triggers deploys, affects remote
-- `git reset` — can discard commits/work
-- `git clean` — deletes untracked files permanently
-- `git restore` — can discard uncommitted changes
+| Command | Reason |
+|---------|--------|
+| `rm` | Deletes files permanently |
+| `git push` | Triggers deploys, affects remote |
+| `git reset` | Can discard commits/work |
+| `git clean` | Deletes untracked files permanently |
+| `git restore` | Can discard uncommitted changes |
+
+### WebFetch Domains
+
+Auto-allowed domains: `github.com`, `raw.githubusercontent.com`, `npmjs.com`, `prisma.io`, `xendit.co`, `neon.com`, `capacitorjs.com`, `ionic.io`, `capgo.app`, `localhost`, `better-auth.com`, `hono.dev`, `orm.drizzle.team`, `tanstack.com`, `inlang.com`, `vite.dev`
 
 ---
 
