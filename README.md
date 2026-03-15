@@ -9,7 +9,7 @@ A maker's forge. Pitch ideas, blueprint products, architect systems, and build �
 ### Ideation
 | Skill | What it does |
 |-------|-------------|
-| `/pitch` | Elevator pitch generator — 5-round AI interview → investor-ready pitch pack |
+| `/pitch` | Elevator pitch generator — 6-round AI interview → investor-ready pitch pack |
 | `/bluep` | Product blueprint generator — 7-round interview → 22-section buildable spec |
 
 ### Architecture & Quality
@@ -32,7 +32,7 @@ A maker's forge. Pitch ideas, blueprint products, architect systems, and build �
 ### Forge Maintenance (forge repo only)
 | Skill | What it does |
 |-------|-------------|
-| `/reforge` | Sync config drift + absorb learnings from all projects into `learnings/` |
+| `/reforge` | Full knowledge feedback loop: config sync, review & prune, absorb learnings + memories, archive staging |
 
 ---
 

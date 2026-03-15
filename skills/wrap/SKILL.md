@@ -114,3 +114,7 @@ If nothing qualifies for promotion, skip Stage 2.
 ## Step 8: Push Decision
 - Ask the user: "Push to remote?" — do NOT push automatically
 - Only push after explicit user confirmation
+
+## Step 9: Context Window Compact
+- After the commit (and optional push), call `/compact` to shed conversation history
+- This gives the next task a clean context window — the commit is the natural break point

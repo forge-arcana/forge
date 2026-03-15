@@ -132,7 +132,7 @@ Outputs a structured status summary with **no prose preamble** — just data:
 ## Testing Strategy
 
 - **E2E debugging**: Fix each failing test individually (single test runs), then re-run the full suite only after all individual fixes pass
-- **E2E long runs**: Full suites always run in the background with a 10-minute timeout so the conversation isn't blocked
+- **E2E long runs**: Run full E2E suites in foreground with `timeout: 300000` (5 min). Config has `maxFailures: 1` so it stops on first failure
 - **E2E pre-flight**: Kill zombie processes, verify DB connectivity, sync schema if changed
 
 ---
@@ -184,7 +184,7 @@ These commands are harmless and should run without prompting:
 |----------|----------|
 | **Shell basics** | `cd`, `ls`, `pwd`, `cat`, `head`, `tail`, `echo`, `printf`, `wc`, `sort`, `uniq`, `tr`, `cut`, `tee`, `test` |
 | **File operations** | `mkdir`, `cp`, `mv`, `touch`, `chmod`, `basename`, `dirname`, `realpath` |
-| **File inspection** | `file`, `stat`, `diff`, `which`, `where`, `whereis`, `type` |
+| **File inspection** | `file`, `stat`, `diff`, `which`, `whereis`, `type` |
 | **Text processing** | `sed`, `awk`, `xargs` |
 | **Search** | `find`, `grep`, `rg`, `ag` |
 | **Node.js** | `node`, `npm`, `npx`, `pnpm`, `tsx`, `tsc` |

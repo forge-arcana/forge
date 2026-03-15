@@ -1,6 +1,6 @@
 ---
 name: pitch
-description: Generate an investor-ready pitch pack via AI-guided 5-round interview. Creates [PROJECT]_PitchForge_V1.0.md. Use when user wants to create a pitch, elevator pitch, or investor narrative.
+description: Generate an investor-ready pitch pack via AI-guided 6-round interview. Creates [PROJECT]_PitchForge_V1.0.md. Use when user wants to create a pitch, elevator pitch, or investor narrative.
 user-invocable: true
 ---
 

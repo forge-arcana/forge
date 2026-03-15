@@ -6,13 +6,14 @@ user-invocable: true
 
 # /reforge — Global Learning & Memory Absorber + Config Sync
 
-Single command to feed all knowledge back into the forge repo. One flow, five parts:
+Single command to feed all knowledge back into the forge repo. One flow, six parts:
 
 1. **Config sync** — push current global config into forge reference
 2. **Review & prune** — check existing forge knowledge for staleness (auto-triggers based on size)
 3. **Learning absorption** — merge global learnings into forge's learning store
 4. **Memory absorption** — merge global memories into forge's team memory store
 5. **Staging archival** — archive fully-absorbed entries from `~/.claude/` staging area
+6. **Report** — summary of all changes
 
 ---
 

@@ -8,11 +8,12 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 - `learnings/` — Absorbed team wisdom (populated by `/reforge`)
 - `memory/` — Team identity & shared conventions (populated by `/reforge`)
 - `.claude/skills/forge/` — Thin bootstrap so `/forge` is discoverable on fresh clone
+- `.claude/skills/reforge/` — Forge-local skill (full, not a bootstrap)
 
 ## Global Skills (available everywhere)
 | Skill | Purpose |
 |-------|---------|
-| `/pitch` | Elevator pitch generator (5-round interview) |
+| `/pitch` | Elevator pitch generator (6-round interview) |
 | `/bluep` | Product blueprint generator (7-round interview) |
 | `/arch` | Architecture polisher (self-improving) |
 | `/forge` | Workstation initializer (divergence analysis + apply) |
@@ -48,6 +49,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `f5416fb` — Unified /reforge flow
-- **Completed**: Three-pillar architecture, thin bootstrap (no install.sh), manifest-based skill drift, self-contained skill packages, `<forge>` path notation, `/forge` owns forge-path management, unified `/reforge` with auto-triggered review & staging archival
-- **Pending**: P2 items (cache web research). Not blocking.
+- **Last commit**: `546c251` — Three-pillar architecture commit
+- **Completed**: Three-pillar architecture (skills + learnings + memory, all bidirectional), thin bootstrap (no install.sh), manifest-based skill drift detection, self-contained skill packages, `<forge>` path notation, `/forge` owns forge-path management, unified `/reforge` (6-part flow with auto-triggered review & archival), self-improving loop, `/wrap` Step 9 context window compact, OCD audit pass (pitch round count, E2E mode, learnings consolidation, dead references)
+- **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.
