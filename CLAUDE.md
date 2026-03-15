@@ -48,6 +48,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `9bf6ab4` — Absorb reference docs into owning skills, eliminate root code/ and pitch/
-- **Completed**: Three-pillar architecture, `install.sh` bootstrap, manifest-based skill drift detection, self-contained skill packages, reference docs absorbed, forge root cleaned, invalid `context: fork` frontmatter removed from 4 skills (audit, arch, dive, quick)
+- **Last commit**: `9bf6ab4` — Absorb reference docs, eliminate root code/ and pitch/
+- **Completed**: Three-pillar architecture, `install.sh` bootstrap (writes `forge-path:` to `~/.claude/CLAUDE.md`), manifest-based skill drift, self-contained skill packages, forge-path resolution simplified (`<forge>` notation), frontmatter cleanup
 - **Pending**: P2 items (cache web research). Not blocking.

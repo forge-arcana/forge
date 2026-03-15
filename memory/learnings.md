@@ -60,3 +60,9 @@
 ## 2026-03-15 — Skill Frontmatter Cleanup
 - `context` is NOT a valid SKILL.md frontmatter attribute — removed `context: fork` from audit, arch, dive, quick
 - Valid SKILL.md frontmatter attributes: `name`, `description`, `user-invocable`, `argument-hint`, `compatibility`, `disable-model-invocation`, `license`, `metadata`
+
+## 2026-03-15 — Forge Path Resolution Simplification
+- Verbose inline parenthetical `(resolve forge path from ~/.claude/CLAUDE.md forge-path: line, fallback /root/dev/forge)` replaced with one-line `## Forge Path` section per skill
+- Skills now use `<forge>/...` notation for all forge repo references
+- `install.sh` writes `forge-path:` to `~/.claude/CLAUDE.md` — idempotent, updates if forge moves
+- Only `/forge` SKILL.md keeps full resolution block with fallback (it's the entry point that may run before `install.sh`)
