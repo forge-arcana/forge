@@ -39,7 +39,77 @@ Scan for quick fixes that mask deeper issues:
 - **Type gymnastics**: Complex generic workarounds that indicate a modeling problem
 - **Hardcoded values**: URLs, port numbers, timeouts, retry counts scattered in code instead of config
 
-**What to flag**: Show the band-aid, explain the risk, propose the proper fix.
+### 2a: Source-Field Fallbacks (HIGH PRIORITY)
+
+These are the most dangerous band-aids — downstream code compensates for data that should have been set at the source (insert/create time). They hide data integrity bugs.
+
+**How to detect — ask these questions for every `||` / `??` / conditional re-fetch:**
+
+1. **Does the schema enforce this field?** If the column is `NOT NULL` with a `DEFAULT`, the fallback is redundant and masks a query bug (field not loaded) or insert bug (field not set).
+2. **Is the fallback re-deriving data from a parent?** e.g., `trip.routeId || jeepney.routeId` — if the child should copy the parent's value at creation, a fallback means the copy failed silently.
+3. **Is there a fallback chain (3+ links)?** e.g., `a.field || b.field || c.field || 'default'` — each link is a confession that the prior source might be missing. One authoritative source should suffice.
+4. **Is there a conditional re-fetch?** e.g., `if (!trip.route) { route = await fetchFromJeepney() }` — if the relation should always load, the fallback masks a broken query shape.
+5. **Is a sentinel value used?** e.g., `entityId || 'unknown'`, `name ?? 'Passenger'` — sentinels in data fields (especially audit logs) make records untraceable. The field should be required or the action should fail.
+
+**Patterns to grep for:**
+```
+# Fallback chains (3+ links)
+rg '\|\|.*\|\|' --type ts
+
+# Sentinel defaults
+rg "(|| 'unknown'||| 'Unknown'|\?\? 'default'|\?\? 0[^.])" --type ts
+
+# Redundant schema-default fallbacks — cross-reference with schema
+rg '\.default\(' packages/database/  # find schema defaults
+rg '\|\| 0[^.]|\?\? 0[^.]' packages/server/  # find code defaults for same fields
+
+# Conditional re-fetches (fetch data that should be on the object)
+rg 'if \(!.*\.(route|profile|user|jeepney)' --type ts
+```
+
+**What to flag:** Show the fallback, trace WHERE the field should have been set (insert/query), explain why the fallback masks a bug. Propose the fix at the SOURCE, not a better fallback.
+
+**What NOT to flag:**
+- Env/config defaults: `process.env.PORT || 3000` (genuinely optional)
+- UI display choices: `nickname || email` (presentation preference)
+- Map/aggregation safety: `map.get(key) || 0` (Map returns undefined by design)
+- Form initializers: `defaultValues: { name: '' }` (React form convention)
+- Optional relations: `user.avatar?.url` where avatar is genuinely nullable by design
+
+### 2b: Client-Supplied Actor Identity (SECURITY — HIGH PRIORITY)
+
+Authenticated endpoints that accept the **acting user's identity** from the request body instead of extracting it from the **server-side auth session**. This is an impersonation vulnerability — any authenticated user can act as another by sending a different identity.
+
+The principle: **the server already knows who is calling** via the auth session/token. Any request body field that identifies "who is performing this action" is redundant at best and a security hole at worst.
+
+**How to detect:**
+
+1. **Scan validation schemas** for fields that represent the acting user's identity (any field ending in `Id` that refers to the caller, not a target resource). These should NOT appear in request body schemas for authenticated endpoints.
+2. **Check route handlers** — if a handler destructures the caller's identity from the request body instead of the framework's session accessor (e.g., `c.get('userId')`, `req.user.id`, `session.userId`), flag it.
+3. **Check for "soft" auth guards** — patterns like `if (sessionId && sessionId !== bodyId)` where the check is conditional (skipped if session is undefined). The check should be unconditional; a missing session means 401, not a bypass.
+4. **Cross-reference client code** — search for API calls that include `session.id` or equivalent in the request body. These are the client-side counterparts that need cleanup.
+
+**Patterns to grep for:**
+```
+# Identity-like fields in validation schemas
+rg 'Id.*z\.string|sender.*z\.string' <validations-dir>/
+
+# Handlers reading caller identity from request body
+rg '(Id|sender).*=.*req\.(valid|body|json)' <routes-dir>/
+
+# Soft auth checks (conditional on session existing)
+rg 'if \((auth|session).*&&' <routes-dir>/
+
+# Client sending own identity in request body
+rg 'Id:.*session|sender.*session' <client-dir>/
+```
+
+**Exceptions (NOT vulnerabilities):**
+- **Admin/superuser routes** behind role-enforcement middleware — admins legitimately act on behalf of other users
+- **Target references** where the ID identifies a resource or another user being acted upon (e.g., a friend to sponsor, an order to cancel), not the caller
+- **Webhook/callback endpoints** from external services (payment providers, OAuth) that supply user context in their payload
+
+**What to flag:** Show the schema field, the route handler, and the client call. Classify severity: CRITICAL if the endpoint modifies state (money, records, permissions), HIGH if it reads private data, MEDIUM if logging-only.
 
 ## Dimension 3: Framework Misuse
 
