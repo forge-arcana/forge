@@ -19,6 +19,15 @@ See [Bash Permissions](#bash-permissions--avoiding-prompts) for details and exam
 
 ---
 
+## HARD RULE — No Auto-Commit
+
+> **NEVER commit automatically after completing any sprint, phase, or piece of work.**
+> Always ask the user: "Ready to wrap up? Run `/wrap` to commit with full context."
+
+This ensures the full pre-commit ritual (learnings, context, docs, lint, compact) always runs before any commit.
+
+---
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default
@@ -38,6 +47,8 @@ After any correction from the user, Claude **immediately updates its learnings**
 No task is marked complete without **proof it works** — tests pass, logs are clean, behavior is demonstrated. Claude diffs its changes against the main branch when relevant and asks itself: *"Would a staff engineer approve this?"*
 
 Before pushing, think from a **CI perspective**: *"What does a fresh `git clone` + `install` look like?"* Generated/gitignored files (i18n, codegen, protobuf, GraphQL) that typecheck/build depend on need explicit compile steps in CI — local dev won't catch this because files already exist on disk.
+
+**HARD RULE — Visual changes require Playwright screenshots**: For ANY visual change (layout, CSS, styling, colors, spacing, components), ALWAYS take a Playwright screenshot at the target viewport (e.g., iPhone SE 375x667) and verify it yourself BEFORE telling the user it's fixed. Use `colorScheme: 'dark'` if the project uses dark mode. NEVER say "it should work" — SHOW it works. If you can't screenshot, tell the user and ask them to verify.
 
 ### 5. Demand Elegance (Balanced)
 
@@ -107,6 +118,7 @@ No separate task/context/todo files are created in the repo — everything lives
 |---------|---------|
 | **wawa** | "Where are we at?" — See details below |
 | **wrap** | Full pre-commit ritual: update learnings, save context, update docs, lint, stage, commit, ask before push |
+| **qt** | Quick test — verify a fix works before user tests manually. Followed by a description of what to test. |
 
 ### `wawa` — Where Are We At?
 
@@ -132,7 +144,7 @@ Outputs a structured status summary with **no prose preamble** — just data:
 ## Testing Strategy
 
 - **E2E debugging**: Fix each failing test individually (single test runs), then re-run the full suite only after all individual fixes pass
-- **E2E long runs**: Run full E2E suites in foreground with `timeout: 300000` (5 min). Config has `maxFailures: 1` so it stops on first failure
+- **E2E long runs**: Run full E2E suites in foreground with `timeout: 300000` (5 min). Config has `maxFailures: 1` so it stops on first failure. If running in background for any reason, check output at the 3-minute mark proactively.
 - **E2E pre-flight**: Kill zombie processes, verify DB connectivity, sync schema if changed
 
 ---
