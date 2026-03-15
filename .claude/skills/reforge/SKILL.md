@@ -19,7 +19,7 @@ Single command to feed all knowledge back into the forge repo. Does three things
 ### Step 1: Read current state
 - Read `~/.claude/CLAUDE.md` (global rules)
 - Read `~/.claude/settings.json` (tool permissions) — if it exists
-- Read `code/claude-code-rules.md` (reference doc)
+- Read `skills/forge/claude-code-rules.md` (reference doc)
 
 ### Step 2: Diff
 Compare all three and identify:
@@ -37,7 +37,7 @@ Compare all three and identify:
 ```
 
 ### Step 4: Apply (after user confirms)
-- Update `code/claude-code-rules.md` to match current global config
+- Update `skills/forge/claude-code-rules.md` to match current global config
 - Follow sync rules from forge conventions:
   - CLAUDE.md "Bash Permissions" <-> reference auto-allowed table
   - settings.json `permissions.allow` <-> reference auto-allowed table
@@ -223,7 +223,7 @@ After user confirmation:
 | learnings/arch-learnings.md | learning | +X entries |
 | learnings/global-patterns.md | learning | +X entries |
 | memory/deploy-practices.md | team memory | NEW |
-| code/claude-code-rules.md | config | updated |
+| skills/forge/claude-code-rules.md | config | updated |
 ```
 
 Ask: "Ready to wrap up? Run `/wrap` to commit with full context."

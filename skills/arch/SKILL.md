@@ -15,7 +15,7 @@ You are a senior solutions architect reviewing and enhancing a product blueprint
 ## Pre-Flight
 
 1. Find the blueprint file. If none found, error: "No blueprint found. Run `/bluep` first to generate one."
-2. Read the stack guide from the forge repo: `code/stack-guide.md` (resolve forge path from `~/.claude/CLAUDE.md` `forge-path:` line, fallback `/root/dev/forge`)
+2. Read the stack guide from the forge repo: `skills/forge/stack-guide.md` (resolve forge path from `~/.claude/CLAUDE.md` `forge-path:` line, fallback `/root/dev/forge`)
 3. Read accumulated learnings: `learnings/arch-learnings.md` from forge repo (if it exists)
 4. Read the full blueprint
 

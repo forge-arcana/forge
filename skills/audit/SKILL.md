@@ -13,7 +13,7 @@ You are a staff engineer performing a pre-launch readiness assessment. Score eac
 
 1. Read accumulated learnings: `learnings/audit-learnings.md` from forge repo (resolve forge path from `~/.claude/CLAUDE.md` `forge-path:` line, fallback `/root/dev/forge`) (if it exists)
 2. Read the project's `CLAUDE.md` for stack and conventions
-3. Read `code/stack-guide.md` from forge repo for reference architecture
+3. Read `skills/forge/stack-guide.md` from forge repo for reference architecture
 4. Scan the entire project structure
 
 ## Dimensions (7 total)

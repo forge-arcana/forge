@@ -48,3 +48,11 @@
 - `/reforge` SKILL.md updated with Part 3: Memory Absorption — triages `~/.claude/memory/` into team-worthy vs personal, absorbs into `forge/memory/`
 - `/reforge` Step 7 (skill sibling sync) removed — skill sync is now `/forge`'s responsibility
 - Clean separation: `/forge` handles DOWN flow (forge → user), `/reforge` handles UP flow (user → forge)
+
+## 2026-03-15 — Self-Contained Skills & Root Cleanup
+- Reference docs absorbed into their owning skills: `code/stack-guide.md` → `skills/forge/`, `code/claude-code-rules.md` → `skills/forge/`, `code/qa-review-prompt.md` was already `skills/dive/qa-framework.md`
+- Root `code/` directory eliminated — skills are self-contained, no orphan reference docs
+- Root `pitch/` directory eliminated — project-specific outputs moved to general repo, framework files already in `skills/pitch/`
+- Forge root is now minimal: three pillars (`skills/`, `learnings/`, `memory/`) + `install.sh` + `CLAUDE.md` + `README.md`
+- All skill references updated from `code/` paths to `skills/forge/` paths (forge, arch, audit, quick, srs, reforge, forge-conventions)
+- Principle: static reference docs should live inside the skill that owns and iterates on them — prevents stale orphans

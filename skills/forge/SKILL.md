@@ -77,8 +77,8 @@ Report what was synced across all three pillars before proceeding.
 
 ## Step 2: Read Forge Reference
 
-1. Read `<forge-path>/code/claude-code-rules.md` — workflow rules
-2. Read `<forge-path>/code/stack-guide.md` — tech stack reference
+1. Read `<forge-path>/skills/forge/claude-code-rules.md` — workflow rules
+2. Read `<forge-path>/skills/forge/stack-guide.md` — tech stack reference
 3. Read `<forge-path>/skills/forge/forge-conventions.md` — distilled conventions checklist
 
 ## Step 3: Scan Current Project

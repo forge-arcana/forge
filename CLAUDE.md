@@ -8,8 +8,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 - `learnings/` — Absorbed team wisdom (populated by `/reforge`)
 - `memory/` — Team identity & shared conventions (populated by `/reforge`)
 - `install.sh` — Bootstrap script for new machines (deploys skills + learnings + memory + manifest)
-- `code/claude-code-rules.md` — Canonical workflow rules reference
-- `code/stack-guide.md` — Technology decisions and logging conventions
 
 ## Global Skills (available everywhere)
 | Skill | Purpose |
@@ -50,6 +48,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `40747b4` — Architectural holes plugged
-- **Completed**: Three-pillar architecture (skills + learnings + memory, all bidirectional), `install.sh` bootstrap, manifest-based skill drift detection, FORGE_HOME removal, `/forge` three-pillar sync, `/reforge` memory absorption, self-contained skill packages in `forge/skills/`
-- **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.
+- **Last commit**: `546c251` — Three-pillar architecture with bidirectional flows
+- **Completed**: Three-pillar architecture (skills + learnings + memory, all bidirectional), `install.sh` bootstrap, manifest-based skill drift detection, self-contained skill packages in `forge/skills/`, reference docs absorbed into owning skills (`code/` eliminated), `pitch/` outputs moved to general, forge root cleaned to minimal structure
+- **Pending**: P2 items (cache web research). Not blocking.

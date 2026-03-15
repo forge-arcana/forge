@@ -1,6 +1,6 @@
 # Forge Conventions Checklist
 
-> Distilled from `forge/code/claude-code-rules.md`. Used by `/forge` to verify project compliance.
+> Distilled from `forge/skills/forge/claude-code-rules.md`. Used by `/forge` to verify project compliance.
 
 ## Required in Every Project
 

@@ -62,21 +62,27 @@ Self-improving skills (/arch, /audit, /quick):
 
 ```
 forge/
-├── code/                  # Reference docs
-│   ├── claude-code-rules.md   # Workflow rules
-│   ├── stack-guide.md         # Tech stack decisions
-│   └── qa-review-prompt.md    # QA personas framework
-├── pitch/                 # Pitch & blueprint frameworks + samples
-│   ├── pitch-forge.md        # Pitch interview framework
-│   ├── product-blueprint.md  # Blueprint interview framework
-│   └── <project>/            # Sample outputs per project
-├── learnings/             # Global learning store
-│   ├── arch-learnings.md
-│   ├── audit-learnings.md
-│   ├── quick-learnings.md
-│   └── global-patterns.md
-└── .claude/skills/        # Forge-local skills
-    └── reforge/
+├── skills/                # Git-tracked source of truth for all 11 global skills
+│   ├── arch/              # Architecture polisher (self-improving)
+│   ├── audit/             # Go-live readiness assessment (self-improving)
+│   ├── bluep/             # Product blueprint generator
+│   ├── dive/              # Deep QA with 19+ adversarial personas
+│   ├── forge/             # Workstation initializer + reference docs
+│   │   ├── SKILL.md
+│   │   ├── claude-code-rules.md   # Workflow rules
+│   │   ├── stack-guide.md         # Tech stack decisions
+│   │   └── forge-conventions.md   # Conventions checklist
+│   ├── pitch/             # Elevator pitch generator
+│   ├── qt/                # Quick test
+│   ├── quick/             # Tech debt code review (self-improving)
+│   ├── srs/               # Restart script setup
+│   ├── wawa/              # Outstanding work summary
+│   └── wrap/              # Pre-commit ritual
+├── learnings/             # Absorbed team wisdom
+├── memory/                # Team identity & shared conventions
+├── install.sh             # Bootstrap for new machines
+├── .claude/skills/reforge/  # Forge-local skill
+└── CLAUDE.md
 ```
 
 ---
