@@ -77,5 +77,10 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ### WSL Compatibility (2026-03-15)
 - `~/.claude/settings.json` additionalDirectories must include all 3 path formats: Windows (`D:\`), WSL-mount (`/mnt/d/`), native Linux (`/root/dev/`)
 
+### Timestamps Removed (2026-03-15)
+- Communication Style (timestamps, elapsed times) convention removed from all forge docs and global config
+- Claude's `[HH:MM]` timestamps are inaccurate — they don't reflect real wall-clock time
+- Removed from: `~/.claude/CLAUDE.md`, `claude-code-rules.md`, `forge-conventions.md`, `/forge` SKILL.md template and divergence report
+
 ### /qt (2026-03-15)
 - `/qt` replaces old `dd` debug-dev inline command

@@ -9,7 +9,6 @@
 - [ ] Has "No Auto-Commit" hard rule
 - [ ] Has "No Command Chaining" hard rule
 - [ ] Has Stack section (frameworks, DB, hosting)
-- [ ] Has Communication Style section (timestamps, elapsed times)
 - [ ] Has Shorthand Commands section (wawa → /wawa, wrap → /wrap)
 - [ ] Has Current Context section (updated by /wrap)
 - [ ] Under 20k chars (compacted by /wrap)

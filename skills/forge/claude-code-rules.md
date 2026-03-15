@@ -96,14 +96,6 @@ No separate task/context/todo files are created in the repo — everything lives
 
 ---
 
-## Communication Style
-
-- **Timestamps on every message** — Prefixed in `[HH:MM]` 24-hour format
-- **Timestamps before tool calls** — A short message always appears before any tool execution
-- **Elapsed time after tool calls** — Follow-up messages include how long the operation took (e.g., `(3.2s)`)
-
----
-
 ## Shell & Platform
 
 - Always uses **bash** (Unix shell syntax), never Windows cmd/PowerShell — even on Windows

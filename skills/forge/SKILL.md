@@ -123,7 +123,6 @@ Produce a table showing what needs to change:
 | CLAUDE.md | Required with standard sections | [exists/missing] | [create/update] |
 | No auto-commit rule | Must be present | [present/missing] | [add] |
 | No command chaining rule | Must be present | [present/missing] | [add] |
-| Communication style (timestamps) | Required | [present/missing] | [add] |
 | .claude/settings.json | Only if project-specific overrides needed | [exists/missing/not needed] | [skip/create] |
 | memory/ directory | Required | [exists/missing] | [create] |
 | logs/ directory | Required (app projects with services only) | [exists/missing/N/A] | [create/skip] |
@@ -154,10 +153,6 @@ Standard sections to include:
 
 ## Stack
 [from project's package.json and tsconfig]
-
-## Communication Style
-- Timestamp all messages: `[HH:MM]` format
-- Elapsed time after tool calls
 
 ## Shorthand Commands
 - **wawa** — Runs the `/wawa` skill

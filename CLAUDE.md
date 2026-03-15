@@ -47,8 +47,15 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 > **NEVER use `&&`, `;`, or `||` to chain commands in a single Bash tool call.**
 > This applies to the main agent AND all subagents. Zero exceptions. Zero tolerance.
 
+## Shorthand Commands
+- **wawa** — Runs the `/wawa` skill
+- **wrap** — Runs the `/wrap` skill
+
+## Documentation
+No docs/ directory — forge is a tooling repo. Skill documentation lives inside each skill's directory (`skills/<name>/SKILL.md`).
+
 ## Current Context
 - **Branch**: main
-- **Last commit**: `4fc9ebf` — First /reforge run
-- **Completed**: Three-pillar architecture, thin bootstrap, manifest-based three-way drift detection (forward + reverse), self-contained skill packages, `<forge>` path notation, 12 global skills (reforge promoted from forge-local), unified `/reforge` with skill reverse-sync, `/forge` with reverse-drift warnings, external docs resolution in `/wrap` and `/forge`, inbox.md eliminated, first successful `/forge` pillar sync + `/reforge` absorption
+- **Last commit**: `4ad7600` — Fix /wrap Step 9
+- **Completed**: Three-pillar architecture, manifest-based drift detection, 12 global skills, `/forge` pillar sync + `/reforge` absorption operational, Communication Style (timestamps) removed from all docs — inaccurate times
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.
