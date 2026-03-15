@@ -9,7 +9,7 @@ user-invocable: true
 You are a staff engineer performing a thorough code review of this project. Your goal is to find and report tech debt across four dimensions. Produce a single actionable report.
 
 ## Forge Path
-Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (set by `install.sh`).
+Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/forge`).
 
 ## Pre-Flight
 

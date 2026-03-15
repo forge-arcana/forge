@@ -12,7 +12,7 @@ You are a senior solutions architect reviewing and enhancing a product blueprint
 `$ARGUMENTS` — path to blueprint file (optional). If not provided, auto-discover by globbing for `*Blueprint*` or `*ProductBlueprint*` in the current directory.
 
 ## Forge Path
-Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (set by `install.sh`).
+Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/forge`).
 
 ## Pre-Flight
 

@@ -7,7 +7,7 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 - `skills/` — Git-tracked source of truth for all 11 global skills (self-contained packages)
 - `learnings/` — Absorbed team wisdom (populated by `/reforge`)
 - `memory/` — Team identity & shared conventions (populated by `/reforge`)
-- `install.sh` — Bootstrap script for new machines (deploys skills + learnings + memory + manifest)
+- `.claude/skills/forge/` — Thin bootstrap so `/forge` is discoverable on fresh clone
 
 ## Global Skills (available everywhere)
 | Skill | Purpose |
@@ -48,6 +48,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `0b826fe` — Simplify forge-path resolution across skills
-- **Completed**: Three-pillar architecture, `install.sh` bootstrap, manifest-based skill drift, self-contained skill packages, `<forge>` path notation, unified `/reforge` flow with auto-triggered review & staging archival, frontmatter cleanup
+- **Last commit**: `f5416fb` — Unified /reforge flow
+- **Completed**: Three-pillar architecture, thin bootstrap (no install.sh), manifest-based skill drift, self-contained skill packages, `<forge>` path notation, `/forge` owns forge-path management, unified `/reforge` with auto-triggered review & staging archival
 - **Pending**: P2 items (cache web research). Not blocking.

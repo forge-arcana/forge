@@ -12,7 +12,8 @@ You are applying forge conventions to a project workspace. This ensures every pr
 Before starting, determine the forge directory:
 1. Check `~/.claude/CLAUDE.md` for a `forge-path:` line
 2. If not found, fall back to `/root/dev/forge`
-3. If the resolved path doesn't exist, error: "Forge not found. Clone the forge repo and run `install.sh` first."
+3. If the resolved path doesn't exist, error: "Forge not found. Clone the forge repo first."
+4. If the resolved path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/forge` owns `forge-path:` management.
 
 ## Arguments
 `$ARGUMENTS` — optional path to target project (e.g., `/forge /root/dev/myproject`). If not provided, use the current working directory.
@@ -57,7 +58,11 @@ After user confirms:
 - Remove REMOVED skills (delete directory)
 - Update the manifest with new hashes
 
-If no manifest exists (new machine), run `<forge-path>/install.sh` instead and skip to Step 2.
+If no manifest exists (fresh machine):
+- Create `~/.claude/skills/`, `~/.claude/learnings/`, `~/.claude/memory/` if they don't exist
+- Deploy ALL skills from `<forge-path>/skills/` (treat every skill as ADDED)
+- Write a fresh manifest
+- Then continue to Steps 1b and 1c as normal
 
 ### 1b: Learning Sync (forge → user)
 

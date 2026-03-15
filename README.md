@@ -80,8 +80,9 @@ forge/
 │   └── wrap/              # Pre-commit ritual
 ├── learnings/             # Absorbed team wisdom
 ├── memory/                # Team identity & shared conventions
-├── install.sh             # Bootstrap for new machines
-├── .claude/skills/reforge/  # Forge-local skill
+├── .claude/skills/
+│   ├── forge/             # Thin bootstrap (so /forge is discoverable on fresh clone)
+│   └── reforge/           # Forge-local skill
 └── CLAUDE.md
 ```
 
@@ -94,6 +95,13 @@ forge/
 /pitch MyProject    → pitch pack
 /bluep MyProject    → product blueprint
 /arch               → polished architecture
+```
+
+**Fresh machine?**
+```
+git clone <forge-repo>
+cd forge
+/forge              → deploys all skills globally, sets up ~/.claude/
 ```
 
 **New project?**

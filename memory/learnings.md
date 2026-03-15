@@ -73,3 +73,11 @@
 - Review runs BEFORE absorption (Part 3-4) to prune stale knowledge before piling new entries on top
 - Staging archival (Part 5) also auto-triggers based on thresholds (>100 entries, >30 files)
 - Principle: don't split one skill into separate modes — integrate conditional steps with auto-triggers instead
+
+## 2026-03-15 — Bootstrap Without install.sh
+- `install.sh` eliminated — `/forge` handles both fresh-machine setup and ongoing sync
+- Chicken-and-egg solved: `.claude/skills/forge/SKILL.md` is a thin bootstrap in the forge repo that points to the real `skills/forge/SKILL.md`
+- On fresh clone, Claude Code discovers the bootstrap, user runs `/forge`, it creates `~/.claude/` dirs and deploys everything
+- `/forge` owns `forge-path:` management (not install.sh) — updates it if forge repo moves
+- Thin bootstrap pattern avoids symlinks (OS-dependent) and full file duplication (drift risk)
+- Separation: `skills/` = source of truth (git-tracked), `.claude/skills/forge/` = bootstrap entry point only
