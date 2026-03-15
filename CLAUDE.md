@@ -48,6 +48,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `9bf6ab4` — Absorb reference docs, eliminate root code/ and pitch/
-- **Completed**: Three-pillar architecture, `install.sh` bootstrap (writes `forge-path:` to `~/.claude/CLAUDE.md`), manifest-based skill drift, self-contained skill packages, forge-path resolution simplified (`<forge>` notation), frontmatter cleanup
+- **Last commit**: `0b826fe` — Simplify forge-path resolution across skills
+- **Completed**: Three-pillar architecture, `install.sh` bootstrap, manifest-based skill drift, self-contained skill packages, `<forge>` path notation, unified `/reforge` flow with auto-triggered review & staging archival, frontmatter cleanup
 - **Pending**: P2 items (cache web research). Not blocking.

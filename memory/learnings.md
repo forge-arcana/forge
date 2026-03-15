@@ -66,3 +66,10 @@
 - Skills now use `<forge>/...` notation for all forge repo references
 - `install.sh` writes `forge-path:` to `~/.claude/CLAUDE.md` — idempotent, updates if forge moves
 - Only `/forge` SKILL.md keeps full resolution block with fallback (it's the entry point that may run before `install.sh`)
+
+## 2026-03-15 — Unified Reforge Flow with Auto-Triggered Review
+- `/reforge review` separate mode eliminated — review is now Part 2 of the unified `/reforge` flow
+- Review fires automatically based on size thresholds (learnings >50 entries, memory >20 files), skipped if below
+- Review runs BEFORE absorption (Part 3-4) to prune stale knowledge before piling new entries on top
+- Staging archival (Part 5) also auto-triggers based on thresholds (>100 entries, >30 files)
+- Principle: don't split one skill into separate modes — integrate conditional steps with auto-triggers instead

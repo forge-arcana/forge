@@ -6,11 +6,13 @@ user-invocable: true
 
 # /reforge — Global Learning & Memory Absorber + Config Sync
 
-Single command to feed all knowledge back into the forge repo. Does three things:
+Single command to feed all knowledge back into the forge repo. One flow, five parts:
 
 1. **Config sync** — push current global config into forge reference
-2. **Learning absorption** — merge global learnings into forge's learning store
-3. **Memory absorption** — merge global memories into forge's team memory store
+2. **Review & prune** — check existing forge knowledge for staleness (auto-triggers based on size)
+3. **Learning absorption** — merge global learnings into forge's learning store
+4. **Memory absorption** — merge global memories into forge's team memory store
+5. **Staging archival** — archive fully-absorbed entries from `~/.claude/` staging area
 
 ---
 
@@ -47,7 +49,69 @@ Compare all three and identify:
 
 ---
 
-## Part 2: Learning Absorption
+## Part 2: Review & Prune Existing Knowledge
+
+Before absorbing new knowledge, check if existing knowledge is still valid. This prevents piling new entries on top of stale ones.
+
+### Triggers (skip if none fire)
+
+| Trigger | What fires |
+|---------|-----------|
+| Any `forge/learnings/*.md` file > 50 entries | Learning review (2a) |
+| `forge/memory/` has > 20 files | Memory review (2b) |
+
+If no triggers fire, skip Part 2 entirely and proceed to Part 3.
+
+### 2a: Forge Learning Review
+
+1. Read ALL learning files in `learnings/`
+2. For each entry, evaluate:
+   - **CURRENT** — still valid and applicable → keep as-is
+   - **STALE** — references outdated versions, deprecated APIs, or patterns superseded by newer approaches → flag for removal
+   - **MERGED** — duplicate or subset of another entry → flag for consolidation
+   - **EVOLVED** — partially valid but needs updating (e.g., "use X" → "use X v2 which changed the API") → flag for rewrite
+3. Search the web for current best practices on any entry marked STALE or EVOLVED to confirm
+4. Present the review table:
+   ```markdown
+   ## Learning Review
+
+   | # | File | Entry | Status | Recommendation |
+   |---|------|-------|--------|----------------|
+   | 1 | arch-learnings.md | [title] | CURRENT | Keep |
+   | 2 | arch-learnings.md | [title] | STALE | Remove — API deprecated in v4 |
+   | 3 | quick-learnings.md | [title] | MERGED | Consolidate with entry #7 |
+   | 4 | audit-learnings.md | [title] | EVOLVED | Rewrite — new compliance rules |
+   ```
+5. After user confirmation:
+   - Remove STALE entries
+   - Merge MERGED entries (keep the more comprehensive one, delete the other)
+   - Rewrite EVOLVED entries with updated information
+   - Report total: kept X, removed X, merged X, rewritten X
+
+### 2b: Forge Memory Review
+
+1. Read ALL memory files in `memory/`
+2. For each file, evaluate:
+   - **CURRENT** — still relevant to the team → keep
+   - **STALE** — references outdated tools, people who left, retired conventions → flag for removal
+   - **MERGED** — overlaps with another memory file → flag for consolidation
+   - **EVOLVED** — partially valid but context has changed → flag for rewrite
+   - **PROMOTED** — already absorbed into a skill's SKILL.md or CLAUDE.md rules → flag as redundant
+3. Present the review table:
+   ```markdown
+   ## Memory Review
+
+   | # | File | Type | Summary | Status | Recommendation |
+   |---|------|------|---------|--------|----------------|
+   | 1 | deploy-freeze.md | team-project | No deploys on Fridays | CURRENT | Keep |
+   | 2 | old-ci-setup.md | team-reference | Jenkins pipeline URLs | STALE | Remove — migrated to GitHub Actions |
+   | 3 | logging-style.md | team-feedback | Log human actions | PROMOTED | Already in /quick SKILL.md |
+   ```
+4. After user confirmation: remove, merge, or rewrite as classified
+
+---
+
+## Part 3: Learning Absorption
 
 ### Intake Sources (global Claude space ONLY)
 `/reforge` does NOT scan project repos directly. It consumes from the user's global Claude space, where `/wrap` has already promoted and genericized learnings.
@@ -148,7 +212,7 @@ To avoid re-evaluating every entry on each run, maintain a watermark file at `le
 - Before triage, compute a content hash for each candidate entry
 - Skip any entry whose hash is already in `processedHashes`
 - After absorption, append new hashes and update `lastRun`
-- On `/reforge review`, reset the tracker (force full re-evaluation)
+- If Part 2 review fires, reset the tracker before triage (force full re-evaluation of all entries)
 
 ### Step 5: Redistribute forge inbox.md
 After absorption, process `learnings/inbox.md`:
@@ -158,7 +222,7 @@ After absorption, process `learnings/inbox.md`:
 
 ---
 
-## Part 3: Memory Absorption
+## Part 4: Memory Absorption
 
 ### Intake Sources
 | Source | Location | What's there |
@@ -207,15 +271,61 @@ After user confirmation:
 
 ---
 
-## Part 4: Report
+## Part 5: Staging Archival
+
+The user's `~/.claude/learnings/` and `~/.claude/memory/` grow forever by design (nothing is ever deleted during `/wrap`). This step offers to archive entries that have been fully absorbed into forge.
+
+### Trigger (skip if none fire)
+
+| Trigger | What fires |
+|---------|-----------|
+| `~/.claude/learnings/general.md` > 100 entries | Learning archival |
+| `~/.claude/memory/` has > 30 files | Memory archival |
+
+If no triggers fire, skip Part 5 entirely.
+
+### Learning Archival
+
+1. Read `~/.claude/learnings/general.md`
+2. Cross-reference each entry against:
+   - `learnings/.reforge-tracker.json` `processedHashes` — was it already absorbed?
+   - `forge/learnings/*.md` — does the genericized version exist in forge?
+3. For entries that are BOTH processed AND present in forge:
+   - Classify as **ARCHIVABLE** — safe to move out of active staging
+4. Present the archival table:
+   ```markdown
+   ## Staging Archival
+
+   | # | Entry | Absorbed Into | Action |
+   |---|-------|--------------|--------|
+   | 1 | "Self-Contained Skill Packages" | global-patterns.md | Archive |
+   | 2 | "WSL Path Compatibility" | arch-learnings.md | Archive |
+   | 3 | "New unprocessed entry" | — | Keep (not yet absorbed) |
+   ```
+5. After user confirmation:
+   - Move archived entries from `~/.claude/learnings/general.md` to `~/.claude/learnings/archive/general.md`
+   - Create `archive/` directory if it doesn't exist
+   - **Never delete** — archival is a move, not a removal
+   - Update the tracker to reflect the archival
+
+### Memory Archival
+
+- Memory files that exist in both `~/.claude/memory/` and `forge/memory/` with identical content → offer to move to `~/.claude/memory/archive/`
+- Same confirmation flow as learning archival
+
+---
+
+## Part 6: Report
 
 ```markdown
 ## Reforge Complete
 
 ### Summary
 - Config sync: [X changes applied / no changes]
+- Review: [X kept, X removed, X merged, X rewritten / skipped — below thresholds]
 - Learning candidates: X found, Y absorbed, Z skipped
 - Memory candidates: X found, Y absorbed as team memory, Z skipped (personal)
+- Staging archival: [X archived / skipped — below thresholds]
 
 ### Files Updated
 | File | Type | Changes |
@@ -227,37 +337,3 @@ After user confirmation:
 ```
 
 Ask: "Ready to wrap up? Run `/wrap` to commit with full context."
-
----
-
-## Part 5: Learning Review & Expiry
-
-Run this when `/reforge review` is invoked, or automatically when any learning file exceeds 50 entries.
-
-### Purpose
-Learnings accumulate over time and can become stale — a pattern valid for React 18 may not apply to React 19, a framework gotcha may have been fixed in a newer version.
-
-### How it works:
-1. Read ALL learning files in `learnings/`
-2. For each entry, evaluate:
-   - **CURRENT** — still valid and applicable -> keep as-is
-   - **STALE** — references outdated versions, deprecated APIs, or patterns superseded by newer approaches -> flag for removal
-   - **MERGED** — duplicate or subset of another entry -> flag for consolidation
-   - **EVOLVED** — partially valid but needs updating (e.g., "use X" -> "use X v2 which changed the API") -> flag for rewrite
-3. Search the web for current best practices on any entry marked STALE or EVOLVED to confirm
-4. Present the review table:
-   ```markdown
-   ## Learning Review
-
-   | # | File | Entry | Status | Recommendation |
-   |---|------|-------|--------|----------------|
-   | 1 | arch-learnings.md | [title] | CURRENT | Keep |
-   | 2 | arch-learnings.md | [title] | STALE | Remove — API deprecated in v4 |
-   | 3 | quick-learnings.md | [title] | MERGED | Consolidate with entry #7 |
-   | 4 | audit-learnings.md | [title] | EVOLVED | Rewrite — new compliance rules |
-   ```
-5. After user confirmation:
-   - Remove STALE entries
-   - Merge MERGED entries (keep the more comprehensive one, delete the other)
-   - Rewrite EVOLVED entries with updated information
-   - Report total: kept X, removed X, merged X, rewritten X
