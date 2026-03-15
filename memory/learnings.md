@@ -27,3 +27,11 @@
 - `/wow` renamed to `/wawa` ("Where Are We At?")
 - Sibling file sync added to `/reforge` Step 7 — ensures `~/.claude/skills/` copies match forge source
 - Learning review/expiry added as `/reforge review` — prunes stale, merges duplicates, rewrites evolved entries
+
+## 2026-03-15 — Robustness & Hole-Plugging
+- `/forge` now deploys global skills to `~/.claude/skills/` + has bootstrap sequence for new machines
+- `/reforge` uses `.reforge-tracker.json` with content hashes to avoid re-evaluating already-processed learnings
+- Self-improving skills (`/arch`, `/audit`, `/quick`) now flag learnings as `Forge-worthy: yes/no` so `/wrap` doesn't have to guess
+- `/wrap` Stage 2 is conditional — only runs when new learnings exist and prioritizes flagged entries
+- Forge's human-contributed inbox renamed from `general.md` to `inbox.md` to avoid confusion with user's `~/.claude/learnings/general.md`
+- All `wow` references updated to `wawa` across forge skills, conventions, and rules

@@ -41,6 +41,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `85ccb30` — Reforge enhancements
-- **Completed**: Full skills restructure (12 global + 1 forge-local), two-stage knowledge flow (/wrap → global → /reforge → forge), FORGE_HOME resolution chain, sibling file sync, learning review/expiry, /wow → /wawa rename, WSL path compatibility, settings.json bash commands
-- **Pending**: None — ready for next session
+- **Last commit**: `5b5405a` — Knowledge flow finalization
+- **Completed**: Full skills restructure (12 global + 1 forge-local), two-stage knowledge flow, FORGE_HOME, sibling sync, learning review/expiry, /wawa rename, WSL paths, skill installation/bootstrap, reforge tracker, self-flagging learnings, inbox.md rename, Stage 2 conditional promotion
+- **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

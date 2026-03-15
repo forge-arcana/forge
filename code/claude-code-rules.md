@@ -105,10 +105,10 @@ No separate task/context/todo files are created in the repo — everything lives
 
 | Command | Meaning |
 |---------|---------|
-| **wow** | "What's outstanding work?" — See details below |
+| **wawa** | "Where are we at?" — See details below |
 | **wrap** | Full pre-commit ritual: update learnings, save context, update docs, lint, stage, commit, ask before push |
 
-### `wow` — What's Outstanding Work?
+### `wawa` — Where Are We At?
 
 Outputs a structured status summary with **no prose preamble** — just data:
 

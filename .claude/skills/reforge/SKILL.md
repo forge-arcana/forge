@@ -64,12 +64,12 @@ Compare all three and identify:
 |--------|----------|-------------|
 | **Global learnings** | `~/.claude/learnings/general.md` | Universal learnings promoted by `/wrap` (Tier 2) |
 | **Global memory** | `~/.claude/memory/` | Universal memories promoted by `/wrap` |
-| **Forge general** | `$FORGE_HOME/learnings/general.md` | Human-contributed insights added directly to forge |
+| **Forge general** | `$FORGE_HOME/learnings/inbox.md` | Human-contributed insights added directly to forge |
 
 ### Step 1: Read intake sources
 - Read `~/.claude/learnings/general.md`
 - Scan `~/.claude/memory/` for all memory files
-- Read `$FORGE_HOME/learnings/general.md`
+- Read `$FORGE_HOME/learnings/inbox.md`
 
 ### Step 2: Read existing knowledge base
 Before evaluating new learnings, load everything we already know:
@@ -98,7 +98,7 @@ Present the full triage table to the user using AskUserQuestion:
 |---|--------|-----------------|----------|--------|-------------|
 | 1 | ~/.claude/learnings/general.md | [one-line summary] | arch | NEW | arch-learnings.md |
 | 2 | ~/.claude/memory/some-pattern.md | [one-line summary] | quick | NEW | quick-learnings.md |
-| 3 | forge/learnings/general.md | [one-line summary] | audit | DUPLICATE | — |
+| 3 | forge/learnings/inbox.md | [one-line summary] | audit | DUPLICATE | — |
 
 ### Already Known (auto-skipped)
 | Source | Learning | Reason |
@@ -141,25 +141,43 @@ For each confirmed learning:
   **Apply when**: [context for when this learning is relevant]
   ```
 
-**IMPORTANT**: Source entries in `~/.claude/learnings/` and `~/.claude/memory/` are NEVER deleted. They remain in the user's global space. `/reforge` only tracks what it has already processed to avoid re-absorbing (dedup in Step 3).
+**IMPORTANT**: Source entries in `~/.claude/learnings/` and `~/.claude/memory/` are NEVER deleted. They remain in the user's global space.
 
-### Step 5: Redistribute forge general.md
-After absorption, process `$FORGE_HOME/learnings/general.md`:
-- Any entry that was absorbed into a skill-specific file → remove from forge's general.md (this is forge-internal housekeeping, not the user's global space)
-- Entries that don't map to any skill → keep in general.md
-- Goal: forge's general.md should only contain unprocessed or truly general insights
+### Processing Tracker
+To avoid re-evaluating every entry on each run, maintain a watermark file at `$FORGE_HOME/learnings/.reforge-tracker.json`:
+
+```json
+{
+  "lastRun": "2026-03-15T16:00:00Z",
+  "processedHashes": [
+    "sha256-of-entry-content-1",
+    "sha256-of-entry-content-2"
+  ]
+}
+```
+
+- Before triage, compute a content hash for each candidate entry
+- Skip any entry whose hash is already in `processedHashes`
+- After absorption, append new hashes and update `lastRun`
+- On `/reforge review`, reset the tracker (force full re-evaluation)
+
+### Step 5: Redistribute forge inbox.md
+After absorption, process `$FORGE_HOME/learnings/inbox.md`:
+- Any entry that was absorbed into a skill-specific file → remove from forge's inbox.md (this is forge-internal housekeeping, not the user's global space)
+- Entries that don't map to any skill → keep in inbox.md
+- Goal: forge's inbox.md should only contain unprocessed or truly general insights
 
 ### Step 6: Report
 ```markdown
 ## Absorption Complete
 
 ### Summary
-- Sources scanned: ~/.claude/learnings/, ~/.claude/memory/, forge/learnings/general.md
+- Sources scanned: ~/.claude/learnings/, ~/.claude/memory/, forge/learnings/inbox.md
 - Candidates found: X
 - New learnings absorbed: X
 - Duplicates skipped: X
 - Incorporated (already in skills): X
-- Redistributed from forge general.md: X
+- Redistributed from forge inbox.md: X
 
 ### Files Updated
 | File | Entries Added |
@@ -191,19 +209,19 @@ After presenting the report, ask: "Ready to wrap up? Run `/wrap` to commit with 
 
 ---
 
-## Part 3: Learning Redistribution (general.md → skill files)
+## Part 3: Learning Redistribution (inbox.md → skill files)
 
-This runs as part of Step 5 above, but can also be triggered independently when the user says they've added something to `learnings/general.md`.
+This runs as part of Step 5 above, but can also be triggered independently when the user says they've added something to `learnings/inbox.md`.
 
 ### How redistribution works:
-1. Read each entry in forge's `general.md`
+1. Read each entry in forge's `inbox.md`
 2. Classify by category based on content:
    - **Architecture decisions, tech choices, infrastructure** → `arch-learnings.md`
    - **Security, scalability, compliance, deployment** → `audit-learnings.md`
    - **Code patterns, tech debt, logging, testing** → `quick-learnings.md`
    - **Workflow, process, multi-category** → `global-patterns.md`
 3. If an entry spans multiple categories → write to `global-patterns.md` AND add a one-line reference in each relevant skill file
-4. Remove redistributed entries from forge's `general.md`
+4. Remove redistributed entries from forge's `inbox.md`
 5. Show what was moved where
 
 ---
