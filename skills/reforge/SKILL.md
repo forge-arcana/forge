@@ -178,7 +178,9 @@ For each candidate learning found in Step 1, classify it:
 | **SUPERSEDED** | Contradicted or replaced by a newer learning — flag for review |
 | **CROSS-CUTTING** | Applies to multiple skills — route to `global-patterns.md` AND each relevant skill file |
 
-Present the full triage table to the user using AskUserQuestion:
+**IMPORTANT: Always output the full triage report as console text (markdown tables), NEVER via AskUserQuestion.** The compressed AskUserQuestion UI makes large tables unreadable. Output all tables directly, then use AskUserQuestion with a simple "Approve all / Adjust" prompt at the end.
+
+Output the full triage as console text:
 
 ```markdown
 ## Learning Triage Report
@@ -190,11 +192,13 @@ Present the full triage table to the user using AskUserQuestion:
 | 2 | ~/.claude/learnings/general.md | [one-line summary] | audit | DUPLICATE | — |
 
 ### Already Known (auto-skipped)
-| Source | Learning | Reason |
-|--------|----------|--------|
-| [source] | [summary] | Duplicate of [existing entry in file] |
-| [source] | [summary] | Already incorporated in /arch SKILL.md step X |
+| # | Learning | Reason |
+|---|----------|--------|
+| 1 | [summary] | Duplicate of [existing entry in file] |
+| 2 | [summary] | Already incorporated in /arch SKILL.md step X |
 ```
+
+Then use AskUserQuestion with a simple confirmation prompt (e.g., "Approve all X candidates?" with options like "Approve all", "Skip some", "Reject all").
 
 **Wait for user confirmation before proceeding.** User can:
 - Approve all NEW items

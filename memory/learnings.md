@@ -25,7 +25,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ## Skills
 
 ### Structure (2026-03-15)
-- 12 global skills: pitch, bluep, arch, forge, dive, audit, wawa, wrap, quick, qt, srs, reforge
+- 15 global skills: pitch, bluep, arch, forge, dive, audit, wawa, wrap, quick, qt, srs, reforge, vsix, ponci, monci
 - reforge promoted from forge-local to global — runnable from any project via `forge-path:` resolution
 - Skills are self-contained packages — reference docs live inside the owning skill directory
 - `skills/` is the git-tracked source of truth; `~/.claude/skills/` is the deployment target
@@ -84,3 +84,8 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ### /qt (2026-03-15)
 - `/qt` replaces old `dd` debug-dev inline command
+
+### /ponci + /monci Split (2026-03-15)
+- `/ponci` = push + invoke `/monci` (was monolithic push+monitor)
+- `/monci` = monitor CI only (no push) — useful for watching runs without pushing
+- `/reforge` triage must output as console text, never AskUserQuestion (compressed UI is unreadable for large tables)

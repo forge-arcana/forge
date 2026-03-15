@@ -11,6 +11,20 @@ You just told the user something is fixed. Now PROVE it. Never say "it should wo
 ## Arguments
 `$ARGUMENTS` — description of what to test (e.g., `/qt "login form validation"`, `/qt "API returns 200"`)
 
+## HARD RULE — Step 0: Logs First, ALWAYS
+
+**Before looking at ANY code** (including your own fix), check runtime evidence:
+
+1. **Reproduce & capture logs** — run the app/test/endpoint and read actual log output (dev.log, console, Cloud Logging, CI logs). Filter by latest PID or timestamp.
+2. **Check error state** — look for stack traces, failed assertions, unexpected status codes, DB constraint violations in the logs.
+3. **If logs are clean** → the fix likely works. Proceed to Step 1 for final proof.
+4. **If logs show errors** → the fix is broken. Report FAIL immediately with log evidence. Do NOT read code to rationalize why it "should" work.
+
+This applies whether:
+- You just wrote a fix (your fix might be wrong — logs prove it)
+- The user describes a bug (no fix yet — logs reveal the root cause)
+- Someone else claims it's fixed (trust logs, not claims)
+
 ## Step 1: Determine Verification Method
 
 Based on the type of change, pick the right approach:
