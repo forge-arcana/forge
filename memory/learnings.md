@@ -15,3 +15,15 @@
 - `allowed-tools` is NOT a valid SKILL.md frontmatter attribute — use `user-invocable: true` instead
 - `~/.claude/settings.json` additionalDirectories must include all 3 path formats for Windows/WSL compatibility: Windows (`D:\`), WSL-mount (`/mnt/d/`), native Linux (`/root/dev/`)
 - Missing bash commands added to settings.json allow list: kill, tee, cd, for, ip, ss, netstat, ipconfig, tasklist, wsl, powershell, cmd, pandoc, start, git rm/mv/check-ignore
+
+## 2026-03-15 — Knowledge Flow Architecture
+- `/wrap` is two-stage: (1) project level — repo `memory/` + Claude project memory, (2) promote generics to global `~/.claude/learnings/` + `~/.claude/memory/`
+- `/wrap` NEVER touches the forge repo — global Claude space is the staging area
+- `/reforge` consumes ONLY from global Claude space (`~/.claude/learnings/`, `~/.claude/memory/`) + forge's own `general.md`
+- `/reforge` NEVER deletes from user's global space — only tracks what's been processed (dedup)
+- Promotion is always a COPY, never a move — project entries persist after promotion
+- Dedup at every level: project learnings, project memory, global learnings, global memory
+- `FORGE_HOME` resolution chain: env var → `forge-home:` in CLAUDE.md → fallback `/root/dev/forge`
+- `/wow` renamed to `/wawa` ("Where Are We At?")
+- Sibling file sync added to `/reforge` Step 7 — ensures `~/.claude/skills/` copies match forge source
+- Learning review/expiry added as `/reforge review` — prunes stale, merges duplicates, rewrites evolved entries

@@ -18,7 +18,7 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/forge` | Workstation initializer (divergence analysis + apply) |
 | `/dive` | Deep QA testing with 19 adversarial personas |
 | `/audit` | Go-live readiness assessment (self-improving) |
-| `/wow` | Outstanding work summary table |
+| `/wawa` | "Where Are We At?" — outstanding work summary table |
 | `/wrap` | Pre-commit ritual (learnings → context → docs → lint → compact → commit) |
 | `/quick` | Tech debt & logging code review (self-improving) |
 | `/qt` | Quick test — verify fixes before user tests manually |
@@ -41,6 +41,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `5fa026c` — Initial skills restructure
-- **Completed**: Full skills restructure (13 global + 1 forge-local), reforge enhanced with triage/genericize/redistribute, settings.json fixed for WSL path compatibility, missing bash commands added
+- **Last commit**: `85ccb30` — Reforge enhancements
+- **Completed**: Full skills restructure (12 global + 1 forge-local), two-stage knowledge flow (/wrap → global → /reforge → forge), FORGE_HOME resolution chain, sibling file sync, learning review/expiry, /wow → /wawa rename, WSL path compatibility, settings.json bash commands
 - **Pending**: None — ready for next session

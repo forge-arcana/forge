@@ -26,7 +26,7 @@ A maker's forge. Pitch ideas, blueprint products, architect systems, and build �
 | `/forge` | Initialize or sync a project with forge conventions |
 | `/qt` | Quick test — verify a fix works before manual testing |
 | `/srs` | Setup `restart.sh` for local dev stack (ports, zombie cleanup, DB checks) |
-| `/wow` | Outstanding work summary table |
+| `/wawa` | Outstanding work summary table |
 | `/wrap` | Pre-commit ritual: learnings → context → docs → lint → compact → commit |
 
 ### Forge Maintenance (forge repo only)
@@ -36,15 +36,24 @@ A maker's forge. Pitch ideas, blueprint products, architect systems, and build �
 
 ---
 
-## Self-Improving Loop
+## Knowledge Flow
 
-Skills like `/arch`, `/audit`, and `/quick` write learnings to a project's `memory/*-learnings.md`. Run `/reforge` from this repo to absorb those learnings into `forge/learnings/`. Next time any self-improving skill runs, it reads the global learnings first.
+Learnings flow through three levels: project → global Claude space → forge.
 
 ```
-/arch in project A → writes memory/arch-learnings.md
-/audit in project B → writes memory/audit-learnings.md
-/reforge in forge → absorbs all into forge/learnings/
-/arch in project C → reads forge/learnings/ first → smarter decisions
+/wrap in any project (two-stage):
+  Stage 1: project memory/learnings.md + ~/.claude/projects/<project>/memory/
+  Stage 2: promote generics → ~/.claude/learnings/ + ~/.claude/memory/
+
+/reforge in forge (consumes global only):
+  → reads ~/.claude/learnings/ + ~/.claude/memory/
+  → triages, genericizes, deduplicates
+  → writes to forge/learnings/{arch,audit,quick,global-patterns}.md
+  → never deletes from user's global space
+
+Self-improving skills (/arch, /audit, /quick):
+  → read forge/learnings/ first → smarter decisions
+  → write back to project memory/ → /wrap promotes → cycle continues
 ```
 
 ---
@@ -91,7 +100,7 @@ forge/
 ```
 /qt                 → verify your fix
 /quick              → tech debt scan
-/wow                → where am I?
+/wawa                → where am I?
 /wrap               → commit with full context
 ```
 
