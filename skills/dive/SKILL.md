@@ -2,7 +2,6 @@
 name: dive
 description: Deep QA analysis using 19+ adversarial personas. Generates tests, finds edge cases, audits security/accessibility/compliance. Use when user wants thorough testing or QA review.
 user-invocable: true
-context: fork
 ---
 
 # /dive — Deep Testing & Analysis

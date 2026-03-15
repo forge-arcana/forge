@@ -2,18 +2,20 @@
 name: quick
 description: Staff-engineer code review for tech debt — strategy patterns, band-aids, framework misuse, and logging hygiene. Produces an actionable tech debt report. Self-improving.
 user-invocable: true
-context: fork
 ---
 
 # /quick — Tech Debt & Logging Code Review
 
 You are a staff engineer performing a thorough code review of this project. Your goal is to find and report tech debt across four dimensions. Produce a single actionable report.
 
+## Forge Path
+Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (set by `install.sh`).
+
 ## Pre-Flight
 
 1. Read the project's `CLAUDE.md` to understand the stack and conventions
-2. Read `skills/forge/stack-guide.md` from forge repo (resolve forge path from `~/.claude/CLAUDE.md` `forge-path:` line, fallback `/root/dev/forge`) to know which frameworks are in play
-3. Read `learnings/quick-learnings.md` from forge repo for accumulated patterns (if it exists)
+2. Read the stack guide: `<forge>/skills/forge/stack-guide.md`
+3. Read accumulated learnings: `<forge>/learnings/quick-learnings.md` (if it exists)
 4. Scan the project structure to understand the codebase layout
 
 ## Dimension 1: Strategy Pattern Opportunities

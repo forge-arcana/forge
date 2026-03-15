@@ -2,7 +2,6 @@
 name: arch
 description: Polish a product blueprint with architecture best practices. Reads blueprint, searches for current best solutions, produces an "-arched" version. Self-improving.
 user-invocable: true
-context: fork
 ---
 
 # /arch — Architecture Polisher
@@ -12,11 +11,14 @@ You are a senior solutions architect reviewing and enhancing a product blueprint
 ## Arguments
 `$ARGUMENTS` — path to blueprint file (optional). If not provided, auto-discover by globbing for `*Blueprint*` or `*ProductBlueprint*` in the current directory.
 
+## Forge Path
+Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (set by `install.sh`).
+
 ## Pre-Flight
 
 1. Find the blueprint file. If none found, error: "No blueprint found. Run `/bluep` first to generate one."
-2. Read the stack guide from the forge repo: `skills/forge/stack-guide.md` (resolve forge path from `~/.claude/CLAUDE.md` `forge-path:` line, fallback `/root/dev/forge`)
-3. Read accumulated learnings: `learnings/arch-learnings.md` from forge repo (if it exists)
+2. Read the stack guide: `<forge>/skills/forge/stack-guide.md`
+3. Read accumulated learnings: `<forge>/learnings/arch-learnings.md` (if it exists)
 4. Read the full blueprint
 
 ## Process

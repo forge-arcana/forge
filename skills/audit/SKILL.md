@@ -2,18 +2,20 @@
 name: audit
 description: Assess go-live readiness across security, scalability, operations, compliance, observability, deployment, and documentation. Self-improving.
 user-invocable: true
-context: fork
 ---
 
 # /audit — Go-Live Readiness Assessment
 
 You are a staff engineer performing a pre-launch readiness assessment. Score each dimension, identify critical gaps, and produce an actionable scorecard.
 
+## Forge Path
+Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (set by `install.sh`).
+
 ## Pre-Flight
 
-1. Read accumulated learnings: `learnings/audit-learnings.md` from forge repo (resolve forge path from `~/.claude/CLAUDE.md` `forge-path:` line, fallback `/root/dev/forge`) (if it exists)
+1. Read accumulated learnings: `<forge>/learnings/audit-learnings.md` (if it exists)
 2. Read the project's `CLAUDE.md` for stack and conventions
-3. Read `skills/forge/stack-guide.md` from forge repo for reference architecture
+3. Read the stack guide: `<forge>/skills/forge/stack-guide.md`
 4. Scan the entire project structure
 
 ## Dimensions (7 total)

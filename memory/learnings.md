@@ -56,3 +56,7 @@
 - Forge root is now minimal: three pillars (`skills/`, `learnings/`, `memory/`) + `install.sh` + `CLAUDE.md` + `README.md`
 - All skill references updated from `code/` paths to `skills/forge/` paths (forge, arch, audit, quick, srs, reforge, forge-conventions)
 - Principle: static reference docs should live inside the skill that owns and iterates on them — prevents stale orphans
+
+## 2026-03-15 — Skill Frontmatter Cleanup
+- `context` is NOT a valid SKILL.md frontmatter attribute — removed `context: fork` from audit, arch, dive, quick
+- Valid SKILL.md frontmatter attributes: `name`, `description`, `user-invocable`, `argument-hint`, `compatibility`, `disable-model-invocation`, `license`, `metadata`

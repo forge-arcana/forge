@@ -48,6 +48,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `546c251` — Three-pillar architecture with bidirectional flows
-- **Completed**: Three-pillar architecture (skills + learnings + memory, all bidirectional), `install.sh` bootstrap, manifest-based skill drift detection, self-contained skill packages in `forge/skills/`, reference docs absorbed into owning skills (`code/` eliminated), `pitch/` outputs moved to general, forge root cleaned to minimal structure
+- **Last commit**: `9bf6ab4` — Absorb reference docs into owning skills, eliminate root code/ and pitch/
+- **Completed**: Three-pillar architecture, `install.sh` bootstrap, manifest-based skill drift detection, self-contained skill packages, reference docs absorbed, forge root cleaned, invalid `context: fork` frontmatter removed from 4 skills (audit, arch, dive, quick)
 - **Pending**: P2 items (cache web research). Not blocking.

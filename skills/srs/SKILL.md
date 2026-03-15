@@ -12,7 +12,7 @@ Generate or update a `restart.sh` in the project root that brings up the entire 
 
 1. **Check project readiness**: Verify `package.json` exists and dependencies are installed. If not, tell the user: "Project isn't ready to start. Run `pnpm install` first."
 2. Read the project's `CLAUDE.md` and `package.json` to understand the stack
-3. Read `skills/forge/stack-guide.md` from forge repo (resolve forge path from `~/.claude/CLAUDE.md` `forge-path:` line, fallback `/root/dev/forge`) for reference architecture
+3. Read the stack guide: `<forge>/skills/forge/stack-guide.md` (resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line, set by `install.sh`)
 4. Scan for existing `restart.sh` — if found, read it and propose updates rather than overwriting
 5. Read the `restart-template.sh` file in the same directory as this skill
 6. Scan for `docker-compose.yml` or `compose.yml` to determine DB setup
