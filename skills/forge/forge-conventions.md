@@ -14,16 +14,14 @@
 - [ ] Has Current Context section (updated by /wrap)
 - [ ] Under 20k chars (compacted by /wrap)
 
-### 2. .claude/settings.json
-- [ ] Exists
-- [ ] Auto-allowed commands match forge reference (git safe commands, node, npm, pnpm, etc.)
+### 2. .claude/settings.json (only if project-specific overrides needed)
+- [ ] Global `~/.claude/settings.json` handles all standard permissions — no per-project file needed by default
+- [ ] If project needs extra env var prefixes, hooks, or domain restrictions: create per-project file with overrides only
 - [ ] Destructive commands NOT in allow list (rm, git push, git reset, git clean, git restore)
-- [ ] WebFetch domains match forge reference
-- [ ] Env var prefixes listed
 
 ### 3. Directory Structure
 - [ ] `memory/` directory exists (for learnings, context overflow)
-- [ ] `logs/` directory exists (for dev.log, browser console forwarding)
+- [ ] `logs/` directory exists (if project has running services — for dev.log, browser console forwarding)
 - [ ] `docs/` directory exists (if project has documentation)
 
 ### 4. Workflow Rules

@@ -58,6 +58,18 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Review runs BEFORE absorption to prune stale knowledge first
 - Staging archival also auto-triggers (>100 entries, >30 files)
 
+## Conventions
+
+### Settings Hierarchy (2026-03-15)
+- Global `~/.claude/settings.json` handles all standard permissions — no per-project file needed by default
+- Per-project `.claude/settings.json` only for overrides (extra env vars, hooks, domain restrictions)
+- Don't duplicate the global allow list into every project — DRY violation
+
+### Conditional Directories (2026-03-15)
+- `memory/` is required in every project
+- `logs/` only for app projects with running services (dev.log, browser console forwarding) — skip for tooling-only repos
+- `docs/` only if project has documentation
+
 ## Settings & Platform
 
 ### WSL Compatibility (2026-03-15)

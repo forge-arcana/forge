@@ -110,8 +110,9 @@ Produce a table showing what needs to change:
 | No auto-commit rule | Must be present | [present/missing] | [add] |
 | No command chaining rule | Must be present | [present/missing] | [add] |
 | Communication style (timestamps) | Required | [present/missing] | [add] |
-| .claude/settings.json | Standard permissions | [exists/missing] | [create/update] |
+| .claude/settings.json | Only if project-specific overrides needed | [exists/missing/not needed] | [skip/create] |
 | memory/ directory | Required | [exists/missing] | [create] |
+| logs/ directory | Required (app projects with services only) | [exists/missing/N/A] | [create/skip] |
 | Shorthand commands | wawa/wrap as skill refs | [present/missing] | [add] |
 | restart.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
 | kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
@@ -151,14 +152,15 @@ Standard sections to include:
 [branch, recent work, test status — to be filled by /wrap]
 ```
 
-### .claude/settings.json (create or update)
-- Standard auto-allowed commands from forge reference
-- WebFetch auto-allowed domains
-- Do NOT overwrite project-specific `additionalDirectories` or `hooks`
+### .claude/settings.json (only if project-specific overrides needed)
+- Global `~/.claude/settings.json` handles all standard permissions — no per-project file needed by default
+- Only create if the project needs extra env var prefixes, hooks, or domain restrictions
+- If creating, add overrides only — do NOT duplicate the global allow list
+- Do NOT overwrite existing project-specific `additionalDirectories` or `hooks`
 
 ### Directories
 - Create `memory/` if missing
-- Create `logs/` if missing
+- Create `logs/` if missing (only for projects with running services — skip for tooling-only repos)
 
 ## Step 6: Summary
 

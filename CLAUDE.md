@@ -49,6 +49,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `546c251` — Three-pillar architecture commit
+- **Last commit**: `9d6effe` — OCD audit fixes
 - **Completed**: Three-pillar architecture (skills + learnings + memory, all bidirectional), thin bootstrap (no install.sh), manifest-based skill drift detection, self-contained skill packages, `<forge>` path notation, `/forge` owns forge-path management, unified `/reforge` (6-part flow with auto-triggered review & archival), self-improving loop, `/wrap` Step 9 context window compact, OCD audit pass (pitch round count, E2E mode, learnings consolidation, dead references)
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.
