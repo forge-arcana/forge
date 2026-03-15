@@ -23,7 +23,6 @@
 - `/reforge` NEVER deletes from user's global space — only tracks what's been processed (dedup)
 - Promotion is always a COPY, never a move — project entries persist after promotion
 - Dedup at every level: project learnings, project memory, global learnings, global memory
-- `FORGE_HOME` resolution chain: env var → `forge-home:` in CLAUDE.md → fallback `/root/dev/forge`
 - `/wow` renamed to `/wawa` ("Where Are We At?")
 - Sibling file sync added to `/reforge` Step 7 — ensures `~/.claude/skills/` copies match forge source
 - Learning review/expiry added as `/reforge review` — prunes stale, merges duplicates, rewrites evolved entries
@@ -35,3 +34,17 @@
 - `/wrap` Stage 2 is conditional — only runs when new learnings exist and prioritizes flagged entries
 - Forge's human-contributed inbox renamed from `general.md` to `inbox.md` to avoid confusion with user's `~/.claude/learnings/general.md`
 - All `wow` references updated to `wawa` across forge skills, conventions, and rules
+
+## 2026-03-15 — Three Pillars Architecture & Install Bootstrap
+- Forge now has three git-tracked pillars: `skills/` (team tools), `learnings/` (team wisdom), `memory/` (team identity)
+- All three pillars flow bidirectionally: DOWN via `/forge` + `install.sh`, UP via `/wrap` + `/reforge`
+- `~/.claude/` is the staging membrane between forge and project work — not a source of truth
+- `install.sh` created as the bootstrap script (`npm install` equivalent for forge): deploys skills, learnings, memory, writes `.forge-manifest.json`
+- Manifest tracks SHA256 hashes per skill directory for drift detection — `/forge` uses this for ADDED/UPDATED/REMOVED/UNCHANGED classification
+- Skills moved from `~/.claude/skills/` (untracked) to `forge/skills/` (git-tracked) as source of truth — enables PR review, git history, team sync
+- All sibling framework files (blueprint-framework.md, qa-framework.md, pitch-framework.md, forge-conventions.md, restart-template.sh) co-located in their skill directories for self-contained packages
+- FORGE_HOME env var and resolution blocks removed from all skills — replaced with `forge-path:` in `~/.claude/CLAUDE.md`
+- `/forge` SKILL.md updated with Step 1: three-pillar sync (manifest-based skills + learning sync + memory sync)
+- `/reforge` SKILL.md updated with Part 3: Memory Absorption — triages `~/.claude/memory/` into team-worthy vs personal, absorbs into `forge/memory/`
+- `/reforge` Step 7 (skill sibling sync) removed — skill sync is now `/forge`'s responsibility
+- Clean separation: `/forge` handles DOWN flow (forge → user), `/reforge` handles UP flow (user → forge)

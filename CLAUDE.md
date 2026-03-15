@@ -3,11 +3,13 @@
 ## Purpose
 Forge is the shared tooling, conventions, and reference documentation repo used across all projects. Skills, stack guides, and workflow rules live here as the source of truth.
 
-## Key Files
+## Key Files & Directories
+- `skills/` — Git-tracked source of truth for all 11 global skills (self-contained packages)
+- `learnings/` — Absorbed team wisdom (populated by `/reforge`)
+- `memory/` — Team identity & shared conventions (populated by `/reforge`)
+- `install.sh` — Bootstrap script for new machines (deploys skills + learnings + memory + manifest)
 - `code/claude-code-rules.md` — Canonical workflow rules reference
 - `code/stack-guide.md` — Technology decisions and logging conventions
-- `code/qa-review-prompt.md` — QA review framework (19 adversarial personas)
-- `learnings/` — Global learning store (populated by `/reforge`)
 
 ## Global Skills (available everywhere)
 | Skill | Purpose |
@@ -27,10 +29,17 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 ## Project-Local Skills (forge repo only)
 | Skill | Purpose |
 |-------|---------|
-| `/reforge` | Config sync + absorb learnings from all projects into `forge/learnings/` |
+| `/reforge` | Config sync + absorb learnings AND memories from all projects into forge |
+
+## Three Pillars (all bidirectional via forge)
+| Pillar | DOWN (forge → user) | UP (user → forge) |
+|--------|--------------------|--------------------|
+| `skills/` | `/forge` deploys to `~/.claude/skills/` | Edit in forge, commit, push |
+| `learnings/` | `/forge` syncs to `~/.claude/learnings/` | `/wrap` promotes → `/reforge` absorbs |
+| `memory/` | `/forge` syncs to `~/.claude/memory/` | `/wrap` promotes → `/reforge` absorbs |
 
 ## Self-Improving Skills Loop
-`/arch`, `/audit`, `/quick` write learnings to project's `memory/*-learnings.md` → run `/reforge` from forge repo to absorb into `learnings/` → next skill run reads global learnings first.
+`/arch`, `/audit`, `/quick` write learnings to project's `memory/*-learnings.md` → `/wrap` promotes to `~/.claude/` → `/reforge` absorbs into `forge/learnings/` → next skill run reads global learnings first.
 
 ## HARD RULE — No Auto-Commit
 > **NEVER commit automatically after completing any sprint, phase, or piece of work.** Always ask the user: "Ready to wrap up? Run `/wrap` to commit with full context."
@@ -41,6 +50,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `5b5405a` — Knowledge flow finalization
-- **Completed**: Full skills restructure (12 global + 1 forge-local), two-stage knowledge flow, FORGE_HOME, sibling sync, learning review/expiry, /wawa rename, WSL paths, skill installation/bootstrap, reforge tracker, self-flagging learnings, inbox.md rename, Stage 2 conditional promotion
+- **Last commit**: `40747b4` — Architectural holes plugged
+- **Completed**: Three-pillar architecture (skills + learnings + memory, all bidirectional), `install.sh` bootstrap, manifest-based skill drift detection, FORGE_HOME removal, `/forge` three-pillar sync, `/reforge` memory absorption, self-contained skill packages in `forge/skills/`
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.
