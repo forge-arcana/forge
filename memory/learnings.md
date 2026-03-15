@@ -9,3 +9,9 @@
 - Old vsix directory removed (claudemeter binary doesn't belong in forge)
 - `/qt` replaces old `dd` debug-dev inline command
 - `/wrap` includes compaction step to keep CLAUDE.md lean
+
+## 2026-03-15 — Reforge Enhancements & Settings Fix
+- `/reforge` now includes: (1) triage-before-absorb — shows summary of new vs known learnings before writing, (2) genericization — strips all project-specific details before writing to forge learnings, (3) general.md redistribution — routes ad-hoc human learnings to the right skill files
+- `allowed-tools` is NOT a valid SKILL.md frontmatter attribute — use `user-invocable: true` instead
+- `~/.claude/settings.json` additionalDirectories must include all 3 path formats for Windows/WSL compatibility: Windows (`D:\`), WSL-mount (`/mnt/d/`), native Linux (`/root/dev/`)
+- Missing bash commands added to settings.json allow list: kill, tee, cd, for, ip, ss, netstat, ipconfig, tasklist, wsl, powershell, cmd, pandoc, start, git rm/mv/check-ignore

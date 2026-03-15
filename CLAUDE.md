@@ -38,3 +38,9 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 ## HARD RULE — No Command Chaining in Bash — EVER
 > **NEVER use `&&`, `;`, or `||` to chain commands in a single Bash tool call.**
 > This applies to the main agent AND all subagents. Zero exceptions. Zero tolerance.
+
+## Current Context
+- **Branch**: main
+- **Last commit**: `5fa026c` — Initial skills restructure
+- **Completed**: Full skills restructure (13 global + 1 forge-local), reforge enhanced with triage/genericize/redistribute, settings.json fixed for WSL path compatibility, missing bash commands added
+- **Pending**: None — ready for next session
