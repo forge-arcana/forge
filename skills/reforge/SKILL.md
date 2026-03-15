@@ -1,36 +1,73 @@
 ---
 name: reforge
-description: Feed everything back to forge. Syncs global config drift AND absorbs learnings and memories from the user's global Claude space. Forge-project only.
+description: Feed everything back to forge from any project. Syncs global config drift AND absorbs learnings and memories from the user's global Claude space into the forge repo.
 user-invocable: true
 ---
 
 # /reforge — Global Learning & Memory Absorber + Config Sync
 
-Single command to feed all knowledge back into the forge repo. One flow, six parts:
+## Forge Path
+Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/forge`).
 
-1. **Config sync** — push current global config into forge reference
+## HARD RULE — /reforge is the ONLY writer to forge
+> **No project, no skill, no manual edit touches forge repo files directly.**
+> `/reforge` is the gatekeeper. All knowledge flows through it.
+> If you need to update forge learnings, memory, or config — run `/reforge`.
+> Direct edits to the forge repo are only for skill development (editing SKILL.md files in `skills/`).
+
+---
+
+Single command to feed all knowledge back into the forge repo. Runnable from **any project**. One flow, six parts:
+
+1. **Config & skill sync** — push current global config into forge reference + detect deployed skill drift
 2. **Review & prune** — check existing forge knowledge for staleness (auto-triggers based on size)
 3. **Learning absorption** — merge global learnings into forge's learning store
 4. **Memory absorption** — merge global memories into forge's team memory store
 5. **Staging archival** — archive fully-absorbed entries from `~/.claude/` staging area
 6. **Report** — summary of all changes
 
+All file paths below are relative to `<forge>` (the resolved forge repo path).
+
 ---
 
-## Part 1: Config Sync
+## Part 1: Config & Skill Sync
 
-### Step 1: Read current state
+### Step 1a: Skill Reverse-Sync (deployed → forge source)
+
+Compare deployed skills (`~/.claude/skills/`) against forge source (`<forge>/skills/`). For each skill:
+
+1. Hash both the deployed and forge source directories
+2. If they differ, the deployed copy has changes that haven't been absorbed into forge
+
+Present the drift report:
+```markdown
+## Skill Reverse-Sync Report
+
+| Skill | Status | Action |
+|-------|--------|--------|
+| wrap | DRIFTED | Deployed has changes — absorb into forge source |
+| arch | IDENTICAL | — |
+```
+
+For each DRIFTED skill:
+- Diff the deployed vs forge source to show exactly what changed
+- After user confirms, **copy the deployed version into `<forge>/skills/<name>/`** (deployed is the newer truth)
+- This is safe because `/forge` will re-deploy from forge source on next run
+
+### Step 1b: Config Sync
+
+Read current state:
 - Read `~/.claude/CLAUDE.md` (global rules)
 - Read `~/.claude/settings.json` (tool permissions) — if it exists
-- Read `skills/forge/claude-code-rules.md` (reference doc)
+- Read `<forge>/skills/forge/claude-code-rules.md` (reference doc)
 
-### Step 2: Diff
+### Step 1c: Diff
 Compare all three and identify:
 - **Additions**: Rules/permissions in global config that aren't in the reference
 - **Removals**: Rules/permissions in the reference that aren't in global config
 - **Conflicts**: Same rule exists in both but differs
 
-### Step 3: Present deviations
+### Step 1d: Present deviations
 ```markdown
 ## Config Sync Report
 
@@ -39,8 +76,8 @@ Compare all three and identify:
 | [rule/permission] | [current value] | [reference value] | [add/remove/update] |
 ```
 
-### Step 4: Apply (after user confirms)
-- Update `skills/forge/claude-code-rules.md` to match current global config
+### Step 1e: Apply (after user confirms)
+- Update `<forge>/skills/forge/claude-code-rules.md` to match current global config
 - Follow sync rules from forge conventions:
   - CLAUDE.md "Bash Permissions" <-> reference auto-allowed table
   - settings.json `permissions.allow` <-> reference auto-allowed table
@@ -58,14 +95,14 @@ Before absorbing new knowledge, check if existing knowledge is still valid. This
 
 | Trigger | What fires |
 |---------|-----------|
-| Any `forge/learnings/*.md` file > 50 entries | Learning review (2a) |
-| `forge/memory/` has > 20 files | Memory review (2b) |
+| Any `<forge>/learnings/*.md` file > 50 entries | Learning review (2a) |
+| `<forge>/memory/` has > 20 files | Memory review (2b) |
 
 If no triggers fire, skip Part 2 entirely and proceed to Part 3.
 
 ### 2a: Forge Learning Review
 
-1. Read ALL learning files in `learnings/`
+1. Read ALL learning files in `<forge>/learnings/`
 2. For each entry, evaluate:
    - **CURRENT** — still valid and applicable → keep as-is
    - **STALE** — references outdated versions, deprecated APIs, or patterns superseded by newer approaches → flag for removal
@@ -91,7 +128,7 @@ If no triggers fire, skip Part 2 entirely and proceed to Part 3.
 
 ### 2b: Forge Memory Review
 
-1. Read ALL memory files in `memory/`
+1. Read ALL memory files in `<forge>/memory/`
 2. For each file, evaluate:
    - **CURRENT** — still relevant to the team → keep
    - **STALE** — references outdated tools, people who left, retired conventions → flag for removal
@@ -120,16 +157,14 @@ If no triggers fire, skip Part 2 entirely and proceed to Part 3.
 | Source | Location | What's there |
 |--------|----------|-------------|
 | **Global learnings** | `~/.claude/learnings/general.md` | Universal learnings promoted by `/wrap` (Tier 2) |
-| **Forge inbox** | `learnings/inbox.md` | Human-contributed insights added directly to forge |
 
 ### Step 1: Read intake sources
 - Read `~/.claude/learnings/general.md`
-- Read `learnings/inbox.md`
 
 ### Step 2: Read existing knowledge base
 Before evaluating new learnings, load everything we already know:
-- Read ALL files in `learnings/` (arch, audit, quick, global-patterns)
-- Read ALL skill SKILL.md files in `skills/*/SKILL.md` (the skills themselves encode knowledge)
+- Read ALL files in `<forge>/learnings/` (arch, audit, quick, global-patterns)
+- Read ALL skill SKILL.md files in `<forge>/skills/*/SKILL.md` (the skills themselves encode knowledge)
 - Build a mental model of what's already known, already incorporated, or already addressed
 
 ### Step 3: Triage — SHOW BEFORE ABSORBING
@@ -183,7 +218,7 @@ The goal: every learning in forge should read as a **universal principle** that 
 
 For each confirmed learning:
 - **Genericize first** — rewrite the learning as a universal pattern
-- Append to the appropriate file in `learnings/`:
+- Append to the appropriate file in `<forge>/learnings/`:
   - `arch-learnings.md` — architecture patterns and decisions
   - `audit-learnings.md` — go-live readiness patterns
   - `quick-learnings.md` — tech debt and logging patterns
@@ -198,7 +233,7 @@ For each confirmed learning:
 **IMPORTANT**: Source entries in `~/.claude/learnings/` are NEVER deleted. They remain in the user's global space.
 
 ### Processing Tracker
-To avoid re-evaluating every entry on each run, maintain a watermark file at `learnings/.reforge-tracker.json`:
+To avoid re-evaluating every entry on each run, maintain a watermark file at `<forge>/learnings/.reforge-tracker.json`:
 
 ```json
 {
@@ -215,12 +250,6 @@ To avoid re-evaluating every entry on each run, maintain a watermark file at `le
 - After absorption, append new hashes and update `lastRun`
 - If Part 2 review fires, reset the tracker before triage (force full re-evaluation of all entries)
 
-### Step 5: Redistribute forge inbox.md
-After absorption, process `learnings/inbox.md`:
-- Any entry that was absorbed into a skill-specific file -> remove from forge's inbox.md (this is forge-internal housekeeping, not the user's global space)
-- Entries that don't map to any skill -> keep in inbox.md
-- Goal: forge's inbox.md should only contain unprocessed or truly general insights
-
 ---
 
 ## Part 4: Memory Absorption
@@ -232,17 +261,17 @@ After absorption, process `learnings/inbox.md`:
 
 ### Step 1: Read intake sources
 - Read all `.md` files in `~/.claude/memory/`
-- Read all `.md` files in `memory/` (forge's team memory)
+- Read all `.md` files in `<forge>/memory/` (forge's team memory)
 
 ### Step 2: Triage memories
 For each memory file in `~/.claude/memory/`, classify:
 
 | Status | Meaning |
 |--------|---------|
-| **TEAM-WORTHY** | Applies to the whole team, not just this user — absorb into `memory/` |
+| **TEAM-WORTHY** | Applies to the whole team, not just this user — absorb into `<forge>/memory/` |
 | **PERSONAL** | User-specific preference or context — skip |
-| **DUPLICATE** | Already exists in `memory/` — skip |
-| **UPDATE** | Exists in `memory/` but user's version is newer/better — flag for merge |
+| **DUPLICATE** | Already exists in `<forge>/memory/` — skip |
+| **UPDATE** | Exists in `<forge>/memory/` but user's version is newer/better — flag for merge |
 
 **Classification rules:**
 - `type: user` memories are ALWAYS personal — skip
@@ -263,7 +292,7 @@ Present triage table:
 
 ### Step 3: Absorb confirmed memories
 After user confirmation:
-- Copy TEAM-WORTHY memories to `memory/`
+- Copy TEAM-WORTHY memories to `<forge>/memory/`
 - Strip any personal details (user name, specific machine paths)
 - Add `<!-- source: team-member, YYYY-MM-DD -->` comment
 - For UPDATE entries: merge the newer content into the existing file
@@ -289,8 +318,8 @@ If no triggers fire, skip Part 5 entirely.
 
 1. Read `~/.claude/learnings/general.md`
 2. Cross-reference each entry against:
-   - `learnings/.reforge-tracker.json` `processedHashes` — was it already absorbed?
-   - `forge/learnings/*.md` — does the genericized version exist in forge?
+   - `<forge>/learnings/.reforge-tracker.json` `processedHashes` — was it already absorbed?
+   - `<forge>/learnings/*.md` — does the genericized version exist in forge?
 3. For entries that are BOTH processed AND present in forge:
    - Classify as **ARCHIVABLE** — safe to move out of active staging
 4. Present the archival table:
@@ -311,7 +340,7 @@ If no triggers fire, skip Part 5 entirely.
 
 ### Memory Archival
 
-- Memory files that exist in both `~/.claude/memory/` and `forge/memory/` with identical content → offer to move to `~/.claude/memory/archive/`
+- Memory files that exist in both `~/.claude/memory/` and `<forge>/memory/` with identical content → offer to move to `~/.claude/memory/archive/`
 - Same confirmation flow as learning archival
 
 ---

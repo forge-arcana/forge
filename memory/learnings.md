@@ -12,7 +12,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ### Knowledge Flow (2026-03-15)
 - `/wrap` is two-stage: (1) project level — repo `memory/` + Claude project memory, (2) promote generics to `~/.claude/learnings/` + `~/.claude/memory/`
 - `/wrap` NEVER touches the forge repo — global Claude space is the staging area
-- `/reforge` consumes ONLY from global Claude space + forge's own `learnings/inbox.md`
+- `/reforge` consumes ONLY from global Claude space (`~/.claude/learnings/` + `~/.claude/memory/`)
 - `/reforge` NEVER deletes from user's global space — tracks processed entries via content hashes
 - Promotion is always a COPY, never a move — project entries persist after promotion
 - Dedup at every level: project learnings, project memory, global learnings, global memory
@@ -25,8 +25,8 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ## Skills
 
 ### Structure (2026-03-15)
-- 11 global skills: pitch, bluep, arch, forge, dive, audit, wawa, wrap, quick, qt, srs
-- 1 forge-local skill: reforge (in `.claude/skills/reforge/`)
+- 12 global skills: pitch, bluep, arch, forge, dive, audit, wawa, wrap, quick, qt, srs, reforge
+- reforge promoted from forge-local to global — runnable from any project via `forge-path:` resolution
 - Skills are self-contained packages — reference docs live inside the owning skill directory
 - `skills/` is the git-tracked source of truth; `~/.claude/skills/` is the deployment target
 
@@ -47,10 +47,12 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ## Deployment
 
-### Manifest (2026-03-15)
+### Manifest & Drift Detection (2026-03-15)
 - `.forge-manifest.json` tracks SHA256 hashes per skill directory for drift detection
-- `/forge` classifies each skill as ADDED/UPDATED/REMOVED/UNCHANGED
-- Forge's human-contributed inbox is `learnings/inbox.md` (not `general.md`)
+- `/forge` does three-way comparison: forge source vs manifest vs deployed — detects REVERSE-DRIFT (deployed newer) and CONFLICT (both changed)
+- `/reforge` Part 1a does skill reverse-sync: diffs deployed `~/.claude/skills/` against `<forge>/skills/`, absorbs deployed-side changes back into forge source
+- Both directions covered: `/forge` warns about reverse drift, `/reforge` absorbs it
+- No manual inbox needed — all knowledge flows through `/wrap` → staging → `/reforge`
 
 ### /reforge Unified Flow (2026-03-15)
 - Six parts: config sync → review & prune (auto-triggered) → learning absorption → memory absorption → staging archival → report

@@ -4,11 +4,10 @@
 Forge is the shared tooling, conventions, and reference documentation repo used across all projects. Skills, stack guides, and workflow rules live here as the source of truth.
 
 ## Key Files & Directories
-- `skills/` — Git-tracked source of truth for all 11 global skills (self-contained packages)
+- `skills/` — Git-tracked source of truth for all 12 global skills (self-contained packages)
 - `learnings/` — Absorbed team wisdom (populated by `/reforge`)
 - `memory/` — Team identity & shared conventions (populated by `/reforge`)
 - `.claude/skills/forge/` — Thin bootstrap so `/forge` is discoverable on fresh clone
-- `.claude/skills/reforge/` — Forge-local skill (full, not a bootstrap)
 
 ## Global Skills (available everywhere)
 | Skill | Purpose |
@@ -24,11 +23,7 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/quick` | Tech debt & logging code review (self-improving) |
 | `/qt` | Quick test — verify fixes before user tests manually |
 | `/srs` | Setup restart script for local dev stack |
-
-## Project-Local Skills (forge repo only)
-| Skill | Purpose |
-|-------|---------|
-| `/reforge` | Config sync + absorb learnings AND memories from all projects into forge |
+| `/reforge` | Feed knowledge back to forge — config sync + absorb learnings & memories (runnable from any project) |
 
 ## Three Pillars (all bidirectional via forge)
 | Pillar | DOWN (forge → user) | UP (user → forge) |
@@ -40,6 +35,11 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 ## Self-Improving Skills Loop
 `/arch`, `/audit`, `/quick` write learnings to project's `memory/*-learnings.md` → `/wrap` promotes to `~/.claude/` → `/reforge` absorbs into `forge/learnings/` → next skill run reads global learnings first.
 
+## HARD RULE — Only /reforge Writes to Forge
+> **No project, no skill, no manual edit touches forge repo files directly.**
+> `/reforge` is the gatekeeper for learnings, memory, and config sync.
+> Direct edits to forge are only for skill development (editing SKILL.md files in `skills/`).
+
 ## HARD RULE — No Auto-Commit
 > **NEVER commit automatically after completing any sprint, phase, or piece of work.** Always ask the user: "Ready to wrap up? Run `/wrap` to commit with full context."
 
@@ -49,6 +49,6 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `ffdbe43` — DRY conventions
-- **Completed**: Three-pillar architecture (skills + learnings + memory, all bidirectional), thin bootstrap (no install.sh), manifest-based skill drift detection, self-contained skill packages, `<forge>` path notation, `/forge` owns forge-path management, unified `/reforge` (6-part flow with auto-triggered review & archival), self-improving loop, `/wrap` Step 9 context window compact, OCD audit pass (pitch round count, E2E mode, learnings consolidation, dead references)
+- **Last commit**: `4fc9ebf` — First /reforge run
+- **Completed**: Three-pillar architecture, thin bootstrap, manifest-based three-way drift detection (forward + reverse), self-contained skill packages, `<forge>` path notation, 12 global skills (reforge promoted from forge-local), unified `/reforge` with skill reverse-sync, `/forge` with reverse-drift warnings, external docs resolution in `/wrap` and `/forge`, inbox.md eliminated, first successful `/forge` pillar sync + `/reforge` absorption
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

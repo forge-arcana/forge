@@ -32,13 +32,23 @@ If the pull fails (diverged, conflicts), warn the user: "Forge repo has diverged
 
 Before touching the project, ensure the user's `~/.claude/` is up to date with forge.
 
-### 1a: Skill Sync (manifest-based)
+### 1a: Skill Sync (manifest-based, with reverse-drift detection)
 
 Read `~/.claude/skills/.forge-manifest.json`. For each skill in `<forge-path>/skills/`:
 
-1. Hash the skill directory
-2. Compare against the manifest hash
-3. Classify: `ADDED` (new skill in forge), `UPDATED` (hash differs), `REMOVED` (in manifest but gone from forge), `UNCHANGED`
+1. Hash the forge source skill directory
+2. Hash the deployed skill directory (`~/.claude/skills/<name>/`)
+3. Compare both against the manifest hash
+4. Classify using **three-way comparison**:
+
+| Forge vs Manifest | Deployed vs Manifest | Classification |
+|-------------------|---------------------|----------------|
+| Same | Same | `UNCHANGED` |
+| Different | Same | `UPDATED` (forge is newer — deploy it) |
+| Same | Different | `REVERSE-DRIFT` (deployed is newer — warn, run /reforge) |
+| Different | Different | `CONFLICT` (both changed — manual review needed) |
+| New skill | — | `ADDED` |
+| Gone from forge | — | `REMOVED` |
 
 Present the sync report:
 ```markdown
@@ -48,6 +58,8 @@ Present the sync report:
 |-------|--------|--------|
 | arch | UNCHANGED | — |
 | wrap | UPDATED | Overwrite ~/.claude/skills/wrap/ |
+| qt | REVERSE-DRIFT | ⚠️ Deployed copy has changes not in forge — run /reforge first |
+| srs | CONFLICT | ⚠️ Both forge and deployed changed — manual review |
 | newskill | ADDED | Deploy to ~/.claude/skills/newskill/ |
 | oldskill | REMOVED | Remove from ~/.claude/skills/oldskill/ |
 ```
@@ -56,7 +68,9 @@ After user confirms:
 - Deploy ADDED skills (copy directory)
 - Update UPDATED skills (replace directory)
 - Remove REMOVED skills (delete directory)
-- Update the manifest with new hashes
+- **REVERSE-DRIFT**: Do NOT overwrite. Warn user to run `/reforge` first to absorb deployed changes into forge source. Skip these skills.
+- **CONFLICT**: Present a diff and let the user decide (merge, keep forge, keep deployed)
+- Update the manifest with new hashes (only for skills that were synced)
 
 If no manifest exists (fresh machine):
 - Create `~/.claude/skills/`, `~/.claude/learnings/`, `~/.claude/memory/` if they don't exist
@@ -91,7 +105,7 @@ Report what was synced across all three pillars before proceeding.
 1. Does `CLAUDE.md` exist? Read it.
 2. Does `.claude/settings.json` exist? Read it.
 3. Does `memory/` directory exist?
-4. Does `docs/` directory exist?
+4. Does `docs/` directory exist? If not, does CLAUDE.md have a `## Documentation` section with a `**Docs path:**` declaring an external docs repo?
 5. What's the project structure? (ls, glob for package.json, tsconfig, etc.)
 6. Is it a monorepo? (check for `packages/`, `pnpm-workspace.yaml`)
 7. Does `restart.sh` exist?
@@ -116,6 +130,7 @@ Produce a table showing what needs to change:
 | Shorthand commands | wawa/wrap as skill refs | [present/missing] | [add] |
 | restart.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
 | kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
+| Documentation | `docs/` in-repo OR `## Documentation` section with `**Docs path:**` | [in-repo/external/missing] | [add section] |
 | Logging setup | dev.log + browser forwarding | [present/missing] | [flag for /quick] |
 ```
 
@@ -147,6 +162,13 @@ Standard sections to include:
 ## Shorthand Commands
 - **wawa** — Runs the `/wawa` skill
 - **wrap** — Runs the `/wrap` skill
+
+## Documentation
+<!-- Include ONE of the following: -->
+<!-- Option A: docs live in this repo -->
+Docs are in the `docs/` directory.
+<!-- Option B: docs live in a separate repo -->
+**Docs path:** /absolute/path/to/docs-repo
 
 ## Current Context
 [branch, recent work, test status — to be filled by /wrap]

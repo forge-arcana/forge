@@ -84,9 +84,25 @@ If nothing qualifies for promotion, skip Stage 2.
 - Stale history belongs in git log or memory files
 
 ## Step 3: Update Docs
-- Scan `docs/` directory (if it exists) for files referencing the areas changed this session
+
+Locate the docs directory using this resolution order:
+
+1. **In-repo**: Check for `docs/` directory in the project root
+2. **External repo**: If no `docs/` exists, search the project's `CLAUDE.md` for a `## Documentation` section containing a local filesystem path
+
+**Convention for external docs**: In CLAUDE.md, declare the docs location like this:
+```markdown
+## Documentation
+**Docs path:** /absolute/path/to/docs-repo
+```
+The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` — for backwards compatibility.
+
+**Once a docs directory is resolved**:
+- Scan it for files (`.md`, `.mdx`) referencing the areas changed this session
 - Update any affected documentation to reflect the changes
-- If no `docs/` directory exists, skip this step
+- If the docs are in a separate repo, stage and commit those changes there too (same commit message convention)
+
+**If no docs directory is found** (neither in-repo nor external), skip this step.
 
 ## Step 4: Lint & Fix
 - Run `npm run lint` (or the project's lint command)

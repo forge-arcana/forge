@@ -29,10 +29,10 @@ A maker's forge. Pitch ideas, blueprint products, architect systems, and build �
 | `/wawa` | Outstanding work summary table |
 | `/wrap` | Pre-commit ritual: learnings → context → docs → lint → compact → commit |
 
-### Forge Maintenance (forge repo only)
+### Knowledge Management
 | Skill | What it does |
 |-------|-------------|
-| `/reforge` | Full knowledge feedback loop: config sync, review & prune, absorb learnings + memories, archive staging |
+| `/reforge` | Feed knowledge back to forge — config sync, review & prune, absorb learnings + memories, archive staging (runnable from any project) |
 
 ---
 
@@ -45,7 +45,7 @@ Learnings flow through three levels: project → global Claude space → forge.
   Stage 1: project memory/learnings.md + ~/.claude/projects/<project>/memory/
   Stage 2: promote generics → ~/.claude/learnings/ + ~/.claude/memory/
 
-/reforge in forge (consumes global only):
+/reforge from any project (consumes global staging):
   → reads ~/.claude/learnings/ + ~/.claude/memory/
   → triages, genericizes, deduplicates
   → writes to forge/learnings/{arch,audit,quick,global-patterns}.md
@@ -62,7 +62,7 @@ Self-improving skills (/arch, /audit, /quick):
 
 ```
 forge/
-├── skills/                # Git-tracked source of truth for all 11 global skills
+├── skills/                # Git-tracked source of truth for all 12 global skills
 │   ├── arch/              # Architecture polisher (self-improving)
 │   ├── audit/             # Go-live readiness assessment (self-improving)
 │   ├── bluep/             # Product blueprint generator
@@ -77,12 +77,12 @@ forge/
 │   ├── quick/             # Tech debt code review (self-improving)
 │   ├── srs/               # Restart script setup
 │   ├── wawa/              # Outstanding work summary
-│   └── wrap/              # Pre-commit ritual
+│   ├── wrap/              # Pre-commit ritual
+│   └── reforge/           # Knowledge feedback loop (runnable from any project)
 ├── learnings/             # Absorbed team wisdom
 ├── memory/                # Team identity & shared conventions
 ├── .claude/skills/
-│   ├── forge/             # Thin bootstrap (so /forge is discoverable on fresh clone)
-│   └── reforge/           # Forge-local skill
+│   └── forge/             # Thin bootstrap (so /forge is discoverable on fresh clone)
 └── CLAUDE.md
 ```
 
@@ -112,10 +112,12 @@ cd forge
 
 **During development?**
 ```
+/forge              → sync latest conventions
 /qt                 → verify your fix
 /quick              → tech debt scan
-/wawa                → where am I?
+/wawa               → where am I?
 /wrap               → commit with full context
+/reforge            → feed learnings back to forge
 ```
 
 **Before go-live?**
