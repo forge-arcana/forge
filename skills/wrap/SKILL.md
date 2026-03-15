@@ -132,5 +132,6 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
 - Only push after explicit user confirmation
 
 ## Step 9: Context Window Compact
-- After the commit (and optional push), call `/compact` to shed conversation history
-- This gives the next task a clean context window — the commit is the natural break point
+- After the commit (and optional push), remind the user: "Run `/compact` or start a new conversation for a fresh context window."
+- `/compact` is a built-in CLI command — only the user can invoke it, not the agent
+- The commit is the natural break point — next task benefits from a clean context
