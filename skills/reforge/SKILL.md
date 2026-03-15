@@ -187,7 +187,7 @@ Present the full triage table to the user using AskUserQuestion:
 | # | Source | Learning Summary | Category | Status | Target File |
 |---|--------|-----------------|----------|--------|-------------|
 | 1 | ~/.claude/learnings/general.md | [one-line summary] | arch | NEW | arch-learnings.md |
-| 2 | learnings/inbox.md | [one-line summary] | audit | DUPLICATE | — |
+| 2 | ~/.claude/learnings/general.md | [one-line summary] | audit | DUPLICATE | — |
 
 ### Already Known (auto-skipped)
 | Source | Learning | Reason |
