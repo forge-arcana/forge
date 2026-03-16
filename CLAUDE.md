@@ -56,6 +56,6 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `4ad7600` — Fix /wrap Step 9
-- **Completed**: Three-pillar architecture, manifest-based drift detection, 12 global skills, `/forge` pillar sync + `/reforge` absorption operational, Communication Style (timestamps) removed from all docs — inaccurate times
+- **Last commit**: `df18b57` — Reforge: absorb 4 new learnings
+- **Completed**: Three-pillar architecture, manifest-based drift detection, 12 global skills (+ monci/ponci/vsix), `/forge` pillar sync + `/reforge` absorption operational, deterministic path-relative hashing for pillar sync
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

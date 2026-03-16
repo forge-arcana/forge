@@ -36,8 +36,13 @@ All file paths below are relative to `<forge>` (the resolved forge repo path).
 
 Compare deployed skills (`~/.claude/skills/`) against forge source (`<forge>/skills/`). For each skill:
 
-1. Hash both the deployed and forge source directories
+1. Hash both the deployed and forge source directories (use path-relative hashing — see command below)
 2. If they differ, the deployed copy has changes that haven't been absorbed into forge
+
+**Hashing command** (paths must be relative to avoid mismatches between source/deployed locations):
+```bash
+find <dir> -type f | sort | while read f; do echo "$(realpath --relative-to=<dir> "$f")"; cat "$f"; done | sha256sum | awk '{print $1}'
+```
 
 Present the drift report:
 ```markdown

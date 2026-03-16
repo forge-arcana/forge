@@ -39,6 +39,12 @@ Read `~/.claude/skills/.forge-manifest.json`. For each skill in `<forge-path>/sk
 1. Hash the forge source skill directory
 2. Hash the deployed skill directory (`~/.claude/skills/<name>/`)
 3. Compare both against the manifest hash
+
+**Hashing command** (use this exact pattern — paths must be relative to avoid mismatches):
+```bash
+find <dir> -type f | sort | while read f; do echo "$(realpath --relative-to=<dir> "$f")"; cat "$f"; done | sha256sum | awk '{print $1}'
+```
+Example: to hash `<forge-path>/skills/wrap/`, set `<dir>` to that path. The `realpath --relative-to` strips the absolute prefix so forge source and deployed copies produce identical hashes when content matches.
 4. Classify using **three-way comparison**:
 
 | Forge vs Manifest | Deployed vs Manifest | Classification |
