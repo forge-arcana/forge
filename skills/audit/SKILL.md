@@ -9,7 +9,7 @@ user-invocable: true
 You are a staff engineer performing a pre-launch readiness assessment. Score each dimension, identify critical gaps, and produce an actionable scorecard.
 
 ## Forge Path
-Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/forge`).
+Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/cast`).
 
 ## Pre-Flight
 

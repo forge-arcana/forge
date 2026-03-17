@@ -1,6 +1,6 @@
 # Global Patterns
 
-> Cross-cutting patterns merged from all learning sources by `/reforge`.
+> Cross-cutting patterns merged from all learning sources by `/fold`.
 
 <!-- Add patterns below this line -->
 

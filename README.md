@@ -4,6 +4,18 @@ A maker's forge. Pitch ideas, blueprint products, architect systems, and build �
 
 ---
 
+## The Forge Cycle
+
+Three one-syllable commands drive the forge loop:
+
+| Command | Action | Analogy |
+|---------|--------|---------|
+| `/mark` | Inspect membrane status (read-only) | Hallmark — inspect and stamp quality |
+| `/cast` | Deploy forge → membrane → project | Pour molten metal into the mold |
+| `/fold` | Absorb knowledge back into forge | Layer experience into the steel |
+
+---
+
 ## Skills
 
 ### Ideation
@@ -23,29 +35,30 @@ A maker's forge. Pitch ideas, blueprint products, architect systems, and build �
 ### Development
 | Skill | What it does |
 |-------|-------------|
-| `/forge` | Initialize or sync a project with forge conventions |
+| `/cast` | Deploy forge conventions into a project (membrane sync + divergence analysis) |
 | `/qt` | Quick test — verify a fix works before manual testing |
 | `/srs` | Setup `restart.sh` for local dev stack (ports, zombie cleanup, DB checks) |
 | `/wawa` | Outstanding work summary table |
-| `/wrap` | Pre-commit ritual: learnings → context → docs → lint → compact → commit |
+| `/wrap` | Pre-commit ritual: lint → stage → context → docs → compact → commit |
 
 ### Knowledge Management
 | Skill | What it does |
 |-------|-------------|
-| `/reforge` | Feed knowledge back to forge — config sync, review & prune, absorb learnings + memories, archive staging (runnable from any project) |
+| `/mark` | Inspect membrane — skill drift, learnings, memory status report |
+| `/fold` | Absorb knowledge back into forge — config sync, review & prune, absorb learnings + memories, archive staging (runnable from any project) |
 
 ---
 
 ## Knowledge Flow
 
-Learnings flow through three levels: project → global Claude space → forge.
+Learnings accumulate automatically during work sessions, then flow through three levels: project → global Claude space → forge.
 
 ```
-/wrap in any project (two-stage):
-  Stage 1: project memory/learnings.md + ~/.claude/projects/<project>/memory/
-  Stage 2: promote generics → ~/.claude/learnings/ + ~/.claude/memory/
+During any work session (automatic):
+  → Claude auto-memory writes to ~/.claude/projects/<project>/memory/
+  → Learnings accumulate in ~/.claude/learnings/ + ~/.claude/memory/
 
-/reforge from any project (consumes global staging):
+/fold from any project (consumes global staging):
   → reads ~/.claude/learnings/ + ~/.claude/memory/
   → triages, genericizes, deduplicates
   → writes to forge/learnings/{arch,audit,quick,global-patterns}.md
@@ -53,7 +66,7 @@ Learnings flow through three levels: project → global Claude space → forge.
 
 Self-improving skills (/arch, /audit, /quick):
   → read forge/learnings/ first → smarter decisions
-  → write back to project memory/ → /wrap promotes → cycle continues
+  → write back to project memory/ → auto-accumulates → cycle continues
 ```
 
 ---
@@ -62,27 +75,28 @@ Self-improving skills (/arch, /audit, /quick):
 
 ```
 forge/
-├── skills/                # Git-tracked source of truth for all 12 global skills
+├── skills/                # Git-tracked source of truth for all global skills
 │   ├── arch/              # Architecture polisher (self-improving)
 │   ├── audit/             # Go-live readiness assessment (self-improving)
 │   ├── bluep/             # Product blueprint generator
+│   ├── cast/              # Deploy forge conventions into projects
 │   ├── dive/              # Deep QA with 19+ adversarial personas
-│   ├── forge/             # Workstation initializer + reference docs
-│   │   ├── SKILL.md
+│   ├── fold/              # Knowledge absorption loop (runnable from any project)
+│   ├── forge/             # Reference docs (no SKILL.md — not a skill)
 │   │   ├── claude-code-rules.md   # Workflow rules
 │   │   ├── stack-guide.md         # Tech stack decisions
 │   │   └── forge-conventions.md   # Conventions checklist
+│   ├── mark/              # Membrane inspection (read-only status report)
 │   ├── pitch/             # Elevator pitch generator
 │   ├── qt/                # Quick test
 │   ├── quick/             # Tech debt code review (self-improving)
 │   ├── srs/               # Restart script setup
 │   ├── wawa/              # Outstanding work summary
-│   ├── wrap/              # Pre-commit ritual
-│   └── reforge/           # Knowledge feedback loop (runnable from any project)
+│   └── wrap/              # Pre-commit ritual
 ├── learnings/             # Absorbed team wisdom
 ├── memory/                # Team identity & shared conventions
 ├── .claude/skills/
-│   └── forge/             # Thin bootstrap (so /forge is discoverable on fresh clone)
+│   └── cast/              # Thin bootstrap (so /cast is discoverable on fresh clone)
 └── CLAUDE.md
 ```
 
@@ -101,23 +115,24 @@ forge/
 ```
 git clone <forge-repo>
 cd forge
-/forge              → deploys all skills globally, sets up ~/.claude/
+/cast               → deploys all skills globally, sets up ~/.claude/
 ```
 
 **New project?**
 ```
-/forge              → apply forge conventions
+/cast               → apply forge conventions
 /srs                → setup restart.sh
 ```
 
 **During development?**
 ```
-/forge              → sync latest conventions
+/cast               → sync latest conventions
 /qt                 → verify your fix
 /quick              → tech debt scan
 /wawa               → where am I?
 /wrap               → commit with full context
-/reforge            → feed learnings back to forge
+/mark               → check membrane status
+/fold               → feed learnings back to forge
 ```
 
 **Before go-live?**

@@ -1,6 +1,6 @@
 # Architecture Learnings
 
-> Populated by `/arch` runs across projects. Absorbed into forge by `/reforge`.
+> Populated by `/arch` runs across projects. Absorbed into forge by `/fold`.
 
 <!-- Add learnings below this line -->
 

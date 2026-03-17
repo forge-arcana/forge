@@ -1,22 +1,22 @@
 ---
-name: forge
-description: Initialize or sync a project workspace with forge conventions. Pulls latest forge, analyzes divergence, applies CLAUDE.md, settings, and structure. Use when setting up a new project or syncing conventions.
+name: cast
+description: Deploy forge conventions into a project workspace. Pulls latest forge, syncs the membrane, analyzes divergence, applies CLAUDE.md, settings, and structure. Use when setting up a new project or syncing conventions.
 user-invocable: true
 ---
 
-# /forge — Workstation Initializer
+# /cast — Deploy Forge Into Project
 
-You are applying forge conventions to a project workspace. This ensures every project has consistent rules, structure, and tooling.
+You are casting forge conventions into a project workspace. This ensures every project has consistent rules, structure, and tooling.
 
 ## Resolve Forge Path
 Before starting, determine the forge directory:
 1. Check `~/.claude/CLAUDE.md` for a `forge-path:` line
 2. If not found, fall back to `/root/dev/forge`
 3. If the resolved path doesn't exist, error: "Forge not found. Clone the forge repo first."
-4. If the resolved path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/forge` owns `forge-path:` management.
+4. If the resolved path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/cast` owns `forge-path:` management.
 
 ## Arguments
-`$ARGUMENTS` — optional path to target project (e.g., `/forge /root/dev/myproject`). If not provided, use the current working directory.
+`$ARGUMENTS` — optional path to target project (e.g., `/cast /root/dev/myproject`). If not provided, use the current working directory.
 
 ## Step 0: Pull Latest Forge (MANDATORY)
 
@@ -51,7 +51,7 @@ Example: to hash `<forge-path>/skills/wrap/`, set `<dir>` to that path. The `rea
 |-------------------|---------------------|----------------|
 | Same | Same | `UNCHANGED` |
 | Different | Same | `UPDATED` (forge is newer — deploy it) |
-| Same | Different | `REVERSE-DRIFT` (deployed is newer — warn, run /reforge) |
+| Same | Different | `REVERSE-DRIFT` (deployed is newer — warn, run /fold) |
 | Different | Different | `CONFLICT` (both changed — manual review needed) |
 | New skill | — | `ADDED` |
 | Gone from forge | — | `REMOVED` |
@@ -64,7 +64,7 @@ Present the sync report:
 |-------|--------|--------|
 | arch | UNCHANGED | — |
 | wrap | UPDATED | Overwrite ~/.claude/skills/wrap/ |
-| qt | REVERSE-DRIFT | ⚠️ Deployed copy has changes not in forge — run /reforge first |
+| qt | REVERSE-DRIFT | ⚠️ Deployed copy has changes not in forge — run /fold first |
 | srs | CONFLICT | ⚠️ Both forge and deployed changed — manual review |
 | newskill | ADDED | Deploy to ~/.claude/skills/newskill/ |
 | oldskill | REMOVED | Remove from ~/.claude/skills/oldskill/ |
@@ -74,7 +74,7 @@ After user confirms:
 - Deploy ADDED skills (copy directory)
 - Update UPDATED skills (replace directory)
 - Remove REMOVED skills (delete directory)
-- **REVERSE-DRIFT**: Do NOT overwrite. Warn user to run `/reforge` first to absorb deployed changes into forge source. Skip these skills.
+- **REVERSE-DRIFT**: Do NOT overwrite. Warn user to run `/fold` first to absorb deployed changes into forge source. Skip these skills.
 - **CONFLICT**: Present a diff and let the user decide (merge, keep forge, keep deployed)
 - Update the manifest with new hashes (only for skills that were synced)
 
@@ -88,7 +88,7 @@ If no manifest exists (fresh machine):
 
 For each `.md` file in `<forge-path>/learnings/`:
 - If the file doesn't exist in `~/.claude/learnings/`, copy it
-- If it exists but differs, report: "forge has updates — run /reforge to reconcile"
+- If it exists but differs, report: "forge has updates — run /fold to reconcile"
 - If identical, skip
 
 ### 1c: Memory Sync (forge → user)

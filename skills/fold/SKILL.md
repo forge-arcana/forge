@@ -1,23 +1,23 @@
 ---
-name: reforge
-description: Feed everything back to forge from any project. Syncs global config drift AND absorbs learnings and memories from the user's global Claude space into the forge repo.
+name: fold
+description: Absorb knowledge back into forge from any project. Syncs global config drift AND absorbs learnings and memories from the user's global Claude space into the forge repo.
 user-invocable: true
 ---
 
-# /reforge — Global Learning & Memory Absorber + Config Sync
+# /fold — Absorb Knowledge Into Forge
 
 ## Forge Path
-Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/forge`).
+Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/cast`).
 
-## HARD RULE — /reforge is the ONLY writer to forge
+## HARD RULE — /fold is the ONLY writer to forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
-> `/reforge` is the gatekeeper. All knowledge flows through it.
-> If you need to update forge learnings, memory, or config — run `/reforge`.
+> `/fold` is the gatekeeper. All knowledge flows through it.
+> If you need to update forge learnings, memory, or config — run `/fold`.
 > Direct edits to the forge repo are only for skill development (editing SKILL.md files in `skills/`).
 
 ---
 
-Single command to feed all knowledge back into the forge repo. Runnable from **any project**. One flow, six parts:
+Single command to fold all knowledge back into the forge repo. Runnable from **any project**. One flow, six parts:
 
 1. **Config & skill sync** — push current global config into forge reference + detect deployed skill drift
 2. **Review & prune** — check existing forge knowledge for staleness (auto-triggers based on size)
@@ -57,7 +57,7 @@ Present the drift report:
 For each DRIFTED skill:
 - Diff the deployed vs forge source to show exactly what changed
 - After user confirms, **copy the deployed version into `<forge>/skills/<name>/`** (deployed is the newer truth)
-- This is safe because `/forge` will re-deploy from forge source on next run
+- This is safe because `/cast` will re-deploy from forge source on next run
 
 ### Step 1b: Config Sync
 
@@ -157,11 +157,11 @@ If no triggers fire, skip Part 2 entirely and proceed to Part 3.
 ## Part 3: Learning Absorption
 
 ### Intake Sources (global Claude space ONLY)
-`/reforge` does NOT scan project repos directly. It consumes from the user's global Claude space, where `/wrap` has already promoted and genericized learnings.
+`/fold` does NOT scan project repos directly. It consumes from the user's global Claude space, where learnings have been accumulated during work sessions.
 
 | Source | Location | What's there |
 |--------|----------|-------------|
-| **Global learnings** | `~/.claude/learnings/general.md` | Universal learnings promoted by `/wrap` (Tier 2) |
+| **Global learnings** | `~/.claude/learnings/general.md` | Universal learnings accumulated during sessions |
 
 ### Step 1: Read intake sources
 - Read `~/.claude/learnings/general.md`
@@ -266,7 +266,7 @@ To avoid re-evaluating every entry on each run, maintain a watermark file at `<f
 ### Intake Sources
 | Source | Location | What's there |
 |--------|----------|-------------|
-| **Global memory** | `~/.claude/memory/` | Universal memories promoted by `/wrap` |
+| **Global memory** | `~/.claude/memory/` | Universal memories accumulated during sessions |
 
 ### Step 1: Read intake sources
 - Read all `.md` files in `~/.claude/memory/`
@@ -312,7 +312,7 @@ After user confirmation:
 
 ## Part 5: Staging Archival
 
-The user's `~/.claude/learnings/` and `~/.claude/memory/` grow forever by design (nothing is ever deleted during `/wrap`). This step offers to archive entries that have been fully absorbed into forge.
+The user's `~/.claude/learnings/` and `~/.claude/memory/` grow forever by design (nothing is ever deleted during work sessions). This step offers to archive entries that have been fully absorbed into forge.
 
 ### Trigger (skip if none fire)
 
@@ -357,7 +357,7 @@ If no triggers fire, skip Part 5 entirely.
 ## Part 6: Report
 
 ```markdown
-## Reforge Complete
+## Fold Complete
 
 ### Summary
 - Config sync: [X changes applied / no changes]

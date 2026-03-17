@@ -1,6 +1,6 @@
 ---
 name: wrap
-description: Pre-commit ritual. Lints, stages, saves context, updates docs/learnings, compacts, commits. Use when the user types "wrap" or wants to commit with full context.
+description: Pre-commit ritual. Lints, stages, saves context, updates docs, compacts, commits. Use when the user types "wrap" or wants to commit with full context.
 user-invocable: true
 ---
 
@@ -48,73 +48,7 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
 
 **If no docs directory is found** (neither in-repo nor external), skip this step.
 
-## Step 5: Update Project Learnings & Memories (Stage 1 — Project Level)
-
-### 5a: Project Learnings (in repo)
-- If anything new was learned this session, write to `memory/learnings.md`
-- If the file doesn't exist, create it
-- Append new learnings with date prefix
-- **Dedup**: Before appending, read the existing file and skip any insight that already exists (exact or semantic duplicate)
-
-### 5b: Project Claude Memory (user's machine)
-- For learnings relevant to this project or similar projects, write to `~/.claude/projects/<project-path>/memory/` as memory files
-- **Format**: Standard memory frontmatter:
-  ```markdown
-  ---
-  name: <short title>
-  description: <one-line description>
-  type: feedback
-  ---
-  <!-- source: <project-name>, <date> -->
-  <learning>
-  ```
-- **Update**: Add pointer to the project's `MEMORY.md` index
-- **Dedup**: Read existing files in `~/.claude/projects/<project-path>/memory/` — skip if the same insight already exists
-
-### 5c: Promote Generics to Global (Stage 2 — Global Level)
-Review everything written in Steps 5a and 5b. For each item, decide if it's generic enough to promote:
-
-#### Global Learnings (`~/.claude/learnings/`)
-For truly universal insights applicable to ANY project:
-- **Strip project specifics first**: Remove project names, specific file paths, business logic, team names, domains. Rewrite as a universal principle.
-- **Write to**: `~/.claude/learnings/general.md` (append with date prefix)
-- **Format**:
-  ```markdown
-  ## <Short Title> (<YYYY-MM-DD>)
-  <!-- source: <project-name>, <date> -->
-  <genericized learning>
-  ```
-- **Dedup**: Read ALL entries in `~/.claude/learnings/general.md` — skip if already exists
-
-#### Global Memory (`~/.claude/memory/`)
-For universal memories (feedback, patterns) useful across all projects:
-- **Strip project specifics first**
-- **Write to**: `~/.claude/memory/` as a memory file with standard frontmatter
-- **Dedup**: Read existing files in `~/.claude/memory/` — skip if already exists
-
-#### Classification guide
-
-| Level | What goes here | Examples |
-|-------|---------------|----------|
-| **Project learnings only** | Project-specific decisions, business logic, state | "We chose Xendit for payments because of PH support" |
-| **Project Claude memory** | Stack-specific patterns for this tech combo | "Hono + Drizzle: use middleware chaining for auth" |
-| **Global learnings** | Universal principles, cross-stack patterns | "Always verify HMR timestamp after config changes" |
-| **Global memory** | Universal feedback/preferences | "Log human-initiated actions with full context, skip pulsing events" |
-
-#### When to run Stage 2
-Stage 2 adds overhead (reading global files, deduping). Only run it when:
-- New learnings were written in Step 5a (if nothing new was learned this session, skip entirely)
-- Any learning has `Forge-worthy: yes` flag (auto-promote these — no judgment needed)
-- For unflagged learnings, only promote if clearly generic (quick judgment — don't over-analyze)
-- If in doubt, skip promotion — `/reforge` can always pull from project-level later if needed
-
-If nothing qualifies for promotion, skip Stage 2.
-
-**IMPORTANT**: Promotion is a COPY, not a move. Project-level entries are never deleted when promoted to global. Nothing is ever deleted during `/wrap`.
-
-**NOTE**: `/wrap` never touches the forge repo. The `/reforge` skill (run from forge) consumes from `~/.claude/learnings/` and `~/.claude/memory/` to absorb into `forge/learnings/` and `forge/memory/`.
-
-## Step 6: Compact
+## Step 5: Compact
 - Check the size of the project's `CLAUDE.md`
 - If it exceeds ~20k characters:
   - Move verbose history, phase notes, and detailed learnings to `memory/` files
@@ -122,16 +56,16 @@ If nothing qualifies for promotion, skip Stage 2.
   - Link moved content from `MEMORY.md` index
 - Check `memory/` files for redundant or stale entries — deduplicate and prune
 
-## Step 7: Commit
+## Step 6: Commit
 - Draft a concise commit message (1-2 sentences) focusing on the "why" not the "what"
 - Include `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` in the message
 - Create the commit
 
-## Step 8: Push Decision
+## Step 7: Push Decision
 - Ask the user: "Push to remote?" — do NOT push automatically
 - Only push after explicit user confirmation
 
-## Step 9: Context Window Compact
+## Step 8: Context Window Compact
 - After the commit (and optional push), remind the user: "Run `/compact` or start a new conversation for a fresh context window."
 - `/compact` is a built-in CLI command — only the user can invoke it, not the agent
 - The commit is the natural break point — next task benefits from a clean context
