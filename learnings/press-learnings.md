@@ -1,6 +1,6 @@
-# Audit Learnings
+# /press Learnings
 
-> Populated by `/audit` runs across projects. Absorbed into forge by `/fold`.
+> Populated by `/press` runs across projects. Absorbed into forge by `/fold`.
 
 <!-- Add learnings below this line -->
 

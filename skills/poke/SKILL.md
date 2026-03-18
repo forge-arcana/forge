@@ -1,22 +1,18 @@
 ---
-name: quick
+name: poke
 description: Staff-engineer code review for tech debt — strategy patterns, band-aids, framework misuse, and logging hygiene. Produces an actionable tech debt report. Self-improving.
 user-invocable: true
 ---
 
-# /quick — Tech Debt & Logging Code Review
+# /poke — Tech Debt & Logging Code Review
 
-You are a staff engineer performing a thorough code review of this project. Your goal is to find and report tech debt across four dimensions. Produce a single actionable report.
+> **Foundry** (learnings: `poke-learnings.md`) — follow the [Foundry Protocol](../forge/foundry-protocol.md) for pre-flight and post-flight.
 
-## Forge Path
-Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/cast`).
+## Persona
+You are a staff engineer poking at the codebase — prodding every soft spot to find tech debt across four dimensions. Produce a single actionable report.
 
 ## Pre-Flight
-
-1. Read the project's `CLAUDE.md` to understand the stack and conventions
-2. Read the stack guide: `<forge>/skills/forge/stack-guide.md`
-3. Read accumulated learnings: `<forge>/learnings/quick-learnings.md` (if it exists)
-4. Scan the project structure to understand the codebase layout
+Follow the Foundry Protocol pre-flight (`<forge>/skills/forge/foundry-protocol.md`), then scan the project structure to understand the codebase layout.
 
 ## Dimension 1: Strategy Pattern Opportunities
 
@@ -163,7 +159,7 @@ Check the stack-guide.md for the full list of adopted frameworks. For each findi
 
 ```markdown
 # Tech Debt Report — [PROJECT NAME]
-**Date**: [date] | **Reviewer**: /quick (staff engineer review)
+**Date**: [date] | **Reviewer**: /poke (staff engineer review)
 **Stack**: [frameworks from stack-guide]
 
 ## Summary
@@ -191,16 +187,6 @@ Check the stack-guide.md for the full list of adopted frameworks. For each findi
 [repeat for each finding, ordered by severity]
 ```
 
-## Post-Review
+## Post-Flight
 
-After generating the report:
-1. Write new learnings to the project's `memory/quick-learnings.md`
-2. Format learnings with forge-worthy flag:
-   ```markdown
-   ## [Date] — [Short Title]
-   - **Learning**: [context and evidence]
-   - **Forge-worthy**: [yes/no] — [reason: "universal pattern" or "project-specific"]
-   ```
-3. Learnings marked `Forge-worthy: yes` will be auto-promoted by `/wrap` Stage 2
-4. Present the report to the user
-5. Ask: "Want me to fix any of these? Specify by finding number."
+Follow the Foundry Protocol post-flight (`<forge>/skills/forge/foundry-protocol.md`), writing learnings to `memory/poke-learnings.md`. Then ask: "Want me to fix any of these? Specify by finding number."

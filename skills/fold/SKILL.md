@@ -122,8 +122,8 @@ If no triggers fire, skip Part 2 entirely and proceed to Part 3.
    |---|------|-------|--------|----------------|
    | 1 | arch-learnings.md | [title] | CURRENT | Keep |
    | 2 | arch-learnings.md | [title] | STALE | Remove — API deprecated in v4 |
-   | 3 | quick-learnings.md | [title] | MERGED | Consolidate with entry #7 |
-   | 4 | audit-learnings.md | [title] | EVOLVED | Rewrite — new compliance rules |
+   | 3 | poke-learnings.md | [title] | MERGED | Consolidate with entry #7 |
+   | 4 | press-learnings.md | [title] | EVOLVED | Rewrite — new compliance rules |
    ```
 5. After user confirmation:
    - Remove STALE entries
@@ -148,7 +148,7 @@ If no triggers fire, skip Part 2 entirely and proceed to Part 3.
    |---|------|------|---------|--------|----------------|
    | 1 | deploy-freeze.md | team-project | No deploys on Fridays | CURRENT | Keep |
    | 2 | old-ci-setup.md | team-reference | Jenkins pipeline URLs | STALE | Remove — migrated to GitHub Actions |
-   | 3 | logging-style.md | team-feedback | Log human actions | PROMOTED | Already in /quick SKILL.md |
+   | 3 | logging-style.md | team-feedback | Log human actions | PROMOTED | Already in /poke SKILL.md |
    ```
 4. After user confirmation: remove, merge, or rewrite as classified
 
@@ -229,8 +229,8 @@ For each confirmed learning:
 - **Genericize first** — rewrite the learning as a universal pattern
 - Append to the appropriate file in `<forge>/learnings/`:
   - `arch-learnings.md` — architecture patterns and decisions
-  - `audit-learnings.md` — go-live readiness patterns
-  - `quick-learnings.md` — tech debt and logging patterns
+  - `press-learnings.md` — go-live readiness patterns
+  - `poke-learnings.md` — tech debt and logging patterns
   - `global-patterns.md` — cross-cutting patterns that span multiple categories
 - Format each entry as:
   ```markdown

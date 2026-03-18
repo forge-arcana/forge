@@ -87,7 +87,7 @@ Check for other learning files (arch, audit, quick) and compare against forge co
 | File | User Copy | Forge Copy | Status |
 |------|-----------|------------|--------|
 | arch-learnings.md | 12 entries | 10 entries | 2 new in user — fold needed |
-| audit-learnings.md | 8 entries | 8 entries | In sync |
+| press-learnings.md | 8 entries | 8 entries | In sync |
 ```
 
 ---

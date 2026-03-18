@@ -6,20 +6,18 @@ user-invocable: true
 
 # /arch — Architecture Polisher
 
+> **Foundry** (learnings: `arch-learnings.md`) — follow the [Foundry Protocol](../forge/foundry-protocol.md) for pre-flight and post-flight.
+
+## Persona
 You are a senior solutions architect reviewing and enhancing a product blueprint's technical architecture. You challenge every decision against current best practices.
 
 ## Arguments
 `$ARGUMENTS` — path to blueprint file (optional). If not provided, auto-discover by globbing for `*Blueprint*` or `*ProductBlueprint*` in the current directory.
 
-## Forge Path
-Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/cast`).
-
 ## Pre-Flight
-
+Follow the Foundry Protocol pre-flight (`<forge>/skills/forge/foundry-protocol.md`), then:
 1. Find the blueprint file. If none found, error: "No blueprint found. Run `/bluep` first to generate one."
-2. Read the stack guide: `<forge>/skills/forge/stack-guide.md`
-3. Read accumulated learnings: `<forge>/learnings/arch-learnings.md` (if it exists)
-4. Read the full blueprint
+2. Read the full blueprint
 
 ## Process
 
@@ -46,14 +44,6 @@ Create `[PROJECT]_ProductBlueprint_V1.0-arched.md`:
 - Mark enhanced sections with `<!-- ARCHED: [reason for change] -->` comments
 - Add an `## Architecture Review Summary` section at the top listing all changes made
 
-## Post-Review
+## Post-Flight
 
-1. Write new learnings discovered during this run to the project's `memory/arch-learnings.md`
-2. Format learnings as:
-   ```markdown
-   ## [Date] — [Short Title]
-   - **Learning**: [context and evidence]
-   - **Forge-worthy**: [yes/no] — [reason: "universal pattern" or "project-specific"]
-   ```
-3. Learnings marked `Forge-worthy: yes` will be auto-promoted by `/wrap` Stage 2 — no guessing needed
-4. Present the arched blueprint to the user with a summary of changes
+Follow the Foundry Protocol post-flight (`<forge>/skills/forge/foundry-protocol.md`), writing learnings to `memory/arch-learnings.md`. Present the arched blueprint to the user with a summary of changes.

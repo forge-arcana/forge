@@ -16,21 +16,27 @@ Three one-syllable commands drive the forge loop:
 
 ---
 
-## Skills
+## Foundries
+
+Foundries are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `skills/forge/foundry-protocol.md`.
 
 ### Ideation
-| Skill | What it does |
-|-------|-------------|
+| Foundry | What it does |
+|---------|-------------|
 | `/pitch` | Elevator pitch generator — 6-round AI interview → investor-ready pitch pack |
 | `/bluep` | Product blueprint generator — 7-round interview → 22-section buildable spec |
 
 ### Architecture & Quality
-| Skill | What it does |
-|-------|-------------|
+| Foundry | What it does |
+|---------|-------------|
 | `/arch` | Polish blueprint architecture against current best practices (self-improving) |
-| `/audit` | Go-live readiness scorecard across 7 dimensions (self-improving) |
-| `/dive` | Deep QA with 19 adversarial personas — generates tests, finds edge cases |
-| `/quick` | Staff-engineer code review for tech debt and logging hygiene (self-improving) |
+| `/poke` | Staff-engineer code review for tech debt and logging hygiene (self-improving) |
+| `/press` | Go-live readiness scorecard across 7 dimensions (self-improving) |
+| `/pound` | Deep QA with 21 adversarial personas — generates tests, finds edge cases |
+
+The evaluative trio — **poke → press → pound** — escalates in intensity.
+
+## Task Skills
 
 ### Development
 | Skill | What it does |
@@ -40,6 +46,9 @@ Three one-syllable commands drive the forge loop:
 | `/srs` | Setup `restart.sh` for local dev stack (ports, zombie cleanup, DB checks) |
 | `/wawa` | Outstanding work summary table |
 | `/wrap` | Pre-commit ritual: lint → stage → context → docs → compact → commit |
+| `/monci` | Monitor CI — watch GitHub Actions runs on current branch |
+| `/ponci` | Push to remote and monitor CI |
+| `/vsix` | Publish a VS Code extension |
 
 ### Knowledge Management
 | Skill | What it does |
@@ -61,10 +70,10 @@ During any work session (automatic):
 /fold from any project (consumes global staging):
   → reads ~/.claude/learnings/ + ~/.claude/memory/
   → triages, genericizes, deduplicates
-  → writes to forge/learnings/{arch,audit,quick,global-patterns}.md
+  → writes to forge/learnings/{arch,press,poke,global-patterns}.md
   → never deletes from user's global space
 
-Self-improving skills (/arch, /audit, /quick):
+Foundries (/arch, /poke, /press, /pound, /pitch, /bluep):
   → read forge/learnings/ first → smarter decisions
   → write back to project memory/ → auto-accumulates → cycle continues
 ```
@@ -76,21 +85,25 @@ Self-improving skills (/arch, /audit, /quick):
 ```
 forge/
 ├── skills/                # Git-tracked source of truth for all global skills
-│   ├── arch/              # Architecture polisher (self-improving)
-│   ├── audit/             # Go-live readiness assessment (self-improving)
-│   ├── bluep/             # Product blueprint generator
+│   ├── arch/              # Architecture polisher (foundry, self-improving)
+│   ├── bluep/             # Product blueprint generator (foundry)
 │   ├── cast/              # Deploy forge conventions into projects
-│   ├── dive/              # Deep QA with 19+ adversarial personas
 │   ├── fold/              # Knowledge absorption loop (runnable from any project)
 │   ├── forge/             # Reference docs (no SKILL.md — not a skill)
 │   │   ├── claude-code-rules.md   # Workflow rules
 │   │   ├── stack-guide.md         # Tech stack decisions
-│   │   └── forge-conventions.md   # Conventions checklist
+│   │   ├── forge-conventions.md   # Conventions checklist
+│   │   └── foundry-protocol.md    # Shared foundry pre-flight/post-flight protocol
 │   ├── mark/              # Membrane inspection (read-only status report)
-│   ├── pitch/             # Elevator pitch generator
+│   ├── monci/             # Monitor CI
+│   ├── pitch/             # Elevator pitch generator (foundry)
+│   ├── poke/              # Tech debt code review (foundry, self-improving)
+│   ├── ponci/             # Push and monitor CI
+│   ├── pound/             # Deep QA with 21 adversarial personas (foundry)
+│   ├── press/             # Go-live readiness assessment (foundry, self-improving)
 │   ├── qt/                # Quick test
-│   ├── quick/             # Tech debt code review (self-improving)
 │   ├── srs/               # Restart script setup
+│   ├── vsix/              # VS Code extension publishing
 │   ├── wawa/              # Outstanding work summary
 │   └── wrap/              # Pre-commit ritual
 ├── learnings/             # Absorbed team wisdom
@@ -128,7 +141,7 @@ cd forge
 ```
 /cast               → sync latest conventions
 /qt                 → verify your fix
-/quick              → tech debt scan
+/poke               → tech debt scan
 /wawa               → where am I?
 /wrap               → commit with full context
 /mark               → check membrane status
@@ -137,6 +150,6 @@ cd forge
 
 **Before go-live?**
 ```
-/audit              → readiness scorecard
-/dive "auth flow"   → deep QA on specific area
+/press              → readiness scorecard
+/pound "auth flow"  → deep QA on specific area
 ```

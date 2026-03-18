@@ -16,22 +16,31 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/cast` | Deploy forge → membrane | Pour molten metal into the mold |
 | `/fold` | Absorb membrane → forge | Layer experience into the steel |
 
-## Global Skills (available everywhere)
+## Foundries (specialist agent skills)
+Foundries are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/foundry-protocol.md`.
+
+| Foundry | Persona | Mode |
+|---------|---------|------|
+| `/arch` | Senior solutions architect | Evaluative |
+| `/poke` | Staff engineer (tech debt) | Evaluative — light |
+| `/press` | Staff engineer (go-live readiness) | Evaluative — medium |
+| `/pound` | 21 adversarial QA personas | Evaluative — heavy |
+| `/pitch` | Investor advisor / storyteller | Generative |
+| `/bluep` | Product strategist | Generative |
+
+## Task Skills
 | Skill | Purpose |
 |-------|---------|
 | `/cast` | Deploy forge conventions into a project (membrane sync + divergence analysis) |
 | `/fold` | Absorb knowledge back into forge — config sync + learnings & memories (runnable from any project) |
 | `/mark` | Inspect membrane status — skill drift, learnings, memory report |
-| `/pitch` | Elevator pitch generator (6-round interview) |
-| `/bluep` | Product blueprint generator (7-round interview) |
-| `/arch` | Architecture polisher (self-improving) |
-| `/dive` | Deep QA testing with 19 adversarial personas |
-| `/audit` | Go-live readiness assessment (self-improving) |
 | `/wawa` | "Where Are We At?" — outstanding work summary table |
 | `/wrap` | Pre-commit ritual (lint → stage → context → docs → compact → commit) |
-| `/quick` | Tech debt & logging code review (self-improving) |
 | `/qt` | Quick test — verify fixes before user tests manually |
 | `/srs` | Setup restart script for local dev stack |
+| `/monci` | Monitor CI — watch GitHub Actions runs on current branch |
+| `/ponci` | Push to remote and monitor CI |
+| `/vsix` | Publish a VS Code extension |
 
 ## Three Pillars (all bidirectional via forge)
 | Pillar | DOWN (forge → user) | UP (user → forge) |
@@ -40,8 +49,8 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `learnings/` | `/cast` syncs to `~/.claude/learnings/` | Auto-accumulates → `/fold` absorbs |
 | `memory/` | `/cast` syncs to `~/.claude/memory/` | Auto-accumulates → `/fold` absorbs |
 
-## Self-Improving Skills Loop
-`/arch`, `/audit`, `/quick` write learnings to project's `memory/*-learnings.md` → auto-memory accumulates to `~/.claude/` → `/fold` absorbs into `forge/learnings/` → next skill run reads global learnings first.
+## Self-Improving Loop
+Foundries (`/arch`, `/poke`, `/press`, `/pound`, `/pitch`, `/bluep`) write learnings to project's `memory/*-learnings.md` → auto-memory accumulates to `~/.claude/` → `/fold` absorbs into `forge/learnings/` → next foundry run reads global learnings in pre-flight.
 
 ## HARD RULE — Only /fold Writes to Forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
@@ -64,6 +73,6 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Last commit**: `46730cc` — Fix pillar hash mismatches
-- **Completed**: Three-pillar architecture, manifest-based drift detection, global skills (+ monci/ponci/vsix), `/cast` + `/fold` + `/mark` core loop, deterministic path-relative hashing for pillar sync
-- **Pending**: Personas (evolving role-specific agents with metallurgy names — separate plan). P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.
+- **Completed**: Three-pillar architecture, manifest-based drift detection, 17 global skills (6 foundries + 11 task skills), `/cast` + `/fold` + `/mark` core loop, deterministic path-relative hashing, foundry protocol formalization
+- **Foundries**: arch, poke (was quick), press (was audit), pound (was dive), pitch, bluep — shared protocol in `skills/forge/foundry-protocol.md`
+- **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

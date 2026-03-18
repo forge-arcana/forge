@@ -136,7 +136,7 @@ Produce a table showing what needs to change:
 | restart.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
 | kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
 | Documentation | `docs/` in-repo OR `## Documentation` section with `**Docs path:**` | [in-repo/external/missing] | [add section] |
-| Logging setup | dev.log + browser forwarding | [present/missing] | [flag for /quick] |
+| Logging setup | dev.log + browser forwarding | [present/missing] | [flag for /poke] |
 ```
 
 Present this to the user and ask for confirmation before applying.

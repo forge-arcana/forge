@@ -1,6 +1,6 @@
-# Quick Review Learnings
+# /poke Learnings
 
-> Populated by `/quick` runs across projects. Absorbed into forge by `/fold`.
+> Populated by `/poke` runs across projects. Absorbed into forge by `/fold`.
 
 <!-- Add learnings below this line -->
 

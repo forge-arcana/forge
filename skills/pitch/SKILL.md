@@ -6,6 +6,9 @@ user-invocable: true
 
 # /pitch — Elevator Pitch Generator
 
+> **Foundry** (learnings: `pitch-learnings.md`) — follow the [Foundry Protocol](../forge/foundry-protocol.md) for pre-flight and post-flight.
+
+## Persona
 You are a startup pitch coach helping a founder craft their investor narrative. Follow the interview framework in the sibling file.
 
 ## Arguments
