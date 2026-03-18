@@ -32,29 +32,20 @@ If the pull fails (diverged, conflicts), warn the user: "Forge repo has diverged
 
 Before touching the project, ensure the user's `~/.claude/` is up to date with forge.
 
-### 1a: Skill Sync (manifest-based, with reverse-drift detection)
+### 1a: Skill Sync (diff-based)
 
-Read `~/.claude/skills/.forge-manifest.json`. For each skill in `<forge-path>/skills/`:
+For each skill directory in `<forge-path>/skills/` (excluding `forge/` which is reference docs):
 
-1. Hash the forge source skill directory
-2. Hash the deployed skill directory (`~/.claude/skills/<name>/`)
-3. Compare both against the manifest hash
+1. Check if deployed copy exists at `~/.claude/skills/<name>/`
+2. Compare using: `diff -rq --strip-trailing-cr <forge-path>/skills/<name> ~/.claude/skills/<name>`
+3. Classify:
 
-**Hashing command** (use this exact pattern — paths must be relative to avoid mismatches):
-```bash
-find <dir> -type f | sort | while read f; do echo "$(realpath --relative-to=<dir> "$f")"; cat "$f"; done | sha256sum | awk '{print $1}'
-```
-Example: to hash `<forge-path>/skills/wrap/`, set `<dir>` to that path. The `realpath --relative-to` strips the absolute prefix so forge source and deployed copies produce identical hashes when content matches.
-4. Classify using **three-way comparison**:
-
-| Forge vs Manifest | Deployed vs Manifest | Classification |
-|-------------------|---------------------|----------------|
-| Same | Same | `UNCHANGED` |
-| Different | Same | `UPDATED` (forge is newer — deploy it) |
-| Same | Different | `REVERSE-DRIFT` (deployed is newer — warn, run /fold) |
-| Different | Different | `CONFLICT` (both changed — manual review needed) |
-| New skill | — | `ADDED` |
-| Gone from forge | — | `REMOVED` |
+| Condition | Classification | Action |
+|-----------|---------------|--------|
+| No diff output | `IDENTICAL` | Skip |
+| Diff found | `DIFFERS` | Show diff, deploy forge version |
+| Skill in forge but not deployed | `ADDED` | Deploy to `~/.claude/skills/<name>/` |
+| Skill deployed but not in forge | `REMOVED` | Remove from `~/.claude/skills/<name>/` |
 
 Present the sync report:
 ```markdown
@@ -62,40 +53,36 @@ Present the sync report:
 
 | Skill | Status | Action |
 |-------|--------|--------|
-| arch | UNCHANGED | — |
-| wrap | UPDATED | Overwrite ~/.claude/skills/wrap/ |
-| qt | REVERSE-DRIFT | ⚠️ Deployed copy has changes not in forge — run /fold first |
-| srs | CONFLICT | ⚠️ Both forge and deployed changed — manual review |
+| prime | IDENTICAL | — |
+| wrap | DIFFERS | Overwrite ~/.claude/skills/wrap/ |
 | newskill | ADDED | Deploy to ~/.claude/skills/newskill/ |
 | oldskill | REMOVED | Remove from ~/.claude/skills/oldskill/ |
 ```
 
+For DIFFERS skills, show the diff output so the user can see what changed. If the deployed copy has changes the user wants to keep, advise them to run `/fold` first to absorb those changes into forge before overwriting.
+
 After user confirms:
 - Deploy ADDED skills (copy directory)
-- Update UPDATED skills (replace directory)
+- Update DIFFERS skills (replace directory with forge version)
 - Remove REMOVED skills (delete directory)
-- **REVERSE-DRIFT**: Do NOT overwrite. Warn user to run `/fold` first to absorb deployed changes into forge source. Skip these skills.
-- **CONFLICT**: Present a diff and let the user decide (merge, keep forge, keep deployed)
-- Update the manifest with new hashes (only for skills that were synced)
 
-If no manifest exists (fresh machine):
+If no deployed skills exist (fresh machine):
 - Create `~/.claude/skills/`, `~/.claude/learnings/`, `~/.claude/memory/` if they don't exist
 - Deploy ALL skills from `<forge-path>/skills/` (treat every skill as ADDED)
-- Write a fresh manifest
 - Then continue to Steps 1b and 1c as normal
 
 ### 1b: Learning Sync (forge → user)
 
 For each `.md` file in `<forge-path>/learnings/`:
 - If the file doesn't exist in `~/.claude/learnings/`, copy it
-- If it exists but differs, report: "forge has updates — run /fold to reconcile"
+- If it exists, compare with `diff --strip-trailing-cr`: if different, report: "forge has updates — run /fold to reconcile"
 - If identical, skip
 
 ### 1c: Memory Sync (forge → user)
 
 For each `.md` file in `<forge-path>/memory/`:
 - If the file doesn't exist in `~/.claude/memory/`, copy it (team memory → user)
-- If it exists but differs, report: "forge has updates — user copy may have local additions"
+- If it exists, compare with `diff --strip-trailing-cr`: if different, report: "forge has updates — user copy may have local additions"
 - If identical, skip
 
 Report what was synced across all three pillars before proceeding.

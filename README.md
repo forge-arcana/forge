@@ -1,6 +1,6 @@
 # Forge
 
-A maker's forge. Pitch ideas, blueprint products, architect systems, and build — all through AI-guided skills.
+A maker's forge. Five arts to shape ideas, challenge architecture, review code, and stress-test — all through AI-guided skills.
 
 ---
 
@@ -16,20 +16,19 @@ Three one-syllable commands drive the forge loop:
 
 ---
 
-## Foundries
+## Arts (the Five P's)
 
-Foundries are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `skills/forge/foundry-protocol.md`.
+Arts are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
 ### Ideation
-| Foundry | What it does |
-|---------|-------------|
-| `/pitch` | Elevator pitch generator — 6-round AI interview → investor-ready pitch pack |
-| `/bluep` | Product blueprint generator — 7-round interview → 22-section buildable spec |
+| Art | What it does |
+|-----|-------------|
+| `/prime` | The originator — takes raw ideas and gives them form, from spark to pitch/opus to full product blueprint |
 
 ### Architecture & Quality
-| Foundry | What it does |
-|---------|-------------|
-| `/arch` | Polish blueprint architecture against current best practices (self-improving) |
+| Art | What it does |
+|-----|-------------|
+| `/probe` | Challenge blueprint architecture against current best practices (self-improving) |
 | `/poke` | Staff-engineer code review for tech debt and logging hygiene (self-improving) |
 | `/press` | Go-live readiness scorecard across 7 dimensions (self-improving) |
 | `/pound` | Deep QA with 21 adversarial personas — generates tests, finds edge cases |
@@ -70,10 +69,10 @@ During any work session (automatic):
 /fold from any project (consumes global staging):
   → reads ~/.claude/learnings/ + ~/.claude/memory/
   → triages, genericizes, deduplicates
-  → writes to forge/learnings/{arch,press,poke,global-patterns}.md
+  → writes to forge/learnings/{probe,press,poke,prime,global-patterns}.md
   → never deletes from user's global space
 
-Foundries (/arch, /poke, /press, /pound, /pitch, /bluep):
+Arts (/prime, /probe, /poke, /press, /pound):
   → read forge/learnings/ first → smarter decisions
   → write back to project memory/ → auto-accumulates → cycle continues
 ```
@@ -85,22 +84,21 @@ Foundries (/arch, /poke, /press, /pound, /pitch, /bluep):
 ```
 forge/
 ├── skills/                # Git-tracked source of truth for all global skills
-│   ├── arch/              # Architecture polisher (foundry, self-improving)
-│   ├── bluep/             # Product blueprint generator (foundry)
+│   ├── prime/             # The originator — ideation to blueprint (art)
+│   ├── probe/             # Architecture challenger (art, self-improving)
 │   ├── cast/              # Deploy forge conventions into projects
 │   ├── fold/              # Knowledge absorption loop (runnable from any project)
 │   ├── forge/             # Reference docs (no SKILL.md — not a skill)
 │   │   ├── claude-code-rules.md   # Workflow rules
 │   │   ├── stack-guide.md         # Tech stack decisions
 │   │   ├── forge-conventions.md   # Conventions checklist
-│   │   └── foundry-protocol.md    # Shared foundry pre-flight/post-flight protocol
+│   │   └── protocol.md            # Shared art pre-flight/post-flight protocol
 │   ├── mark/              # Membrane inspection (read-only status report)
 │   ├── monci/             # Monitor CI
-│   ├── pitch/             # Elevator pitch generator (foundry)
-│   ├── poke/              # Tech debt code review (foundry, self-improving)
+│   ├── poke/              # Tech debt code review (art, self-improving)
 │   ├── ponci/             # Push and monitor CI
-│   ├── pound/             # Deep QA with 21 adversarial personas (foundry)
-│   ├── press/             # Go-live readiness assessment (foundry, self-improving)
+│   ├── pound/             # Deep QA with 21 adversarial personas (art)
+│   ├── press/             # Go-live readiness assessment (art, self-improving)
 │   ├── qt/                # Quick test
 │   ├── srs/               # Restart script setup
 │   ├── vsix/              # VS Code extension publishing
@@ -119,9 +117,8 @@ forge/
 
 **New idea?**
 ```
-/pitch MyProject    → pitch pack
-/bluep MyProject    → product blueprint
-/arch               → polished architecture
+/prime MyProject    → idea → pitch/opus → product blueprint
+/probe              → polished architecture
 ```
 
 **Fresh machine?**

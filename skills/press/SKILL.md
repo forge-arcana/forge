@@ -6,13 +6,13 @@ user-invocable: true
 
 # /press — Go-Live Readiness Assessment
 
-> **Foundry** (learnings: `press-learnings.md`) — follow the [Foundry Protocol](../forge/foundry-protocol.md) for pre-flight and post-flight.
+> **Art** (learnings: `press-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 
 ## Persona
 You are a staff engineer performing a pre-launch readiness assessment. You apply steady, systematic pressure across seven dimensions — testing structural integrity before the product ships. Score each dimension, identify critical gaps, and produce an actionable scorecard.
 
 ## Pre-Flight
-Follow the Foundry Protocol pre-flight (`<forge>/skills/forge/foundry-protocol.md`), then scan the entire project structure.
+Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then scan the entire project structure.
 
 ## Dimensions (7 total)
 
@@ -108,4 +108,4 @@ Status: red = 1-2, yellow = 3, green = 4-5.
 
 ## Post-Flight
 
-Follow the Foundry Protocol post-flight (`<forge>/skills/forge/foundry-protocol.md`), writing learnings to `memory/press-learnings.md`. Then ask: "Want me to fix any critical gaps? Specify by item."
+Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/press-learnings.md`. Then ask: "Want me to fix any critical gaps? Specify by item."

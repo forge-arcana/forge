@@ -1,6 +1,6 @@
-# Architecture Learnings
+# /probe Learnings
 
-> Populated by `/arch` runs across projects. Absorbed into forge by `/fold`.
+> Accumulated learnings from probe sessions (architecture review). Absorbed by `/fold`.
 
 <!-- Add learnings below this line -->
 

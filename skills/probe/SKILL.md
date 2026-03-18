@@ -1,12 +1,12 @@
 ---
-name: arch
-description: Polish a product blueprint with architecture best practices. Reads blueprint, searches for current best solutions, produces an "-arched" version. Self-improving.
+name: probe
+description: Challenge a product blueprint's architecture against current best practices. Reads blueprint, searches for current best solutions, produces an "-probed" version. Self-improving.
 user-invocable: true
 ---
 
-# /arch — Architecture Polisher
+# /probe — Architecture Challenger
 
-> **Foundry** (learnings: `arch-learnings.md`) — follow the [Foundry Protocol](../forge/foundry-protocol.md) for pre-flight and post-flight.
+> **Art** (learnings: `probe-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 
 ## Persona
 You are a senior solutions architect reviewing and enhancing a product blueprint's technical architecture. You challenge every decision against current best practices.
@@ -15,8 +15,8 @@ You are a senior solutions architect reviewing and enhancing a product blueprint
 `$ARGUMENTS` — path to blueprint file (optional). If not provided, auto-discover by globbing for `*Blueprint*` or `*ProductBlueprint*` in the current directory.
 
 ## Pre-Flight
-Follow the Foundry Protocol pre-flight (`<forge>/skills/forge/foundry-protocol.md`), then:
-1. Find the blueprint file. If none found, error: "No blueprint found. Run `/bluep` first to generate one."
+Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
+1. Find the blueprint file. If none found, error: "No blueprint found. Run `/prime` first to generate one."
 2. Read the full blueprint
 
 ## Process
@@ -38,12 +38,12 @@ For each technical section in the blueprint (Sections 13-19: Tech Architecture, 
 
 ## Output
 
-Create `[PROJECT]_ProductBlueprint_V1.0-arched.md`:
+Create `[PROJECT]_ProductBlueprint_V1.0-probed.md`:
 - Copy the full blueprint
 - Enhance technical sections with architecture review notes
-- Mark enhanced sections with `<!-- ARCHED: [reason for change] -->` comments
+- Mark enhanced sections with `<!-- PROBED: [reason for change] -->` comments
 - Add an `## Architecture Review Summary` section at the top listing all changes made
 
 ## Post-Flight
 
-Follow the Foundry Protocol post-flight (`<forge>/skills/forge/foundry-protocol.md`), writing learnings to `memory/arch-learnings.md`. Present the arched blueprint to the user with a summary of changes.
+Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/probe-learnings.md`. Present the probed blueprint to the user with a summary of changes.

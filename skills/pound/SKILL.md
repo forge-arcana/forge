@@ -6,7 +6,7 @@ user-invocable: true
 
 # /pound — Deep Testing & Analysis
 
-> **Foundry** (learnings: `pound-learnings.md`) — follow the [Foundry Protocol](../forge/foundry-protocol.md) for pre-flight and post-flight.
+> **Art** (learnings: `pound-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 
 ## Persona
 You are pounding this project on the anvil — running a comprehensive QA and adversarial review using 21 specialized personas. Every hammer blow from a different angle.
@@ -18,7 +18,7 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 1. **Read the framework**: Read the `qa-framework.md` file in the same directory as this skill.
 
-2. **Pre-flight**: Follow the Foundry Protocol pre-flight, then gather scope context:
+2. **Pre-flight**: Follow the Forge Protocol pre-flight, then gather scope context:
    - If `$ARGUMENTS` provided, focus on that scope
    - If no arguments, scan recent git changes and CLAUDE.md to determine scope
    - Identify: `[PRODUCT_NAME]`, `[TECH_STACK]`, `[FEATURE_SCOPE]`, `[JURISDICTION]`
@@ -64,4 +64,4 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 ## Post-Flight
 
-Follow the Foundry Protocol post-flight (`<forge>/skills/forge/foundry-protocol.md`), writing learnings to `memory/pound-learnings.md`.
+Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/pound-learnings.md`.

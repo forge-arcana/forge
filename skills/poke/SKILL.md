@@ -6,13 +6,13 @@ user-invocable: true
 
 # /poke — Tech Debt & Logging Code Review
 
-> **Foundry** (learnings: `poke-learnings.md`) — follow the [Foundry Protocol](../forge/foundry-protocol.md) for pre-flight and post-flight.
+> **Art** (learnings: `poke-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 
 ## Persona
 You are a staff engineer poking at the codebase — prodding every soft spot to find tech debt across four dimensions. Produce a single actionable report.
 
 ## Pre-Flight
-Follow the Foundry Protocol pre-flight (`<forge>/skills/forge/foundry-protocol.md`), then scan the project structure to understand the codebase layout.
+Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then scan the project structure to understand the codebase layout.
 
 ## Dimension 1: Strategy Pattern Opportunities
 
@@ -189,4 +189,4 @@ Check the stack-guide.md for the full list of adopted frameworks. For each findi
 
 ## Post-Flight
 
-Follow the Foundry Protocol post-flight (`<forge>/skills/forge/foundry-protocol.md`), writing learnings to `memory/poke-learnings.md`. Then ask: "Want me to fix any of these? Specify by finding number."
+Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/poke-learnings.md`. Then ask: "Want me to fix any of these? Specify by finding number."

@@ -16,17 +16,16 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/cast` | Deploy forge → membrane | Pour molten metal into the mold |
 | `/fold` | Absorb membrane → forge | Layer experience into the steel |
 
-## Foundries (specialist agent skills)
-Foundries are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/foundry-protocol.md`.
+## Arts (the Five P's)
+Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
-| Foundry | Persona | Mode |
-|---------|---------|------|
-| `/arch` | Senior solutions architect | Evaluative |
+| Art | Persona | Mode |
+|-----|---------|------|
+| `/prime` | The originator (ideation → blueprint) | Generative |
+| `/probe` | Senior solutions architect | Evaluative |
 | `/poke` | Staff engineer (tech debt) | Evaluative — light |
 | `/press` | Staff engineer (go-live readiness) | Evaluative — medium |
 | `/pound` | 21 adversarial QA personas | Evaluative — heavy |
-| `/pitch` | Investor advisor / storyteller | Generative |
-| `/bluep` | Product strategist | Generative |
 
 ## Task Skills
 | Skill | Purpose |
@@ -50,7 +49,7 @@ Foundries are skills that adopt a specialist persona and have a self-improving l
 | `memory/` | `/cast` syncs to `~/.claude/memory/` | Auto-accumulates → `/fold` absorbs |
 
 ## Self-Improving Loop
-Foundries (`/arch`, `/poke`, `/press`, `/pound`, `/pitch`, `/bluep`) write learnings to project's `memory/*-learnings.md` → auto-memory accumulates to `~/.claude/` → `/fold` absorbs into `forge/learnings/` → next foundry run reads global learnings in pre-flight.
+Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`) write learnings to project's `memory/*-learnings.md` → auto-memory accumulates to `~/.claude/` → `/fold` absorbs into `forge/learnings/` → next art run reads global learnings in pre-flight.
 
 ## HARD RULE — Only /fold Writes to Forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
@@ -73,6 +72,6 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, manifest-based drift detection, 17 global skills (6 foundries + 11 task skills), `/cast` + `/fold` + `/mark` core loop, deterministic path-relative hashing, foundry protocol formalization
-- **Foundries**: arch, poke (was quick), press (was audit), pound (was dive), pitch, bluep — shared protocol in `skills/forge/foundry-protocol.md`
+- **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (5 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity
+- **Arts**: prime (was pitch+bluep), probe (was arch), poke (was quick), press (was audit), pound (was dive) — shared protocol in `skills/forge/protocol.md`
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

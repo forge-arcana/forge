@@ -17,7 +17,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Dedup at every level: project learnings, project memory, global learnings, global memory
 
 ### Self-Improving Loop (2026-03-15)
-- Foundries (`/arch`, `/poke`, `/press`, `/pound`, `/pitch`, `/bluep`) flag learnings as `Forge-worthy: yes/no` at write time
+- Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`) flag learnings as `Forge-worthy: yes/no` at write time
 - Auto-memory promotes flagged entries during sessions
 - `/fold` absorbs into `forge/learnings/` → next skill run reads them first
 
@@ -29,8 +29,8 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ## Skills
 
-### Structure (2026-03-17)
-- Foundries (6): arch, poke, press, pound, pitch, bluep — specialist agent skills with self-improving loops
+### Structure (2026-03-18)
+- Arts (5): prime, probe, poke, press, pound — specialist agent skills with self-improving loops
 - Task skills (11): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci, forge (reference-only)
 - `skills/forge/` directory still exists but only holds reference docs (no SKILL.md) — not a skill
 - Skills are self-contained packages — reference docs live inside the owning skill directory
@@ -53,11 +53,12 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ## Deployment
 
-### Manifest & Drift Detection (2026-03-17)
-- `.forge-manifest.json` tracks SHA256 hashes per skill directory for drift detection
-- `/cast` does three-way comparison: forge source vs manifest vs deployed — detects REVERSE-DRIFT (deployed newer) and CONFLICT (both changed)
+### Drift Detection (2026-03-18)
+- Git-based drift detection using `diff --strip-trailing-cr` (no CRLF issues across OSes)
+- `/mark` always runs `git fetch` first, then diffs forge source vs deployed membrane
+- `/cast` does `git pull` then diff-based skill sync — no manifest file needed
 - `/fold` Part 1a does skill reverse-sync: diffs deployed `~/.claude/skills/` against `<forge>/skills/`, absorbs deployed-side changes back into forge source
-- Both directions covered: `/cast` warns about reverse drift, `/fold` absorbs it
+- Both directions covered: `/cast` warns about drift, `/fold` absorbs it
 - `/mark` provides read-only inspection of the full membrane state
 - No manual inbox needed — all knowledge flows through auto-memory → staging → `/fold`
 

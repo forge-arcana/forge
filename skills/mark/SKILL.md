@@ -15,45 +15,53 @@ Read-only inspection of the membrane (`~/.claude/`) against the forge source of 
 2. If not found, fall back to `/root/dev/forge`
 3. If the resolved path doesn't exist, error: "Forge not found. Clone the forge repo first."
 
+## Step 0: Fetch Latest Forge (ALWAYS)
+
+Before inspecting, fetch the latest remote state:
+
+```
+git -C <forge-path> fetch
+```
+
+Check if local is behind remote:
+```
+git -C <forge-path> rev-list HEAD..origin/main --count
+```
+
+If behind, report: "Forge is X commits behind remote. Run `/cast` to pull and sync."
+
 ---
 
 ## Section 1: Skill Drift Report
 
-Compare forge source (`<forge>/skills/`) against deployed membrane (`~/.claude/skills/`) using the manifest.
+Compare forge source (`<forge>/skills/`) against deployed membrane (`~/.claude/skills/`) using diff.
 
-Read `~/.claude/skills/.forge-manifest.json`. For each skill:
+For each skill directory in `<forge>/skills/` (excluding `forge/` which is reference docs, not a skill):
 
-1. Hash the forge source skill directory
-2. Hash the deployed skill directory
-3. Compare both against the manifest hash
+1. Check if deployed copy exists at `~/.claude/skills/<name>/`
+2. If both exist, compare using: `diff -rq --strip-trailing-cr <forge>/skills/<name> ~/.claude/skills/<name>`
+3. Classify:
 
-**Hashing command** (use this exact pattern — paths must be relative to avoid mismatches):
-```bash
-find <dir> -type f | sort | while read f; do echo "$(realpath --relative-to=<dir> "$f")"; cat "$f"; done | sha256sum | awk '{print $1}'
-```
-
-4. Classify using three-way comparison:
-
-| Forge vs Manifest | Deployed vs Manifest | Classification |
-|-------------------|---------------------|----------------|
-| Same | Same | `UNCHANGED` |
-| Different | Same | `UPDATED` (forge is newer — `/cast` will deploy) |
-| Same | Different | `REVERSE-DRIFT` (deployed is newer — `/fold` will absorb) |
-| Different | Different | `CONFLICT` (both changed — manual review needed) |
-| New skill | — | `ADDED` (forge has new skill — `/cast` will deploy) |
-| Gone from forge | — | `REMOVED` (skill deleted from forge) |
+| Condition | Classification |
+|-----------|----------------|
+| No diff output | `IDENTICAL` |
+| Diff found, forge is ahead of remote | `FORGE-UPDATED` (forge has newer changes — `/cast` will deploy) |
+| Diff found, forge matches remote | `DEPLOYED-DIFFERS` (deployed copy was modified — `/fold` will absorb) |
+| Skill exists in forge but not deployed | `ADDED` (new skill — `/cast` will deploy) |
+| Skill exists deployed but not in forge | `REMOVED` (skill deleted from forge) |
 
 Output:
 ```markdown
 ## Skill Status
 
-| Skill | Forge | Deployed | Manifest | Status |
-|-------|-------|----------|----------|--------|
-| arch | abc123 | abc123 | abc123 | UNCHANGED |
-| wrap | def456 | abc123 | abc123 | UPDATED — cast needed |
-| qt | abc123 | ghi789 | abc123 | REVERSE-DRIFT — fold needed |
+| Skill | Status | Action |
+|-------|--------|--------|
+| prime | IDENTICAL | — |
+| wrap | FORGE-UPDATED | cast needed |
+| qt | DEPLOYED-DIFFERS | fold needed |
+| newskill | ADDED | cast needed |
 
-**Summary**: X unchanged, Y need cast, Z need fold, W conflicts
+**Summary**: X identical, Y need cast, Z need fold
 ```
 
 ---
@@ -81,12 +89,12 @@ Output:
 
 ### 2b: Skill-Specific Learnings (`~/.claude/learnings/`)
 
-Check for other learning files (arch, audit, quick) and compare against forge copies:
+Check for other learning files and compare against forge copies:
 
 ```markdown
 | File | User Copy | Forge Copy | Status |
 |------|-----------|------------|--------|
-| arch-learnings.md | 12 entries | 10 entries | 2 new in user — fold needed |
+| probe-learnings.md | 12 entries | 10 entries | 2 new in user — fold needed |
 | press-learnings.md | 8 entries | 8 entries | In sync |
 ```
 
@@ -129,6 +137,7 @@ Output a final summary with recommended actions:
 
 | Area | Status | Action |
 |------|--------|--------|
+| Forge Remote | [up to date / X commits behind] | [Run /cast to pull] |
 | Skills | Y need cast, Z need fold | Run `/cast` or `/fold` |
 | Learnings | X unprocessed entries | Run `/fold` |
 | Memory | Y new, Z updated | Run `/fold` |

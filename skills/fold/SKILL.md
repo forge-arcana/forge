@@ -36,13 +36,8 @@ All file paths below are relative to `<forge>` (the resolved forge repo path).
 
 Compare deployed skills (`~/.claude/skills/`) against forge source (`<forge>/skills/`). For each skill:
 
-1. Hash both the deployed and forge source directories (use path-relative hashing — see command below)
-2. If they differ, the deployed copy has changes that haven't been absorbed into forge
-
-**Hashing command** (paths must be relative to avoid mismatches between source/deployed locations):
-```bash
-find <dir> -type f | sort | while read f; do echo "$(realpath --relative-to=<dir> "$f")"; cat "$f"; done | sha256sum | awk '{print $1}'
-```
+1. Compare using: `diff -rq --strip-trailing-cr ~/.claude/skills/<name> <forge>/skills/<name>`
+2. If diff output exists, the deployed copy has changes that haven't been absorbed into forge
 
 Present the drift report:
 ```markdown
@@ -51,7 +46,7 @@ Present the drift report:
 | Skill | Status | Action |
 |-------|--------|--------|
 | wrap | DRIFTED | Deployed has changes — absorb into forge source |
-| arch | IDENTICAL | — |
+| probe | IDENTICAL | — |
 ```
 
 For each DRIFTED skill:
@@ -120,8 +115,8 @@ If no triggers fire, skip Part 2 entirely and proceed to Part 3.
 
    | # | File | Entry | Status | Recommendation |
    |---|------|-------|--------|----------------|
-   | 1 | arch-learnings.md | [title] | CURRENT | Keep |
-   | 2 | arch-learnings.md | [title] | STALE | Remove — API deprecated in v4 |
+   | 1 | probe-learnings.md | [title] | CURRENT | Keep |
+   | 2 | probe-learnings.md | [title] | STALE | Remove — API deprecated in v4 |
    | 3 | poke-learnings.md | [title] | MERGED | Consolidate with entry #7 |
    | 4 | press-learnings.md | [title] | EVOLVED | Rewrite — new compliance rules |
    ```
@@ -168,7 +163,7 @@ If no triggers fire, skip Part 2 entirely and proceed to Part 3.
 
 ### Step 2: Read existing knowledge base
 Before evaluating new learnings, load everything we already know:
-- Read ALL files in `<forge>/learnings/` (arch, audit, quick, global-patterns)
+- Read ALL files in `<forge>/learnings/` (probe, poke, press, pound, prime, global-patterns)
 - Read ALL skill SKILL.md files in `<forge>/skills/*/SKILL.md` (the skills themselves encode knowledge)
 - Build a mental model of what's already known, already incorporated, or already addressed
 
@@ -193,14 +188,14 @@ Output the full triage as console text:
 ### Candidates for Absorption
 | # | Source | Learning Summary | Category | Status | Target File |
 |---|--------|-----------------|----------|--------|-------------|
-| 1 | ~/.claude/learnings/general.md | [one-line summary] | arch | NEW | arch-learnings.md |
-| 2 | ~/.claude/learnings/general.md | [one-line summary] | audit | DUPLICATE | — |
+| 1 | ~/.claude/learnings/general.md | [one-line summary] | probe | NEW | probe-learnings.md |
+| 2 | ~/.claude/learnings/general.md | [one-line summary] | poke | DUPLICATE | — |
 
 ### Already Known (auto-skipped)
 | # | Learning | Reason |
 |---|----------|--------|
 | 1 | [summary] | Duplicate of [existing entry in file] |
-| 2 | [summary] | Already incorporated in /arch SKILL.md step X |
+| 2 | [summary] | Already incorporated in /probe SKILL.md step X |
 ```
 
 Then use AskUserQuestion with a simple confirmation prompt (e.g., "Approve all X candidates?" with options like "Approve all", "Skip some", "Reject all").
@@ -223,14 +218,15 @@ Then use AskUserQuestion with a simple confirmation prompt (e.g., "Approve all X
 | Specific database names, table names | Generic description (e.g., "the user table") |
 | Business logic details unique to one product | The general pattern it exemplifies |
 
-The goal: every learning in forge should read as a **universal principle** that applies to any project using the same tech stack. If someone reads `arch-learnings.md` with zero context about any specific project, every entry should still make complete sense.
+The goal: every learning in forge should read as a **universal principle** that applies to any project using the same tech stack. If someone reads `probe-learnings.md` with zero context about any specific project, every entry should still make complete sense.
 
 For each confirmed learning:
 - **Genericize first** — rewrite the learning as a universal pattern
 - Append to the appropriate file in `<forge>/learnings/`:
-  - `arch-learnings.md` — architecture patterns and decisions
+  - `probe-learnings.md` — architecture patterns and decisions
   - `press-learnings.md` — go-live readiness patterns
   - `poke-learnings.md` — tech debt and logging patterns
+  - `prime-learnings.md` — ideation, pitch, and blueprint patterns
   - `global-patterns.md` — cross-cutting patterns that span multiple categories
 - Format each entry as:
   ```markdown
@@ -338,7 +334,7 @@ If no triggers fire, skip Part 5 entirely.
    | # | Entry | Absorbed Into | Action |
    |---|-------|--------------|--------|
    | 1 | "Self-Contained Skill Packages" | global-patterns.md | Archive |
-   | 2 | "WSL Path Compatibility" | arch-learnings.md | Archive |
+   | 2 | "WSL Path Compatibility" | probe-learnings.md | Archive |
    | 3 | "New unprocessed entry" | — | Keep (not yet absorbed) |
    ```
 5. After user confirmation:
@@ -369,7 +365,7 @@ If no triggers fire, skip Part 5 entirely.
 ### Files Updated
 | File | Type | Changes |
 |------|------|---------|
-| learnings/arch-learnings.md | learning | +X entries |
+| learnings/probe-learnings.md | learning | +X entries |
 | learnings/global-patterns.md | learning | +X entries |
 | memory/deploy-practices.md | team memory | NEW |
 | skills/forge/claude-code-rules.md | config | updated |
