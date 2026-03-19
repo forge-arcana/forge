@@ -6,8 +6,7 @@
 
 ### 1. CLAUDE.md at Project Root
 - [ ] Exists
-- [ ] Has "No Auto-Commit" hard rule
-- [ ] Has "No Command Chaining" hard rule
+- [ ] Hard rules live in global `~/.claude/CLAUDE.md` — do NOT duplicate in project CLAUDE.md
 - [ ] Has Stack section (frameworks, DB, hosting)
 - [ ] Has Shorthand Commands section (wawa → /wawa, wrap → /wrap)
 - [ ] Has Current Context section (updated by /wrap)

@@ -114,8 +114,7 @@ Produce a table showing what needs to change:
 | Aspect | Forge Convention | Current Project | Action |
 |--------|-----------------|-----------------|--------|
 | CLAUDE.md | Required with standard sections | [exists/missing] | [create/update] |
-| No auto-commit rule | Must be present | [present/missing] | [add] |
-| No command chaining rule | Must be present | [present/missing] | [add] |
+| Hard rules (no auto-commit, no chaining) | Live in global `~/.claude/CLAUDE.md` — do NOT duplicate in project | [global/missing] | Skip if global membrane exists |
 | .claude/settings.json | Only if project-specific overrides needed | [exists/missing/not needed] | [skip/create] |
 | memory/ directory | Required | [exists/missing] | [create] |
 | logs/ directory | Required (app projects with services only) | [exists/missing/N/A] | [create/skip] |
@@ -134,15 +133,10 @@ After user confirms:
 
 ### CLAUDE.md (create or update)
 Standard sections to include:
+Hard rules (No Auto-Commit, No Command Chaining) live in the global `~/.claude/CLAUDE.md`. Do NOT duplicate them in project CLAUDE.md files — the global membrane already covers all projects.
+
 ```markdown
 # [Project Name] — Project Rules
-
-## HARD RULE — No Auto-Commit
-> NEVER commit automatically after completing any sprint, phase, or piece of work.
-> Always ask the user: "Ready to wrap up? Run `/wrap` to commit with full context."
-
-## HARD RULE — No Command Chaining in Bash — EVER
-> NEVER use `&&`, `;`, or `||` to chain commands in a single Bash tool call.
 
 ## Stack
 [from project's package.json and tsconfig]
