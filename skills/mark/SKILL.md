@@ -16,6 +16,8 @@ Read-only inspection of the membrane (`~/.claude/`) against the forge source of 
 
 This resolves the forge path, fetches the latest remote state (without pulling), and produces the **Skill Drift Report** with directional classifications (IDENTICAL, FORGE-UPDATED, DEPLOYED-DIFFERS, ADDED, REMOVED).
 
+Run `<forge>/scripts/forge-status.sh --fetch` and use its output for Sections 1-3 below. This single command replaces ~30 sequential tool calls with one.
+
 Output the drift report as **Section 1: Skill Status**.
 
 ---

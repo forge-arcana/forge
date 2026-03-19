@@ -14,6 +14,12 @@ You are a staff engineer poking at the codebase — prodding every soft spot to 
 ## Pre-Flight
 Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then scan the project structure to understand the codebase layout.
 
+## Evidence Collection
+
+Run `<forge>/scripts/forge-scan.sh poke <project-path>` to collect mechanical evidence across all four dimensions. This single command replaces ~20 sequential grep/read tool calls.
+
+Use the script's output as your evidence base for the judgment phase below. The script finds patterns — you classify severity, trace root causes, and recommend fixes.
+
 ## Dimension 1: Strategy Pattern Opportunities
 
 Scan for branching where a strategy pattern would work better:

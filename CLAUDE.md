@@ -41,6 +41,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/monci` | Monitor CI — watch GitHub Actions runs on current branch |
 | `/ponci` | Push to remote and monitor CI |
 | `/vsix` | Publish a VS Code extension |
+| `/dig` | Think deeper — reframe agent as staff engineer for current discussion |
 
 ## Three Pillars (all bidirectional via forge)
 | Pillar | DOWN (forge → user) | UP (user → forge) |
@@ -78,9 +79,10 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (6 arts + 10 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run, shared preflight extraction, hash-free trackers
+- **Completed**: Three-pillar architecture, git-based drift detection, 17 global skills (6 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run, shared preflight extraction, hash-free trackers, `/dig` skill, performance scripts
 - **Arts**: prime, probe, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (forge-cycle pre-flight for /mark, /cast, /fold)
+- **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
-- **Recent**: Dropped all hashing from trackers — replaced with human-readable entry titles (learnings) and filename lists (memories). Added memory tracker to prevent re-evaluation of skipped files. Removed obsolete `feedback_no_timestamps.md` memory.
+- **Recent**: Added 4 bash scripts to replace ~100 sequential LLM tool calls with single-command evidence collection. Skills now delegate mechanical work (diffs, greps, counts) to scripts and focus LLM on judgment (triage, scoring, classification).
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

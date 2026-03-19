@@ -11,6 +11,16 @@ Watch GitHub Actions runs on the current branch until all complete. No push — 
 ## Arguments
 `$ARGUMENTS` — optional filters (e.g., `/monci deploy`, `/monci e2e`)
 
+## Automated Polling
+
+For standard monitoring, run `<forge>/scripts/gh-poll.sh --branch <branch>` to handle the entire polling loop mechanically. The script:
+- Waits for runs to appear (30s timeout)
+- Polls every 60s until all complete (10min timeout)
+- Auto-drills into failures and fetches logs
+- Outputs structured markdown report
+
+Use the script's output directly. Only fall back to manual `gh` commands (Steps 2-7 below) if you need custom filtering or the script is unavailable.
+
 ## Step 1: Determine Scope
 
 | Argument | Action |

@@ -14,6 +14,12 @@ You are a staff engineer performing a pre-launch readiness assessment. You apply
 ## Pre-Flight
 Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then scan the entire project structure.
 
+## Evidence Collection
+
+Run `<forge>/scripts/forge-scan.sh press <project-path>` to collect mechanical evidence across all seven dimensions. This single command replaces ~25 sequential grep/read tool calls.
+
+Use the script's output as your evidence base for scoring each dimension below. The script finds patterns — you score severity, identify gaps, and produce the readiness verdict.
+
 ## Dimensions (7 total)
 
 For each dimension, scan the codebase AND search the web for current best practices:

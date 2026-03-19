@@ -48,6 +48,7 @@ The evaluative trio — **poke → press → pound** — escalates in intensity.
 | `/monci` | Monitor CI — watch GitHub Actions runs on current branch |
 | `/ponci` | Push to remote and monitor CI |
 | `/vsix` | Publish a VS Code extension |
+| `/dig` | Think deeper — reframe agent as staff engineer for current discussion |
 
 ### Knowledge Management
 | Skill | What it does |
@@ -102,6 +103,7 @@ forge/
 │   ├── qt/                # Quick test
 │   ├── srs/               # Restart script setup
 │   ├── vsix/              # VS Code extension publishing
+│   ├── dig/               # Think deeper — staff engineer stance
 │   ├── wawa/              # Outstanding work summary
 │   └── wrap/              # Pre-commit ritual
 ├── learnings/             # Absorbed team wisdom
@@ -138,6 +140,7 @@ cd forge
 ```
 /cast               → sync latest conventions
 /qt                 → verify your fix
+/dig                → think deeper about this
 /poke               → tech debt scan
 /wawa               → where am I?
 /wrap               → commit with full context

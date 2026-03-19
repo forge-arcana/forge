@@ -26,6 +26,12 @@ You are summoned, never scheduled. When the forge grows heavy, when the learning
 
 Build a complete mental model of the forge's current state before proceeding.
 
+## Evidence Collection
+
+Run `<forge>/scripts/forge-purge-scan.sh` to collect mechanical evidence across all four dimensions. This single command replaces ~30 sequential file read and grep tool calls.
+
+Use the script's output as your evidence base for the judgment phase below. The script detects contamination patterns, counts entries, checks consistency — you classify severity, decide what to remove/rewrite/consolidate, and produce the cleansing plan.
+
 ## Dimension 1: Knowledge Purity
 
 Scan ALL files in `<forge>/learnings/` for contamination:

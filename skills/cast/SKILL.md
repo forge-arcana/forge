@@ -15,6 +15,8 @@ You are casting forge conventions into a project workspace. This ensures every p
 
 > Execute [Forge Preflight](../forge/preflight.md) in **pull** mode.
 
+Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the Skill Drift Report from its output for Step 1a below.
+
 This resolves the forge path, pulls the latest forge (aborting if diverged), and produces the **Skill Drift Report**.
 
 **Additional /cast responsibility**: If the resolved forge path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/cast` owns `forge-path:` management.

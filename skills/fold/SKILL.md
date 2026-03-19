@@ -31,6 +31,8 @@ All file paths below are relative to `<forge>` (the resolved forge repo path).
 
 > Execute [Forge Preflight](../forge/preflight.md) in **pull** mode.
 
+Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the Skill Drift Report from its output for Part 1a below.
+
 This resolves the forge path, pulls the latest forge (aborting if diverged), and produces the **Skill Drift Report** with directional classifications.
 
 **This is critical** — without pulling first, /fold could overwrite newer forge changes with stale deployed copies.
