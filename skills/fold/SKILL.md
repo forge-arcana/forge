@@ -379,17 +379,34 @@ If no triggers fire, skip Part 5 entirely.
 
 ---
 
-## Part 6: Report
+## Part 6: Commit & Push
+
+`/fold` owns the full cycle — absorb, commit, push. No `/wrap` needed for forge.
+
+1. **Stage** all changed files in `<forge>` with `git add <file>` (never `git add -A`)
+2. **Update context** in `<forge>/CLAUDE.md` Current Context section
+3. **Commit** with a descriptive message (what was absorbed, not where it came from — no project names):
+   ```
+   git commit -m "Absorb N learnings: [topic summaries]
+
+   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+   ```
+   If no changes were made (nothing absorbed, no config drift), skip the commit.
+4. **Push** to remote: `git push`
+
+## Part 7: Report
 
 ```markdown
 ## Fold Complete
 
 ### Summary
 - Config sync: [X changes applied / no changes]
+- Forge-worthy promotion: [X promoted / none found]
 - Review: [X kept, X removed, X merged, X rewritten / skipped — below thresholds]
 - Learning candidates: X found, Y absorbed, Z skipped
 - Memory candidates: X found, Y absorbed as team memory, Z skipped (personal)
 - Staging archival: [X archived / skipped — below thresholds]
+- Commit: [hash — pushed to remote / no changes to commit]
 
 ### Files Updated
 | File | Type | Changes |
@@ -399,5 +416,3 @@ If no triggers fire, skip Part 5 entirely.
 | memory/deploy-practices.md | team memory | NEW |
 | skills/forge/claude-code-rules.md | config | updated |
 ```
-
-Ask: "Ready to wrap up? Run `/wrap` to commit with full context."
