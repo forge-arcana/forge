@@ -78,7 +78,8 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (6 arts + 10 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run (cleansed entity name leaks, removed 5 promoted duplicates from global-patterns)
+- **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (6 arts + 10 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run, shared preflight extraction
 - **Arts**: prime, probe, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
-- **Recent**: Moved learning promotion from /wrap to /fold (Step 0), first /purge cleansing, project name sanitization
+- **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (forge-cycle pre-flight for /mark, /cast, /fold)
+- **Recent**: Extracted shared preflight into `skills/forge/preflight.md` — DRY for forge path resolution, remote sync, and skill drift classification across /mark, /cast, /fold. Fixed /fold missing `git pull` safety gap.
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

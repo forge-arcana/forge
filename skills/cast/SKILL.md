@@ -8,62 +8,37 @@ user-invocable: true
 
 You are casting forge conventions into a project workspace. This ensures every project has consistent rules, structure, and tooling.
 
-## Resolve Forge Path
-Before starting, determine the forge directory:
-1. Check `~/.claude/CLAUDE.md` for a `forge-path:` line
-2. If not found, fall back to `/root/dev/forge`
-3. If the resolved path doesn't exist, error: "Forge not found. Clone the forge repo first."
-4. If the resolved path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/cast` owns `forge-path:` management.
-
 ## Arguments
 `$ARGUMENTS` — optional path to target project (e.g., `/cast /root/dev/myproject`). If not provided, use the current working directory.
 
-## Step 0: Pull Latest Forge (MANDATORY)
+## Step 0: Preflight
 
-Before doing ANYTHING else, pull the latest forge repo:
+> Execute [Forge Preflight](../forge/preflight.md) in **pull** mode.
 
-```
-git -C <forge-path> pull --ff-only
-```
+This resolves the forge path, pulls the latest forge (aborting if diverged), and produces the **Skill Drift Report**.
 
-If the pull fails (diverged, conflicts), warn the user: "Forge repo has diverged. Run `git -C <forge-path> status` to investigate." Do NOT proceed with stale forge data.
+**Additional /cast responsibility**: If the resolved forge path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/cast` owns `forge-path:` management.
 
 ## Step 1: Sync All Three Pillars
 
 Before touching the project, ensure the user's `~/.claude/` is up to date with forge.
 
-### 1a: Skill Sync (diff-based)
+### 1a: Skill Sync (using preflight drift results)
 
-For each skill directory in `<forge-path>/skills/` (excluding `forge/` which is reference docs):
+Use the drift classifications from the preflight Skill Drift Report:
 
-1. Check if deployed copy exists at `~/.claude/skills/<name>/`
-2. Compare using: `diff -rq --strip-trailing-cr <forge-path>/skills/<name> ~/.claude/skills/<name>`
-3. Classify:
-
-| Condition | Classification | Action |
-|-----------|---------------|--------|
-| No diff output | `IDENTICAL` | Skip |
-| Diff found | `DIFFERS` | Show diff, deploy forge version |
-| Skill in forge but not deployed | `ADDED` | Deploy to `~/.claude/skills/<name>/` |
-| Skill deployed but not in forge | `REMOVED` | Remove from `~/.claude/skills/<name>/` |
-
-Present the sync report:
-```markdown
-## Skill Sync Report
-
-| Skill | Status | Action |
-|-------|--------|--------|
-| prime | IDENTICAL | — |
-| wrap | DIFFERS | Overwrite ~/.claude/skills/wrap/ |
-| newskill | ADDED | Deploy to ~/.claude/skills/newskill/ |
-| oldskill | REMOVED | Remove from ~/.claude/skills/oldskill/ |
-```
-
-For DIFFERS skills, show the diff output so the user can see what changed. If the deployed copy has changes the user wants to keep, advise them to run `/fold` first to absorb those changes into forge before overwriting.
+| Classification | Action |
+|---------------|--------|
+| `IDENTICAL` | Skip |
+| `FORGE-UPDATED` | Show diff, deploy forge version (forge is newer) |
+| `DEPLOYED-DIFFERS` | Show diff. Advise user to run `/fold` first to absorb deployed changes before overwriting |
+| `ADDED` | Deploy to `~/.claude/skills/<name>/` |
+| `REMOVED` | Remove from `~/.claude/skills/<name>/` |
 
 After user confirms:
 - Deploy ADDED skills (copy directory)
-- Update DIFFERS skills (replace directory with forge version)
+- Update FORGE-UPDATED skills (replace directory with forge version)
+- For DEPLOYED-DIFFERS: warn before overwriting — user may want to `/fold` first
 - Remove REMOVED skills (delete directory)
 
 If no deployed skills exist (fresh machine):

@@ -10,59 +10,13 @@ Read-only inspection of the membrane (`~/.claude/`) against the forge source of 
 
 **This skill makes NO changes.** It only reads and reports.
 
-## Resolve Forge Path
-1. Check `~/.claude/CLAUDE.md` for a `forge-path:` line
-2. If not found, fall back to `/root/dev/forge`
-3. If the resolved path doesn't exist, error: "Forge not found. Clone the forge repo first."
+## Step 0: Preflight
 
-## Step 0: Fetch Latest Forge (ALWAYS)
+> Execute [Forge Preflight](../forge/preflight.md) in **fetch** mode.
 
-Before inspecting, fetch the latest remote state:
+This resolves the forge path, fetches the latest remote state (without pulling), and produces the **Skill Drift Report** with directional classifications (IDENTICAL, FORGE-UPDATED, DEPLOYED-DIFFERS, ADDED, REMOVED).
 
-```
-git -C <forge-path> fetch
-```
-
-Check if local is behind remote:
-```
-git -C <forge-path> rev-list HEAD..origin/main --count
-```
-
-If behind, report: "Forge is X commits behind remote. Run `/cast` to pull and sync."
-
----
-
-## Section 1: Skill Drift Report
-
-Compare forge source (`<forge>/skills/`) against deployed membrane (`~/.claude/skills/`) using diff.
-
-For each skill directory in `<forge>/skills/` (excluding `forge/` which is reference docs, not a skill):
-
-1. Check if deployed copy exists at `~/.claude/skills/<name>/`
-2. If both exist, compare using: `diff -rq --strip-trailing-cr <forge>/skills/<name> ~/.claude/skills/<name>`
-3. Classify:
-
-| Condition | Classification |
-|-----------|----------------|
-| No diff output | `IDENTICAL` |
-| Diff found, forge is ahead of remote | `FORGE-UPDATED` (forge has newer changes — `/cast` will deploy) |
-| Diff found, forge matches remote | `DEPLOYED-DIFFERS` (deployed copy was modified — `/fold` will absorb) |
-| Skill exists in forge but not deployed | `ADDED` (new skill — `/cast` will deploy) |
-| Skill exists deployed but not in forge | `REMOVED` (skill deleted from forge) |
-
-Output:
-```markdown
-## Skill Status
-
-| Skill | Status | Action |
-|-------|--------|--------|
-| prime | IDENTICAL | — |
-| wrap | FORGE-UPDATED | cast needed |
-| qt | DEPLOYED-DIFFERS | fold needed |
-| newskill | ADDED | cast needed |
-
-**Summary**: X identical, Y need cast, Z need fold
-```
+Output the drift report as **Section 1: Skill Status**.
 
 ---
 

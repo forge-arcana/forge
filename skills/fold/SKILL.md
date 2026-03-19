@@ -6,9 +6,6 @@ user-invocable: true
 
 # /fold — Absorb Knowledge Into Forge
 
-## Forge Path
-Resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/cast`).
-
 ## HARD RULE — /fold is the ONLY writer to forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
 > `/fold` is the gatekeeper. All knowledge flows through it.
@@ -30,26 +27,31 @@ All file paths below are relative to `<forge>` (the resolved forge repo path).
 
 ---
 
+## Step 0: Preflight
+
+> Execute [Forge Preflight](../forge/preflight.md) in **pull** mode.
+
+This resolves the forge path, pulls the latest forge (aborting if diverged), and produces the **Skill Drift Report** with directional classifications.
+
+**This is critical** — without pulling first, /fold could overwrite newer forge changes with stale deployed copies.
+
+---
+
 ## Part 1: Config & Skill Sync
 
-### Step 1a: Skill Reverse-Sync (deployed → forge source)
+### Step 1a: Skill Reverse-Sync (using preflight drift results)
 
-Compare deployed skills (`~/.claude/skills/`) against forge source (`<forge>/skills/`). For each skill:
+Use the drift classifications from the preflight Skill Drift Report:
 
-1. Compare using: `diff -rq --strip-trailing-cr ~/.claude/skills/<name> <forge>/skills/<name>`
-2. If diff output exists, the deployed copy has changes that haven't been absorbed into forge
+| Classification | /fold Action |
+|---------------|-------------|
+| `IDENTICAL` | Skip |
+| `DEPLOYED-DIFFERS` | Deployed copy was modified — absorb into forge source (reverse-sync) |
+| `FORGE-UPDATED` | Skip — forge has newer changes, these will deploy on next `/cast` |
+| `ADDED` | Skip — new skill in forge, will deploy on next `/cast` |
+| `REMOVED` | Skip — skill removed from forge |
 
-Present the drift report:
-```markdown
-## Skill Reverse-Sync Report
-
-| Skill | Status | Action |
-|-------|--------|--------|
-| wrap | DRIFTED | Deployed has changes — absorb into forge source |
-| probe | IDENTICAL | — |
-```
-
-For each DRIFTED skill:
+For each `DEPLOYED-DIFFERS` skill:
 - Diff the deployed vs forge source to show exactly what changed
 - After user confirms, **copy the deployed version into `<forge>/skills/<name>/`** (deployed is the newer truth)
 - This is safe because `/cast` will re-deploy from forge source on next run
