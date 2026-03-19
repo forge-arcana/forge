@@ -186,6 +186,9 @@ These are patterns confirmed across multiple projects. Not opinions — battle s
 - `db.transaction()` gives `PgTransaction` type, not `Database` — use `type DbOrTx = any` for tx params
 - `count()` import gets shadowed by function params named `count` — rename import to `dbCount`
 - `innerJoin` results use capitalized table name as key (`{ Seat: seat, Trip: trip }`)
+- `pgEnum` columns reject plain strings in `eq()` — export `enumEq(col, val)` and `enumInArray(col, vals)` helpers that centralize the single `as never` cast
+- JSON/JSONB columns return `unknown` — casting `as T` is the standard workaround. A `typedJson<T>()` helper can centralize it, but Drizzle has no native solution. Don't flag as critical debt.
+- Self-referencing FK (e.g., `parentId → table.id`) requires `(): any` return type on the `.references()` callback — TypeScript can't resolve the table type during its own definition
 
 ### Hono
 - `secureHeaders()` without args — CSP not included by default (unlike Helmet)
@@ -197,6 +200,8 @@ These are patterns confirmed across multiple projects. Not opinions — battle s
 - Claims `/api/auth/*` — plan routes around this
 - Bearer plugin for Capacitor clients (token in header, not cookie)
 - Phone-first users need placeholder email
+- `freshAge` session cache: direct DB writes (e.g., role switch) won't be reflected in `auth.api.getSession()` until cache expires. Read mutable fields directly from DB in session endpoints.
+- Hono middleware `c.header()` before `await next()` corrupts Better Auth's raw Response cookies. Only set headers on the rejection response (e.g., 429), never on pass-through.
 
 ### Paraglide
 - Compile-time = zero runtime bundle cost
@@ -218,6 +223,19 @@ These are patterns confirmed across multiple projects. Not opinions — battle s
 - `as const` gives literal types — when mutating, explicitly type as `number`
 - `Record<string, unknown>` return values need explicit annotations or arithmetic fails downstream
 - For monorepo dev workflow: `moduleResolution: "bundler"` — workspace packages resolve from source without `tsc --build`
+- `array.filter(Boolean)` does NOT narrow away `null`/`undefined`. Use `array.filter((x): x is T => Boolean(x))` for proper type narrowing.
+- Never `catch (e: any)` — use `catch (e: unknown)` + a `parseError(e)` helper that handles Error, string, and unknown. Catches `(e as Error).message` crashes on non-Error throws.
+- Define runtime arrays `as const` FIRST, then derive types: `export const ROLES = ['a', 'b'] as const; export type Role = (typeof ROLES)[number];`. Standalone `type Role = 'a' | 'b'` can't be used in `.includes()`, `z.enum()`, or `pgEnum`.
+- `z.coerce.number()` has input type `unknown` — `useForm<ExplicitType>()` with zodResolver causes type conflicts. Use untyped `useForm()` and cast in onSubmit.
+
+### React
+- Never place a conditional `return` between hooks — React counts hooks per render. Changing the count throws "Rendered fewer hooks than expected". Move early returns before all hooks or remove them.
+- Radix UI `DialogContent` uses `{...props}` which silently overrides internal `style` (positioning). Destructure and merge: `style={{ ...basePositioning, ...style }}`.
+- React video `srcObject` timing: conditionally rendered `<video>` elements need `useEffect` to assign `srcObject` after re-render — can't set it in the same function that triggers the render.
+
+### Tailwind v4
+- `@theme` registers `@property` rules that resist class overrides. Inline `style` prop with `--color-*` variables is the only guaranteed override for forced-light containers.
+- `@tailwindcss/vite` may not follow pnpm workspace symlinks to scan shared packages. Classes used only in shared UI packages won't generate CSS. Fix: `@source` directive in globals.css pointing to the shared package.
 
 ### GCP
 - `gcloud.cmd` on Windows: use Node subprocess with explicit argument arrays (bash can't find gcloud auth context)
