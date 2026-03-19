@@ -11,7 +11,7 @@ Set these before each review:
 
 | Variable | Example |
 |----------|---------|
-| `[PRODUCT_NAME]` | "Jeepi onboarding flow" |
+| `[PRODUCT_NAME]` | "onboarding flow" |
 | `[JURISDICTION]` | "UK" / "US" / "EU" / "UK and EU" |
 | `[FEATURE_SCOPE]` | "User registration, payment checkout, and account settings" |
 | `[USER_DATA_HANDLED]` | "Name, email, address, payment card details" |

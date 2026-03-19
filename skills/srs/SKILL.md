@@ -63,7 +63,7 @@ Use the template from `restart-template.sh` (same directory as this skill) and c
 - `mkdir -p logs` before starting to ensure log directory exists
 - Pipe all output to `logs/dev.log` via `tee` for AI debugging access
 
-### DB readiness (from hoa pattern):
+### DB readiness:
 ```bash
 if ! docker compose ps --status running 2>/dev/null | grep -q db; then
   docker compose up -d db

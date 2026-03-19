@@ -16,7 +16,7 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/cast` | Deploy forge → membrane | Pour molten metal into the mold |
 | `/fold` | Absorb membrane → forge | Layer experience into the steel |
 
-## Arts (the Five P's)
+## Arts (the Six P's)
 Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
 | Art | Persona | Mode |
@@ -26,6 +26,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/poke` | Staff engineer (tech debt) | Evaluative — light |
 | `/press` | Staff engineer (go-live readiness) | Evaluative — medium |
 | `/pound` | 21 adversarial QA personas | Evaluative — heavy |
+| `/purge` | The Purist (forge master) | Cleansing |
 
 ## Task Skills
 | Skill | Purpose |
@@ -56,6 +57,11 @@ Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`) write learnings to projec
 > `/fold` is the gatekeeper for learnings, memory, and config sync.
 > Direct edits to forge are only for skill development (editing SKILL.md files in `skills/`).
 
+## HARD RULE — No Project Names in Forge
+> **Forge is a shared repo. NEVER include project-specific details in learnings, memory, or commit messages.**
+> Strip all project names, specific file paths, domains, and business logic before writing.
+> Learnings must read as universal principles. Commit messages must describe *what* was absorbed, not *where* it came from.
+
 ## HARD RULE — No Auto-Commit
 > **NEVER commit automatically after completing any sprint, phase, or piece of work.** Always ask the user: "Ready to wrap up? Run `/wrap` to commit with full context."
 
@@ -72,6 +78,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (5 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity
-- **Arts**: prime (was pitch+bluep), probe (was arch), poke (was quick), press (was audit), pound (was dive) — shared protocol in `skills/forge/protocol.md`
+- **Completed**: Three-pillar architecture, git-based drift detection, 17 global skills (6 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization
+- **Arts**: prime, probe, poke, press, pound, purge (new) — shared protocol in `skills/forge/protocol.md`
+- **Recent**: Added `/purge` (the Purist — forge cleansing art), "No Project Names" HARD RULE, sanitized all project-specific leaks, moved identity to `memory/identity.md`
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

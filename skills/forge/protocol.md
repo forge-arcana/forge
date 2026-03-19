@@ -50,7 +50,7 @@ Each art defines its own execution in its SKILL.md:
 3. **Present results** to the user
 4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/fold` to absorb learnings into forge
 
-## The Five Arts
+## The Six Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
@@ -59,8 +59,9 @@ Each art defines its own execution in its SKILL.md:
 | `/poke` | Staff engineer (tech debt) | Evaluative | Light |
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
+| `/purge` | The Purist (forge master) | Cleansing | — |
 
-The evaluative trio — **poke → press → pound** — escalates in intensity: poking for soft spots, pressing for structural readiness, pounding from every angle.
+The evaluative trio — **poke → press → pound** — escalates in intensity: poking for soft spots, pressing for structural readiness, pounding from every angle. `/purge` stands apart — it tends the forge itself, not projects.
 
 ## Learning Cycle
 

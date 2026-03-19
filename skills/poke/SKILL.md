@@ -42,9 +42,9 @@ These are the most dangerous band-aids — downstream code compensates for data 
 **How to detect — ask these questions for every `||` / `??` / conditional re-fetch:**
 
 1. **Does the schema enforce this field?** If the column is `NOT NULL` with a `DEFAULT`, the fallback is redundant and masks a query bug (field not loaded) or insert bug (field not set).
-2. **Is the fallback re-deriving data from a parent?** e.g., `trip.routeId || jeepney.routeId` — if the child should copy the parent's value at creation, a fallback means the copy failed silently.
+2. **Is the fallback re-deriving data from a parent?** e.g., `child.parentId || parent.id` — if the child should copy the parent's value at creation, a fallback means the copy failed silently.
 3. **Is there a fallback chain (3+ links)?** e.g., `a.field || b.field || c.field || 'default'` — each link is a confession that the prior source might be missing. One authoritative source should suffice.
-4. **Is there a conditional re-fetch?** e.g., `if (!trip.route) { route = await fetchFromJeepney() }` — if the relation should always load, the fallback masks a broken query shape.
+4. **Is there a conditional re-fetch?** e.g., `if (!order.customer) { customer = await fetchFromParent() }` — if the relation should always load, the fallback masks a broken query shape.
 5. **Is a sentinel value used?** e.g., `entityId || 'unknown'`, `name ?? 'Passenger'` — sentinels in data fields (especially audit logs) make records untraceable. The field should be required or the action should fail.
 
 **Patterns to grep for:**
@@ -60,7 +60,7 @@ rg '\.default\(' packages/database/  # find schema defaults
 rg '\|\| 0[^.]|\?\? 0[^.]' packages/server/  # find code defaults for same fields
 
 # Conditional re-fetches (fetch data that should be on the object)
-rg 'if \(!.*\.(route|profile|user|jeepney)' --type ts
+rg 'if \(!.*\.(route|profile|user|parent)' --type ts
 ```
 
 **What to flag:** Show the fallback, trace WHERE the field should have been set (insert/query), explain why the fallback masks a bug. Propose the fix at the SOURCE, not a better fallback.

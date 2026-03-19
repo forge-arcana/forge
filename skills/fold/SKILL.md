@@ -207,12 +207,12 @@ Then use AskUserQuestion with a simple confirmation prompt (e.g., "Approve all X
 
 ### Step 4: Genericize & Absorb confirmed learnings
 
-**CRITICAL: No project-specific details in forge learnings.** Before writing any learning to forge, strip ALL project-specific references:
+**CRITICAL: No project-specific details in forge — learnings, memory, OR commit messages.** Before writing any learning to forge, strip ALL project-specific references. Commit messages must describe *what* was absorbed (topics, patterns), never *where* it came from (project names).
 
 | Strip | Replace with |
 |-------|-------------|
-| Project names (e.g., "Jeepi", "Hoa", "Sookie") | "the project" or omit |
-| Specific file paths (e.g., `src/routes/hoa/auth.ts`) | Generic path pattern (e.g., "auth route handler") |
+| Project names | "the project" or omit |
+| Specific file paths (e.g., `src/routes/myapp/auth.ts`) | Generic path pattern (e.g., "auth route handler") |
 | Specific API keys, URLs, domains | "[API endpoint]", "[domain]" |
 | Specific user/team names | "the team" or omit |
 | Specific database names, table names | Generic description (e.g., "the user table") |
