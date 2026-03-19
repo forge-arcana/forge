@@ -50,7 +50,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `memory/` | `/cast` syncs to `~/.claude/memory/` | Auto-accumulates → `/fold` absorbs |
 
 ## Self-Improving Loop
-Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`) write learnings to project's `memory/*-learnings.md` → auto-memory accumulates to `~/.claude/` → `/fold` absorbs into `forge/learnings/` → next art run reads global learnings in pre-flight.
+Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`, `/purge`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/fold` scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md` → `/fold` absorbs into `forge/learnings/` → next art run reads global learnings in pre-flight.
 
 ## HARD RULE — Only /fold Writes to Forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
@@ -80,5 +80,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Branch**: main
 - **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (6 arts + 10 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run (cleansed entity name leaks, removed 5 promoted duplicates from global-patterns)
 - **Arts**: prime, probe, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
-- **Recent**: First `/purge` cleansing — removed project-specific entity names from stack-guide and learnings, pruned 5 duplicate entries from global-patterns.md that were already in stack-guide, fixed arts/skill counts in memory
+- **Recent**: Moved learning promotion from /wrap to /fold (Step 0), first /purge cleansing, project name sanitization
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

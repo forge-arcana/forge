@@ -151,12 +151,41 @@ If no triggers fire, skip Part 2 entirely and proceed to Part 3.
 
 ## Part 3: Learning Absorption
 
-### Intake Sources (global Claude space ONLY)
-`/fold` does NOT scan project repos directly. It consumes from the user's global Claude space, where learnings have been accumulated during work sessions.
+### Step 0: Promote Forge-worthy Learnings from Project Memories
+
+Before reading the global intake sources, scan all project memory directories for art learnings flagged as Forge-worthy.
+
+1. **Scan**: Glob `~/.claude/projects/*/memory/*-learnings.md` for all art learning files across all projects
+2. **Parse**: For each file, extract entries tagged `Forge-worthy: yes`
+3. **Dedup**: Skip entries whose content already exists in `~/.claude/learnings/general.md` (avoid re-promoting)
+4. **Genericize**: Strip all project-specific details (project names, specific file paths, domains, business logic) — rewrite as universal principles. Use the same genericization rules as Step 4 below.
+5. **Promote**: Append each genericized entry to `~/.claude/learnings/general.md` with a source comment:
+   ```markdown
+   <!-- promoted from project memory, YYYY-MM-DD -->
+   ## [Short Title]
+   [genericized learning content]
+   ```
+6. **Report**: Output a promotion summary:
+   ```markdown
+   ## Forge-worthy Promotion Report
+
+   | # | Source File | Learning | Action |
+   |---|-----------|----------|--------|
+   | 1 | *-learnings.md | [title] | Promoted to general.md |
+   | 2 | *-learnings.md | [title] | Skipped — already promoted |
+   ```
+
+If no `*-learnings.md` files exist or no entries are tagged `Forge-worthy: yes`, skip this step silently.
+
+**IMPORTANT**: Project-specific learnings (`Forge-worthy: no` or untagged) are NEVER promoted. Only `Forge-worthy: yes` entries cross the membrane boundary.
+
+### Intake Sources (global Claude space)
+
+After promotion, `/fold` consumes from the user's global Claude space. Forge-worthy entries promoted in Step 0 are now included here.
 
 | Source | Location | What's there |
 |--------|----------|-------------|
-| **Global learnings** | `~/.claude/learnings/general.md` | Universal learnings accumulated during sessions |
+| **Global learnings** | `~/.claude/learnings/general.md` | Universal learnings accumulated during sessions (including promoted Forge-worthy entries) |
 
 ### Step 1: Read intake sources
 - Read `~/.claude/learnings/general.md`

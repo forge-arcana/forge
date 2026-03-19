@@ -46,7 +46,7 @@ Each art defines its own execution in its SKILL.md:
    - **Learning**: [context and evidence — universal principle, no project names/paths]
    - **Forge-worthy**: [yes/no] — [reason: "universal pattern" or "project-specific"]
    ```
-2. Learnings marked `Forge-worthy: yes` will be auto-promoted by `/wrap` Stage 2 — no manual intervention needed
+2. Learnings marked `Forge-worthy: yes` will be promoted by `/fold` Part 3 Step 0 — scans project memories, genericizes, and promotes to `~/.claude/learnings/general.md`
 3. **Present results** to the user
 4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/fold` to absorb learnings into forge
 
@@ -67,8 +67,7 @@ The evaluative trio — **poke → press → pound** — escalates in intensity:
 
 ```
 Art runs → writes to project's memory/<learnings-file>
-→ /wrap auto-promotes Forge-worthy items
-→ accumulates in ~/.claude/learnings/
-→ /fold absorbs into <forge>/learnings/
+→ /fold Step 0 promotes Forge-worthy items to ~/.claude/learnings/general.md
+→ /fold Steps 1-4 triage, genericize, and absorb into <forge>/learnings/
 → next art run reads global learnings in pre-flight
 ```

@@ -9,17 +9,18 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - All three flow bidirectionally: DOWN via `/cast`, UP via auto-memory + `/fold`
 - `~/.claude/` is the staging membrane — not a source of truth
 
-### Knowledge Flow (2026-03-17)
-- Learnings accumulate automatically during work sessions via Claude Code's auto-memory system
-- `/fold` consumes ONLY from global Claude space (`~/.claude/learnings/` + `~/.claude/memory/`)
+### Knowledge Flow (2026-03-19)
+- Learnings accumulate in project memory (`~/.claude/projects/*/memory/*-learnings.md`) during art runs
+- `/fold` Part 3 Step 0 scans project memories for `Forge-worthy: yes` entries, genericizes them, and promotes to `~/.claude/learnings/general.md`
+- `/fold` Part 3 Steps 1-4 consume from global Claude space (`~/.claude/learnings/` + `~/.claude/memory/`) and absorb into forge
 - `/fold` NEVER deletes from user's global space — tracks processed entries via content hashes
 - Promotion is always a COPY, never a move — project entries persist after promotion
 - Dedup at every level: project learnings, project memory, global learnings, global memory
 
-### Self-Improving Loop (2026-03-15)
+### Self-Improving Loop (2026-03-19)
 - Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`, `/purge`) flag learnings as `Forge-worthy: yes/no` at write time
-- Auto-memory promotes flagged entries during sessions
-- `/fold` absorbs into `forge/learnings/` → next skill run reads them first
+- `/fold` Part 3 Step 0 scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md`
+- `/fold` Part 3 Steps 1-4 triage and absorb into `forge/learnings/` → next skill run reads them first
 
 ### Core Loop Rename (2026-03-17)
 - `/forge` → `/cast` (deploy forge → membrane → project — "pour molten metal into the mold")
