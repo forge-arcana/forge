@@ -13,14 +13,35 @@ if [[ -f "$HOME/.claude/CLAUDE.md" ]]; then
 fi
 FORGE_PATH="${FORGE_PATH:-/root/dev/forge}"
 
+# --- Load last-cast baseline SHA (written by /cast after successful deploy) ---
+LAST_CAST_SHA=""
+LAST_CAST_FILE="$HOME/.claude/.last-cast.json"
+if [[ -f "$LAST_CAST_FILE" ]]; then
+  LAST_CAST_SHA=$(python3 -c "
+import json
+with open('$LAST_CAST_FILE') as f:
+    print(json.load(f).get('lastCastCommit', ''))
+" 2>/dev/null || true)
+fi
+
 if [[ ! -d "$FORGE_PATH" ]]; then
   echo "ERROR: Forge not found at $FORGE_PATH. Clone the forge repo first."
   exit 1
 fi
 
+# Validate baseline SHA is reachable in git history
+if [[ -n "$LAST_CAST_SHA" ]]; then
+  git -C "$FORGE_PATH" cat-file -t "$LAST_CAST_SHA" >/dev/null 2>&1 || LAST_CAST_SHA=""
+fi
+
 echo "## Forge Preflight Report"
 echo "**Forge path**: \`$FORGE_PATH\`"
 echo "**Mode**: $MODE"
+if [[ -n "$LAST_CAST_SHA" ]]; then
+  echo "**Baseline**: \`${LAST_CAST_SHA:0:7}\` (last cast commit)"
+else
+  echo "**Baseline**: none (two-way fallback)"
+fi
 echo ""
 
 # --- Step 2: Remote sync ---
@@ -56,6 +77,7 @@ echo "|-------|--------|--------|"
 IDENTICAL=0
 NEED_CAST=0
 NEED_FOLD=0
+CONFLICT=0
 ADDED=0
 REMOVED=0
 
@@ -78,14 +100,50 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
     echo "| $skill | IDENTICAL | -- |"
     IDENTICAL=$((IDENTICAL + 1))
   else
-    # Check direction: is forge ahead of remote?
-    git_diff=$(git -C "$FORGE_PATH" diff HEAD origin/main -- "skills/$skill" 2>/dev/null || true)
-    if [[ -n "$git_diff" ]]; then
-      echo "| $skill | FORGE-UPDATED | cast needed |"
-      NEED_CAST=$((NEED_CAST + 1))
+    if [[ -z "$LAST_CAST_SHA" ]]; then
+      # No baseline — fall back to two-way heuristic
+      git_diff=$(git -C "$FORGE_PATH" diff HEAD origin/main -- "skills/$skill" 2>/dev/null || true)
+      if [[ -n "$git_diff" ]]; then
+        echo "| $skill | FORGE-UPDATED | cast needed |"
+        NEED_CAST=$((NEED_CAST + 1))
+      else
+        echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
+        NEED_FOLD=$((NEED_FOLD + 1))
+      fi
     else
-      echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
-      NEED_FOLD=$((NEED_FOLD + 1))
+      # Three-way comparison using baseline
+      # Q1: Did forge change since last cast?
+      forge_changed="no"
+      git -C "$FORGE_PATH" diff --quiet "$LAST_CAST_SHA" HEAD -- "skills/$skill/" 2>/dev/null || forge_changed="yes"
+
+      if [[ "$forge_changed" == "no" ]]; then
+        # Forge didn't move — membrane was edited
+        echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
+        NEED_FOLD=$((NEED_FOLD + 1))
+      else
+        # Forge moved — check if deployed matches baseline (stale) or was also modified (conflict)
+        # Get baseline SKILL.md content
+        baseline_content=$(git -C "$FORGE_PATH" show "$LAST_CAST_SHA:skills/$skill/SKILL.md" 2>/dev/null || echo "")
+
+        if [[ -z "$baseline_content" ]]; then
+          # Skill didn't exist at baseline — forge added it, needs cast
+          echo "| $skill | FORGE-UPDATED | cast needed |"
+          NEED_CAST=$((NEED_CAST + 1))
+        else
+          # Compare deployed SKILL.md against baseline
+          deployed_vs_baseline=$(diff --strip-trailing-cr <(echo "$baseline_content") "$deployed/SKILL.md" 2>/dev/null || true)
+
+          if [[ -z "$deployed_vs_baseline" ]]; then
+            # Deployed matches baseline — membrane is just stale
+            echo "| $skill | FORGE-UPDATED | cast needed |"
+            NEED_CAST=$((NEED_CAST + 1))
+          else
+            # Both sides changed since last cast
+            echo "| $skill | CONFLICT | both changed since last cast |"
+            CONFLICT=$((CONFLICT + 1))
+          fi
+        fi
+      fi
     fi
   fi
 done
@@ -104,7 +162,11 @@ if [[ -d "$HOME/.claude/skills" ]]; then
 fi
 
 echo ""
-echo "**Summary**: $IDENTICAL identical, $((NEED_CAST + ADDED)) need cast, $NEED_FOLD need fold, $REMOVED removed"
+CONFLICT_MSG=""
+if [[ "$CONFLICT" -gt 0 ]]; then
+  CONFLICT_MSG=", $CONFLICT conflict"
+fi
+echo "**Summary**: $IDENTICAL identical, $((NEED_CAST + ADDED)) need cast, $NEED_FOLD need fold${CONFLICT_MSG}, $REMOVED removed"
 echo ""
 
 # --- Step 4: Learning status ---
@@ -289,10 +351,14 @@ else
   echo "| Forge Remote | Up to date (pulled) | -- |"
 fi
 
-if [[ $((NEED_CAST + ADDED + NEED_FOLD + REMOVED)) -eq 0 ]]; then
+if [[ $((NEED_CAST + ADDED + NEED_FOLD + CONFLICT + REMOVED)) -eq 0 ]]; then
   echo "| Skills | $IDENTICAL identical | -- |"
 else
-  echo "| Skills | $((NEED_CAST + ADDED)) need cast, $NEED_FOLD need fold | Run /cast or /fold |"
+  SKILL_STATUS="$((NEED_CAST + ADDED)) need cast, $NEED_FOLD need fold"
+  if [[ "$CONFLICT" -gt 0 ]]; then
+    SKILL_STATUS="$SKILL_STATUS, $CONFLICT conflict"
+  fi
+  echo "| Skills | $SKILL_STATUS | Run /cast or /fold |"
 fi
 
 UNPROCESSED=${UNPROCESSED:-0}
@@ -310,7 +376,9 @@ fi
 echo ""
 
 # Recommended next step
-if [[ "${BEHIND:-0}" -gt 0 ]]; then
+if [[ "$CONFLICT" -gt 0 ]]; then
+  echo "**Recommended**: Resolve $CONFLICT skill conflict(s) before running \`/cast\` or \`/fold\`"
+elif [[ "${BEHIND:-0}" -gt 0 ]]; then
   echo "**Recommended**: \`/cast\` (forge is behind remote)"
 elif [[ $((NEED_CAST + ADDED)) -gt 0 ]]; then
   echo "**Recommended**: \`/cast\` (skills need deployment)"

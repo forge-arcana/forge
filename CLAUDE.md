@@ -84,5 +84,6 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (forge-cycle pre-flight for /mark, /cast, /fold)
 - **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
-- **Recent**: Added 4 bash scripts to replace ~100 sequential LLM tool calls with single-command evidence collection. Skills now delegate mechanical work (diffs, greps, counts) to scripts and focus LLM on judgment (triage, scoring, classification).
+- **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
+- **Recent**: Three-way drift detection via commit SHA baseline. Fixes misclassification where stale membrane was labeled DEPLOYED-DIFFERS instead of FORGE-UPDATED. Added CONFLICT state for when both sides change.
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

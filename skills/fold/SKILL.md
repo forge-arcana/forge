@@ -50,6 +50,7 @@ Use the drift classifications from the preflight Skill Drift Report:
 | `IDENTICAL` | Skip |
 | `DEPLOYED-DIFFERS` | Deployed copy was modified — absorb into forge source (reverse-sync) |
 | `FORGE-UPDATED` | Skip — forge has newer changes, these will deploy on next `/cast` |
+| `CONFLICT` | Both sides changed since last cast — show both diffs, ask user to reconcile before proceeding |
 | `ADDED` | Skip — new skill in forge, will deploy on next `/cast` |
 | `REMOVED` | Skip — skill removed from forge |
 

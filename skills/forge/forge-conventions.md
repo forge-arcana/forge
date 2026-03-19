@@ -43,6 +43,6 @@
 - [ ] Browser console → logs/dev.log (dev only)
 
 ### 7. Dev Stack
-- [ ] restart.sh exists (or suggest /srs)
-- [ ] kill-zombies.sh exists (or suggest /srs)
+- [ ] restart.sh exists at root or `scripts/` (or suggest /srs)
+- [ ] kill-zombies.sh exists at root or `scripts/` (or suggest /srs)
 - [ ] Port layout documented

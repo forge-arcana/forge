@@ -85,6 +85,17 @@ For each `.md` file in `<forge-path>/memory/`:
 - If it exists, compare with `diff --strip-trailing-cr`: if different, report: "forge has updates — user copy may have local additions"
 - If identical, skip
 
+### 1d: Record Cast Baseline
+
+After all three pillars are synced, record the current forge commit as the deployment baseline:
+
+Write `~/.claude/.last-cast.json`:
+```json
+{ "lastCastCommit": "<output of git -C <forge-path> rev-parse HEAD>" }
+```
+
+This enables three-way drift detection on subsequent `/mark` and `/fold` runs.
+
 Report what was synced across all three pillars before proceeding.
 
 ## Step 2: Read Forge Reference

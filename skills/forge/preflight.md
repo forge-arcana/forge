@@ -36,10 +36,13 @@ For each skill directory in `<forge>/skills/` (excluding `forge/` which is refer
 | Condition | Classification | Meaning |
 |-----------|----------------|---------|
 | No diff output | `IDENTICAL` | In sync — no action needed |
-| Diff found, forge is ahead of remote | `FORGE-UPDATED` | Forge has newer changes — `/cast` will deploy |
-| Diff found, forge matches remote | `DEPLOYED-DIFFERS` | Deployed copy was modified — `/fold` will absorb |
+| Diff found, forge changed since baseline, deployed unchanged | `FORGE-UPDATED` | Forge has newer changes — `/cast` will deploy |
+| Diff found, forge unchanged since baseline, deployed changed | `DEPLOYED-DIFFERS` | Deployed copy was modified — `/fold` will absorb |
+| Diff found, both changed since baseline | `CONFLICT` | Both sides changed — user must reconcile |
 | Skill exists in forge but not deployed | `ADDED` | New skill — `/cast` will deploy |
 | Skill exists deployed but not in forge | `REMOVED` | Skill deleted from forge |
+
+**Baseline**: The last-cast commit SHA stored in `~/.claude/.last-cast.json` (written by `/cast` after each deploy). If no baseline exists (first cast, or SHA unreachable after force push), falls back to a two-way heuristic (`git diff HEAD origin/main`).
 
 Also check the reverse — skills that exist in `~/.claude/skills/` but NOT in `<forge>/skills/` (excluding `forge/`). These are `REMOVED` from forge's perspective or user-local additions.
 

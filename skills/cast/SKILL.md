@@ -34,6 +34,7 @@ Use the drift classifications from the preflight Skill Drift Report:
 | `IDENTICAL` | Skip |
 | `FORGE-UPDATED` | Show diff, deploy forge version (forge is newer) |
 | `DEPLOYED-DIFFERS` | Show diff. Advise user to run `/fold` first to absorb deployed changes before overwriting |
+| `CONFLICT` | Show both diffs (forge vs baseline, deployed vs baseline). Ask user to reconcile before proceeding |
 | `ADDED` | Deploy to `~/.claude/skills/<name>/` |
 | `REMOVED` | Remove from `~/.claude/skills/<name>/` |
 
@@ -62,6 +63,17 @@ For each `.md` file in `<forge-path>/memory/`:
 - If it exists, compare with `diff --strip-trailing-cr`: if different, report: "forge has updates — user copy may have local additions"
 - If identical, skip
 
+### 1d: Record Cast Baseline
+
+After all three pillars are synced, record the current forge commit as the deployment baseline:
+
+Write `~/.claude/.last-cast.json`:
+```json
+{ "lastCastCommit": "<output of git -C <forge-path> rev-parse HEAD>" }
+```
+
+This enables three-way drift detection on subsequent `/mark` and `/fold` runs. The SHA marks what was deployed, so future comparisons can distinguish "forge updated since cast" from "deployed copy was modified".
+
 Report what was synced across all three pillars before proceeding.
 
 ## Step 2: Read Forge Reference
@@ -78,8 +90,8 @@ Report what was synced across all three pillars before proceeding.
 4. Does `docs/` directory exist? If not, does CLAUDE.md have a `## Documentation` section with a `**Docs path:**` declaring an external docs repo?
 5. What's the project structure? (ls, glob for package.json, tsconfig, etc.)
 6. Is it a monorepo? (check for `packages/`, `pnpm-workspace.yaml`)
-7. Does `restart.sh` exist?
-8. Does `kill-zombies.sh` exist?
+7. Does `restart.sh` exist? (check project root AND `scripts/`)
+8. Does `kill-zombies.sh` exist? (check project root AND `scripts/`)
 
 ## Step 4: Divergence Report
 
