@@ -159,7 +159,7 @@ Before reading the global intake sources, scan all project memory directories fo
 
 1. **Scan**: Glob `~/.claude/projects/*/memory/*-learnings.md` for all art learning files across all projects
 2. **Parse**: For each file, extract entries tagged `Forge-worthy: yes`
-3. **Dedup**: Skip entries whose content already exists in `~/.claude/learnings/general.md` (avoid re-promoting)
+3. **Dedup**: Extract the `## Title` heading from each candidate entry. Skip if title is already in `<forge>/learnings/.reforge-tracker.json` `promotedEntries` array (already promoted in a prior run). Also skip if a `## Title` with the same heading already exists in `~/.claude/learnings/general.md`.
 4. **Genericize**: Strip all project-specific details (project names, specific file paths, domains, business logic) — rewrite as universal principles. Use the same genericization rules as Step 4 below.
 5. **Promote**: Append each genericized entry to `~/.claude/learnings/general.md` with a source comment:
    ```markdown
@@ -269,22 +269,27 @@ For each confirmed learning:
 **IMPORTANT**: Source entries in `~/.claude/learnings/` are NEVER deleted. They remain in the user's global space.
 
 ### Processing Tracker
-To avoid re-evaluating every entry on each run, maintain a watermark file at `<forge>/learnings/.reforge-tracker.json`:
+To avoid re-evaluating every entry on each run, maintain a tracker at `<forge>/learnings/.reforge-tracker.json`:
 
 ```json
 {
   "lastRun": "2026-03-15T16:00:00Z",
-  "processedHashes": [
-    "sha256-of-entry-content-1",
-    "sha256-of-entry-content-2"
+  "processedEntries": [
+    "Self-Contained Skill Packages",
+    "WSL Path Compatibility"
+  ],
+  "promotedEntries": [
+    "Barrel Import Browser Builds"
   ]
 }
 ```
 
-- Before triage, compute a content hash for each candidate entry
-- Skip any entry whose hash is already in `processedHashes`
-- After absorption, append new hashes and update `lastRun`
-- If Part 2 review fires, reset the tracker before triage (force full re-evaluation of all entries)
+- **processedEntries**: `## Title` headings from `general.md` entries that have been triaged (Part 3 Steps 1-4)
+- **promotedEntries**: `## Title` headings from Forge-worthy project memory entries that have been promoted to `general.md` (Part 3 Step 0)
+- Before triage, extract `## Title` headings from candidate entries
+- Skip any entry whose title is already in the relevant array
+- After absorption/promotion, append new titles and update `lastRun`
+- If Part 2 review fires, reset the tracker (force full re-evaluation of all entries)
 
 ---
 
@@ -295,18 +300,40 @@ To avoid re-evaluating every entry on each run, maintain a watermark file at `<f
 |--------|----------|-------------|
 | **Global memory** | `~/.claude/memory/` | Universal memories accumulated during sessions |
 
-### Step 1: Read intake sources
-- Read all `.md` files in `~/.claude/memory/`
-- Read all `.md` files in `<forge>/memory/` (forge's team memory)
+### Memory Tracker
+Maintain a tracker at `<forge>/memory/.memory-tracker.json`:
 
-### Step 2: Triage memories
-For each memory file in `~/.claude/memory/`, classify:
+```json
+{
+  "lastRun": "2026-03-15T16:00:00Z",
+  "skippedFiles": ["user-role.md", "personal-preference.md"]
+}
+```
+
+- **skippedFiles**: membrane memory files that were triaged and intentionally not absorbed (PERSONAL)
+- A memory file needs triage only if it exists in membrane but NOT in forge AND NOT in `skippedFiles`
+- Files that exist in both membrane and forge: use `diff --strip-trailing-cr` to check sync (no tracker needed)
+- If Part 2 memory review fires, reset the tracker (force full re-evaluation)
+
+### Step 1: Read intake sources
+- Read all `.md` files in `~/.claude/memory/` (exclude MEMORY.md index)
+- Read all `.md` files in `<forge>/memory/` (exclude MEMORY.md index)
+- Read `<forge>/memory/.memory-tracker.json` if it exists
+
+### Step 2: Triage memories (unprocessed files only)
+
+Determine which files need triage:
+- File in membrane AND in forge → use `diff --strip-trailing-cr` to check sync. If identical, skip. If different, classify as UPDATE.
+- File in membrane only AND in `skippedFiles` → already decided, skip
+- File in membrane only AND NOT in `skippedFiles` → **new, needs triage**
+
+For each **new** memory file, classify:
 
 | Status | Meaning |
 |--------|---------|
 | **TEAM-WORTHY** | Applies to the whole team, not just this user — absorb into `<forge>/memory/` |
-| **PERSONAL** | User-specific preference or context — skip |
-| **DUPLICATE** | Already exists in `<forge>/memory/` — skip |
+| **PERSONAL** | User-specific preference or context — skip (but record decision in tracker) |
+| **DUPLICATE** | Already exists in `<forge>/memory/` — skip (record in tracker) |
 | **UPDATE** | Exists in `<forge>/memory/` but user's version is newer/better — flag for merge |
 
 **Classification rules:**
@@ -332,6 +359,7 @@ After user confirmation:
 - Strip any personal details (user name, specific machine paths)
 - Add `<!-- source: team-member, YYYY-MM-DD -->` comment
 - For UPDATE entries: merge the newer content into the existing file
+- **Update tracker**: add PERSONAL files to `skippedFiles` so they aren't re-triaged next run. TEAM-WORTHY files don't need tracking — they'll exist in forge, so `diff` handles them.
 
 **IMPORTANT**: Source entries in `~/.claude/memory/` are NEVER deleted.
 
@@ -354,7 +382,7 @@ If no triggers fire, skip Part 5 entirely.
 
 1. Read `~/.claude/learnings/general.md`
 2. Cross-reference each entry against:
-   - `<forge>/learnings/.reforge-tracker.json` `processedHashes` — was it already absorbed?
+   - `<forge>/learnings/.reforge-tracker.json` `processedEntries` — was its title already processed?
    - `<forge>/learnings/*.md` — does the genericized version exist in forge?
 3. For entries that are BOTH processed AND present in forge:
    - Classify as **ARCHIVABLE** — safe to move out of active staging
@@ -376,7 +404,7 @@ If no triggers fire, skip Part 5 entirely.
 
 ### Memory Archival
 
-- Memory files that exist in both `~/.claude/memory/` and `<forge>/memory/` with identical content → offer to move to `~/.claude/memory/archive/`
+- Memory files that exist in both `~/.claude/memory/` and `<forge>/memory/` with identical content (via `diff --strip-trailing-cr`) → offer to move to `~/.claude/memory/archive/`
 - Same confirmation flow as learning archival
 
 ---

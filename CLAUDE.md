@@ -78,8 +78,9 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (6 arts + 10 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run, shared preflight extraction
+- **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (6 arts + 10 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run, shared preflight extraction, hash-free trackers
 - **Arts**: prime, probe, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (forge-cycle pre-flight for /mark, /cast, /fold)
-- **Recent**: Extracted shared preflight into `skills/forge/preflight.md` — DRY for forge path resolution, remote sync, and skill drift classification across /mark, /cast, /fold. Fixed /fold missing `git pull` safety gap.
+- **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
+- **Recent**: Dropped all hashing from trackers — replaced with human-readable entry titles (learnings) and filename lists (memories). Added memory tracker to prevent re-evaluation of skipped files. Removed obsolete `feedback_no_timestamps.md` memory.
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

@@ -24,8 +24,8 @@ Output the drift report as **Section 1: Skill Status**.
 
 ### 2a: Global Learnings (`~/.claude/learnings/`)
 
-Read `~/.claude/learnings/general.md` and count total entries.
-Read `<forge>/learnings/.reforge-tracker.json` and count processed hashes.
+Read `~/.claude/learnings/general.md` and extract all `## Title` headings.
+Read `<forge>/learnings/.reforge-tracker.json` and compare against `processedEntries` titles.
 
 Output:
 ```markdown
@@ -56,11 +56,13 @@ Check for other learning files and compare against forge copies:
 
 ## Section 3: Memory Status
 
-Read all `.md` files in `~/.claude/memory/` and `<forge>/memory/`.
+Read all `.md` files in `~/.claude/memory/` and `<forge>/memory/` (exclude MEMORY.md indexes).
+Read `<forge>/memory/.memory-tracker.json` if it exists (contains `skippedFiles` — memories previously triaged as PERSONAL).
 
 For each file in `~/.claude/memory/`:
-- Check if it exists in `<forge>/memory/`
-- If yes, check if content matches
+- Check if it exists in `<forge>/memory/` → if yes, `diff --strip-trailing-cr` to check sync
+- Check if it's in tracker's `skippedFiles` → if yes, mark as "Skipped (PERSONAL)"
+- Otherwise → new, fold candidate
 
 Output:
 ```markdown
