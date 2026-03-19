@@ -78,7 +78,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 17 global skills (6 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization
-- **Arts**: prime, probe, poke, press, pound, purge (new) — shared protocol in `skills/forge/protocol.md`
-- **Recent**: Added `/purge` (the Purist — forge cleansing art), "No Project Names" HARD RULE, sanitized all project-specific leaks, moved identity to `memory/identity.md`
+- **Completed**: Three-pillar architecture, git-based drift detection, 16 global skills (6 arts + 10 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run (cleansed entity name leaks, removed 5 promoted duplicates from global-patterns)
+- **Arts**: prime, probe, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
+- **Recent**: First `/purge` cleansing — removed project-specific entity names from stack-guide and learnings, pruned 5 duplicate entries from global-patterns.md that were already in stack-guide, fixed arts/skill counts in memory
 - **Pending**: P2 items (embed logging/restart.sh guidance in skills, cache web research). Not blocking.

@@ -56,26 +56,6 @@
 **Learning**: When using HttpOnly cookie sessions (Better Auth, etc.), XHR requests (file uploads) must set `xhr.withCredentials = true`. Without it, cookies aren't sent and the upload gets 401. `fetch` with `credentials: "include"` has the same requirement.
 **Apply when**: Any file upload or XHR request in a cookie-based auth system.
 
-## Typed Constants Before Typed Comparisons (2026-03-19)
-**Learning**: For any status/role/type enum, define the runtime array `as const` FIRST, then derive the type: `export const FOO = ['a', 'b'] as const; export type Foo = (typeof FOO)[number];`. Never define standalone `type Foo = 'a' | 'b'` without a runtime array — it can't be used in `.includes()`, Zod `z.enum()`, or Drizzle `pgEnum`. A single source of truth prevents magic string drift.
-**Apply when**: Defining any status, role, or type enum in TypeScript.
-
-## Error Handling: catch (e: unknown) + parseError() (2026-03-19)
-**Learning**: Never use `catch (e: any)` (defeats type safety) or `(e as Error).message` (crashes on non-Error throws). Standard pattern: `catch (e: unknown) { const msg = parseError(e); }` where `parseError` handles Error, string, and unknown types safely.
-**Apply when**: Writing any try/catch block in TypeScript.
-
-## TypeScript filter(Boolean) Does Not Narrow (2026-03-19)
-**Learning**: `array.filter(Boolean)` does NOT narrow away `null`/`undefined` from the resulting type. Use a type predicate: `array.filter((x): x is T => Boolean(x))`. Similarly, `z.coerce.number()` (Zod) has input type `unknown` — using `useForm<ExplicitType>()` with zodResolver causes type conflicts. Use untyped `useForm()` and cast in onSubmit.
-**Apply when**: Filtering nullable arrays or using Zod coercion with React Hook Form.
-
-## Playwright: No Blind Waits (2026-03-19)
-**Learning**: Replace all `waitForTimeout()` with proper assertions: `toBeVisible()`, `toBeEnabled()`, `waitForURL()`. Tests run 10x faster with zero flakiness. Blind waits are the #1 cause of slow, flaky E2E suites.
-**Apply when**: Writing or reviewing Playwright/E2E tests.
-
-## Tailwind v4 Monorepo Class Scanning (2026-03-19)
-**Learning**: `@tailwindcss/vite` may not follow pnpm workspace symlinks to scan shared packages. Classes used only in a shared UI package won't generate CSS in consumer apps. Fix: add `@source` directive in globals.css pointing to the shared package, AND use inline styles for brand-critical properties.
-**Apply when**: Using Tailwind v4 with `@tailwindcss/vite` in a pnpm monorepo with shared UI packages.
-
 ## pnpm --filter: exec vs Script Name (2026-03-15)
 **Learning**: `pnpm --filter <pkg> <arg>` treats `<arg>` as a package.json script name. To run a binary (tsx, tsc, vitest, etc.) scoped to a workspace package, use `pnpm --filter <pkg> exec <binary> <args>`. Without `exec`, pnpm fails with `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`. This commonly bites CI workflows where commands are written as raw shell rather than package scripts.
 **Apply when**: Running CLI tools scoped to a specific workspace package in a pnpm monorepo.

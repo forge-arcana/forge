@@ -17,7 +17,7 @@
 **Apply when**: Reviewing code for tech debt, especially around data access patterns with fallback defaults.
 
 ## Client-Supplied Identity in Validation Schemas (2026-03-17)
-**Learning**: When a validation schema accepts an identity field (e.g., `employerUserId`) from the request body for an authenticated endpoint, the backend must verify the relationship between the caller and the referenced entity — not just that the entity exists. Without engagement/relationship verification, any authenticated user can target arbitrary entities with false claims. This is especially dangerous for complaint, dispute, and review endpoints.
+**Learning**: When a validation schema accepts an identity field (e.g., `targetUserId`, `ownerUserId`) from the request body for an authenticated endpoint, the backend must verify the relationship between the caller and the referenced entity — not just that the entity exists. Without engagement/relationship verification, any authenticated user can target arbitrary entities with false claims. This is especially dangerous for complaint, dispute, and review endpoints.
 **Apply when**: Reviewing any endpoint that accepts an entity ID from the request body and creates a record linking the caller to that entity.
 **Forge-worthy**: yes — universal pattern for any multi-actor system
 

@@ -141,7 +141,7 @@ These events drown out the signal. If a polling cycle *does* detect something no
 ### What every log entry must include
 
 - **Who** — `userId`, session ID, or request identifier
-- **What** — entity IDs (`tripId`, `documentId`, `orderId`), action name
+- **What** — entity IDs (`orderId`, `documentId`, `itemId`), action name
 - **Result** — status transitions, counts, outcomes
 - **Never** log passwords, tokens, or full credit card numbers
 
@@ -149,7 +149,7 @@ These events drown out the signal. If a polling cycle *does* detect something no
 
 | Outcome | Level | Example |
 |---|---|---|
-| Successful action | `logger.info` | `logger.info({ userId, tripId }, 'trip_started')` |
+| Successful action | `logger.info` | `logger.info({ userId, orderId }, 'order_placed')` |
 | Validation/auth failure | `logger.warn` | `logger.warn({ email, issues }, 'login_rejected')` |
 | Unexpected error | `logger.error` | `logger.error({ err, userId }, 'payment_failed')` |
 
@@ -185,7 +185,7 @@ These are patterns confirmed across multiple projects. Not opinions — battle s
 - No native `upsert()` — use `onConflictDoUpdate` or manual find-then-update-or-insert
 - `db.transaction()` gives `PgTransaction` type, not `Database` — use `type DbOrTx = any` for tx params
 - `count()` import gets shadowed by function params named `count` — rename import to `dbCount`
-- `innerJoin` results use capitalized table name as key (`{ Seat: seat, Trip: trip }`)
+- `innerJoin` results use capitalized table name as key (`{ Order: order, Item: item }`)
 - `pgEnum` columns reject plain strings in `eq()` — export `enumEq(col, val)` and `enumInArray(col, vals)` helpers that centralize the single `as never` cast
 - JSON/JSONB columns return `unknown` — casting `as T` is the standard workaround. A `typedJson<T>()` helper can centralize it, but Drizzle has no native solution. Don't flag as critical debt.
 - Self-referencing FK (e.g., `parentId → table.id`) requires `(): any` return type on the `.references()` callback — TypeScript can't resolve the table type during its own definition
