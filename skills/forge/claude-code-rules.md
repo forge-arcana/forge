@@ -176,8 +176,13 @@ These tools run without prompting:
 | Tool | Purpose |
 |------|---------|
 | **Read** | Read file contents |
+| **Write** | Create new files |
+| **Edit** | Modify existing files |
 | **Glob** | Find files by pattern |
 | **Grep** | Search file contents |
+| **Agent** | Launch subagents for parallel work |
+| **TodoWrite** | Track task progress |
+| **NotebookEdit** | Edit Jupyter notebooks |
 | **WebSearch** | Search the web |
 
 ### Auto-Allowed Commands

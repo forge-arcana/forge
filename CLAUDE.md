@@ -87,5 +87,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Absorbed /prod into /poke — evaluative trifecta (poke → press → pound). Poke now covers Uncle Bob's tenets (SOLID, Clean Functions, Dependency Direction, Composition) alongside tech debt. Speed optimization pass across 7 skills.
+- **Recent**: Updated reference doc auto-allowed tools table (added Write, Edit, Agent, TodoWrite, NotebookEdit). Fixed /cast cp -r pitfall documentation to prevent nested directory bug.
 - **Pending**: None

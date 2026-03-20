@@ -44,6 +44,8 @@ After user confirms:
 - For DEPLOYED-DIFFERS: warn before overwriting — user may want to `/fold` first
 - Remove REMOVED skills (delete directory)
 
+**IMPORTANT — cp -r pitfall**: `cp -r source/ dest/` copies INTO `dest/` when `dest/` already exists, creating `dest/source/`. To replace a skill directory's contents, either use `cp -rT source/ dest/` (copies contents, not the directory) or remove the destination first. Never use bare `cp -r` for skill updates.
+
 If no deployed skills exist (fresh machine):
 - Create `~/.claude/skills/`, `~/.claude/learnings/`, `~/.claude/memory/` if they don't exist
 - Deploy ALL skills from `<forge-path>/skills/` (treat every skill as ADDED)
