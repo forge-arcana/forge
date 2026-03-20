@@ -10,17 +10,15 @@ Concise status snapshot. No prose preamble — just the header and table.
 
 ## Steps
 
-1. **Re-read project state** (MANDATORY — never rely on conversation memory):
-   - Read the project's `CLAUDE.md` (especially `## Current Context` section)
-   - Glob for any active plan files: `.claude/plans/*.md`
-   - Read any found plan files
-   - Glob for project memory files: `memory/project_*.md` (in the project's memory directory)
-   - Read any found project memory files — these contain planned work, decisions, and outstanding items that may not be in CLAUDE.md yet
+1. **Gather all state in parallel** (MANDATORY — never rely on conversation memory):
 
-2. **Check git state**:
-   - Run `git status` (never use `-uall` flag)
-   - Run `git log --oneline -5`
-   - Run `git diff --stat` for uncommitted changes
+   **Batch A** — launch ALL of these in parallel (independent reads):
+   - Read the project's `CLAUDE.md` (especially `## Current Context` section)
+   - Glob for active plan files: `.claude/plans/*.md`
+   - Glob for project memory files: `memory/project_*.md`
+   - Run `<forge>/scripts/wawa-status.sh` (collapses `git status` + `git log` + `git diff --stat` into one call)
+
+   **Batch B** — after globs return, read any found plan files and project memory files in parallel
 
 3. **STRICT sourcing — ZERO inference**:
    - **Phase work**: ONLY from an active plan file in `.claude/plans/`. No plan file = no phase rows.

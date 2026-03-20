@@ -16,11 +16,14 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 ## Process
 
-1. **Read the framework**: Read the `qa-framework.md` file in the same directory as this skill.
+1. **Pre-flight** — launch these reads **in parallel** (all independent):
+   - Read the `qa-framework.md` file in the same directory as this skill
+   - Follow the Forge Protocol pre-flight (learnings, stack guide, project CLAUDE.md)
+   - If no `$ARGUMENTS`, run `git log --oneline -10` to determine scope
 
-2. **Pre-flight**: Follow the Forge Protocol pre-flight, then gather scope context:
+2. **Gather scope context** from the parallel reads:
    - If `$ARGUMENTS` provided, focus on that scope
-   - If no arguments, scan recent git changes and CLAUDE.md to determine scope
+   - If no arguments, use git changes and CLAUDE.md to determine scope
    - Identify: `[PRODUCT_NAME]`, `[TECH_STACK]`, `[FEATURE_SCOPE]`, `[JURISDICTION]`
 
 3. **Fill context variables** in the framework:

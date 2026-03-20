@@ -24,7 +24,7 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
 For each technical section in the blueprint (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD):
 
 1. **Analyze** the current recommendation
-2. **Search the web** for current best practices for the specific technology choice (e.g., "Drizzle ORM best practices 2025", "Hono middleware patterns") — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache)
+2. **Search the web** for current best practices — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache). **Batch all uncached web searches in parallel** (each section's search is independent — don't wait for one to finish before starting the next).
 3. **Challenge** the decision:
    - Is this still the best choice? Has something better emerged?
    - Are there known pitfalls with this approach at the expected scale?

@@ -61,7 +61,7 @@ For each `DEPLOYED-DIFFERS` skill:
 
 ### Step 1b: Config Sync
 
-Read current state:
+Read current state — **all three in parallel** (independent reads):
 - Read `~/.claude/CLAUDE.md` (global rules)
 - Read `~/.claude/settings.json` (tool permissions) — if it exists
 - Read `<forge>/skills/forge/claude-code-rules.md` (reference doc)
@@ -105,9 +105,15 @@ Before absorbing new knowledge, check if existing knowledge is still valid. This
 
 If no triggers fire, skip Part 2 entirely and proceed to Part 3.
 
+### Evidence Collection
+
+Before Part 2, run `<forge>/scripts/fold-evidence.sh` to collect all forge learnings, forge memories, membrane learnings, membrane memories, and tracker state in a single command. This replaces ~30+ sequential file reads with one call.
+
+Use the script's output as your evidence base for Parts 2-4 below.
+
 ### 2a: Forge Learning Review
 
-1. Read ALL learning files in `<forge>/learnings/`
+1. Use fold-evidence.sh output (Section 1: Forge Learnings) — no additional reads needed
 2. For each entry, evaluate:
    - **CURRENT** — still valid and applicable → keep as-is
    - **STALE** — references outdated versions, deprecated APIs, or patterns superseded by newer approaches → flag for removal
@@ -193,13 +199,10 @@ After promotion, `/fold` consumes from the user's global Claude space. Forge-wor
 | **Global learnings** | `~/.claude/learnings/general.md` | Universal learnings accumulated during sessions (including promoted Forge-worthy entries) |
 
 ### Step 1: Read intake sources
-- Read `~/.claude/learnings/general.md`
+- Use fold-evidence.sh output (Section 3: Membrane Learnings) — no additional reads needed
 
 ### Step 2: Read existing knowledge base
-Before evaluating new learnings, load everything we already know:
-- Read ALL files in `<forge>/learnings/` (probe, poke, press, pound, prime, global-patterns)
-- Read ALL skill SKILL.md files in `<forge>/skills/*/SKILL.md` (the skills themselves encode knowledge)
-- Build a mental model of what's already known, already incorporated, or already addressed
+Use fold-evidence.sh output (Section 1: Forge Learnings) for the learning files. Additionally, read ALL skill SKILL.md files in `<forge>/skills/*/SKILL.md` **in parallel** (the skills themselves encode knowledge). Build a mental model of what's already known, already incorporated, or already addressed.
 
 ### Step 3: Triage — SHOW BEFORE ABSORBING
 For each candidate learning found in Step 1, classify it:
@@ -319,9 +322,7 @@ Maintain a tracker at `<forge>/memory/.memory-tracker.json`:
 - If Part 2 memory review fires, reset the tracker (force full re-evaluation)
 
 ### Step 1: Read intake sources
-- Read all `.md` files in `~/.claude/memory/` (exclude MEMORY.md index)
-- Read all `.md` files in `<forge>/memory/` (exclude MEMORY.md index)
-- Read `<forge>/memory/.memory-tracker.json` if it exists
+Use fold-evidence.sh output (Sections 2 and 4: Forge Memory + Membrane Memory, Section 5: Trackers) — no additional reads needed.
 
 ### Step 2: Triage memories (unprocessed files only)
 

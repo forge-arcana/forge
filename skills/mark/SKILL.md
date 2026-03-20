@@ -22,12 +22,23 @@ Output the drift report as **Section 1: Skill Status**.
 
 ---
 
-## Section 2: Learning Status
+## Sections 2-3: Learning & Memory Status (parallel evidence collection)
+
+Launch **all of these reads in parallel** before processing (all independent):
+- Read `~/.claude/learnings/general.md`
+- Read `<forge>/learnings/.reforge-tracker.json`
+- Glob and read all `~/.claude/learnings/*.md` files
+- Glob and read all `<forge>/learnings/*.md` files
+- Glob and read all `~/.claude/memory/*.md` files (exclude MEMORY.md)
+- Glob and read all `<forge>/memory/*.md` files (exclude MEMORY.md)
+- Read `<forge>/memory/.memory-tracker.json` (if it exists)
+
+Then process the results into Sections 2 and 3 below.
 
 ### 2a: Global Learnings (`~/.claude/learnings/`)
 
-Read `~/.claude/learnings/general.md` and extract all `## Title` headings.
-Read `<forge>/learnings/.reforge-tracker.json` and compare against `processedEntries` titles.
+From the parallel reads, extract all `## Title` headings from `general.md`.
+Compare against `processedEntries` titles from the tracker.
 
 Output:
 ```markdown
@@ -58,8 +69,7 @@ Check for other learning files and compare against forge copies:
 
 ## Section 3: Memory Status
 
-Read all `.md` files in `~/.claude/memory/` and `<forge>/memory/` (exclude MEMORY.md indexes).
-Read `<forge>/memory/.memory-tracker.json` if it exists (contains `skippedFiles` — memories previously triaged as PERSONAL).
+Use the memory files already read in the parallel batch above.
 
 For each file in `~/.claude/memory/`:
 - Check if it exists in `<forge>/memory/` → if yes, `diff --strip-trailing-cr` to check sync

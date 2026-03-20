@@ -76,22 +76,20 @@ This enables three-way drift detection on subsequent `/mark` and `/fold` runs. T
 
 Report what was synced across all three pillars before proceeding.
 
-## Step 2: Read Forge Reference
+## Steps 2-3: Read Forge Reference + Scan Project (parallel)
 
-1. Read `<forge-path>/skills/forge/claude-code-rules.md` — workflow rules
-2. Read `<forge-path>/skills/forge/stack-guide.md` — tech stack reference
-3. Read `<forge-path>/skills/forge/forge-conventions.md` — distilled conventions checklist
+Launch **all of these reads in parallel** (all independent):
 
-## Step 3: Scan Current Project
+**Forge reference reads:**
+- Read `<forge-path>/skills/forge/claude-code-rules.md` — workflow rules
+- Read `<forge-path>/skills/forge/stack-guide.md` — tech stack reference
+- Read `<forge-path>/skills/forge/forge-conventions.md` — distilled conventions checklist
 
-1. Does `CLAUDE.md` exist? Read it.
-2. Does `.claude/settings.json` exist? Read it.
-3. Does `memory/` directory exist?
-4. Does `docs/` directory exist? If not, does CLAUDE.md have a `## Documentation` section with a `**Docs path:**` declaring an external docs repo?
-5. What's the project structure? (ls, glob for package.json, tsconfig, etc.)
-6. Is it a monorepo? (check for `packages/`, `pnpm-workspace.yaml`)
-7. Does `restart.sh` exist? (check project root AND `scripts/`)
-8. Does `kill-zombies.sh` exist? (check project root AND `scripts/`)
+**Project scan reads:**
+- Read `CLAUDE.md` (if it exists)
+- Read `.claude/settings.json` (if it exists)
+- Glob for `package.json`, `tsconfig*`, `pnpm-workspace.yaml`, `packages/`
+- Check for `memory/`, `docs/`, `restart.sh`, `kill-zombies.sh` (project root)
 
 ## Step 4: Divergence Report
 

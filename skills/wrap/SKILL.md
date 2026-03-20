@@ -22,12 +22,16 @@ Execute the following steps in order. Do NOT skip steps. Do NOT commit without c
 - If secrets are detected, warn the user
 - **Why before context/docs:** Now you see exactly what's going in — context and docs describe the final state.
 
-## Step 3: Save Context
+## Step 3: Save Context + Locate Docs (parallel)
+
+Do both of these **in parallel** (independent operations):
+
+**3a: Save Context**
 - Update the `## Progress` section in the project's `CLAUDE.md`
 - **Replace** it with current state: branch, test count, completed phases, pending work
 - Stale history belongs in git log or memory files
 
-## Step 4: Update Docs
+**3b: Locate Docs Directory**
 
 Locate the docs directory using this resolution order:
 
