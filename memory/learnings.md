@@ -18,21 +18,15 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Dedup at every level: project learnings, project memory, global learnings, global memory
 
 ### Self-Improving Loop (2026-03-19)
-- Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`, `/purge`) flag learnings as `Forge-worthy: yes/no` at write time
+- Arts (listed in protocol.md Seven Arts table) flag learnings as `Forge-worthy: yes/no` at write time
 - `/fold` Part 3 Step 0 scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md`
 - `/fold` Part 3 Steps 1-4 triage and absorb into `forge/learnings/` → next skill run reads them first
-
-### Core Loop Rename (2026-03-17)
-- `/forge` → `/cast` (deploy forge → membrane → project — "pour molten metal into the mold")
-- `/reforge` → `/fold` (absorb knowledge back into forge — "layer experience into the steel")
-- New: `/mark` (inspect membrane status — "hallmark inspection", read-only)
-- All one-syllable metallurgy verbs. `/wrap` is a utility skill, not part of the forge loop.
 
 ## Skills
 
 ### Structure (2026-03-18)
-- Arts (6): prime, probe, poke, press, pound, purge — specialist agent skills with self-improving loops
-- Task skills (10): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci
+- Arts (7): prime, probe, prod, poke, press, pound, purge — specialist agent skills with self-improving loops (prod is unique: immutable canon, no learnings)
+- Task skills (11): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci, dig
 - `skills/forge/` holds reference docs (stack-guide, rules, conventions, protocol) — not a deployable skill
 - Skills are self-contained packages — reference docs live inside the owning skill directory
 - `skills/` is the git-tracked source of truth; `~/.claude/skills/` is the deployment target
@@ -86,15 +80,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ### WSL Compatibility (2026-03-15)
 - `~/.claude/settings.json` additionalDirectories must include all 3 path formats: Windows (`D:\`), WSL-mount (`/mnt/d/`), native Linux (`/root/dev/`)
 
-### Timestamps Removed (2026-03-15)
-- Communication Style (timestamps, elapsed times) convention removed from all forge docs and global config
-- Claude's `[HH:MM]` timestamps are inaccurate — they don't reflect real wall-clock time
-- Removed from: `~/.claude/CLAUDE.md`, `claude-code-rules.md`, `forge-conventions.md`, `/cast` SKILL.md template and divergence report
-
-### /qt (2026-03-15)
-- `/qt` replaces old `dd` debug-dev inline command
-
-### /ponci + /monci Split (2026-03-15)
-- `/ponci` = push + invoke `/monci` (was monolithic push+monitor)
-- `/monci` = monitor CI only (no push) — useful for watching runs without pushing
+### /ponci + /monci (2026-03-15)
+- `/ponci` = push + invoke `/monci`
+- `/monci` = monitor CI only (no push)
 - `/fold` triage must output as console text, never AskUserQuestion (compressed UI is unreadable for large tables)
