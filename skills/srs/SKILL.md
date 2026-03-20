@@ -77,12 +77,15 @@ fi
 
 ## Step 3: Also generate kill-zombies.sh
 
-A standalone cleanup script for use outside restart:
-- Kills all processes on project ports
+Use the template from `kill-zombies-template.sh` (same directory as this skill) and customize for this project.
+
+A standalone cleanup script for use outside restart — dev servers (Vite, tsx, Playwright) sometimes leave orphan processes that hold ports open, causing "address already in use" on restart and flaky E2E tests:
+- Kills all processes on project ports (skips API port by default for safety)
 - Kills orphaned node processes matching project name
 - Kills stale Playwright browsers
-- `--dry-run` and `--include-dev` flags
-- Can be run independently (e.g., before E2E tests)
+- `--dry-run` flag to preview without killing
+- `--include-dev` flag to also kill the API server process
+- Can be run independently (e.g., before E2E tests, or as part of CI pre-flight)
 
 ## Step 4: Verify
 

@@ -22,7 +22,7 @@ Use the script's output as your evidence base for scoring each dimension below. 
 
 ## Dimensions (7 total)
 
-For each dimension, scan the codebase AND search the web for current best practices:
+For each dimension, scan the codebase AND search the web for current best practices (check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache)):
 
 ### 1. Security
 - OWASP Top 10 coverage (XSS, SQLi, CSRF, SSRF, etc.)
@@ -42,12 +42,13 @@ For each dimension, scan the codebase AND search the web for current best practi
 - Database indexing (are queries hitting indexes?)
 
 ### 3. Operations
-- Structured logging (Pino with JSON output, proper levels)
+- Structured logging per `<forge>/skills/forge/stack-guide.md` Logging Convention (Pino, JSON output, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`)
 - Error tracking (Sentry or equivalent configured)
 - Health check endpoints
 - Backup/restore procedures documented
 - Rollback capability (blue-green, canary, or instant revert)
 - Graceful shutdown handling
+- `restart.sh` and `kill-zombies.sh` exist (per `<forge>/skills/forge/forge-conventions.md` items 6-7) — suggest `/srs` if missing
 
 ### 4. Compliance
 - Data privacy (GDPR/local equivalent, data retention, deletion)
@@ -57,7 +58,7 @@ For each dimension, scan the codebase AND search the web for current best practi
 - Cookie consent (if applicable)
 
 ### 5. Observability
-- Structured logging on all routes (success AND failure)
+- Structured logging on all routes (success AND failure) — validate against `<forge>/skills/forge/forge-conventions.md` logging checklist (items 6: action context, pre-action intent, no pulsing, dev vs prod gating)
 - Request tracing (trace IDs across services)
 - Performance metrics (response times, error rates)
 - Alerting rules defined (what triggers a page?)

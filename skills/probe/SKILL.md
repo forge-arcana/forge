@@ -24,7 +24,7 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
 For each technical section in the blueprint (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD):
 
 1. **Analyze** the current recommendation
-2. **Search the web** for current best practices for the specific technology choice (e.g., "Drizzle ORM best practices 2025", "Hono middleware patterns")
+2. **Search the web** for current best practices for the specific technology choice (e.g., "Drizzle ORM best practices 2025", "Hono middleware patterns") — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache)
 3. **Challenge** the decision:
    - Is this still the best choice? Has something better emerged?
    - Are there known pitfalls with this approach at the expected scale?
@@ -35,6 +35,10 @@ For each technical section in the blueprint (Sections 13-19: Tech Architecture, 
    - Specific configuration guidance
    - Known gotchas and mitigation strategies
    - Links to relevant documentation
+
+Additionally, verify the blueprint includes:
+- **Logging strategy** aligned with `<forge>/skills/forge/stack-guide.md` Logging Convention (structured logging, dev vs prod verbosity, browser console forwarding). If absent, flag it.
+- **Dev setup plan** that includes `restart.sh` and `kill-zombies.sh` (see `<forge>/skills/forge/forge-conventions.md` items 6-7). If absent, flag it.
 
 ## Output
 

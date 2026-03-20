@@ -126,7 +126,7 @@ Scan for custom/bespoke handling where the adopted framework already provides a 
 - **Bespoke i18n** when Paraglide handles it
 - **Manual form handling** when framework-provided form utilities exist
 
-Check the stack-guide.md for the full list of adopted frameworks. For each finding, search the web to confirm the framework provides the capability.
+Check the stack-guide.md for the full list of adopted frameworks. For each finding, search the web to confirm the framework provides the capability (check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache)).
 
 **What to flag**: Show the custom code, link to the framework's built-in solution, explain migration path.
 
