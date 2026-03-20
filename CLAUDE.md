@@ -16,13 +16,14 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/cast` | Deploy forge → membrane | Pour molten metal into the mold |
 | `/fold` | Absorb membrane → forge | Layer experience into the steel |
 
-## Arts (the Six P's)
+## Arts (Seven P's)
 Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
 | Art | Persona | Mode |
 |-----|---------|------|
 | `/prime` | The originator (ideation → blueprint) | Generative |
 | `/probe` | Senior solutions architect | Evaluative |
+| `/prod` | Uncle Bob (universal code quality) | Evaluative — foundational |
 | `/poke` | Staff engineer (tech debt) | Evaluative — light |
 | `/press` | Staff engineer (go-live readiness) | Evaluative — medium |
 | `/pound` | 21 adversarial QA personas | Evaluative — heavy |
@@ -79,11 +80,11 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 17 global skills (6 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run, shared preflight extraction, hash-free trackers, `/dig` skill, performance scripts
-- **Arts**: prime, probe, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
+- **Completed**: Three-pillar architecture, git-based drift detection, 18 global skills (7 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run, shared preflight extraction, hash-free trackers, `/dig` skill, performance scripts, `/prod` art (Uncle Bob)
+- **Arts**: prime, probe, prod, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (forge-cycle pre-flight for /mark, /cast, /fold)
-- **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
+- **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/forge-scan.sh` (project evidence for /prod, /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Embedded logging/restart.sh guidance cross-references in evaluative arts (probe, press). Added web research cache protocol with 30-day TTL to protocol.md, referenced from probe, press, poke.
+- **Recent**: Added `/prod` art — Uncle Bob's tenets (SOLID, Clean Code, Clean Architecture) as immutable, context-free code quality review. Evaluative quartet: prod → poke → press → pound. Also embedded logging/restart.sh cross-references and web research cache protocol.
 - **Pending**: None

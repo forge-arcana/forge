@@ -36,7 +36,7 @@ After pre-flight, proceed to the art's own `## Process` or `## Dimensions` secti
 
 Each art defines its own execution in its SKILL.md:
 
-- **Evaluative arts** (probe, poke, press, pound): adopt the persona, apply review framework/dimensions, web-search for current best practices, produce a structured report
+- **Evaluative arts** (probe, prod, poke, press, pound): adopt the persona, apply review framework/dimensions, web-search for current best practices, produce a structured report. Exception: `/prod` uses no web research — its canon (Uncle Bob) is immutable.
 - **Generative arts** (prime): adopt the persona, conduct a structured conversation/interview, produce a document
 
 ## Web Research Cache
@@ -89,18 +89,19 @@ This ensures the same topic maps to one cache key regardless of when the search 
 3. **Present results** to the user
 4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/fold` to absorb learnings into forge
 
-## The Six Arts
+## The Seven Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
 | `/prime` | The originator (ideation → blueprint) | Generative | — |
 | `/probe` | Senior solutions architect | Evaluative | — |
+| `/prod` | Uncle Bob (universal code quality) | Evaluative | Foundational |
 | `/poke` | Staff engineer (tech debt) | Evaluative | Light |
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
 | `/purge` | The Purist (forge master) | Cleansing | — |
 
-The evaluative trio — **poke → press → pound** — escalates in intensity: poking for soft spots, pressing for structural readiness, pounding from every angle. `/purge` stands apart — it tends the forge itself, not projects.
+The evaluative quartet — **prod → poke → press → pound** — escalates in intensity: prodding with universal principles, poking for project-specific soft spots, pressing for structural readiness, pounding from every angle. `/prod` is unique — immutable canon (Uncle Bob), no learnings, no self-improvement. `/purge` stands apart — it tends the forge itself, not projects.
 
 ## Learning Cycle
 

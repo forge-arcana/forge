@@ -75,7 +75,7 @@ Scan ALL files in `<forge>/memory/` for:
 
 ## Dimension 3: Art Fitness
 
-For each art's SKILL.md (`prime`, `probe`, `poke`, `press`, `pound`, `purge`):
+For each art's SKILL.md (all arts listed in `protocol.md` Seven Arts table):
 
 - **Bloat**: instructions that have grown too long or repetitive
 - **Outdated references**: mentions of old tool versions, deprecated patterns
