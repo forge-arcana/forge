@@ -38,17 +38,29 @@ Use the drift classifications from the preflight Skill Drift Report:
 | `ADDED` | Deploy to `~/.claude/skills/<name>/` |
 | `REMOVED` | Remove from `~/.claude/skills/<name>/` |
 
-After user confirms:
-- Deploy ADDED skills (copy directory)
-- Update FORGE-UPDATED skills (replace directory with forge version)
-- For DEPLOYED-DIFFERS: warn before overwriting — user may want to `/fold` first
-- Remove REMOVED skills (delete directory)
+After user confirms, deploy using the cast-deploy script:
 
-**IMPORTANT — cp -r pitfall**: `cp -r source/ dest/` copies INTO `dest/` when `dest/` already exists, creating `dest/source/`. To replace a skill directory's contents, either use `cp -rT source/ dest/` (copies contents, not the directory) or remove the destination first. Never use bare `cp -r` for skill updates.
+```bash
+# Deploy specific skills (FORGE-UPDATED or ADDED)
+bash <forge>/scripts/cast-deploy.sh skill1 skill2 ...
+
+# Or deploy all (fresh machine)
+bash <forge>/scripts/cast-deploy.sh --all
+```
+
+**NEVER use `cp -r` directly for skill deployment.** Always use `cast-deploy.sh` — it handles the rm-then-copy correctly and verifies no nesting bugs occurred.
+
+For DEPLOYED-DIFFERS: warn before overwriting — user may want to `/fold` first.
+For REMOVED: `rm -rf ~/.claude/skills/<name>/`.
+
+After deploying, verify with:
+```bash
+bash <forge>/scripts/cast-deploy.sh --verify
+```
 
 If no deployed skills exist (fresh machine):
-- Create `~/.claude/skills/`, `~/.claude/learnings/`, `~/.claude/memory/` if they don't exist
-- Deploy ALL skills from `<forge-path>/skills/` (treat every skill as ADDED)
+- Create `~/.claude/learnings/`, `~/.claude/memory/` if they don't exist
+- Deploy ALL skills: `bash <forge>/scripts/cast-deploy.sh --all`
 - Then continue to Steps 1b and 1c as normal
 
 ### 1b: Learning Sync (forge → user)
