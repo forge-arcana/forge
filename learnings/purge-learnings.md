@@ -13,3 +13,13 @@
 **Learning**: Domain-specific entity variable names (`tripId`, `seatId`, `employerUserId`) in examples reveal the source project even without the project name. Use generic entity names (`orderId`, `itemId`, `targetUserId`) in all forge examples and learnings.
 **Apply when**: Writing or reviewing any forge content that includes code examples with entity names.
 **Forge-worthy**: yes — forge purity pattern
+
+## SKILL.md Bloat From Absorbed Learnings (2026-03-20)
+**Learning**: When learnings get promoted into a SKILL.md (e.g., detection heuristics, grep patterns, detailed rules), they bloat the skill over time. Inline grep patterns belong in `forge-scan.sh`, logging rules belong in `forge-conventions.md`. The trim test: "Would the LLM produce worse output if this section were half the length?" If not, reference the source doc instead of restating.
+**Apply when**: Running /purge Dimension 3 (Skill Fitness) — check for sections >30% of file that restate content from reference docs or scan scripts.
+**Forge-worthy**: yes — universal skill maintenance pattern
+
+## Art Consolidation: Scope Over Count (2026-03-20)
+**Learning**: When two arts overlap >50% in findings, merge them. A wider-scope art with more dimensions is better than two overlapping arts that produce duplicate findings. The evaluative trifecta (poke → press → pound) works because each has a distinct scope: code quality, operational readiness, adversarial QA. Adding a fourth art for "universal principles" created redundancy with poke's existing tech debt dimensions.
+**Apply when**: Proposing new arts or reviewing whether existing arts still earn their seat.
+**Forge-worthy**: yes — forge architecture pattern

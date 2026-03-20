@@ -73,18 +73,24 @@ Scan ALL files in `<forge>/memory/` for:
 - **Promoted content**: memory that's already been absorbed into a SKILL.md or CLAUDE.md rule (redundant)
 - **Project contamination**: same rules as Dimension 1a
 
-## Dimension 3: Art Fitness
+## Dimension 3: Skill Fitness (arts AND task skills)
 
-For each art's SKILL.md (all arts listed in `protocol.md` Seven Arts table):
+For ALL skills in `<forge>/skills/*/SKILL.md` (not just arts):
 
-- **Bloat**: instructions that have grown too long or repetitive
-- **Outdated references**: mentions of old tool versions, deprecated patterns
+### 3a: Bloat Analysis
+Use the scan script's section-level breakdown. Flag any skill where:
+- **Total lines > 150** — skill may need trimming (poke at ~210 is the ceiling after absorbing 7 dimensions)
+- **Any single section > 30% of file** — section is doing too much, consider splitting or referencing external docs
+- **Inline grep patterns** — these belong in `forge-scan.sh`, not in SKILL.md. The scan script runs them mechanically; duplicating in the skill is maintenance burden.
+- **Restated reference content** — logging rules, conventions, framework lists that already live in `forge-conventions.md` or `stack-guide.md`. Reference the doc, don't restate.
+
+**The trim test**: for each verbose section, ask "Would the LLM produce worse output if this section were half the length?" If not, cut it.
+
+### 3b: Consistency & Freshness
+- **Outdated references**: old tool versions, deprecated patterns, stale counts
 - **Consistency**: do all arts follow the same protocol structure? Same frontmatter conventions?
-- **Grep patterns**: are the example grep commands still valid for the current stack?
-
-Also check:
-- `<forge>/skills/forge/protocol.md` — is the arts table current? Learning cycle accurate?
-- `<forge>/skills/forge/forge-conventions.md` — does the checklist match reality?
+- **Arts table**: does `protocol.md` match reality? Learning cycle accurate?
+- **Conventions**: does `forge-conventions.md` checklist match current practice?
 
 ## Dimension 4: Reference Integrity
 

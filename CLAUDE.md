@@ -16,18 +16,19 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/cast` | Deploy forge → membrane | Pour molten metal into the mold |
 | `/fold` | Absorb membrane → forge | Layer experience into the steel |
 
-## Arts (Seven P's)
+## Arts (Six P's)
 Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
 | Art | Persona | Mode |
 |-----|---------|------|
 | `/prime` | The originator (ideation → blueprint) | Generative |
 | `/probe` | Senior solutions architect | Evaluative |
-| `/prod` | Uncle Bob (universal code quality) | Evaluative — foundational |
-| `/poke` | Staff engineer (tech debt) | Evaluative — light |
+| `/poke` | Staff engineer (code quality + tech debt) | Evaluative — light |
 | `/press` | Staff engineer (go-live readiness) | Evaluative — medium |
 | `/pound` | 21 adversarial QA personas | Evaluative — heavy |
 | `/purge` | The Purist (forge master) | Cleansing |
+
+**Evaluative trifecta** — poke often, press before milestones, pound before ship.
 
 ## Task Skills
 | Skill | Purpose |
@@ -80,11 +81,11 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 18 global skills (7 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, first `/purge` run, shared preflight extraction, hash-free trackers, `/dig` skill, performance scripts, `/prod` art (Uncle Bob)
-- **Arts**: prime, probe, prod, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
+- **Completed**: Three-pillar architecture, git-based drift detection, 17 global skills (6 arts + 11 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound)
+- **Arts**: prime, probe, poke, press, pound, purge — shared protocol in `skills/forge/protocol.md`
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (forge-cycle pre-flight for /mark, /cast, /fold)
-- **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/forge-scan.sh` (project evidence for /prod, /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
+- **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Speed optimization pass — added `fold-evidence.sh` and `wawa-status.sh` scripts, parallelized reads across 7 skills (wawa, fold, probe, pound, wrap, cast, mark), pinned restart/kill-zombies to project root
+- **Recent**: Absorbed /prod into /poke — evaluative trifecta (poke → press → pound). Poke now covers Uncle Bob's tenets (SOLID, Clean Functions, Dependency Direction, Composition) alongside tech debt. Speed optimization pass across 7 skills.
 - **Pending**: None

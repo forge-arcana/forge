@@ -160,7 +160,7 @@ echo "### Art SKILL.md sizes"
 echo ""
 echo "| Art | Lines | Chars | Has Protocol Ref? |"
 echo "|-----|-------|-------|-------------------|"
-for art in prime probe prod poke press pound purge; do
+for art in prime probe poke press pound purge; do
   skill_file="$FORGE_PATH/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     lines=$(wc -l < "$skill_file")
@@ -175,11 +175,57 @@ for art in prime probe prod poke press pound purge; do
 done
 echo ""
 
+echo "### Section-level bloat analysis (all skills)"
+echo ""
+echo "| Skill | Section | Lines | % of File |"
+echo "|-------|---------|-------|-----------|"
+for f in "$FORGE_PATH"/skills/*/SKILL.md; do
+  [[ ! -f "$f" ]] && continue
+  skill_name=$(basename "$(dirname "$f")")
+  [[ "$skill_name" == "forge" ]] && continue
+  total=$(wc -l < "$f")
+  python3 -c "
+import re
+with open('$f') as fh:
+    content = fh.read()
+sections = re.split(r'^## ', content, flags=re.MULTILINE)
+for section in sections[1:]:
+    lines_list = section.strip().split('\n')
+    title = lines_list[0].strip()[:40]
+    count = len(lines_list)
+    pct = round(100 * count / $total) if $total > 0 else 0
+    if pct >= 15:
+        print(f'| $skill_name | {title} | {count} | {pct}% |')
+" 2>/dev/null || true
+done
+echo ""
+
+echo "### Redundancy check: content duplicated from reference docs"
+echo '```'
+for f in "$FORGE_PATH"/skills/*/SKILL.md; do
+  [[ ! -f "$f" ]] && continue
+  skill_name=$(basename "$(dirname "$f")")
+  [[ "$skill_name" == "forge" ]] && continue
+  # Check for inline grep patterns (should be in scan script instead)
+  grep_count=$(grep -c "^rg \|^grep " "$f" 2>/dev/null | head -1 || true)
+  grep_count="${grep_count:-0}"
+  if [[ "$grep_count" =~ ^[0-9]+$ ]] && [[ "$grep_count" -gt 0 ]]; then
+    echo "$skill_name: $grep_count inline grep patterns (should be in forge-scan.sh)"
+  fi
+  logging_lines=$(grep -c "MUST be logged\|MUST NOT be logged\|What MUST\|What MUST NOT" "$f" 2>/dev/null | head -1 || true)
+  logging_lines="${logging_lines:-0}"
+  if [[ "$logging_lines" =~ ^[0-9]+$ ]] && [[ "$logging_lines" -gt 2 ]]; then
+    echo "$skill_name: $logging_lines logging rule lines (should reference forge-conventions.md)"
+  fi
+done
+echo '```'
+echo ""
+
 echo "### Consistency: frontmatter fields"
 echo ""
 echo "| Art | name | description | user-invocable |"
 echo "|-----|------|-------------|----------------|"
-for art in prime probe prod poke press pound purge; do
+for art in prime probe poke press pound purge; do
   skill_file="$FORGE_PATH/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     has_name=$(grep -c '^name:' "$skill_file" 2>/dev/null || echo "0")
@@ -221,7 +267,7 @@ echo ""
 # Skill count verification
 echo "### Skill count verification"
 TOTAL_SKILLS=$(find "$FORGE_PATH/skills" -maxdepth 1 -mindepth 1 -type d ! -name forge | wc -l)
-ARTS=$(echo "prime probe prod poke press pound purge" | wc -w)
+ARTS=$(echo "prime probe poke press pound purge" | wc -w)
 TASK_SKILLS=$((TOTAL_SKILLS - ARTS))
 echo "**Total skills**: $TOTAL_SKILLS ($ARTS arts + $TASK_SKILLS task skills)"
 echo ""

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# forge-scan.sh — Mechanical evidence collection for /prod, /poke, and /press
-# Usage: forge-scan.sh <prod|poke|press> <project-path>
+# forge-scan.sh — Mechanical evidence collection for /poke and /press
+# Usage: forge-scan.sh <poke|press> <project-path>
 # Outputs structured markdown with grep findings for LLM judgment
 #
 # Portable: Linux, macOS, Windows (Git Bash / WSL).
@@ -11,7 +11,7 @@ SCAN_TYPE="${1:-}"
 PROJECT="${2:-.}"
 
 if [[ -z "$SCAN_TYPE" ]]; then
-  echo "Usage: forge-scan.sh <prod|poke|press> <project-path>"
+  echo "Usage: forge-scan.sh <poke|press> <project-path>"
   exit 1
 fi
 
@@ -127,24 +127,28 @@ check_exists() {
 }
 
 # ============================================================
-# PROD SCAN — Universal code quality evidence (Uncle Bob)
+# POKE SCAN — Code quality + tech debt evidence collection
 # ============================================================
-if [[ "$SCAN_TYPE" == "prod" ]]; then
+if [[ "$SCAN_TYPE" == "poke" ]]; then
 
-  echo "# /prod Evidence Collection"
+  echo "# /poke Evidence Collection"
   echo ""
 
-  # --- Dimension 1: SOLID ---
-  echo "## Dimension 1: SOLID"
+  # --- Dimension 1: SOLID & Strategy Patterns ---
+  echo "## Dimension 1: SOLID & Strategy Patterns"
   echo ""
 
   scan_pattern "Switch/case chains (OCP candidates)" \
     "case '" \
     "ts"
 
-  scan_pattern "Classes with many methods (SRP smell)" \
-    '(public|private|protected)\s+(async\s+)?\w+\(' \
+  scan_pattern "Environment branching (NODE_ENV)" \
+    "NODE_ENV|isDev|isProduction|isStaging" \
     "ts"
+
+  scan_pattern "Feature flag if-statements" \
+    "featureFlag|feature_flag|FEATURE_" \
+    "ts" "-i"
 
   scan_pattern "Concrete class imports (DIP — should inject)" \
     'import.*Service|import.*Repository|import.*Client' \
@@ -152,127 +156,6 @@ if [[ "$SCAN_TYPE" == "prod" ]]; then
 
   scan_pattern "NotImplemented / method stubs (LSP/ISP smell)" \
     'NotImplemented|throw new Error.*not implemented|TODO.*implement' \
-    "ts" "-i"
-
-  # --- Dimension 2: Clean Functions ---
-  echo "## Dimension 2: Clean Functions"
-  echo ""
-
-  scan_pattern "Generic variable names (data, info, result, tmp)" \
-    '\b(const|let|var)\s+(data|info|result|tmp|temp|ret|val|obj|item)\b' \
-    "ts"
-
-  scan_pattern "Functions with many parameters (>4)" \
-    '\(((\w+:\s*\w+,\s*){4,})' \
-    "ts"
-
-  scan_pattern "Deep nesting (4+ levels of indentation)" \
-    '^\s{16,}\S' \
-    "ts"
-
-  scan_pattern "Single-letter variables (outside loops)" \
-    '\b(const|let)\s+[a-z]\s*=' \
-    "ts"
-
-  # --- Dimension 3: DRY / KISS / YAGNI ---
-  echo "## Dimension 3: DRY / KISS / YAGNI"
-  echo ""
-
-  scan_pattern "Abstractions with one implementation" \
-    'implements \w+' \
-    "ts"
-
-  scan_pattern "Feature flag infrastructure" \
-    'featureFlag|feature_flag|FEATURE_|isEnabled' \
-    "ts" "-i"
-
-  scan_pattern "Config-driven behavior" \
-    'config\[|getConfig|configMap|strategyMap' \
-    "ts" "-i"
-
-  # --- Dimension 4: Law of Demeter ---
-  echo "## Dimension 4: Law of Demeter"
-  echo ""
-
-  scan_pattern "Deep property chains (a.b.c.d — train wrecks)" \
-    '\w+\.\w+\.\w+\.\w+' \
-    "ts"
-
-  scan_pattern "Optional chaining depth (a?.b?.c?.d)" \
-    '\?\.\w+\?\.\w+\?\.' \
-    "ts"
-
-  # --- Dimension 5: Composition over Inheritance ---
-  echo "## Dimension 5: Composition over Inheritance"
-  echo ""
-
-  scan_pattern "Class inheritance (extends)" \
-    'class \w+ extends' \
-    "ts"
-
-  scan_pattern "Mixin patterns" \
-    'mixin|Mixin|applyMixin' \
-    "ts" "-i"
-
-  # --- Dimension 6: Dependency Direction ---
-  echo "## Dimension 6: Dependency Direction"
-  echo ""
-
-  scan_pattern "Shared importing from features (wrong direction)" \
-    "from ['\"]\.\./(features|pages|routes|views)/" \
-    "ts"
-
-  scan_pattern "Circular dependency markers" \
-    'circular|CIRCULAR' \
-    "ts" "-i"
-
-  scan_pattern "Domain importing framework code" \
-    "from ['\"]hono|from ['\"]react|from ['\"]express|from ['\"]next" \
-    "ts"
-
-  # --- File stats ---
-  echo "## File Size Analysis"
-  echo ""
-  echo "### Largest TypeScript files (potential SRP violations)"
-  echo '```'
-  find "$PROJECT" -name '*.ts' -o -name '*.tsx' \
-    | grep -v node_modules \
-    | grep -v dist \
-    | grep -v '.d.ts' \
-    | while read -r f; do
-        wc -l < "$f" | tr -d ' '
-        echo " $f"
-      done \
-    | sort -rn \
-    | head -15 \
-    | awk '{printf "%4d lines  %s\n", $1, $2}'
-  echo '```'
-  echo ""
-
-fi
-
-# ============================================================
-# POKE SCAN — Tech debt evidence collection
-# ============================================================
-if [[ "$SCAN_TYPE" == "poke" ]]; then
-
-  echo "# /poke Evidence Collection"
-  echo ""
-
-  # --- Dimension 1: Strategy Pattern Opportunities ---
-  echo "## Dimension 1: Strategy Patterns"
-  echo ""
-
-  scan_pattern "Environment branching (NODE_ENV)" \
-    "NODE_ENV|isDev|isProduction|isStaging" \
-    "ts"
-
-  scan_pattern "Switch/case chains (>3 cases)" \
-    "case '" \
-    "ts"
-
-  scan_pattern "Feature flag if-statements" \
-    "featureFlag|feature_flag|FEATURE_" \
     "ts" "-i"
 
   # --- Dimension 2: Band-Aids ---
@@ -374,6 +257,81 @@ if [[ "$SCAN_TYPE" == "poke" ]]; then
   scan_pattern "Dev log endpoint" \
     '/api/dev/log|dev.log|browser_console' \
     "ts" "-i"
+
+  # --- Dimension 5: Clean Functions ---
+  echo "## Dimension 5: Clean Functions"
+  echo ""
+
+  scan_pattern "Generic variable names (data, info, result, tmp)" \
+    '\b(const|let|var)\s+(data|info|result|tmp|temp|ret|val|obj|item)\b' \
+    "ts"
+
+  scan_pattern "Functions with many parameters (>4)" \
+    '\(((\w+:\s*\w+,\s*){4,})' \
+    "ts"
+
+  scan_pattern "Deep nesting (4+ levels of indentation)" \
+    '^\s{16,}\S' \
+    "ts"
+
+  scan_pattern "Single-letter variables (outside loops)" \
+    '\b(const|let)\s+[a-z]\s*=' \
+    "ts"
+
+  # --- Dimension 6: Dependency Direction & Law of Demeter ---
+  echo "## Dimension 6: Dependency Direction & Law of Demeter"
+  echo ""
+
+  scan_pattern "Shared importing from features (wrong direction)" \
+    "from ['\"]\.\./(features|pages|routes|views)/" \
+    "ts"
+
+  scan_pattern "Circular dependency markers" \
+    'circular|CIRCULAR' \
+    "ts" "-i"
+
+  scan_pattern "Domain importing framework code" \
+    "from ['\"]hono|from ['\"]react|from ['\"]express|from ['\"]next" \
+    "ts"
+
+  scan_pattern "Deep property chains (train wrecks)" \
+    '\w+\.\w+\.\w+\.\w+' \
+    "ts"
+
+  scan_pattern "Optional chaining depth (a?.b?.c?.d)" \
+    '\?\.\w+\?\.\w+\?\.' \
+    "ts"
+
+  # --- Dimension 7: Composition over Inheritance ---
+  echo "## Dimension 7: Composition over Inheritance"
+  echo ""
+
+  scan_pattern "Class inheritance (extends)" \
+    'class \w+ extends' \
+    "ts"
+
+  scan_pattern "Mixin patterns" \
+    'mixin|Mixin|applyMixin' \
+    "ts" "-i"
+
+  # --- File Size Analysis ---
+  echo "## File Size Analysis"
+  echo ""
+  echo "### Largest TypeScript files (potential SRP violations)"
+  echo '```'
+  find "$PROJECT" -name '*.ts' -o -name '*.tsx' \
+    | grep -v node_modules \
+    | grep -v dist \
+    | grep -v '.d.ts' \
+    | while read -r f; do
+        wc -l < "$f" | tr -d ' '
+        echo " $f"
+      done \
+    | sort -rn \
+    | head -15 \
+    | awk '{printf "%4d lines  %s\n", $1, $2}'
+  echo '```'
+  echo ""
 
   # --- File structure checks ---
   echo "## Project Structure"
