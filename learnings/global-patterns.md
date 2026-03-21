@@ -71,3 +71,23 @@
 ## Android AVD Segregation Across Projects (2026-03-21)
 **Learning**: Prefix AVDs with project name (`<project>-<role>`) to avoid collisions across projects sharing an Android SDK. Nuke commands must clean orphaned `.avd` data dirs under `ANDROID_AVD_HOME` — left behind when emulators run during `avdmanager delete`. Each project owns its own emulator config; no shared state.
 **Apply when**: Setting up Android emulator workflows for Capacitor/hybrid projects in multi-project environments.
+
+## Voice TTS Is the Dominant Cost at Scale (2026-03-21)
+**Learning**: For voice-first apps, TTS API cost is the single biggest scaling concern. At low user counts, TTS can be ~50% of total infrastructure cost. Making voice playback opt-in is both a good UX decision (avoids uncanny valley) and a critical cost lever. Always model voice costs separately and identify which tier boundary triggers the cost jump.
+**Apply when**: Any voice-first product — model TTS costs as the primary scaling constraint.
+
+## Three-Layer Architecture as Cost Control (2026-03-21)
+**Learning**: For AI-powered apps with high-frequency input, separating processing into layers with different cost profiles (free capture → cheap classification → expensive generation only on-demand) makes the product viable for solo founders. Most user interactions touch only the cheap layers. The expensive layer fires only when the user explicitly asks. This is an architecture decision that IS a business decision.
+**Apply when**: Designing any AI-powered product — layer processing by cost, make expensive layers on-demand.
+
+## Offline-First Is Non-Negotiable for Capture Apps (2026-03-21)
+**Learning**: When the core use case happens in a place with no internet (commute, underground, spotty signal), offline-first isn't a nice-to-have — it's the difference between the product working and not working. Auto-sync (not manual push) is correct because the whole point of a capture app is reducing cognitive load. Requiring the user to remember to sync defeats the purpose.
+**Apply when**: If your primary use case happens offline, offline-first is table stakes.
+
+## Trust Ladder Onboarding for Sensitive Features (2026-03-21)
+**Learning**: When a product requires sensitive data (voice biometrics, diary-level thoughts), don't ask for everything upfront. Build a trust ladder: deliver core value first (basic features), then progressively unlock sensitive features (voice input → voice customization). The user should feel "of course I'll give you this" by the time you ask, not "why do you need this?"
+**Apply when**: Any app requiring biometric or deeply personal data — design the onboarding progression.
+
+## Modes as a Volume Dial, Not Separate Machines (2026-03-21)
+**Learning**: When a product has multiple "modes" of interaction, check whether these are genuinely different processing pipelines or just different amounts of the same processing. Often all modes use the same engine — the mode is injected as context into one system prompt. This avoids maintaining N separate AI pipelines. The modes are a "volume dial" of AI involvement: from zero (quick action) to full (open dialogue with history).
+**Apply when**: Prefer one adaptive system over many specialized systems when the variation is in degree, not kind.
