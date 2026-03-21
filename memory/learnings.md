@@ -11,18 +11,15 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ### Knowledge Flow (2026-03-21)
 - Cast and fold are symmetric mirrors — both triage before acting, both present tables, both ask for confirmation. See `memory/identity.md` "The Heart of Cast and Fold" for design rationale.
-- **Cast (forge → user)**: Classifies entries as NEW / SYNCED / UPDATED / USER-ONLY. Deploys only confirmed entries. Never overwrites silently.
-- **Fold (user → forge)**: Classifies entries as NEW / DUPLICATE / INCORPORATED / SUPERSEDED / CROSS-CUTTING. Absorbs only confirmed entries. Never removes forge-only content.
+- Both use the **universal classification system** (IDENTICAL, FORGE-UPDATED, DEPLOYED-DIFFERS, CONFLICT, ADDED, REMOVED) from `preflight.md`
+- **Cast (forge → user)**: Deploys ADDED and FORGE-UPDATED entries. Skips DEPLOYED-DIFFERS (advises `/fold` first). Never overwrites silently.
+- **Fold (user → forge)**: Absorbs REMOVED and DEPLOYED-DIFFERS entries. Adds fold-specific sub-classifications (NEW, CROSS-CUTTING, DUPLICATE, INCORPORATED, SUPERSEDED) for quality gating. Never removes forge-only content.
 - **Config sync**: Cast deploys forge rules → `~/.claude/CLAUDE.md`. Fold absorbs user additions → `claude-code-rules.md`. Neither direction removes the other side's content.
-- Learnings accumulate in project memory (`~/.claude/projects/*/memory/*-learnings.md`) during art runs
-- `/fold` Part 3 Step 0 scans project memories for `Forge-worthy: yes` entries, genericizes them, and promotes to `~/.claude/learnings/general.md`
+- Arts flag learnings as `Forge-worthy: yes/no` at write time during art runs
+- Learnings accumulate in project memory (`~/.claude/projects/*/memory/*-learnings.md`), then `/fold` Part 3 Step 0 scans for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md`
+- `/fold` Part 3 Steps 1-4 triage and absorb into `forge/learnings/` → next art run reads them first
 - `/fold` NEVER deletes from user's global space — tracks processed entries via title-based tracker
 - Promotion is always a COPY, never a move — project entries persist after promotion
-
-### Self-Improving Loop (2026-03-19)
-- Arts (listed in protocol.md Seven Arts table) flag learnings as `Forge-worthy: yes/no` at write time
-- `/fold` Part 3 Step 0 scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md`
-- `/fold` Part 3 Steps 1-4 triage and absorb into `forge/learnings/` → next skill run reads them first
 
 ## Skills
 
@@ -51,13 +48,12 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ## Deployment
 
-### Drift Detection (2026-03-18)
-- Git-based drift detection using `diff --strip-trailing-cr` (no CRLF issues across OSes)
-- `/mark` always runs `git fetch` first, then diffs forge source vs deployed membrane
-- `/cast` does `git pull` then diff-based skill sync — no manifest file needed
-- `/fold` Part 1a does skill reverse-sync: diffs deployed `~/.claude/skills/` against `<forge>/skills/`, absorbs deployed-side changes back into forge source
-- Both directions covered: `/cast` warns about drift, `/fold` absorbs it
-- `/mark` provides read-only inspection of the full membrane state
+### Drift Detection (2026-03-21)
+- `forge-status.sh` is the shared classification engine — one script, three interpretations
+- `/mark` runs it in fetch mode (read-only), `/cast` and `/fold` run it in pull mode (before acting)
+- Script handles skill drift (three-way with baseline SHA), learning status, memory status — all mechanically
+- Git-based comparison using `diff --strip-trailing-cr` (no CRLF issues across OSes)
+- Cast acts on the cast column (deploy ADDED/FORGE-UPDATED), fold acts on the fold column (absorb REMOVED/DEPLOYED-DIFFERS)
 - No manual inbox needed — all knowledge flows through auto-memory → staging → `/fold`
 
 ### /fold Unified Flow (2026-03-17)
