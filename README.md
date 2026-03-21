@@ -1,6 +1,6 @@
 # Forge
 
-A maker's forge. Five arts to shape ideas, challenge architecture, review code, and stress-test — all through AI-guided skills.
+A maker's forge. Seven arts to shape ideas, challenge architecture, review code, stress-test, crack blockers, and cleanse knowledge — all through AI-guided skills.
 
 ---
 
@@ -16,7 +16,7 @@ Three one-syllable commands drive the forge loop:
 
 ---
 
-## Arts (the Five P's)
+## Arts (the Seven P's)
 
 Arts are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
@@ -28,12 +28,22 @@ Arts are specialist agent skills — they adopt a persona and have a self-improv
 ### Architecture & Quality
 | Art | What it does |
 |-----|-------------|
-| `/probe` | Challenge blueprint architecture against current best practices (self-improving) |
+| `/probe` | Challenge architecture decisions against current best practices — probes blueprints, plans, or conversations (self-improving) |
 | `/poke` | Staff-engineer code review for tech debt and logging hygiene (self-improving) |
 | `/press` | Go-live readiness scorecard across 7 dimensions (self-improving) |
 | `/pound` | Deep QA with 21 adversarial personas — generates tests, finds edge cases |
 
-The evaluative trio — **poke → press → pound** — escalates in intensity.
+The evaluative trifecta — **poke → press → pound** — escalates in intensity.
+
+### When Blocked
+| Art | What it does |
+|-----|-------------|
+| `/pry` | The Lever — relentless solution-finder that cracks "can't be done" claims (self-improving) |
+
+### Forge Hygiene
+| Art | What it does |
+|-----|-------------|
+| `/purge` | The Purist — cleanses stale knowledge, deduplication, and drift across the forge (self-improving) |
 
 ## Task Skills
 
@@ -49,6 +59,8 @@ The evaluative trio — **poke → press → pound** — escalates in intensity.
 | `/ponci` | Push to remote and monitor CI |
 | `/vsix` | Publish a VS Code extension |
 | `/dig` | Think deeper — reframe agent as staff engineer for current discussion |
+| `/temper` | Hardened evaluation — runs poke + press N times, consolidates with confidence scoring |
+| `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
 
 ### Knowledge Management
 | Skill | What it does |
@@ -70,10 +82,10 @@ During any work session (automatic):
 /fold from any project (consumes global staging):
   → reads ~/.claude/learnings/ + ~/.claude/memory/
   → triages, genericizes, deduplicates
-  → writes to forge/learnings/{probe,press,poke,prime,global-patterns}.md
+  → writes to forge/learnings/{probe,press,poke,prime,pry,purge,global-patterns}.md
   → never deletes from user's global space
 
-Arts (/prime, /probe, /poke, /press, /pound):
+Arts (/prime, /probe, /poke, /press, /pound, /pry, /purge):
   → read forge/learnings/ first → smarter decisions
   → write back to project memory/ → auto-accumulates → cycle continues
 ```
@@ -104,6 +116,10 @@ forge/
 │   ├── srs/               # Restart script setup
 │   ├── vsix/              # VS Code extension publishing
 │   ├── dig/               # Think deeper — staff engineer stance
+│   ├── eli5/              # Explain Like I'm 5
+│   ├── pry/               # The Lever — relentless solution-finder (art)
+│   ├── purge/             # The Purist — forge hygiene (art, self-improving)
+│   ├── temper/            # Hardened evaluation — repeated poke + press
 │   ├── wawa/              # Outstanding work summary
 │   └── wrap/              # Pre-commit ritual
 ├── learnings/             # Absorbed team wisdom
@@ -148,8 +164,14 @@ cd forge
 /fold               → feed learnings back to forge
 ```
 
+**Stuck on something "impossible"?**
+```
+/pry                → crack the blocker
+```
+
 **Before go-live?**
 ```
+/temper             → hardened evaluation (poke + press × 3)
 /press              → readiness scorecard
 /pound "auth flow"  → deep QA on specific area
 ```
