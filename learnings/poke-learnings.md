@@ -30,3 +30,11 @@
 **Learning**: In projects using TanStack Query, manual `useState` + `useEffect` + fetch patterns for server data indicate framework misuse. These miss caching, deduplication, retry, background refetch, and optimistic updates. Common in admin/settings pages added later in the project lifecycle when the pattern isn't enforced. A quick grep for `useState.*loading.*true` or `useEffect.*api.get` catches these.
 **Apply when**: Reviewing frontend code in TanStack Query projects, especially admin/settings pages.
 **Forge-worthy**: yes — universal React data-fetching pattern
+
+## Client-Supplied Identity in Validation Schemas (2026-03-21)
+**Learning**: When a validation schema accepts an identity field (e.g., `targetUserId`, `ownerUserId`) from the request body for an authenticated endpoint, the backend must verify the relationship between the caller and the referenced entity — not just that the entity exists. Without engagement/relationship verification, any authenticated user can target arbitrary entities with false claims. Especially dangerous for complaint, dispute, and review endpoints.
+**Apply when**: Reviewing any endpoint that accepts an entity ID from the request body and creates a record linking the caller to that entity.
+
+## Schema Defaults Must Match Code Defaults (2026-03-21)
+**Learning**: When auditing DB schemas, verify that column defaults match what the application code actually inserts. A default of `'occupied'` when code always inserts `'empty'` is a bug waiting to happen. Unused schema defaults are silent time bombs — they only fire when someone forgets to specify the value explicitly, and then they produce wrong data instead of an error.
+**Apply when**: Reviewing database schemas for tech debt, especially columns with default values that aren't tested by normal application flows.
