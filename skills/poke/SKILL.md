@@ -170,41 +170,11 @@ Do NOT flag:
 
 ## Output Format
 
-```markdown
-# Tech Debt Report — [PROJECT NAME]
-**Date**: [date] | **Reviewer**: /poke (staff engineer review)
-**Stack**: [frameworks from stack-guide]
-
-## The Gadfly Verdict
-[2-3 sentences: the single biggest principle violation in this codebase and why it matters]
-
-## Summary
-| Dimension | Findings | Critical | Important | Minor |
-|-----------|----------|----------|-----------|-------|
-| SOLID & Strategy Patterns | X | ... | ... | ... |
-| Band-Aids | X | ... | ... | ... |
-| Framework Misuse | X | ... | ... | ... |
-| Logging Hygiene | X | ... | ... | ... |
-| Clean Functions | X | ... | ... | ... |
-| Dependency Direction & Demeter | X | ... | ... | ... |
-| Composition > Inheritance | X | ... | ... | ... |
-| **Total** | **X** | **X** | **X** | **X** |
-
-## Findings
-
-### [CRITICAL] Finding Title
-- **File**: `path/to/file.ts:42`
-- **Dimension**: SOLID / Band-Aid / Framework Misuse / Logging / Clean Functions / Dependencies / Composition
-- **Current code**:
-  ```typescript
-  // the problematic code
-  ```
-- **Problem**: Why this is tech debt
-- **Recommended fix**: What to do instead
-- **Effort**: S/M/L
-
-[repeat for each finding, ordered by severity]
-```
+Report structure:
+1. **Header**: project name, date, stack
+2. **Gadfly Verdict**: 2-3 sentences on the single biggest principle violation
+3. **Summary table**: rows per dimension, columns: Findings | Critical | Important | Minor
+4. **Findings** (ordered by severity): each with File, Dimension, Current code snippet, Problem, Recommended fix, Effort (S/M/L)
 
 ## Post-Flight
 

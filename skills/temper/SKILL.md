@@ -15,7 +15,6 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 - Before major releases (more thorough than a single poke + press)
 - When you want confidence-weighted findings instead of a single opinion
 - When you suspect false positives from a single evaluative pass
-- As a pre-ship gate alongside or instead of the evaluative trifecta
 
 ## Step 0: Setup
 
@@ -44,6 +43,24 @@ Save the output as `PRESS_EVIDENCE`.
 
 Launch subagents to perform independent analyses. Each subagent gets the same evidence but analyzes independently — the LLM reasoning is where variance occurs.
 
+### Finding Format (shared by both poke and press prompts)
+
+All subagent findings MUST use this exact format:
+
+```
+FINDING_START
+TITLE: [short title]
+SEVERITY: [CRITICAL | IMPORTANT | MINOR]
+DIMENSION: [which dimension]
+SCORE: [1-5, press only — omit for poke]
+FILE: [path:line or "N/A" if architectural]
+PROBLEM: [description]
+FIX: [recommended fix]
+EFFORT: [S/M/L]
+CODE: [problematic code snippet max 5 lines, poke only — omit for press]
+FINDING_END
+```
+
 ### Poke Passes
 
 Spawn N subagents in parallel (where N = pass count), each with this prompt template:
@@ -51,11 +68,8 @@ Spawn N subagents in parallel (where N = pass count), each with this prompt temp
 ```
 You are a staff engineer who learned at Uncle Bob's knee. Analyze the following
 project evidence for code quality and tech debt issues.
-
-RULES:
-- NEVER use && or ; to chain bash commands
-- Do NOT run forge-scan.sh — evidence is provided below
-- Produce findings in the EXACT format specified below
+NEVER use && or ; to chain bash commands.
+Do NOT run forge-scan.sh — evidence is provided below.
 
 PROJECT CONTEXT:
 [paste project CLAUDE.md content]
@@ -69,7 +83,7 @@ Read <forge>/learnings/poke-learnings.md if it exists.
 EVIDENCE:
 [paste POKE_EVIDENCE]
 
-REVIEW DIMENSIONS (from /poke):
+REVIEW DIMENSIONS:
 1. SOLID & Strategy Patterns
 2. Band-Aids (including source-field fallbacks and client-supplied actor identity)
 3. Framework Misuse
@@ -78,20 +92,8 @@ REVIEW DIMENSIONS (from /poke):
 6. Dependency Direction & Law of Demeter
 7. Composition over Inheritance
 
-For each finding, output EXACTLY this format (one per finding):
-
-FINDING_START
-TITLE: [short title]
-SEVERITY: [CRITICAL | IMPORTANT | MINOR]
-DIMENSION: [which of the 7 dimensions]
-FILE: [path:line]
-PROBLEM: [why this is an issue]
-FIX: [recommended fix]
-EFFORT: [S/M/L]
-CODE: [problematic code snippet, max 5 lines]
-FINDING_END
-
-Output ONLY findings in this format. No preamble, no summary, no commentary.
+For each finding, output EXACTLY the FINDING format (with CODE, without SCORE).
+Output ONLY findings. No preamble, no summary, no commentary.
 ```
 
 ### Press Passes
@@ -101,11 +103,8 @@ Spawn N subagents in parallel, each with this prompt template:
 ```
 You are a staff engineer performing a pre-launch readiness assessment.
 Analyze the following project evidence across 7 readiness dimensions.
-
-RULES:
-- NEVER use && or ; to chain bash commands
-- Do NOT run forge-scan.sh — evidence is provided below
-- Produce findings in the EXACT format specified below
+NEVER use && or ; to chain bash commands.
+Do NOT run forge-scan.sh — evidence is provided below.
 
 PROJECT CONTEXT:
 [paste project CLAUDE.md content]
@@ -119,31 +118,13 @@ Read <forge>/learnings/press-learnings.md if it exists.
 EVIDENCE:
 [paste PRESS_EVIDENCE]
 
-REVIEW DIMENSIONS (from /press):
-1. Security
-2. Scalability
-3. Operations
-4. Compliance
-5. Observability
-6. Deployment
-7. Documentation
+REVIEW DIMENSIONS:
+1. Security  2. Scalability  3. Operations  4. Compliance
+5. Observability  6. Deployment  7. Documentation
 
-For each dimension, also assign a score: 1-5 (1=not addressed, 5=excellent).
-
-For each finding, output EXACTLY this format (one per finding):
-
-FINDING_START
-TITLE: [short title]
-SEVERITY: [CRITICAL | IMPORTANT | MINOR]
-DIMENSION: [which of the 7 dimensions]
-SCORE: [1-5 for this dimension]
-FILE: [path:line or "N/A" if architectural]
-PROBLEM: [what the gap is]
-FIX: [recommended fix]
-EFFORT: [S/M/L]
-FINDING_END
-
-Output ONLY findings in this format. No preamble, no summary, no commentary.
+For each dimension, assign a score 1-5 (1=not addressed, 5=excellent).
+For each finding, output EXACTLY the FINDING format (with SCORE, without CODE).
+Output ONLY findings. No preamble, no summary, no commentary.
 ```
 
 **Important**: Launch ALL subagents (poke + press) in a single parallel batch. Do not wait for poke to finish before starting press.
@@ -162,83 +143,24 @@ Parse all subagent outputs. For each unique finding (match by TITLE + FILE, fuzz
 
 ### Severity Promotion
 
-If a finding appears at different severities across passes, use the **highest** severity observed. Confidence should already be HIGH if multiple passes flagged it.
+If a finding appears at different severities across passes, use the **highest** severity observed.
 
 ### Press Score Consolidation
 
-For each press dimension, average the scores across passes (round to nearest 0.5). Use the averaged score for the final scorecard.
+For each press dimension, average the scores across passes (round to nearest 0.5).
 
 ## Step 4: Output — The Temper Report
 
-```markdown
-# Temper Report — [PROJECT NAME]
-**Date**: [date] | **Passes**: [N] poke + [N] press | **Method**: /temper
-**Stack**: [frameworks]
+Produce a markdown report with these sections in order:
 
-## Confidence Legend
-- **Confirmed** (N/N) — every pass flagged this independently
-- **Likely** (>=half) — majority consensus
-- **Possible** (1/N) — single pass only, may be noise
-
----
-
-## Readiness Scorecard (from /press passes)
-
-| Dimension | Avg Score | Gaps | Status |
-|-----------|-----------|------|--------|
-| Security | X.X/5 | [count] | red/yellow/green |
-| Scalability | X.X/5 | [count] | red/yellow/green |
-| Operations | X.X/5 | [count] | red/yellow/green |
-| Compliance | X.X/5 | [count] | red/yellow/green |
-| Observability | X.X/5 | [count] | red/yellow/green |
-| Deployment | X.X/5 | [count] | red/yellow/green |
-| Documentation | X.X/5 | [count] | red/yellow/green |
-| **Overall** | **X.X/35** | **[total]** | **verdict** |
-
-## Code Quality Summary (from /poke passes)
-
-| Dimension | Confirmed | Likely | Possible |
-|-----------|-----------|--------|----------|
-| SOLID & Strategy Patterns | X | X | X |
-| Band-Aids | X | X | X |
-| Framework Misuse | X | X | X |
-| Logging Hygiene | X | X | X |
-| Clean Functions | X | X | X |
-| Dependency Direction & Demeter | X | X | X |
-| Composition > Inheritance | X | X | X |
-| **Total** | **X** | **X** | **X** |
-
----
-
-## Confirmed Findings (high confidence — fix these)
-
-### [SEVERITY] [Poke|Press] Finding Title
-- **Confidence**: Confirmed (N/N passes)
-- **Dimension**: [dimension]
-- **File**: `path:line`
-- **Problem**: [consolidated description]
-- **Fix**: [recommended fix]
-- **Effort**: S/M/L
-
-[repeat for all confirmed findings, ordered by severity]
-
-## Likely Findings (medium confidence — review these)
-
-[same format, for findings appearing in >=half of passes]
-
-## Possible Findings (low confidence — may be noise)
-
-[same format, for single-pass findings — keep brief, one line each]
-
----
-
-## Temper Verdict
-
-**Confirmed criticals**: [count] | **Confirmed importants**: [count]
-**Ship-ready**: YES / NO / WITH CONDITIONS
-
-[2-3 sentence executive summary: what's hardened, what needs work]
-```
+1. **Header**: Project name, date, pass count, stack
+2. **Confidence Legend**: Confirmed / Likely / Possible definitions with pass thresholds
+3. **Readiness Scorecard** (press): Table with columns `Dimension | Avg Score | Gaps | Status` — one row per press dimension (7 dims + overall total out of 35). Status: red/yellow/green.
+4. **Code Quality Summary** (poke): Table with columns `Dimension | Confirmed | Likely | Possible` — one row per poke dimension (7 dims + total).
+5. **Confirmed Findings** (fix these): Each finding with Confidence, Dimension, File, Problem, Fix, Effort. Ordered by severity.
+6. **Likely Findings** (review these): Same format.
+7. **Possible Findings** (may be noise): Brief, one line each.
+8. **Temper Verdict**: Confirmed criticals count, confirmed importants count, ship-ready verdict (YES / NO / WITH CONDITIONS), 2-3 sentence executive summary.
 
 ## Step 5: Next Steps
 

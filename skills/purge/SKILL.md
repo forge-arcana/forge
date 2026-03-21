@@ -109,39 +109,11 @@ Scan reference docs for internal consistency:
 
 ## Output Format
 
-```markdown
-# Forge Cleansing Report
-**Date**: [date] | **Purified by**: /purge (the Purist)
-
-## Summary
-| Dimension | Findings | Critical | Important | Minor |
-|-----------|----------|----------|-----------|-------|
-| Knowledge Purity | X | ... | ... | ... |
-| Memory Hygiene | X | ... | ... | ... |
-| Art Fitness | X | ... | ... | ... |
-| Reference Integrity | X | ... | ... | ... |
-| **Total** | **X** | **X** | **X** | **X** |
-
-## Findings
-
-### [CRITICAL] Finding Title
-- **File**: `learnings/global-patterns.md` entry "XYZ"
-- **Dimension**: Knowledge Purity / Memory Hygiene / Art Fitness / Reference Integrity
-- **Problem**: [what's wrong]
-- **Action**: [remove / rewrite / consolidate / update]
-- **Before**: [current text]
-- **After**: [proposed text, if rewrite]
-
-[repeat for each finding, ordered by severity]
-
-## Cleansing Plan
-| # | Action | File | Details |
-|---|--------|------|---------|
-| 1 | REMOVE | learnings/global-patterns.md | Stale entry "XYZ" — API deprecated |
-| 2 | REWRITE | learnings/poke-learnings.md | Genericize — project name leaked |
-| 3 | CONSOLIDATE | learnings/probe-learnings.md | Duplicate of global-patterns entry |
-| 4 | UPDATE | skills/forge/protocol.md | Arts table outdated |
-```
+Report structure:
+1. **Header**: date, purified by /purge
+2. **Summary table**: rows per dimension, columns: Findings | Critical | Important | Minor
+3. **Findings** (ordered by severity): each with File, Dimension, Problem, Action (remove/rewrite/consolidate/update), Before/After text
+4. **Cleansing Plan table**: columns: # | Action | File | Details
 
 Present the full report, then ask the user to confirm before applying changes.
 

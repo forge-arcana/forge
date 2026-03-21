@@ -83,45 +83,14 @@ If all direct and lateral paths are exhausted:
 
 ## Output Format
 
-```markdown
-# Pry Report — [CLAIM BEING CHALLENGED]
-**Date**: [date] | **Pried by**: /pry (the Lever)
+Report structure:
+1. **The Wall**: verbatim claim being challenged
+2. **Decomposition table**: columns: # | Assumption | Verdict (FALSE / TRUE+bypass / TRUE+hard) | Evidence
+3. **Paths Found**: each with Assumption cracked, How (with code/links), Confidence, Effort, Trade-offs
+4. **Recommendation**: which path and why
+5. **What I Tried That Didn't Work**: brief list to prevent re-investigation
 
-## The Wall
-> [verbatim claim being challenged]
-
-## Decomposition
-| # | Assumption | Verdict | Evidence |
-|---|-----------|---------|----------|
-| 1 | ... | FALSE / TRUE+bypass / TRUE+hard | [source] |
-| 2 | ... | ... | ... |
-
-## Paths Found
-
-### [Path name]
-- **Assumption cracked**: #[N]
-- **How**: [explanation with code/links]
-- **Confidence**: High / Medium / Low
-- **Effort**: S / M / L
-- **Trade-offs**: [if any]
-
-[repeat for each viable path]
-
-## Recommendation
-[Which path to take and why — or if reframed, the alternative problem + solution]
-
-## What I Tried That Didn't Work
-[Brief list so the user doesn't re-investigate dead ends]
-```
-
-If no path is found (rare), be honest:
-```markdown
-## Verdict: Confirmed Hard Wall
-- **Assumptions verified**: [list with evidence]
-- **Lateral paths exhausted**: [list with reasons]
-- **Closest reframe**: [the best alternative, even if imperfect]
-- **What would change this**: [future event — library update, API change, spec revision]
-```
+If no path found: **Confirmed Hard Wall** — list verified assumptions, exhausted lateral paths, closest reframe, and what future event would change it.
 
 ## Post-Flight
 
