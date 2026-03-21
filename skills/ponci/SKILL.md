@@ -13,7 +13,7 @@ Push to remote, then hand off to `/monci` for monitoring. No prose — just push
 
 ## Step 1: Push to Remote
 
-1. Confirm which branch we're on and show the commits that will be pushed:
+1. Show which branch we're on and the commits that will be pushed, then use `AskUserQuestion` to confirm: "Push these commits?" with options "Yes, push" / "No, abort":
    ```
    git log origin/<branch>..HEAD --oneline
    ```

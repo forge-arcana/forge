@@ -235,6 +235,33 @@ WebView OAuth redirects don't work — the OAuth provider can't redirect back in
 
 **Provider priority:** Google, Facebook, and Apple are the three that matter for most markets. Research your target market's social login adoption rates to decide priority. If you offer any social login on iOS, Apple Sign-In is **required by App Store policy**. When first implementing, add a TODO to resolve provider priority based on market research.
 
+#### Mobile Build Scripts
+
+Two scripts in `scripts/` handle the build-to-release pipeline:
+
+**`build-mobile.sh`** — Builds all mobile SPAs and merges into `www/`:
+- Vite builds each SPA with `VITE_CAPACITOR=true` (disables SPA base paths, hides web-only features)
+- Merges multiple `dist/` outputs into a single `www/` directory (worker at root, employer at `/employer/`)
+- `VITE_API_URL` unset = relative `/api` (same-origin dev); set = absolute URL for staging/production
+- `www/` is gitignored — build artifact only
+
+**`release-apk.sh`** — Builds debug APK and uploads to distribution host:
+- `--api-url <url>` flag bakes the staging or production API target into the APK
+- `--skip-build` flag for upload-only (reuse existing APK)
+- Debug APK via `./gradlew assembleDebug` (release signing is a separate concern)
+- Host on GCS public bucket — GitHub Releases requires auth for private repos
+- Landing page shows download via `VITE_APK_URL` build arg (Dockerfile + deploy.yml)
+
+**Vite `envDir` in monorepos:** Vite reads `.env` from the package root by default, not the monorepo root. Set `envDir: path.resolve(__dirname, "../..")` in every SPA's vite.config.ts so shared `VITE_*` vars from the root `.env.local` reach all SPAs in local dev. Docker builds are unaffected (use `--build-arg`).
+
+**Android SDK in WSL:** Gradle needs native Linux binaries — Windows `.exe` tools don't execute under WSL. Install cmdline-tools + build-tools natively (e.g., `/root/android-sdk`). Emulator stays on Windows (needs GPU passthrough) — manage via `powershell.exe` or a Node.js helper script for reliable argument handling.
+
+**APK distribution via GCS:**
+- Create a public bucket (e.g., `gs://my-public-releases`) with `allUsers` as `objectViewer`
+- Upload APKs via `gcloud storage cp`
+- Direct download URL: `https://storage.googleapis.com/<bucket>/<path>`
+- Landing page controlled by env vars: `VITE_APK_URL` (tester sideload), `VITE_GOOGLE_PLAY_URL`, `VITE_APP_STORE_URL` — empty = hide section
+
 ### pnpm
 - v10 blocks build scripts by default — add `pnpm.onlyBuiltDependencies` to root package.json
 - `dotenv` in monorepo: `import 'dotenv/config'` looks in CWD, not package root — use explicit path

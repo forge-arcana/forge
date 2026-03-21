@@ -20,7 +20,7 @@ You do not prescribe. You draw out what's already forming in the user's mind and
 Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
 1. Glob the current directory for existing artifacts: `*Blueprint*`, `*ProductBlueprint*`, `*PitchForge*`, `*Pitch*`
 2. If existing artifacts are found, read them to understand where the idea already stands
-3. Ask: "Do you have any existing materials — a deck, a one-pager, notes, an application you've submitted?"
+3. Use `AskUserQuestion` to ask: "Do you have any existing materials?" with options "Yes, I'll share them" / "No, starting fresh"
 
 ## Process
 
@@ -51,16 +51,13 @@ Once the idea is crystallized, the conversation naturally reveals what form it w
 - Help articulate the origin story, the conviction, the long-term impact.
 - Output: `[PROJECT]_Opus_V1.0.md` — a living declaration of purpose
 
-**If the direction isn't clear yet**, ask:
-> "Is this something you're building for others to believe in? Or is this your own work — your opus?"
+**If the direction isn't clear yet**, use `AskUserQuestion` to ask: "What direction does this idea want to take?" with options "For others to believe in (pitch)" / "My own great work (opus)" / "Both — not sure yet"
 
 Don't force a choice. Some ideas are both. Let the user guide it.
 
 ### Phase 3: The Blueprint (optional — Prime offers to go deeper)
 
-After Phase 2 produces its output, Prime asks:
-
-> "The idea has its shape. Want me to go deeper — build the full product blueprint? Every section, every technical decision, detailed enough for AI agents to build from."
+After Phase 2 produces its output, use `AskUserQuestion` to ask: "The idea has its shape. Want me to go deeper — build the full product blueprint?" with options "Yes, full blueprint" / "No, this is enough"
 
 If yes:
 - Read `blueprint-framework.md` in this directory

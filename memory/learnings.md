@@ -9,13 +9,15 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - All three flow bidirectionally: DOWN via `/cast`, UP via auto-memory + `/fold`
 - `~/.claude/` is the staging membrane — not a source of truth
 
-### Knowledge Flow (2026-03-19)
+### Knowledge Flow (2026-03-21)
+- Cast and fold are symmetric mirrors — both triage before acting, both present tables, both ask for confirmation. See `memory/identity.md` "The Heart of Cast and Fold" for design rationale.
+- **Cast (forge → user)**: Classifies entries as NEW / SYNCED / UPDATED / USER-ONLY. Deploys only confirmed entries. Never overwrites silently.
+- **Fold (user → forge)**: Classifies entries as NEW / DUPLICATE / INCORPORATED / SUPERSEDED / CROSS-CUTTING. Absorbs only confirmed entries. Never removes forge-only content.
+- **Config sync**: Cast deploys forge rules → `~/.claude/CLAUDE.md`. Fold absorbs user additions → `claude-code-rules.md`. Neither direction removes the other side's content.
 - Learnings accumulate in project memory (`~/.claude/projects/*/memory/*-learnings.md`) during art runs
 - `/fold` Part 3 Step 0 scans project memories for `Forge-worthy: yes` entries, genericizes them, and promotes to `~/.claude/learnings/general.md`
-- `/fold` Part 3 Steps 1-4 consume from global Claude space (`~/.claude/learnings/` + `~/.claude/memory/`) and absorb into forge
-- `/fold` NEVER deletes from user's global space — tracks processed entries via content hashes
+- `/fold` NEVER deletes from user's global space — tracks processed entries via title-based tracker
 - Promotion is always a COPY, never a move — project entries persist after promotion
-- Dedup at every level: project learnings, project memory, global learnings, global memory
 
 ### Self-Improving Loop (2026-03-19)
 - Arts (listed in protocol.md Seven Arts table) flag learnings as `Forge-worthy: yes/no` at write time
@@ -59,7 +61,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - No manual inbox needed — all knowledge flows through auto-memory → staging → `/fold`
 
 ### /fold Unified Flow (2026-03-17)
-- Six parts: config sync → review & prune (auto-triggered) → learning absorption → memory absorption → staging archival → report
+- Seven parts: classification + config sync → review & prune (auto-triggered) → learning absorption → memory absorption → staging archival → commit & push → report
 - Review fires automatically based on size thresholds (learnings >50, memory >20 files)
 - Review runs BEFORE absorption to prune stale knowledge first
 - Staging archival also auto-triggers (>100 entries, >30 files)

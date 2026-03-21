@@ -41,7 +41,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/wawa` | "Where Are We At?" — outstanding work summary table |
 | `/wrap` | Pre-commit ritual (lint → stage → context → docs → compact → commit) |
 | `/qt` | Quick test — verify fixes before user tests manually |
-| `/srs` | Setup restart script for local dev stack |
+| `/srs` | Setup run scripts (restart + kill-zombies) for local dev |
 | `/monci` | Monitor CI — watch GitHub Actions runs on current branch |
 | `/ponci` | Push to remote and monitor CI |
 | `/vsix` | Publish a VS Code extension |
@@ -86,11 +86,12 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 20 global skills (7 arts + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound)
+- **Completed**: Three-pillar architecture, git-based drift detection, 20 global skills (7 arts + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
 - **Arts**: prime, probe, poke, press, pound, pry, purge — shared protocol in `skills/forge/protocol.md`
-- **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (forge-cycle pre-flight for /mark, /cast, /fold)
-- **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/cast-deploy.sh` (skill deployment for /cast — handles cp -r pitfall), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
+- **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
+- **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (universal classification system for /mark, /cast, /fold)
+- **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Windows Git Bash portability fix: replaced all `grep -oP` with `sed -n` across 4 scripts, removed hardcoded `/root/dev/forge` fallback, added VS Code conventions to forge-conventions.md
+- **Recent**: Cast/fold restructured as thin directional wrappers around forge-status.sh. AskUserQuestion HARD RULE added across all skills. Universal classification system in preflight.md. Cast/fold report templates fixed (direction-correct). "Heart of Cast and Fold" design rationale in identity.md. Windows Git Bash portability fix across scripts.
 - **Pending**: None

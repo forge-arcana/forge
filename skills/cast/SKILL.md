@@ -8,35 +8,37 @@ user-invocable: true
 
 You are casting forge conventions into a project workspace. This ensures every project has consistent rules, structure, and tooling.
 
+Cast is a thin directional wrapper around the shared classification engine (`forge-status.sh`). It runs the same script as `/mark`, then deploys everything in the **cast column** of the [universal classification table](../forge/preflight.md).
+
 ## Arguments
 `$ARGUMENTS` — optional path to target project (e.g., `/cast /root/dev/myproject`). If not provided, use the current working directory.
 
-## Step 0: Preflight
+## Step 0: Preflight + Classification
 
 > Execute [Forge Preflight](../forge/preflight.md) in **pull** mode.
 
-Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the Skill Drift Report from its output for Step 1a below.
+Run `<forge>/scripts/forge-status.sh --pull` to pull the latest forge and produce the **full classification report** across all pillars (skills, learnings, memory). This single script call replaces ~30 sequential tool calls.
 
-This resolves the forge path, pulls the latest forge (aborting if diverged), and produces the **Skill Drift Report**.
+Use the script's output as your action plan for Step 1.
 
 **Additional /cast responsibility**: If the resolved forge path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/cast` owns `forge-path:` management.
 
-## Step 1: Sync All Three Pillars
+## Step 1: Membrane Sync (forge → user)
 
-Before touching the project, ensure the user's `~/.claude/` is up to date with forge.
+For each classified entry in the script output, apply the **cast direction**:
 
-### 1a: Skill Sync (using preflight drift results)
-
-Use the drift classifications from the preflight Skill Drift Report:
-
-| Classification | Action |
-|---------------|--------|
+| Classification | Cast Action |
+|----------------|-------------|
 | `IDENTICAL` | Skip |
-| `FORGE-UPDATED` | Show diff, deploy forge version (forge is newer) |
-| `DEPLOYED-DIFFERS` | Show diff. Advise user to run `/fold` first to absorb deployed changes before overwriting |
-| `CONFLICT` | Show both diffs (forge vs baseline, deployed vs baseline). Ask user to reconcile before proceeding |
-| `ADDED` | Deploy to `~/.claude/skills/<name>/` |
-| `REMOVED` | Remove from `~/.claude/skills/<name>/` |
+| `FORGE-UPDATED` | Deploy forge version (show diff first) |
+| `DEPLOYED-DIFFERS` | Skip — advise user to run `/fold` first |
+| `CONFLICT` | Show both versions, user decides via `AskUserQuestion` |
+| `ADDED` | Deploy to membrane |
+| `REMOVED` | Skip — flows via `/fold` |
+
+Follow the **triage ceremony** (preflight.md): classify → present report table → `AskUserQuestion` to confirm → apply only confirmed entries.
+
+### Skill Deployment
 
 After user confirms, deploy using the cast-deploy script:
 
@@ -48,47 +50,29 @@ bash <forge>/scripts/cast-deploy.sh skill1 skill2 ...
 bash <forge>/scripts/cast-deploy.sh --all
 ```
 
-**NEVER use `cp -r` directly for skill deployment.** Always use `cast-deploy.sh` — it handles the rm-then-copy correctly and verifies no nesting bugs occurred.
+**NEVER use `cp -r` directly.** Always use `cast-deploy.sh`. Verify with `cast-deploy.sh --verify`.
 
-For DEPLOYED-DIFFERS: warn before overwriting — user may want to `/fold` first.
 For REMOVED: `rm -rf ~/.claude/skills/<name>/`.
 
-After deploying, verify with:
-```bash
-bash <forge>/scripts/cast-deploy.sh --verify
-```
+If no deployed skills exist (fresh machine): create `~/.claude/learnings/`, `~/.claude/memory/` if needed, deploy ALL skills, then continue.
 
-If no deployed skills exist (fresh machine):
-- Create `~/.claude/learnings/`, `~/.claude/memory/` if they don't exist
-- Deploy ALL skills: `bash <forge>/scripts/cast-deploy.sh --all`
-- Then continue to Steps 1b and 1c as normal
+### Config Sync (forge → user)
 
-### 1b: Learning Sync (forge → user)
+Deploy forge rules from `<forge>/skills/forge/claude-code-rules.md` into `~/.claude/CLAUDE.md`. Same cast direction applies:
+- ADDED (forge-only rules) → propose adding
+- REMOVED (user-only rules) → skip (flow via `/fold`)
+- CONFLICT → present both, user decides
 
-For each `.md` file in `<forge-path>/learnings/`:
-- If the file doesn't exist in `~/.claude/learnings/`, copy it
-- If it exists, compare with `diff --strip-trailing-cr`: if different, report: "forge has updates — run /fold to reconcile"
-- If identical, skip
+**Never sync**: hooks, additionalDirectories, machine-specific paths. `forge-path:` is managed in Step 0.
 
-### 1c: Memory Sync (forge → user)
+### Record Cast Baseline
 
-For each `.md` file in `<forge-path>/memory/`:
-- If the file doesn't exist in `~/.claude/memory/`, copy it (team memory → user)
-- If it exists, compare with `diff --strip-trailing-cr`: if different, report: "forge has updates — user copy may have local additions"
-- If identical, skip
-
-### 1d: Record Cast Baseline
-
-After all three pillars are synced, record the current forge commit as the deployment baseline:
-
-Write `~/.claude/.last-cast.json`:
+After all pillars are synced, write `~/.claude/.last-cast.json`:
 ```json
 { "lastCastCommit": "<output of git -C <forge-path> rev-parse HEAD>" }
 ```
 
-This enables three-way drift detection on subsequent `/mark` and `/fold` runs. The SHA marks what was deployed, so future comparisons can distinguish "forge updated since cast" from "deployed copy was modified".
-
-Report what was synced across all three pillars before proceeding.
+Present a **Pillar Sync Summary** before proceeding to the project scan.
 
 ## Steps 2-3: Read Forge Reference + Scan Project (parallel)
 
@@ -115,26 +99,24 @@ Produce a table showing what needs to change:
 | Aspect | Forge Convention | Current Project | Action |
 |--------|-----------------|-----------------|--------|
 | CLAUDE.md | Required with standard sections | [exists/missing] | [create/update] |
-| Hard rules (no auto-commit, no chaining) | Live in global `~/.claude/CLAUDE.md` — do NOT duplicate in project | [global/missing] | Skip if global membrane exists |
-| .claude/settings.json | Only if project-specific overrides needed | [exists/missing/not needed] | [skip/create] |
+| Hard rules | Live in global `~/.claude/CLAUDE.md` — do NOT duplicate | [global/missing] | Skip if global exists |
+| .claude/settings.json | Only if project-specific overrides needed | [exists/missing] | [skip/create] |
 | memory/ directory | Required | [exists/missing] | [create] |
 | logs/ directory | Required (app projects with services only) | [exists/missing/N/A] | [create/skip] |
 | Shorthand commands | wawa/wrap as skill refs | [present/missing] | [add] |
-| restart.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
-| kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
-| Documentation | `docs/` in-repo OR `## Documentation` section with `**Docs path:**` | [in-repo/external/missing] | [add section] |
+| restart.sh / kill-zombies.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
+| Documentation | `docs/` or `**Docs path:**` section | [in-repo/external/missing] | [add section] |
 | Logging setup | dev.log + browser forwarding | [present/missing] | [flag for /poke] |
 ```
 
-**IMPORTANT: Always present the divergence table as console text (markdown), then use `AskUserQuestion` with a simple confirmation prompt** (e.g., "Apply all changes?" with options like "Apply all", "Skip some", "Skip all"). Never use inline text questions — they're easy to miss and don't provide structured options. Wait for user confirmation before proceeding to Step 5.
+Use `AskUserQuestion` to confirm before applying. Options: "Apply all" / "Skip some" / "Abort".
 
 ## Step 5: Apply Changes
 
 After user confirms via AskUserQuestion:
 
 ### CLAUDE.md (create or update)
-Standard sections to include:
-Hard rules (No Auto-Commit, No Command Chaining) live in the global `~/.claude/CLAUDE.md`. Do NOT duplicate them in project CLAUDE.md files — the global membrane already covers all projects.
+Hard rules live in the global `~/.claude/CLAUDE.md`. Do NOT duplicate them in project CLAUDE.md files.
 
 ```markdown
 # [Project Name] — Project Rules
@@ -147,29 +129,24 @@ Hard rules (No Auto-Commit, No Command Chaining) live in the global `~/.claude/C
 - **wrap** — Runs the `/wrap` skill
 
 ## Documentation
-<!-- Include ONE of the following: -->
-<!-- Option A: docs live in this repo -->
-Docs are in the `docs/` directory.
-<!-- Option B: docs live in a separate repo -->
-**Docs path:** /absolute/path/to/docs-repo
+<!-- docs/ in-repo OR **Docs path:** /absolute/path -->
 
 ## Current Context
 [branch, recent work, test status — to be filled by /wrap]
 ```
 
 ### .claude/settings.json (only if project-specific overrides needed)
-- Global `~/.claude/settings.json` handles all standard permissions — no per-project file needed by default
 - Only create if the project needs extra env var prefixes, hooks, or domain restrictions
-- If creating, add overrides only — do NOT duplicate the global allow list
-- Do NOT overwrite existing project-specific `additionalDirectories` or `hooks`
+- Add overrides only — do NOT duplicate the global allow list
+- Do NOT overwrite existing `additionalDirectories` or `hooks`
 
 ### Directories
 - Create `memory/` if missing
-- Create `logs/` if missing (only for projects with running services — skip for tooling-only repos)
+- Create `logs/` if missing (only for projects with running services)
 
 ## Step 6: Summary
 
-Present a **Forge Transfer** table summarizing everything that moved between forge and the user's membrane during Steps 1-5. Build it from what actually happened — only include rows for items that changed.
+Present a **Forge Transfer** table summarizing what changed:
 
 ```markdown
 ## Forge Transfer — /cast | [DATE]
@@ -179,12 +156,10 @@ Present a **Forge Transfer** table summarizing everything that moved between for
 | ⬇ RECEIVED | `/temper` skill — hardened evaluation via repeated poke + press |
 | ⬇ RECEIVED | `/probe` update — context-aware target resolution |
 | ⬇ RECEIVED | 2 new learnings — mobile testing progression, integer money pattern |
-| ⬆ SENT | (rare — only if deployed-differs was detected and user chose to overwrite) |
 ```
 
-- **⬇ RECEIVED** — skills deployed, learnings synced, memory copied from forge
-- **⬆ SENT** — deployed-differs warnings where user's membrane had changes (advise `/fold` first)
+- **⬇ RECEIVED** — skills deployed, learnings synced, memory copied, config rules installed
+- If DEPLOYED-DIFFERS was detected, note: "X items have membrane changes — run `/fold` to absorb before next `/cast`"
 - If nothing changed: just say "Everything in sync."
-- Each row should have a brief human description of what was transferred, not just a filename
 
-If changes were applied to the project, do NOT commit — use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet". If nothing changed (everything in sync), skip the prompt.
+If changes were applied to the project, do NOT commit — use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet". If nothing changed, skip the prompt.

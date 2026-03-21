@@ -28,6 +28,21 @@ This ensures the full pre-commit ritual (learnings, context, docs, lint, compact
 
 ---
 
+## HARD RULE — AskUserQuestion for ALL Decision Points
+
+> **NEVER ask the user a decision question as inline text.** Always use the `AskUserQuestion` tool.
+> Inline questions get buried in output and the user misses them. AskUserQuestion creates a visible prompt the user MUST respond to.
+
+This applies to:
+- Next-step choices ("want to test locally or deploy to staging?")
+- Confirmation prompts ("apply these changes?")
+- Scope clarifications ("which module should I focus on?")
+- Any question where you need the user's answer before proceeding
+
+**Exceptions**: Rhetorical questions, status updates, and informational statements that don't require a response.
+
+---
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default

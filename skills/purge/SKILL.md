@@ -143,7 +143,7 @@ Scan reference docs for internal consistency:
 | 4 | UPDATE | skills/forge/protocol.md | Arts table outdated |
 ```
 
-Present the full report, then ask the user to confirm before applying changes.
+Present the full report, then use `AskUserQuestion` to confirm before applying. Options: "Approve all" / "Skip some" / "Reject all".
 
 ## Applying the Purge
 

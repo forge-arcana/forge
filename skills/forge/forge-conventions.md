@@ -51,3 +51,9 @@
 - [ ] `terminal.integrated.defaultProfile.windows`: `"Git Bash"`
 - [ ] `terminal.external.windowsExec`: `"c:\\Program Files\\git\\bin\\bash.exe"`
 - [ ] `window.openFoldersInNewWindow`: `"on"`
+
+### 9. Capacitor (if applicable)
+- [ ] `scripts/build-mobile.sh` exists (builds SPAs → merges into `www/`)
+- [ ] `scripts/release-apk.sh` exists (builds APK + uploads to distribution host)
+- [ ] `www/` and `*.apk` in `.gitignore`
+- [ ] `envDir: path.resolve(__dirname, "../..")` in all SPA vite configs (monorepo env var loading)

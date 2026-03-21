@@ -19,6 +19,11 @@
 **Apply when**: Running /purge Dimension 3 (Skill Fitness) — check for sections >30% of file that restate content from reference docs or scan scripts.
 **Forge-worthy**: yes — universal skill maintenance pattern
 
+## Inline Questions Are Invisible to Users (2026-03-21)
+**Learning**: Decision-point questions embedded as inline text output get buried and missed by users. The `AskUserQuestion` tool creates a visible, blocking prompt that the user must respond to. Every skill and every general conversation question that requires a user decision before proceeding must use `AskUserQuestion`, never inline text. This was observed repeatedly across both forge skills (13 inline question points across 11 skills) and general Claude conversation flow.
+**Apply when**: Writing or reviewing any skill that asks the user to make a choice, confirm an action, or clarify scope. Also applies as a global rule for all Claude interactions.
+**Forge-worthy**: yes — universal UX reliability pattern
+
 ## Art Consolidation: Scope Over Count (2026-03-20)
 **Learning**: When two arts overlap >50% in findings, merge them. A wider-scope art with more dimensions is better than two overlapping arts that produce duplicate findings. The evaluative trifecta (poke → press → pound) works because each has a distinct scope: code quality, operational readiness, adversarial QA. Adding a fourth art for "universal principles" created redundancy with poke's existing tech debt dimensions.
 **Apply when**: Proposing new arts or reviewing whether existing arts still earn their seat.

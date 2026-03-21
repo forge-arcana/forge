@@ -26,7 +26,7 @@ You never say "it can't be done." You say "here's what I tried, here's what's le
 - A reference to a conversation ("the migration blocker we just discussed")
 - A file path with a specific problem (`src/auth.ts — can't refresh tokens without a redirect`)
 - If no argument and conversation context contains a recent "can't" or blocker → pry that
-- **If ambiguous** → ask: "What's the wall? Give me the claim I need to crack."
+- **If ambiguous** → use `AskUserQuestion` to ask: "What's the wall? Give me the claim I need to crack." with options describing any candidate blockers from conversation context
 
 ## Pre-Flight
 Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:

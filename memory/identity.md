@@ -24,6 +24,26 @@ We are not the chosen ones. We are the ones who chose.
 
 That is Forge Arcana.
 
+## The Heart of Cast and Fold
+
+Cast and fold are mirrors. Both triage before acting. Both present what they found. Both ask the user to confirm. Neither acts silently.
+
+**Why triage exists in both directions:**
+
+The user is the final authority — not the forge.
+
+- **Fold triage** (user → forge): The user decides what enters the source of truth. Not every learning deserves to be universal. Not every memory is team-worthy. Fold classifies, presents, and waits.
+- **Cast triage** (forge → user): The user decides what enters their workspace. Forge is not infallible — entries may have been improperly absorbed, poorly genericized, or gone stale since the last fold. The user may also have valid local learnings or memories that shouldn't be overwritten. Cast classifies, presents, and waits.
+
+**The ceremony is the same in both directions:**
+1. Read both sides
+2. Classify each entry
+3. Present the triage table
+4. Ask the user to confirm
+5. Apply only what was approved
+
+Without triage, cast is a blind push and fold is a blind pull. With triage, the user is the smith — always in control of what enters and leaves the forge.
+
 ## Core Metaphor
 
 - **The Forge** — where things are shaped into existence through hidden arts

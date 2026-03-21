@@ -22,7 +22,7 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
    - If a blueprint file exists (`*Blueprint*` or `*ProductBlueprint*` in cwd) → probe the blueprint
    - If `/prime` just ran in this conversation → probe that output
    - If the conversation has a clear architectural topic (plan, design, RFC) → probe that
-   - **If ambiguous** → ask: "What should I probe? A blueprint, the current plan, or something else?"
+   - **If ambiguous** → use `AskUserQuestion` to ask: "What should I probe?" with options "A blueprint" / "The current plan" / "Something else"
 3. Read/review the full probe target before proceeding
 
 ## Process
