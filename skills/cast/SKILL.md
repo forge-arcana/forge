@@ -126,11 +126,11 @@ Produce a table showing what needs to change:
 | Logging setup | dev.log + browser forwarding | [present/missing] | [flag for /poke] |
 ```
 
-Present this to the user and ask for confirmation before applying.
+**IMPORTANT: Always present the divergence table as console text (markdown), then use `AskUserQuestion` with a simple confirmation prompt** (e.g., "Apply all changes?" with options like "Apply all", "Skip some", "Skip all"). Never use inline text questions — they're easy to miss and don't provide structured options. Wait for user confirmation before proceeding to Step 5.
 
 ## Step 5: Apply Changes
 
-After user confirms:
+After user confirms via AskUserQuestion:
 
 ### CLAUDE.md (create or update)
 Standard sections to include:
