@@ -208,4 +208,4 @@ Do NOT flag:
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/poke-learnings.md`. Then use `AskUserQuestion` to prompt: "Want me to fix any of these?" with options "Yes, specify by number" / "No, just the report".
+Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/poke-learnings.md`. Then ask: "Want me to fix any of these? Specify by finding number."

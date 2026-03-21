@@ -1,10 +1,10 @@
 ---
 name: srs
-description: Setup run scripts — dev startup (restart.sh) and process cleanup (kill-zombies.sh) for local development. Use when user needs a local dev startup script.
+description: Setup or update restart.sh to bring up the entire local dev stack. Proposes ports, kills zombies, checks DB, verifies port health. Use when user needs a local dev startup script.
 user-invocable: true
 ---
 
-# /srs — Setup Run Scripts
+# /srs — Setup Restart Script
 
 Generate or update `restart.sh` and `kill-zombies.sh` in the **project root** (never in `scripts/` — these are dev-only utilities that must not pollute production directories or CI cron paths).
 
@@ -34,7 +34,7 @@ Proposed port layout:
 
 - Check existing `.env`, `vite.config.ts`, and `docker-compose.yml` for already-defined ports
 - If ports are already defined, use them. Only propose new ones for undefined services.
-- Use `AskUserQuestion` to confirm the port layout before generating the script. Options: "Looks good, generate" / "I want to change ports"
+- **Ask the user** to confirm or change before generating the script
 
 ## Step 2: Generate restart.sh
 

@@ -115,4 +115,4 @@ Status: red = 1-2, yellow = 3, green = 4-5.
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/press-learnings.md`. Then use `AskUserQuestion` to prompt: "Want me to fix any critical gaps?" with options "Yes, specify by item" / "No, just the report".
+Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/press-learnings.md`. Then ask: "Want me to fix any critical gaps? Specify by item."

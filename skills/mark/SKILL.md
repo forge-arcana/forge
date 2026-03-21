@@ -8,9 +8,7 @@ user-invocable: true
 
 Read-only inspection of the membrane (`~/.claude/`) against the forge source of truth. Reports what's drifted, what's accumulated, and what's ready for `/cast` or `/fold`.
 
-Uses the **universal classification system** from [preflight.md Step 4](../forge/preflight.md#step-4-entry-level-classification-all-pillars) across ALL pillars (skills, learnings, memory, config). Mark is the bridge between cast and fold — it observes the same state that cast deploys and fold absorbs.
-
-**This skill makes NO changes.** It only reads, classifies, and reports.
+**This skill makes NO changes.** It only reads and reports.
 
 ## Step 0: Preflight
 
@@ -37,77 +35,80 @@ Launch **all of these reads in parallel** before processing (all independent):
 
 Then process the results into Sections 2 and 3 below.
 
-### 2a: Learning Status
+### 2a: Global Learnings (`~/.claude/learnings/`)
 
-For each `.md` file in both `<forge>/learnings/` and `~/.claude/learnings/` (skip `.json` trackers), parse entries by `## ` headings and classify each using the universal system (preflight.md Step 4):
+From the parallel reads, extract all `## Title` headings from `general.md`.
+Compare against `processedEntries` titles from the tracker.
 
+Output:
 ```markdown
 ## Learning Status
 
-| File | Entry | Classification | Direction |
-|------|-------|---------------|-----------|
-| global-patterns.md | WSL Path Compatibility | IDENTICAL | — |
-| global-patterns.md | Integer Money Pattern | ADDED (forge-only) | cast needed |
-| global-patterns.md | New User Discovery | REMOVED (membrane-only) | fold needed |
-| poke-learnings.md | Band-Aid Detection | DEPLOYED-DIFFERS | fold needed |
+| Source | Total Entries | Processed | Unprocessed |
+|--------|--------------|-----------|-------------|
+| ~/.claude/learnings/general.md | X | Y | Z |
 
-**Summary**: X identical, Y cast needed, Z fold needed
+**Unprocessed entries** (ready for /fold):
+1. [entry title/first line] (YYYY-MM-DD)
+2. [entry title/first line] (YYYY-MM-DD)
+...
+```
+
+### 2b: Skill-Specific Learnings (`~/.claude/learnings/`)
+
+Check for other learning files and compare against forge copies:
+
+```markdown
+| File | User Copy | Forge Copy | Status |
+|------|-----------|------------|--------|
+| probe-learnings.md | 12 entries | 10 entries | 2 new in user — fold needed |
+| press-learnings.md | 8 entries | 8 entries | In sync |
 ```
 
 ---
 
 ## Section 3: Memory Status
 
-For each `.md` file in both `<forge>/memory/` and `~/.claude/memory/` (skip `.json` trackers, skip `MEMORY.md`), classify using the universal system:
+Use the memory files already read in the parallel batch above.
 
+For each file in `~/.claude/memory/`:
+- Check if it exists in `<forge>/memory/` → if yes, `diff --strip-trailing-cr` to check sync
+- Check if it's in tracker's `skippedFiles` → if yes, mark as "Skipped (PERSONAL)"
+- Otherwise → new, fold candidate
+
+Output:
 ```markdown
 ## Memory Status
 
-| File | Classification | Direction |
-|------|---------------|-----------|
-| identity.md | IDENTICAL | — |
-| new-pattern.md | REMOVED (membrane-only) | fold needed |
-| team-convention.md | DEPLOYED-DIFFERS | fold needed |
-| old-convention.md | ADDED (forge-only) | cast needed |
+| File | In Membrane | In Forge | Status |
+|------|-------------|----------|--------|
+| deploy-practices.md | yes | yes | In sync |
+| new-pattern.md | yes | no | New — fold candidate |
+| team-convention.md | yes | yes (differs) | Updated — fold candidate |
 
-**Summary**: X identical, Y cast needed, Z fold needed
+**Forge-only memories** (in forge but not deployed — cast candidate):
+| File | Summary |
+|------|---------|
+| old-convention.md | [description from frontmatter] |
+
+**Summary**: X in sync, Y need fold, Z need cast
 ```
 
 ---
 
-## Section 4: Config Status
-
-Compare `~/.claude/CLAUDE.md` against `<forge>/skills/forge/claude-code-rules.md` using the universal classification:
-
-```markdown
-## Config Status
-
-| Rule/Section | Classification | Direction |
-|-------------|---------------|-----------|
-| No Command Chaining | IDENTICAL | — |
-| AskUserQuestion HARD RULE | ADDED (forge-only) | cast needed |
-| Custom project shorthand | REMOVED (membrane-only) | fold needed |
-
-**Summary**: X identical, Y cast needed, Z fold needed
-```
-
-Skip machine-specific content (hooks, additionalDirectories, forge-path).
-
----
-
-## Section 5: Combined Status
+## Section 4: Combined Status
 
 Output a final summary with recommended actions:
 
 ```markdown
 ## Membrane Status — Summary
 
-| Pillar | Identical | Cast Needed | Fold Needed | Conflicts |
-|--------|-----------|-------------|-------------|-----------|
-| Skills | X | Y | Z | 0 |
-| Learnings | X | Y | Z | 0 |
-| Memory | X | Y | Z | 0 |
-| Config | X | Y | Z | 0 |
+| Area | Status | Action |
+|------|--------|--------|
+| Forge Remote | [up to date / X commits behind] | [Run /cast to pull] |
+| Skills | Y need cast, Z need fold | Run `/cast` or `/fold` |
+| Learnings | X unprocessed entries | Run `/fold` |
+| Memory | Y new, Z updated | Run `/fold` |
 
-**Recommended next step**: [/cast if forge has updates to deploy, /fold if membrane has accumulated knowledge, or "All in sync — nothing to do"]
+**Recommended next step**: [/cast if forge has updates to pull, /fold if membrane has accumulated knowledge, or "All in sync — nothing to do"]
 ```

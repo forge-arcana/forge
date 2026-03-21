@@ -63,7 +63,7 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 [repeat for each finding]
 ```
 
-6. **Optionally generate test files** for critical findings — use `AskUserQuestion` to ask: "Generate test code for critical findings?" with options "Yes, generate tests" / "No, just the report".
+6. **Optionally generate test files** for critical findings — ask the user if they want test code generated.
 
 ## Post-Flight
 
