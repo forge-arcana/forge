@@ -59,3 +59,7 @@
 ## pnpm --filter: exec vs Script Name (2026-03-15)
 **Learning**: `pnpm --filter <pkg> <arg>` treats `<arg>` as a package.json script name. To run a binary (tsx, tsc, vitest, etc.) scoped to a workspace package, use `pnpm --filter <pkg> exec <binary> <args>`. Without `exec`, pnpm fails with `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`. This commonly bites CI workflows where commands are written as raw shell rather than package scripts.
 **Apply when**: Running CLI tools scoped to a specific workspace package in a pnpm monorepo.
+
+## Mobile Testing Progression: Browser → Emulator → Device → Store (2026-03-21)
+**Learning**: Start mobile development testing in the browser (DevTools device mode, F12 → target device). As the product matures, build APKs for local device testing. For iteration velocity, lean heavily on emulators. Only pursue Play Store / App Store integration when the product is solid — store submissions have cost (developer accounts, review cycles, compliance), so readiness matters before that step.
+**Apply when**: Setting up the testing strategy for any mobile-first or hybrid app project. Decide this progression on day one.

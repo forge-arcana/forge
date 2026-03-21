@@ -169,5 +169,23 @@ Docs are in the `docs/` directory.
 
 ## Step 6: Summary
 
-Report what was applied. Do NOT commit — instead ask:
-> "Changes applied. Ready to wrap up? Run `/wrap` to commit with full context."
+Present a **Forge Transfer** table summarizing everything that moved between forge and the user's membrane during Steps 1-5. Build it from what actually happened — only include rows for items that changed.
+
+```markdown
+## Forge Transfer — /cast | [DATE]
+
+| Direction | What |
+|-----------|------|
+| ⬇ RECEIVED | `/temper` skill — hardened evaluation via repeated poke + press |
+| ⬇ RECEIVED | `/probe` update — context-aware target resolution |
+| ⬇ RECEIVED | 2 new learnings — mobile testing progression, integer money pattern |
+| ⬆ SENT | (rare — only if deployed-differs was detected and user chose to overwrite) |
+```
+
+- **⬇ RECEIVED** — skills deployed, learnings synced, memory copied from forge
+- **⬆ SENT** — deployed-differs warnings where user's membrane had changes (advise `/fold` first)
+- If nothing changed: just say "Everything in sync."
+- Each row should have a brief human description of what was transferred, not just a filename
+
+After the table, do NOT commit — ask:
+> "Ready to wrap up? Run `/wrap` to commit with full context."

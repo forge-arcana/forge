@@ -430,23 +430,24 @@ If no triggers fire, skip Part 5 entirely.
 
 ## Part 7: Report
 
+Present a **Forge Transfer** table summarizing everything that moved between the user's membrane and forge during Parts 1-6. Build it from what actually happened — only include rows for items that changed.
+
 ```markdown
-## Fold Complete
+## Forge Transfer — /fold | [DATE]
 
-### Summary
-- Config sync: [X changes applied / no changes]
-- Forge-worthy promotion: [X promoted / none found]
-- Review: [X kept, X removed, X merged, X rewritten / skipped — below thresholds]
-- Learning candidates: X found, Y absorbed, Z skipped
-- Memory candidates: X found, Y absorbed as team memory, Z skipped (personal)
-- Staging archival: [X archived / skipped — below thresholds]
-- Commit: [hash — pushed to remote / no changes to commit]
-
-### Files Updated
-| File | Type | Changes |
-|------|------|---------|
-| learnings/probe-learnings.md | learning | +X entries |
-| learnings/global-patterns.md | learning | +X entries |
-| memory/deploy-practices.md | team memory | NEW |
-| skills/forge/claude-code-rules.md | config | updated |
+| Direction | What |
+|-----------|------|
+| ⬆ SENT | 3 poke learnings — schema defaults, confidence scoring, client identity |
+| ⬆ SENT | Identity update — seven arts, /pry added |
+| ⬇ RECEIVED | Settings drift fix — missing WSL path format |
+| — SKIPPED | 2 personal memories — not forge-worthy |
 ```
+
+- **⬆ SENT** — learnings and memories absorbed into forge
+- **⬇ RECEIVED** — config drift fixes synced from forge back to membrane
+- **— SKIPPED** — only if items were explicitly skipped (personal memories, below-threshold reviews)
+- If nothing changed: just say "Everything in sync."
+- Each row should have a brief human description of what was transferred, not just a filename
+
+After the table, add the commit status as a one-liner:
+> **Commit**: `[hash]` — pushed to remote (or: no changes to commit)

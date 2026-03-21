@@ -47,6 +47,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/vsix` | Publish a VS Code extension |
 | `/dig` | Think deeper — reframe agent as staff engineer for current discussion |
 | `/temper` | Hardened evaluation — runs poke + press N times, consolidates with confidence scoring |
+| `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
 
 ## Three Pillars (all bidirectional via forge)
 | Pillar | DOWN (forge → user) | UP (user → forge) |
@@ -84,11 +85,11 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 19 global skills (7 arts + 12 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound)
+- **Completed**: Three-pillar architecture, git-based drift detection, 20 global skills (7 arts + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound)
 - **Arts**: prime, probe, poke, press, pound, pry, purge — shared protocol in `skills/forge/protocol.md`
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (forge-cycle pre-flight for /mark, /cast, /fold)
 - **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/cast-deploy.sh` (skill deployment for /cast — handles cp -r pitfall), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Added `/pry` art — relentless solution-finder that challenges "can't be done" claims.
+- **Recent**: Added `/eli5` skill, Forge Transfer summary for /cast + /fold, purge evolving patterns dimension, mobile testing learning.
 - **Pending**: None

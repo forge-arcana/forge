@@ -102,7 +102,7 @@ echo "|------|---------|"
 for f in "$FORGE_PATH"/learnings/*.md; do
   [[ ! -f "$f" ]] && continue
   fname=$(basename "$f")
-  count=$(grep -c '^## ' "$f" 2>/dev/null || echo "0")
+  count=$(grep -c '^## ' "$f" 2>/dev/null || true)
   echo "| $fname | $count |"
 done
 echo ""

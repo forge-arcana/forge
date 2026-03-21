@@ -61,7 +61,14 @@ Web-search to verify any entry you suspect is stale. Don't guess.
 
 **What to flag**: Show both copies, recommend which to keep and which to remove.
 
-### 1d: Density
+### 1d: Evolving Patterns
+- Entries that are **stages of a larger pattern** — separate snapshots that should be consolidated into one evolving entry
+- Multiple learnings across different dates that refine the same concept (e.g., three entries about mobile testing that together describe a progression)
+- Patterns where newer entries supersede older ones without explicitly replacing them
+
+**What to flag**: Show all related entries, propose a single consolidated entry that captures the full evolved understanding.
+
+### 1e: Density
 - Entries that are too verbose — can the same insight be said in fewer words?
 - Entries that bundle multiple learnings — should they be split?
 
