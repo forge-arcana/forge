@@ -83,6 +83,8 @@ NEED_FOLD=0
 CONFLICT=0
 ADDED=0
 REMOVED=0
+CHANGED_SKILLS=()
+ADDED_SKILLS=()
 
 # Scan forge skills
 for skill_dir in "$FORGE_PATH"/skills/*/; do
@@ -94,6 +96,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
   if [[ ! -d "$deployed" ]]; then
     echo "| $skill | ADDED | cast needed |"
     ADDED=$((ADDED + 1))
+    ADDED_SKILLS+=("$skill")
     continue
   fi
 
@@ -109,9 +112,11 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
       if [[ -n "$git_diff" ]]; then
         echo "| $skill | FORGE-UPDATED | cast needed |"
         NEED_CAST=$((NEED_CAST + 1))
+        CHANGED_SKILLS+=("$skill")
       else
         echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
         NEED_FOLD=$((NEED_FOLD + 1))
+        CHANGED_SKILLS+=("$skill")
       fi
     else
       # Three-way comparison using baseline
@@ -123,6 +128,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
         # Forge didn't move — membrane was edited
         echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
         NEED_FOLD=$((NEED_FOLD + 1))
+        CHANGED_SKILLS+=("$skill")
       else
         # Forge moved — check if deployed matches baseline (stale) or was also modified (conflict)
         # Get baseline SKILL.md content
@@ -132,6 +138,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
           # Skill didn't exist at baseline — forge added it, needs cast
           echo "| $skill | FORGE-UPDATED | cast needed |"
           NEED_CAST=$((NEED_CAST + 1))
+          CHANGED_SKILLS+=("$skill")
         else
           # Compare deployed SKILL.md against baseline
           deployed_vs_baseline=$(diff --strip-trailing-cr <(echo "$baseline_content") "$deployed/SKILL.md" 2>/dev/null || true)
@@ -140,10 +147,12 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
             # Deployed matches baseline — membrane is just stale
             echo "| $skill | FORGE-UPDATED | cast needed |"
             NEED_CAST=$((NEED_CAST + 1))
+            CHANGED_SKILLS+=("$skill")
           else
             # Both sides changed since last cast
             echo "| $skill | CONFLICT | both changed since last cast |"
             CONFLICT=$((CONFLICT + 1))
+            CHANGED_SKILLS+=("$skill")
           fi
         fi
       fi
@@ -171,6 +180,32 @@ if [[ "$CONFLICT" -gt 0 ]]; then
 fi
 echo "**Summary**: $IDENTICAL identical, $((NEED_CAST + ADDED)) need cast, $NEED_FOLD need fold${CONFLICT_MSG}, $REMOVED removed"
 echo ""
+
+# --- Step 3b: Change details for non-IDENTICAL skills ---
+if [[ ${#CHANGED_SKILLS[@]} -gt 0 && -n "$LAST_CAST_SHA" ]]; then
+  echo "### Change Details"
+  echo ""
+  for skill in "${CHANGED_SKILLS[@]}"; do
+    deployed="$HOME/.claude/skills/$skill"
+
+    # Show git log of what changed in this skill since baseline
+    changes=$(git -C "$FORGE_PATH" log --oneline "$LAST_CAST_SHA"..HEAD -- "skills/$skill/" 2>/dev/null || true)
+    if [[ -n "$changes" ]]; then
+      echo "**$skill**:"
+      echo "$changes" | while IFS= read -r line; do
+        echo "  - $line"
+      done
+    else
+      # Deployed differs but no forge commits — membrane was edited
+      diff_stat=$(diff --strip-trailing-cr "$FORGE_PATH/skills/$skill/SKILL.md" "$deployed/SKILL.md" 2>/dev/null | grep -c '^[<>]' || echo "0")
+      if [[ "$diff_stat" -gt 0 ]]; then
+        echo "**$skill** (deployed copy modified):"
+        echo "  - $diff_stat lines changed in deployed copy"
+      fi
+    fi
+  done
+  echo ""
+fi
 
 # --- Step 4: Learning status ---
 echo "## Learning Status"
@@ -230,6 +265,7 @@ echo ""
 echo "| File | User Copy | Forge Copy | Status |"
 echo "|------|-----------|------------|--------|"
 
+LEARNING_DETAILS_LINES=()
 for forge_file in "$FORGE_PATH"/learnings/*.md; do
   [[ ! -f "$forge_file" ]] && continue
   fname=$(basename "$forge_file")
@@ -247,15 +283,74 @@ for forge_file in "$FORGE_PATH"/learnings/*.md; do
     elif [[ "$user_count" -gt "$forge_count" ]]; then
       diff=$((user_count - forge_count))
       echo "| $fname | $user_count | $forge_count | $diff new in user -- fold needed |"
+      # Collect detail: titles in user but not in forge
+      new_titles=$(python3 -c "
+import re
+def get_titles(path):
+    titles = set()
+    try:
+        with open(path) as f:
+            for line in f:
+                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
+                if m: titles.add(m.group(1).strip())
+    except: pass
+    return titles
+for t in sorted(get_titles('$user_file') - get_titles('$forge_file')):
+    print(t)
+" 2>/dev/null || true)
+      if [[ -n "$new_titles" ]]; then
+        LEARNING_DETAILS_LINES+=("**${fname}** (new in user):")
+        while IFS= read -r title; do
+          LEARNING_DETAILS_LINES+=("  - ${title}")
+        done <<< "$new_titles"
+      fi
     else
       diff=$((forge_count - user_count))
       echo "| $fname | $user_count | $forge_count | $diff new in forge -- cast needed |"
+      # Collect detail: titles in forge but not in user
+      new_titles=$(python3 -c "
+import re
+def get_titles(path):
+    titles = set()
+    try:
+        with open(path) as f:
+            for line in f:
+                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
+                if m: titles.add(m.group(1).strip())
+    except: pass
+    return titles
+for t in sorted(get_titles('$forge_file') - get_titles('$user_file')):
+    print(t)
+" 2>/dev/null || true)
+      if [[ -n "$new_titles" ]]; then
+        LEARNING_DETAILS_LINES+=("**${fname}** (new in forge):")
+        while IFS= read -r title; do
+          LEARNING_DETAILS_LINES+=("  - ${title}")
+        done <<< "$new_titles"
+      fi
     fi
   else
     echo "| $fname | missing | $forge_count | cast needed |"
+    # Collect detail: all titles (file missing in membrane)
+    all_titles=$(grep '^## ' "$forge_file" 2>/dev/null | sed 's/^## //' | sed 's/ ([0-9-]*)$//' || true)
+    if [[ -n "$all_titles" ]]; then
+      LEARNING_DETAILS_LINES+=("**${fname}** (new file):")
+      while IFS= read -r title; do
+        LEARNING_DETAILS_LINES+=("  - ${title}")
+      done <<< "$all_titles"
+    fi
   fi
 done
 echo ""
+
+if [[ ${#LEARNING_DETAILS_LINES[@]} -gt 0 ]]; then
+  echo "### Learning Details"
+  echo ""
+  for line in "${LEARNING_DETAILS_LINES[@]}"; do
+    echo "$line"
+  done
+  echo ""
+fi
 
 # --- Step 5: Memory status ---
 echo "## Memory Status"
@@ -313,22 +408,22 @@ if [[ -d "$HOME/.claude/memory" ]]; then
 fi
 
 # Check forge-only memories
-FORGE_ONLY=""
+FORGE_ONLY_FILES=()
 for forge_mem in "$FORGE_PATH"/memory/*.md; do
   [[ ! -f "$forge_mem" ]] && continue
   fname=$(basename "$forge_mem")
   [[ "$fname" == "MEMORY.md" ]] && continue
 
   if [[ ! -f "$HOME/.claude/memory/$fname" ]]; then
-    FORGE_ONLY="$FORGE_ONLY $fname"
+    FORGE_ONLY_FILES+=("$fname")
     MEM_CAST=$((MEM_CAST + 1))
   fi
 done
 
 echo ""
-if [[ -n "$FORGE_ONLY" ]]; then
+if [[ ${#FORGE_ONLY_FILES[@]} -gt 0 ]]; then
   echo "**Forge-only memories** (cast candidate):"
-  for fname in $FORGE_ONLY; do
+  for fname in "${FORGE_ONLY_FILES[@]}"; do
     desc=$(sed -n 's/^description:[[:space:]]*//p' "$FORGE_PATH/memory/$fname" 2>/dev/null || echo "(no description)")
     echo "| $fname | $desc |"
   done
