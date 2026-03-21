@@ -5,7 +5,7 @@
 ## Step 1: Resolve Forge Path
 
 1. Check `~/.claude/CLAUDE.md` for a `forge-path:` line
-2. If not found, fall back to `/root/dev/forge`
+2. If not found, error: "forge-path not found in ~/.claude/CLAUDE.md. Run /cast to configure."
 3. If the resolved path doesn't exist, error: "Forge not found. Clone the forge repo first."
 
 ## Step 2: Remote Sync

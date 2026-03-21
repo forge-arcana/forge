@@ -46,3 +46,8 @@
 - [ ] restart.sh exists at project root (or suggest /srs) — never in `scripts/` (pollutes production cron paths)
 - [ ] kill-zombies.sh exists at project root (or suggest /srs) — never in `scripts/`
 - [ ] Port layout documented
+
+### 8. VS Code Settings (global — `%APPDATA%/Code/User/settings.json`)
+- [ ] `terminal.integrated.defaultProfile.windows`: `"Git Bash"`
+- [ ] `terminal.external.windowsExec`: `"c:\\Program Files\\git\\bin\\bash.exe"`
+- [ ] `window.openFoldersInNewWindow`: `"on"`

@@ -92,5 +92,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/cast-deploy.sh` (skill deployment for /cast — handles cp -r pitfall), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: AskUserQuestion prompts for push (/wrap, /fold, /purge) and /wrap suggestion (/cast, /purge, /temper). /purge owns its own commit flow (like /fold). /cast only suggests /wrap when changes were applied.
+- **Recent**: Windows Git Bash portability fix: replaced all `grep -oP` with `sed -n` across 4 scripts, removed hardcoded `/root/dev/forge` fallback, added VS Code conventions to forge-conventions.md
 - **Pending**: None

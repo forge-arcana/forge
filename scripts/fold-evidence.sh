@@ -7,9 +7,12 @@ set -euo pipefail
 FORGE_PATH="${1:-}"
 if [[ -z "$FORGE_PATH" ]]; then
   if [[ -f "$HOME/.claude/CLAUDE.md" ]]; then
-    FORGE_PATH=$(grep -oP 'forge-path:\s*\K\S+' "$HOME/.claude/CLAUDE.md" 2>/dev/null || true)
+    FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$HOME/.claude/CLAUDE.md" 2>/dev/null | tr -d '[:space:]' || true)
   fi
-  FORGE_PATH="${FORGE_PATH:-/root/dev/forge}"
+  if [[ -z "$FORGE_PATH" ]]; then
+    echo "ERROR: forge-path not found in ~/.claude/CLAUDE.md. Run /cast to configure."
+    exit 1
+  fi
 fi
 
 if [[ ! -d "$FORGE_PATH" ]]; then
@@ -67,8 +70,8 @@ for f in "$FORGE_PATH"/memory/*.md; do
   [[ ! -f "$f" ]] && continue
   fname=$(basename "$f")
   [[ "$fname" == "MEMORY.md" ]] && continue
-  mtype=$(grep -oP 'type:\s*\K.*' "$f" 2>/dev/null || echo "unknown")
-  desc=$(grep -oP 'description:\s*\K.*' "$f" 2>/dev/null || echo "(no description)")
+  mtype=$(sed -n 's/^type:[[:space:]]*//p' "$f" 2>/dev/null || echo "unknown")
+  desc=$(sed -n 's/^description:[[:space:]]*//p' "$f" 2>/dev/null || echo "(no description)")
   echo "| $fname | $mtype | $desc |"
 done
 echo ""
@@ -137,8 +140,8 @@ if [[ -d "$MEMBRANE_MEMORY" ]]; then
     [[ ! -f "$f" ]] && continue
     fname=$(basename "$f")
     [[ "$fname" == "MEMORY.md" ]] && continue
-    mtype=$(grep -oP 'type:\s*\K.*' "$f" 2>/dev/null || echo "unknown")
-    desc=$(grep -oP 'description:\s*\K.*' "$f" 2>/dev/null || echo "(no description)")
+    mtype=$(sed -n 's/^type:[[:space:]]*//p' "$f" 2>/dev/null || echo "unknown")
+    desc=$(sed -n 's/^description:[[:space:]]*//p' "$f" 2>/dev/null || echo "(no description)")
     echo "| $fname | $mtype | $desc |"
   done
   echo ""

@@ -9,9 +9,12 @@ MODE="${1:---fetch}"
 # --- Step 1: Resolve forge path ---
 FORGE_PATH=""
 if [[ -f "$HOME/.claude/CLAUDE.md" ]]; then
-  FORGE_PATH=$(grep -oP 'forge-path:\s*\K\S+' "$HOME/.claude/CLAUDE.md" 2>/dev/null || true)
+  FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$HOME/.claude/CLAUDE.md" 2>/dev/null | tr -d '[:space:]' || true)
 fi
-FORGE_PATH="${FORGE_PATH:-/root/dev/forge}"
+if [[ -z "$FORGE_PATH" ]]; then
+  echo "ERROR: forge-path not found in ~/.claude/CLAUDE.md. Run /cast to configure."
+  exit 1
+fi
 
 # --- Load last-cast baseline SHA (written by /cast after successful deploy) ---
 LAST_CAST_SHA=""
@@ -326,7 +329,7 @@ echo ""
 if [[ -n "$FORGE_ONLY" ]]; then
   echo "**Forge-only memories** (cast candidate):"
   for fname in $FORGE_ONLY; do
-    desc=$(grep -oP 'description:\s*\K.*' "$FORGE_PATH/memory/$fname" 2>/dev/null || echo "(no description)")
+    desc=$(sed -n 's/^description:[[:space:]]*//p' "$FORGE_PATH/memory/$fname" 2>/dev/null || echo "(no description)")
     echo "| $fname | $desc |"
   done
   echo ""

@@ -15,9 +15,12 @@ set -euo pipefail
 
 FORGE_PATH=""
 if [[ -f "$HOME/.claude/CLAUDE.md" ]]; then
-  FORGE_PATH=$(grep -oP 'forge-path:\s*\K\S+' "$HOME/.claude/CLAUDE.md" 2>/dev/null || true)
+  FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$HOME/.claude/CLAUDE.md" 2>/dev/null | tr -d '[:space:]' || true)
 fi
-FORGE_PATH="${FORGE_PATH:-/root/dev/forge}"
+if [[ -z "$FORGE_PATH" ]]; then
+  echo "ERROR: forge-path not found in ~/.claude/CLAUDE.md. Run /cast to configure."
+  exit 1
+fi
 
 FORGE_SKILLS="$FORGE_PATH/skills"
 MEMBRANE_SKILLS="$HOME/.claude/skills"

@@ -8,9 +8,12 @@ set -euo pipefail
 FORGE_PATH="${1:-}"
 if [[ -z "$FORGE_PATH" ]]; then
   if [[ -f "$HOME/.claude/CLAUDE.md" ]]; then
-    FORGE_PATH=$(grep -oP 'forge-path:\s*\K\S+' "$HOME/.claude/CLAUDE.md" 2>/dev/null || true)
+    FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$HOME/.claude/CLAUDE.md" 2>/dev/null | tr -d '[:space:]' || true)
   fi
-  FORGE_PATH="${FORGE_PATH:-/root/dev/forge}"
+  if [[ -z "$FORGE_PATH" ]]; then
+    echo "ERROR: forge-path not found in ~/.claude/CLAUDE.md. Run /cast to configure."
+    exit 1
+  fi
 fi
 
 if [[ ! -d "$FORGE_PATH" ]]; then
@@ -144,8 +147,8 @@ for f in "$FORGE_PATH"/memory/*.md; do
   [[ ! -f "$f" ]] && continue
   fname=$(basename "$f")
   [[ "$fname" == "MEMORY.md" ]] && continue
-  mtype=$(grep -oP 'type:\s*\K.*' "$f" 2>/dev/null || echo "unknown")
-  desc=$(grep -oP 'description:\s*\K.*' "$f" 2>/dev/null || echo "(no description)")
+  mtype=$(sed -n 's/^type:[[:space:]]*//p' "$f" 2>/dev/null || echo "unknown")
+  desc=$(sed -n 's/^description:[[:space:]]*//p' "$f" 2>/dev/null || echo "(no description)")
   echo "| $fname | $mtype | $desc |"
 done
 echo ""
@@ -273,7 +276,7 @@ echo "**Total skills**: $TOTAL_SKILLS ($ARTS arts + $TASK_SKILLS task skills)"
 echo ""
 
 # Check if CLAUDE.md counts match
-CLAIMED_SKILLS=$(grep -oP '\d+ global skills' "$FORGE_PATH/CLAUDE.md" 2>/dev/null || echo "not stated")
+CLAIMED_SKILLS=$(grep -o '[0-9]* global skills' "$FORGE_PATH/CLAUDE.md" 2>/dev/null || echo "not stated")
 echo "**CLAUDE.md claims**: $CLAIMED_SKILLS"
 echo "**Actual**: $TOTAL_SKILLS"
 echo ""
