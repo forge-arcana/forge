@@ -110,5 +110,5 @@ Output a final summary with recommended actions:
 | Learnings | X unprocessed entries | Run `/fold` |
 | Memory | Y new, Z updated | Run `/fold` |
 
-**Recommended next step**: [/cast if forge has updates to push, /fold if membrane has accumulated knowledge, or "All in sync — nothing to do"]
+**Recommended next step**: [/cast if forge has updates to pull, /fold if membrane has accumulated knowledge, or "All in sync — nothing to do"]
 ```
