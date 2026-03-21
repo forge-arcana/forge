@@ -86,7 +86,7 @@ For ALL skills in `<forge>/skills/*/SKILL.md` (not just arts):
 
 ### 3a: Bloat Analysis
 Use the scan script's section-level breakdown. Flag any skill where:
-- **Total lines > 150** — skill may need trimming (poke at ~180 is the ceiling after absorbing 7 dimensions)
+- **Total lines > 150** — skill may need trimming (poke at ~210 is the ceiling after absorbing 7 dimensions)
 - **Any single section > 30% of file** — section is doing too much, consider splitting or referencing external docs
 - **Inline grep patterns** — these belong in `forge-scan.sh`, not in SKILL.md. The scan script runs them mechanically; duplicating in the skill is maintenance burden.
 - **Restated reference content** — logging rules, conventions, framework lists that already live in `forge-conventions.md` or `stack-guide.md`. Reference the doc, don't restate.

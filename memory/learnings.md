@@ -20,6 +20,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - `/fold` Part 3 Steps 1-4 triage and absorb into `forge/learnings/` → next art run reads them first
 - `/fold` NEVER deletes from user's global space — tracks processed entries via title-based tracker
 - Promotion is always a COPY, never a move — project entries persist after promotion
+- `/fold` triage must output as console text, never AskUserQuestion (compressed UI is unreadable for large tables)
 
 ## Skills
 
@@ -61,7 +62,6 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Review fires automatically based on size thresholds (learnings >50, memory >20 files)
 - Review runs BEFORE absorption to prune stale knowledge first
 - Staging archival also auto-triggers (>100 entries, >30 files)
-- Triage tables must output as console text, never AskUserQuestion (compressed UI is unreadable for large tables)
 
 ## Conventions
 
