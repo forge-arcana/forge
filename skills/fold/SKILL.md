@@ -413,20 +413,14 @@ If no triggers fire, skip Part 5 entirely.
 
 ---
 
-## Part 6: Commit & Push
+## Part 6: Wrap & Push
 
-`/fold` owns the full cycle — absorb, commit, push. No `/wrap` needed for forge.
+`/fold` delegates commit to the `/wrap` ritual — lint, stage, context, docs, compact, commit.
 
-1. **Stage** all changed files in `<forge>` with `git add <file>` (never `git add -A`)
-2. **Update context** in `<forge>/CLAUDE.md` Current Context section
-3. **Commit** with a descriptive message (what was absorbed, not where it came from — no project names):
-   ```
-   git commit -m "Absorb N learnings: [topic summaries]
-
-   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
-   ```
-   If no changes were made (nothing absorbed, no config drift), skip the commit.
-4. **Push** to remote: `git push`
+1. **Conflict check**: Run `git -C <forge> diff --name-only --diff-filter=U` to detect unresolved merge conflicts. If ANY unresolved files exist, **STOP** — list the conflicted files and ask the user to resolve them before proceeding. Do NOT commit or push with unresolved conflicts.
+2. **Run /wrap**: Execute the full `/wrap` ritual against the forge repo. This handles staging, context updates, compaction, and commit. The commit message should describe what was absorbed (topics, not project names).
+3. If `/wrap` results in no changes (nothing absorbed, no config drift), skip to Part 7.
+4. **Push decision**: Ask the user: "Push to remote?" — do NOT push automatically. Only push after explicit confirmation.
 
 ## Part 7: Report
 
@@ -449,5 +443,6 @@ Present a **Forge Transfer** table summarizing everything that moved between the
 - If nothing changed: just say "Everything in sync."
 - Each row should have a brief human description of what was transferred, not just a filename
 
-After the table, add the commit status as a one-liner:
-> **Commit**: `[hash]` — pushed to remote (or: no changes to commit)
+After the table, add the commit and push status:
+> **Commit**: `[hash]` (or: no changes to commit)
+> **Push**: pushed to remote / user declined / blocked by unresolved conflicts
