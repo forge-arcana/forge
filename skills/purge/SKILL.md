@@ -90,6 +90,7 @@ Use the scan script's section-level breakdown. Flag any skill where:
 - **Any single section > 30% of file** — section is doing too much, consider splitting or referencing external docs
 - **Inline grep patterns** — these belong in `forge-scan.sh`, not in SKILL.md. The scan script runs them mechanically; duplicating in the skill is maintenance burden.
 - **Restated reference content** — logging rules, conventions, framework lists that already live in `forge-conventions.md` or `stack-guide.md`. Reference the doc, don't restate.
+- **Output Format templates** — markdown blocks with placeholder values (`X`, `...`, `[repeat for each]`) are low-value filler. The LLM infers table structure from column headers alone. Flag any Output Format section >15 lines. Replace with a compact structural description (section names + column headers, 3-5 lines).
 
 **The trim test**: for each verbose section, ask "Would the LLM produce worse output if this section were half the length?" If not, cut it.
 
