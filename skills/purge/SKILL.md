@@ -150,7 +150,13 @@ Present the full report, then ask the user to confirm before applying changes.
 After user confirms:
 1. Apply all approved changes (remove, rewrite, consolidate, update)
 2. Report totals: X removed, X rewritten, X consolidated, X updated
-3. Do NOT commit — ask: "Forge cleansed. Ready to wrap up? Run `/wrap` to commit with full context."
+3. **Commit & push** — `/purge` owns its own commit flow (forge has no linter/docs):
+   - **Conflict check**: Run `git -C <forge> diff --name-only --diff-filter=U`. If ANY unresolved files exist, **STOP** and list them.
+   - **Stage** changed files with `git add <file>` (never `git add -A`)
+   - **Update context** in `<forge>/CLAUDE.md` Current Context section
+   - **Commit**: `"Purge: [what was cleansed]"` with `Co-Authored-By`
+   - If no changes were made, skip the commit.
+   - **Push decision**: Use `AskUserQuestion` — options: "Yes, push" / "No, keep local"
 
 ## Post-Flight
 

@@ -70,7 +70,8 @@ Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`, `/pry`, `/purge`) write l
 > Learnings must read as universal principles. Commit messages must describe *what* was absorbed, not *where* it came from.
 
 ## HARD RULE — No Auto-Commit
-> **NEVER commit automatically after completing any sprint, phase, or piece of work.** Always ask the user: "Ready to wrap up? Run `/wrap` to commit with full context."
+> **NEVER commit automatically after completing any sprint, phase, or piece of work.**
+> Use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
 
 ## HARD RULE — No Command Chaining in Bash — EVER
 > **NEVER use `&&`, `;`, or `||` to chain commands in a single Bash tool call.**
@@ -91,5 +92,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (membrane inspection for /mark, /cast, /fold), `scripts/cast-deploy.sh` (skill deployment for /cast — handles cp -r pitfall), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: /fold self-contained commit with conflict gate + AskUserQuestion push, /wrap AskUserQuestion push, /mark perspective fix (pull not push).
+- **Recent**: AskUserQuestion prompts for push (/wrap, /fold, /purge) and /wrap suggestion (/cast, /purge, /temper). /purge owns its own commit flow (like /fold). /cast only suggests /wrap when changes were applied.
 - **Pending**: None

@@ -245,7 +245,7 @@ For each press dimension, average the scores across passes (round to nearest 0.5
 After presenting the report, suggest:
 - "Want me to fix the confirmed criticals? Specify by finding title."
 - "Run `/pound` for adversarial QA on the weak dimensions."
-- "Run `/wrap` to commit if you're satisfied."
+- Use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
 
 ## Notes
 

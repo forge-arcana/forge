@@ -22,7 +22,7 @@ See [Bash Permissions](#bash-permissions--avoiding-prompts) for details and exam
 ## HARD RULE — No Auto-Commit
 
 > **NEVER commit automatically after completing any sprint, phase, or piece of work.**
-> Always ask the user: "Ready to wrap up? Run `/wrap` to commit with full context."
+> Use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
 
 This ensures the full pre-commit ritual (learnings, context, docs, lint, compact) always runs before any commit.
 

@@ -187,5 +187,4 @@ Present a **Forge Transfer** table summarizing everything that moved between for
 - If nothing changed: just say "Everything in sync."
 - Each row should have a brief human description of what was transferred, not just a filename
 
-After the table, do NOT commit — ask:
-> "Ready to wrap up? Run `/wrap` to commit with full context."
+If changes were applied to the project, do NOT commit — use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet". If nothing changed (everything in sync), skip the prompt.
