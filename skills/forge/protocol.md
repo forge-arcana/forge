@@ -38,6 +38,7 @@ Each art defines its own execution in its SKILL.md:
 
 - **Evaluative arts** (probe, poke, press, pound): adopt the persona, apply review framework/dimensions, web-search for current best practices, produce a structured report
 - **Generative arts** (prime): adopt the persona, conduct a structured conversation/interview, produce a document
+- **Investigative arts** (pry): decompose blockers, aggressively search for alternatives, challenge assumptions until a path forward emerges
 
 ## Web Research Cache
 

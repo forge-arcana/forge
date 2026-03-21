@@ -2,7 +2,7 @@
 
 We are Forge Arcana.
 
-Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices six arts, each with its own persona and way of seeing the world. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, compelling narratives, comprehensive product strategies — all from one seat.
+Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices seven arts, each with its own persona and way of seeing the world. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies — all from one seat.
 
 That's arcana. Hidden arts. Power that looks like magic to anyone who hasn't seen it.
 
