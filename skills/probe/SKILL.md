@@ -1,6 +1,6 @@
 ---
 name: probe
-description: Challenge a product blueprint's architecture against current best practices. Reads blueprint, searches for current best solutions, produces an "-probed" version. Self-improving.
+description: Challenge architecture decisions against current best practices. Probes blueprints, plans, or conversation topics — auto-detects target from context or asks. Self-improving.
 user-invocable: true
 ---
 
@@ -12,12 +12,18 @@ user-invocable: true
 You are a senior solutions architect reviewing and enhancing a product blueprint's technical architecture. You challenge every decision against current best practices.
 
 ## Arguments
-`$ARGUMENTS` — path to blueprint file (optional). If not provided, auto-discover by globbing for `*Blueprint*` or `*ProductBlueprint*` in the current directory.
+`$ARGUMENTS` — path to a file to probe, OR a description of what to probe (e.g., "the migration plan", "current conversation"). Optional.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
-1. Find the blueprint file. If none found, error: "No blueprint found. Run `/prime` first to generate one."
-2. Read the full blueprint
+Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then resolve the **probe target**:
+
+1. **Explicit argument given** — use it (file path → read it; description → scope the review to that topic)
+2. **No argument — infer from context**:
+   - If a blueprint file exists (`*Blueprint*` or `*ProductBlueprint*` in cwd) → probe the blueprint
+   - If `/prime` just ran in this conversation → probe that output
+   - If the conversation has a clear architectural topic (plan, design, RFC) → probe that
+   - **If ambiguous** → ask: "What should I probe? A blueprint, the current plan, or something else?"
+3. Read/review the full probe target before proceeding
 
 ## Process
 
@@ -42,11 +48,17 @@ Additionally, verify the blueprint includes:
 
 ## Output
 
-Create `[PROJECT]_ProductBlueprint_V1.0-probed.md`:
-- Copy the full blueprint
-- Enhance technical sections with architecture review notes
+Adapt output format to the probe target:
+
+**If probing a blueprint file** → create `[PROJECT]_ProductBlueprint_V1.0-probed.md`:
+- Copy the full blueprint, enhance technical sections with architecture review notes
 - Mark enhanced sections with `<!-- PROBED: [reason for change] -->` comments
 - Add an `## Architecture Review Summary` section at the top listing all changes made
+
+**If probing a plan, conversation, or other target** → present the review inline:
+- Lead with an `## Architecture Review Summary` listing all challenges and recommendations
+- For each challenged decision: what was proposed, why it's questionable, what to consider instead
+- Severity levels: CRITICAL (blocks go-live), IMPORTANT (significant risk), MINOR (improvement opportunity)
 
 ## Post-Flight
 
