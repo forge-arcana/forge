@@ -14,14 +14,15 @@ user-invocable: true
 
 ---
 
-Single command to fold all knowledge back into the forge repo. Runnable from **any project**. One flow, six parts:
+Single command to fold all knowledge back into the forge repo. Runnable from **any project**. One flow, seven parts:
 
 1. **Config & skill sync** — push current global config into forge reference + detect deployed skill drift
 2. **Review & prune** — check existing forge knowledge for staleness (auto-triggers based on size)
 3. **Learning absorption** — merge global learnings into forge's learning store
 4. **Memory absorption** — merge global memories into forge's team memory store
 5. **Staging archival** — archive fully-absorbed entries from `~/.claude/` staging area
-6. **Report** — summary of all changes
+6. **Commit & push** — conflict gate, stage, context update, commit, push with user confirmation
+7. **Report** — summary of all changes
 
 All file paths below are relative to `<forge>` (the resolved forge repo path).
 
@@ -413,14 +414,24 @@ If no triggers fire, skip Part 5 entirely.
 
 ---
 
-## Part 6: Wrap & Push
+## Part 6: Commit & Push
 
-`/fold` delegates commit to the `/wrap` ritual — lint, stage, context, docs, compact, commit.
+`/fold` owns its own commit flow — no `/wrap` needed (forge has no linter, no docs, and staging happens throughout Parts 1-5).
 
 1. **Conflict check**: Run `git -C <forge> diff --name-only --diff-filter=U` to detect unresolved merge conflicts. If ANY unresolved files exist, **STOP** — list the conflicted files and ask the user to resolve them before proceeding. Do NOT commit or push with unresolved conflicts.
-2. **Run /wrap**: Execute the full `/wrap` ritual against the forge repo. This handles staging, context updates, compaction, and commit. The commit message should describe what was absorbed (topics, not project names).
-3. If `/wrap` results in no changes (nothing absorbed, no config drift), skip to Part 7.
-4. **Push decision**: Ask the user: "Push to remote?" — do NOT push automatically. Only push after explicit confirmation.
+2. **Stage** all changed files in `<forge>` with `git add <file>` (never `git add -A`)
+3. **Update context** in `<forge>/CLAUDE.md` Current Context section
+4. **Compact check**: If `<forge>/CLAUDE.md` exceeds ~20k chars, move verbose content to `memory/` files
+5. **Commit** with a descriptive message (what was absorbed, not where it came from — no project names):
+   ```
+   git commit -m "Absorb N learnings: [topic summaries]
+
+   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+   ```
+   If no changes were made (nothing absorbed, no config drift), skip to Part 7.
+6. **Push decision**: Use `AskUserQuestion` to prompt the user — do NOT push automatically.
+   - Options: "Yes, push" / "No, keep local"
+   - If the user declines, skip the push and proceed to Part 7
 
 ## Part 7: Report
 

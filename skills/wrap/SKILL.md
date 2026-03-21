@@ -66,8 +66,10 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
 - Create the commit
 
 ## Step 7: Push Decision
-- Ask the user: "Push to remote?" — do NOT push automatically
+- Use `AskUserQuestion` to prompt the user — do NOT push automatically
+  - Options: "Yes, push" / "No, keep local"
 - Only push after explicit user confirmation
+- If the user declines, skip the push
 
 ## Step 8: Context Window Compact
 - After the commit (and optional push), remind the user: "Run `/compact` or start a new conversation for a fresh context window."
