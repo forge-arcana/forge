@@ -18,16 +18,16 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Dedup at every level: project learnings, project memory, global learnings, global memory
 
 ### Self-Improving Loop (2026-03-19)
-- Arts (listed in protocol.md Six Arts table) flag learnings as `Forge-worthy: yes/no` at write time
+- Arts (listed in protocol.md Seven Arts table) flag learnings as `Forge-worthy: yes/no` at write time
 - `/fold` Part 3 Step 0 scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md`
 - `/fold` Part 3 Steps 1-4 triage and absorb into `forge/learnings/` → next skill run reads them first
 
 ## Skills
 
 ### Structure (2026-03-18)
-- Arts (6): prime, probe, poke, press, pound, purge — specialist agent skills with self-improving loops
+- Arts (7): prime, probe, poke, press, pound, pry, purge — specialist agent skills with self-improving loops
 - Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — poke often, press before milestones, pound before ship
-- Task skills (11): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci, dig
+- Task skills (12): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci, dig, temper
 - `skills/forge/` holds reference docs (stack-guide, rules, conventions, protocol) — not a deployable skill
 - Skills are self-contained packages — reference docs live inside the owning skill directory
 - `skills/` is the git-tracked source of truth; `~/.claude/skills/` is the deployment target

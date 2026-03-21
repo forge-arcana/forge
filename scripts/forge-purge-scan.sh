@@ -160,7 +160,7 @@ echo "### Art SKILL.md sizes"
 echo ""
 echo "| Art | Lines | Chars | Has Protocol Ref? |"
 echo "|-----|-------|-------|-------------------|"
-for art in prime probe poke press pound purge; do
+for art in prime probe poke press pound pry purge; do
   skill_file="$FORGE_PATH/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     lines=$(wc -l < "$skill_file")
@@ -225,7 +225,7 @@ echo "### Consistency: frontmatter fields"
 echo ""
 echo "| Art | name | description | user-invocable |"
 echo "|-----|------|-------------|----------------|"
-for art in prime probe poke press pound purge; do
+for art in prime probe poke press pound pry purge; do
   skill_file="$FORGE_PATH/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     has_name=$(grep -c '^name:' "$skill_file" 2>/dev/null || echo "0")
@@ -267,7 +267,7 @@ echo ""
 # Skill count verification
 echo "### Skill count verification"
 TOTAL_SKILLS=$(find "$FORGE_PATH/skills" -maxdepth 1 -mindepth 1 -type d ! -name forge | wc -l)
-ARTS=$(echo "prime probe poke press pound purge" | wc -w)
+ARTS=$(echo "prime probe poke press pound pry purge" | wc -w)
 TASK_SKILLS=$((TOTAL_SKILLS - ARTS))
 echo "**Total skills**: $TOTAL_SKILLS ($ARTS arts + $TASK_SKILLS task skills)"
 echo ""
