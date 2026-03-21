@@ -198,7 +198,8 @@ These are patterns confirmed across multiple projects. Not opinions — battle s
 
 ### Better Auth
 - Claims `/api/auth/*` — plan routes around this
-- Bearer plugin for Capacitor clients (token in header, not cookie)
+- Bearer plugin for Capacitor clients (token in header, not cookie). Cookie auth also works if using `androidScheme: "https"` + same-origin serving.
+- Social auth in Capacitor: see **Capacitor → Social Auth** section below
 - Phone-first users need placeholder email
 - `freshAge` session cache: direct DB writes (e.g., role switch) won't be reflected in `auth.api.getSession()` until cache expires. Read mutable fields directly from DB in session endpoints.
 - Hono middleware `c.header()` before `await next()` corrupts Better Auth's raw Response cookies. Only set headers on the rejection response (e.g., 429), never on pass-through.
@@ -212,8 +213,27 @@ These are patterns confirmed across multiple projects. Not opinions — battle s
 - Use `getSignedUrl({ action: 'write' })` (XML API) — `createResumableUpload()` (JSON API) ignores bucket CORS
 
 ### Capacitor
-- Google Sign-In: native plugin gets ID token, pass to Better Auth via `signIn.social({ idToken })`
 - `@capacitor/preferences` for secure token storage (replaces localStorage)
+- `androidScheme: "https"` in capacitor.config.ts — required for cookie auth in Android WebView (without it, cookies are treated as cross-origin)
+- Same-origin dev: set `MOBILE_DIST_PATH` env var → API serves mobile `www/` content, Capacitor `server.url` points at API. Avoids CORS/cookie issues entirely.
+- External API calls (geocoding, maps, etc.) should be proxied through your API server — Android emulator DNS resolution is unreliable for external domains. Better pattern regardless (no CORS/CSP issues, enables caching).
+
+#### Social Auth in Capacitor
+WebView OAuth redirects don't work — the OAuth provider can't redirect back into a WebView. Two approaches:
+
+**Recommended: `better-auth-capacitor` plugin** (system browser + deep links)
+- OAuth opens in system browser (not WebView), completes normally, deep links back to app
+- Requires App Links (Android) + Universal Links (iOS) on your production domain
+- Server-side: Better Auth handles providers as normal — no mobile-specific server code
+- Client-side: `setupBetterAuthCapacitor()` in app entry, then standard `signIn.social()` calls
+- **Blocked by production domain** — App Links / Universal Links require a real domain with `assetlinks.json` (Android) and `apple-app-site-association` (iOS). Cannot test with localhost.
+- Reference: https://github.com/daveyplate/better-auth-capacitor
+
+**Alternative: Native SDK + ID token pass-through**
+- Native Google/Facebook/Apple SDK gets ID token, pass to Better Auth via `signIn.social({ idToken })`
+- More complex (native SDK per provider), but works without App Links
+
+**Provider priority:** Google, Facebook, and Apple are the three that matter for most markets. Research your target market's social login adoption rates to decide priority. If you offer any social login on iOS, Apple Sign-In is **required by App Store policy**. When first implementing, add a TODO to resolve provider priority based on market research.
 
 ### pnpm
 - v10 blocks build scripts by default — add `pnpm.onlyBuiltDependencies` to root package.json

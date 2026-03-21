@@ -23,7 +23,8 @@
     "Toast/Snackbar Redundancy — Platform Guidelines",
     "Migration Fixup Scripts Must Guard Against Fresh DBs",
     "Never Accept Actor Identity from Request Body",
-    "Band-Aid Fallback Detection: Ask \"Where Should This Be Set?\""
+    "Band-Aid Fallback Detection: Ask \"Where Should This Be Set?\"",
+    "Android AVD Segregation Across Projects"
   ],
   "promotedEntries": []
 }
