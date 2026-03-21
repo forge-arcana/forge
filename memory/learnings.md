@@ -61,6 +61,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Review fires automatically based on size thresholds (learnings >50, memory >20 files)
 - Review runs BEFORE absorption to prune stale knowledge first
 - Staging archival also auto-triggers (>100 entries, >30 files)
+- Triage tables must output as console text, never AskUserQuestion (compressed UI is unreadable for large tables)
 
 ## Conventions
 
@@ -82,4 +83,3 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ### /ponci + /monci (2026-03-15)
 - `/ponci` = push + invoke `/monci`
 - `/monci` = monitor CI only (no push)
-- `/fold` triage must output as console text, never AskUserQuestion (compressed UI is unreadable for large tables)
