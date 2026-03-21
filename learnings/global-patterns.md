@@ -63,3 +63,7 @@
 ## Mobile Testing Progression: Browser → Emulator → Device → Store (2026-03-21)
 **Learning**: Start mobile development testing in the browser (DevTools device mode, F12 → target device). As the product matures, build APKs for local device testing. For iteration velocity, lean heavily on emulators. Only pursue Play Store / App Store integration when the product is solid — store submissions have cost (developer accounts, review cycles, compliance), so readiness matters before that step.
 **Apply when**: Setting up the testing strategy for any mobile-first or hybrid app project. Decide this progression on day one.
+
+## Camera getUserMedia Succeeds But Produces Black Feed on Emulators (2026-03-21)
+**Learning**: Android emulators with `hw.camera.back=emulated` (the default) return a valid MediaStream from `getUserMedia()` — no error thrown, no catch block triggered — but the video feed is black or shows a useless checkerboard. Code that gates fallback UI on `catch` misses this entirely. Two fixes required: (1) Set AVD config to `hw.camera.back=virtualscene` for a 3D scene where QR codes can be placed on virtual walls. (2) In the UI, always show the manual-entry fallback alongside the camera viewfinder — never hide it behind a toggle or error state — because "camera works but shows nothing useful" is a silent failure that code cannot reliably detect without frame-level pixel analysis.
+**Apply when**: Building any camera-dependent feature (QR scanner, barcode reader, photo capture) in a hybrid/Capacitor/WebView app that will be tested on Android emulators.
