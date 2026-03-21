@@ -89,7 +89,7 @@ This ensures the same topic maps to one cache key regardless of when the search 
 3. **Present results** to the user
 4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/fold` to absorb learnings into forge
 
-## The Six Arts
+## The Seven Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
@@ -98,6 +98,7 @@ This ensures the same topic maps to one cache key regardless of when the search 
 | `/poke` | Staff engineer (code quality + tech debt) | Evaluative | Light |
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
+| `/pry` | The Lever (relentless solution-finder) | Investigative | — |
 | `/purge` | The Purist (forge master) | Cleansing | — |
 
 ### The Evaluative Trifecta — poke → press → pound
