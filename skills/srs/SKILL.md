@@ -6,7 +6,7 @@ user-invocable: true
 
 # /srs — Setup Restart Script
 
-Generate or update `restart.sh` and `kill-zombies.sh` in the **`dev/`** directory (never in `scripts/` — these are dev-only utilities that must not pollute production directories or CI cron paths). Create `dev/` if it doesn't exist.
+Generate or update `restart.sh` and `kill-zombies.sh` in the **project root** (never in `scripts/` — these are dev-only utilities that must not pollute production directories or CI cron paths).
 
 ## Pre-Flight
 
@@ -89,7 +89,7 @@ A standalone cleanup script for use outside restart — dev servers (Vite, tsx, 
 
 ## Step 4: Verify
 
-- Run `bash -n dev/restart.sh` to syntax-check
-- Run `bash -n dev/kill-zombies.sh` to syntax-check
+- Run `bash -n restart.sh` to syntax-check (project root)
+- Run `bash -n kill-zombies.sh` to syntax-check (project root)
 - Show the user the generated scripts and port layout
 - Do NOT run the script automatically — let the user decide when to start
