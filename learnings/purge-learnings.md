@@ -35,3 +35,7 @@
 ## Output Format Templates Are Low-Value Bloat (2026-03-21)
 **Learning**: Example output tables with placeholder values (X, ..., [repeat for each]) consume 30-70 lines per skill but add near-zero value — the LLM can infer table structure from column headers alone. Replace verbose markdown template blocks with a compact 3-5 line format description listing section names and column headers. Applied across 6 skills for a 38% total reduction (1,350 → 833 lines) with no behavior loss. The trim test still applies: "Would the LLM produce worse output if this section were half the length?"
 **Apply when**: Running /purge Dimension 3 (Skill Fitness) — flag any Output Format section >15 lines as a trim candidate.
+
+## All Transfers Are Guarded by User Wisdom (2026-03-22)
+**Learning**: ALL pillars (skills, config, learnings, memory) require user review in BOTH directions. Deploy and absorb operations both present a PLAN table where the user approves/rejects individual items. Nothing transfers without user judgment — no pillar gets a mechanical bypass. A skill can have a bad update, a config can have stale rules, a learning can be wrong. The source of truth for structure is the repo; the source of truth for judgment is the user.
+**Apply when**: Designing or reviewing any transfer mechanism between a source repo and deployed copies. Any time you're tempted to say a transfer is "mechanical" or "automatic" — the user reviews every item.
