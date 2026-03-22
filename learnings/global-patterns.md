@@ -111,3 +111,7 @@
 ## Fold/Cast Race Condition on Direct Forge Edits (2026-03-22)
 **Learning**: When skill files are edited directly in the source repo (skill development), the deployed copies in the user's membrane become stale instantly. If `/fold` runs from another session before `/cast` updates the membrane, fold sees DEPLOYED-DIFFERS and absorbs the stale deployed version — silently reverting the source edit. This is a race condition in bidirectional sync systems: concurrent sessions can undo each other's work via the absorption path. Prevention: always run the deployment command immediately after direct source edits to keep the membrane in sync.
 **Apply when**: Editing source-of-truth files directly while a bidirectional sync system (deploy + absorb) operates on deployed copies.
+
+## All Transfers Are Guarded by User Wisdom (2026-03-22)
+**Learning**: In bidirectional sync systems, ALL pillars (skills, config, learnings, memory) require user review in BOTH directions. Deploy and absorb operations both present a PLAN table where the user approves/rejects individual items. Nothing transfers without user judgment — no pillar gets a mechanical bypass. A skill can have a bad update, a config can have stale rules, a learning can be wrong. The source of truth for structure is the repo; the source of truth for judgment is the user.
+**Apply when**: Designing or reviewing any transfer mechanism between a source repo and deployed copies. Any time you're tempted to say a transfer is "mechanical" or "automatic" — the user reviews every item.
