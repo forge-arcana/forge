@@ -11,6 +11,12 @@ user-invocable: true
 > `/fold` is the gatekeeper. All knowledge flows through it.
 > Direct edits to the forge repo are only for skill development (editing SKILL.md files in `skills/`).
 
+## HARD RULE — Disk is truth, context is stale
+> **NEVER use in-context memory of forge file contents to make absorption decisions.**
+> Always `Read` files from disk or use script output (fold-evidence.sh, forge-status.sh).
+> Your context window may contain skill definitions, learnings, or reference docs from before the last `/cast` — using them causes silent reverts and duplicate absorptions.
+> This applies to ALL parts: skill sync, config sync, learning triage, memory triage, deduplication checks.
+
 ---
 
 Single command to fold all knowledge back into the forge repo. Runnable from **any project**. One flow, seven parts:
@@ -36,9 +42,6 @@ Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the S
 ## Part 1: Config & Skill Sync
 
 ### 1a: Skill Reverse-Sync (using preflight drift results)
-
-> **HARD RULE — Disk is truth, context is stale.**
-> When diffing DEPLOYED-DIFFERS, read the deployed file FROM DISK (`~/.claude/skills/<name>/SKILL.md`), NOT from your in-context memory of the skill. Your context window may contain an older version of the skill that was loaded before the last `/cast`. If you use in-context knowledge to "merge" or "improve" the diff, you will silently revert changes made by other sessions. Always `Read` the file, never recall it.
 
 | Classification | /fold Action |
 |---------------|-------------|
