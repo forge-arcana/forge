@@ -47,6 +47,9 @@ packages/
   database/  — Drizzle schema, migrations, client, seed
   server/    — Hono server, routes, services, middleware, auth
   web/       — Vite + React frontend, TanStack Router, components
+scripts/     — Production scripts only (build, deploy, release, CI)
+dev/         — Local dev tooling (restart.sh, kill-zombies.sh, emulator.js)
+logs/        — Dev server output (gitignored)
 ```
 
 For multi-role apps (e.g., customer + staff + admin), the `web/` package can be split:

@@ -43,8 +43,8 @@
 - [ ] Browser console → logs/dev.log (dev only)
 
 ### 7. Dev Stack
-- [ ] restart.sh exists at project root (or suggest /srs) — never in `scripts/` (pollutes production cron paths)
-- [ ] kill-zombies.sh exists at project root (or suggest /srs) — never in `scripts/`
+- [ ] `dev/restart.sh` exists (or suggest /srs) — never in `scripts/` (production only)
+- [ ] `dev/kill-zombies.sh` exists (or suggest /srs) — never in `scripts/`
 - [ ] Port layout documented
 
 ### 8. VS Code Settings (global — `%APPDATA%/Code/User/settings.json`)
