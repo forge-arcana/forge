@@ -283,61 +283,176 @@ for forge_file in "$FORGE_PATH"/learnings/*.md; do
     elif [[ "$user_count" -gt "$forge_count" ]]; then
       diff=$((user_count - forge_count))
       echo "| $fname | $user_count | $forge_count | $diff new in user -- fold needed |"
-      # Collect detail: titles in user but not in forge
-      new_titles=$(python3 -c "
-import re
-def get_titles(path):
-    titles = set()
+      # Collect detail: titles + summaries for entries in user but not in forge
+      detail_lines=$(python3 -c "
+import re, subprocess
+def get_entries(path):
+    entries = {}
+    current_title = None
     try:
         with open(path) as f:
             for line in f:
                 m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
-                if m: titles.add(m.group(1).strip())
+                if m:
+                    current_title = m.group(1).strip()
+                    entries[current_title] = ''
+                elif current_title and line.startswith('**Learning**:'):
+                    s = line.replace('**Learning**:', '').strip()
+                    if len(s) > 100: s = s[:97] + '...'
+                    entries[current_title] = s
     except: pass
-    return titles
-for t in sorted(get_titles('$user_file') - get_titles('$forge_file')):
-    print(t)
+    return entries
+def get_blame_authors(path, forge_path):
+    authors = {}
+    try:
+        out = subprocess.run(['git', '-C', forge_path, 'blame', '--line-porcelain', path],
+            capture_output=True, text=True, timeout=10).stdout
+        author = ''
+        for line in out.split('\n'):
+            if line.startswith('author '): author = line[7:]
+            elif line.startswith('\t'):
+                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line[1:])
+                if m: authors[m.group(1).strip()] = author
+    except: pass
+    return authors
+user_e = get_entries('$user_file')
+forge_e = get_entries('$forge_file')
+blame = get_blame_authors('$user_file', '$FORGE_PATH') if False else {}
+# For user-only entries, blame the user file
+try:
+    out = subprocess.run(['git', '-C', '$FORGE_PATH', 'blame', '--line-porcelain', '$user_file'],
+        capture_output=True, text=True, timeout=10).stdout
+    author = ''
+    for line in out.split('\n'):
+        if line.startswith('author '): author = line[7:]
+        elif line.startswith('\t'):
+            m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line[1:])
+            if m: blame[m.group(1).strip()] = author
+except: pass
+new_titles = sorted(set(user_e.keys()) - set(forge_e.keys()))
+for t in new_titles:
+    a = blame.get(t, '')
+    suffix = f' ({a})' if a else ''
+    print(f'{t}{suffix}')
+    if user_e.get(t): print(f'  -> {user_e[t]}')
 " 2>/dev/null || true)
-      if [[ -n "$new_titles" ]]; then
+      if [[ -n "$detail_lines" ]]; then
         LEARNING_DETAILS_LINES+=("**${fname}** (new in user):")
-        while IFS= read -r title; do
-          LEARNING_DETAILS_LINES+=("  - ${title}")
-        done <<< "$new_titles"
+        while IFS= read -r line; do
+          if [[ "$line" == "  -> "* ]]; then
+            LEARNING_DETAILS_LINES+=("    ${line/#  -> /→ }")
+          else
+            LEARNING_DETAILS_LINES+=("  - ${line}")
+          fi
+        done <<< "$detail_lines"
       fi
     else
       diff=$((forge_count - user_count))
       echo "| $fname | $user_count | $forge_count | $diff new in forge -- cast needed |"
-      # Collect detail: titles in forge but not in user
-      new_titles=$(python3 -c "
-import re
-def get_titles(path):
-    titles = set()
+      # Collect detail: titles + summaries for entries in forge but not in user
+      detail_lines=$(python3 -c "
+import re, subprocess
+def get_entries(path):
+    entries = {}
+    current_title = None
     try:
         with open(path) as f:
             for line in f:
                 m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
-                if m: titles.add(m.group(1).strip())
+                if m:
+                    current_title = m.group(1).strip()
+                    entries[current_title] = ''
+                elif current_title and line.startswith('**Learning**:'):
+                    s = line.replace('**Learning**:', '').strip()
+                    if len(s) > 100: s = s[:97] + '...'
+                    entries[current_title] = s
     except: pass
-    return titles
-for t in sorted(get_titles('$forge_file') - get_titles('$user_file')):
-    print(t)
+    return entries
+def get_blame_authors(path, forge_path):
+    authors = {}
+    try:
+        out = subprocess.run(['git', '-C', forge_path, 'blame', '--line-porcelain', path],
+            capture_output=True, text=True, timeout=10).stdout
+        author = ''
+        for line in out.split('\n'):
+            if line.startswith('author '): author = line[7:]
+            elif line.startswith('\t'):
+                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line[1:])
+                if m: authors[m.group(1).strip()] = author
+    except: pass
+    return authors
+forge_e = get_entries('$forge_file')
+user_e = get_entries('$user_file')
+blame = get_blame_authors('$forge_file', '$FORGE_PATH')
+new_titles = sorted(set(forge_e.keys()) - set(user_e.keys()))
+for t in new_titles:
+    a = blame.get(t, '')
+    suffix = f' ({a})' if a else ''
+    print(f'{t}{suffix}')
+    if forge_e.get(t): print(f'  -> {forge_e[t]}')
 " 2>/dev/null || true)
-      if [[ -n "$new_titles" ]]; then
+      if [[ -n "$detail_lines" ]]; then
         LEARNING_DETAILS_LINES+=("**${fname}** (new in forge):")
-        while IFS= read -r title; do
-          LEARNING_DETAILS_LINES+=("  - ${title}")
-        done <<< "$new_titles"
+        while IFS= read -r line; do
+          if [[ "$line" == "  -> "* ]]; then
+            LEARNING_DETAILS_LINES+=("    ${line/#  -> /→ }")
+          else
+            LEARNING_DETAILS_LINES+=("  - ${line}")
+          fi
+        done <<< "$detail_lines"
       fi
     fi
   else
     echo "| $fname | missing | $forge_count | cast needed |"
-    # Collect detail: all titles (file missing in membrane)
-    all_titles=$(grep '^## ' "$forge_file" 2>/dev/null | sed 's/^## //' | sed 's/ ([0-9-]*)$//' || true)
-    if [[ -n "$all_titles" ]]; then
+    # Collect detail: all titles + summaries (file missing in membrane)
+    detail_lines=$(python3 -c "
+import re, subprocess
+def get_entries(path):
+    entries = {}
+    current_title = None
+    try:
+        with open(path) as f:
+            for line in f:
+                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
+                if m:
+                    current_title = m.group(1).strip()
+                    entries[current_title] = ''
+                elif current_title and line.startswith('**Learning**:'):
+                    s = line.replace('**Learning**:', '').strip()
+                    if len(s) > 100: s = s[:97] + '...'
+                    entries[current_title] = s
+    except: pass
+    return entries
+def get_blame_authors(path, forge_path):
+    authors = {}
+    try:
+        out = subprocess.run(['git', '-C', forge_path, 'blame', '--line-porcelain', path],
+            capture_output=True, text=True, timeout=10).stdout
+        author = ''
+        for line in out.split('\n'):
+            if line.startswith('author '): author = line[7:]
+            elif line.startswith('\t'):
+                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line[1:])
+                if m: authors[m.group(1).strip()] = author
+    except: pass
+    return authors
+forge_e = get_entries('$forge_file')
+blame = get_blame_authors('$forge_file', '$FORGE_PATH')
+for t in sorted(forge_e.keys()):
+    a = blame.get(t, '')
+    suffix = f' ({a})' if a else ''
+    print(f'{t}{suffix}')
+    if forge_e.get(t): print(f'  -> {forge_e[t]}')
+" 2>/dev/null || true)
+    if [[ -n "$detail_lines" ]]; then
       LEARNING_DETAILS_LINES+=("**${fname}** (new file):")
-      while IFS= read -r title; do
-        LEARNING_DETAILS_LINES+=("  - ${title}")
-      done <<< "$all_titles"
+      while IFS= read -r line; do
+        if [[ "$line" == "  -> "* ]]; then
+          LEARNING_DETAILS_LINES+=("    ${line/#  -> /→ }")
+        else
+          LEARNING_DETAILS_LINES+=("  - ${line}")
+        fi
+      done <<< "$detail_lines"
     fi
   fi
 done

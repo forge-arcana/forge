@@ -21,7 +21,7 @@ Single command to fold all knowledge back into the forge repo. Runnable from **a
 4. **Memory absorption** — merge global memories into forge's team memory store
 5. **Staging archival** — archive fully-absorbed entries from `~/.claude/` staging area
 6. **Commit & push** — conflict gate, stage, context update, commit, push with user confirmation
-7. **Report** — summary of all changes
+7. **DONE Report** — receipt of what was executed
 
 ---
 
@@ -96,11 +96,33 @@ Skip silently if no Forge-worthy entries exist.
 
 Use fold-evidence.sh output for membrane learnings (Section 3) and forge learnings (Section 1). Also read all `<forge>/skills/*/SKILL.md` in parallel to understand what's already incorporated.
 
-### Step 3: Triage — SHOW BEFORE ABSORBING
+### Step 3: PLAN Report — Decision Gate
 
 Classify each candidate: **NEW** (absorb), **DUPLICATE** (skip), **INCORPORATED** (already in SKILL.md — skip), **SUPERSEDED** (flag), **CROSS-CUTTING** (route to global-patterns + relevant skill files).
 
-**Output the full triage as console text (markdown tables), NEVER via AskUserQuestion** — compressed UI makes tables unreadable. Then use AskUserQuestion with "Approve all / Adjust" prompt.
+Build a unified PLAN table from ALL parts (config sync, skills, learnings, memories) — one table, one decision point. Use contributor names from `git blame` on forge files and first-sentence summaries from the Learning Details in `forge-status.sh` output.
+
+```markdown
+## Forge Transfer — /fold | YYYY-MM-DD | PLAN
+
+| What | Action | Contributor |
+|------|--------|-------------|
+| `/probe` skill | absorb (deployed-differs) | — |
+| claude-code-rules.md (config) | merge | — |
+| Integer Money Pattern | absorb → global-patterns.md | cygnum |
+|   → Store all currency as smallest-unit integers (cents/centavos) in the database | | |
+| Mobile Testing Progression | skip (duplicate) | cygnum |
+|   → Already in global-patterns.md | | |
+| deploy-practices.md (memory) | absorb | — |
+
+3 skills identical, 2 learnings in forge — omitted.
+```
+
+**Action vocabulary**: `absorb` (new learning/memory → forge), `merge` (config drift), `skip (duplicate)`, `skip (personal)`, `skip (superseded)`, `skip (incorporated)`, `conflict` (both changed)
+
+If everything is in sync: skip the table, say "Everything in sync." and proceed to Part 6.
+
+**Output the PLAN table as console text (markdown), NEVER via AskUserQuestion** — compressed UI makes tables unreadable. Then use AskUserQuestion with "Apply all / Adjust / Skip" prompt.
 
 ### Step 4: Genericize & Absorb
 
@@ -174,16 +196,26 @@ Never delete — archival is a move.
 5. **Commit**: descriptive message (what was absorbed, not where from — no project names) with `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
 6. **Push decision**: AskUserQuestion — "Yes, push" / "No, keep local"
 
-## Part 7: Report
+## Part 7: DONE Report
 
-Present a **Forge Transfer** table:
+Present the receipt of what was actually executed. Only include rows for items that changed — no "in sync" rows.
 
-| Direction | Meaning |
-|-----------|---------|
-| **⬆ SENT** | Learnings/memories absorbed into forge |
-| **⬇ RECEIVED** | Config drift fixes synced from forge to membrane |
-| **— SKIPPED** | Items explicitly skipped (personal, below threshold) |
+```markdown
+## Forge Transfer — /fold | YYYY-MM-DD | DONE
 
-If nothing changed: "Everything in sync."
+| What | Result | Contributor |
+|------|--------|-------------|
+| `/probe` skill | absorbed | — |
+| claude-code-rules.md (config) | merged | — |
+| Integer Money Pattern | absorbed → global-patterns.md | cygnum |
+| Mobile Testing Progression | skipped (duplicate) | cygnum |
+| deploy-practices.md (memory) | absorbed | — |
+
+Commit: `abc1234` — pushed to origin/main
+```
+
+**Result vocabulary** (past tense of PLAN actions): `absorbed`, `merged`, `skipped (reason)`, `reconciled`
+
+If nothing changed: "Everything in sync." — skip both PLAN and DONE reports.
 
 After the table: commit hash + push status.

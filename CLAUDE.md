@@ -100,5 +100,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Reversed dev/ convention — restart.sh and kill-zombies.sh belong in project root (not dev/), scripts/ remains production-only. Absorbed fold (staging archival simplification) and srs (project root) from deployed membrane.
+- **Recent**: Unified PLAN/DONE reporting for cast and fold — same 3-column format (What | Action/Result | Contributor), contributor names via git blame, learning summaries in forge-status.sh, direction column removed
 - **Pending**: None

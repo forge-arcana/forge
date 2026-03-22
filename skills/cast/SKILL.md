@@ -15,82 +15,64 @@ You are casting forge conventions into a project workspace. This ensures every p
 
 > Execute [Forge Preflight](../forge/preflight.md) in **pull** mode.
 
-Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the Skill Drift Report from its output for Step 1a below.
+Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the Skill Drift Report and Learning Details from its output for the PLAN Report in Step 1.
 
 This resolves the forge path, pulls the latest forge (aborting if diverged), and produces the **Skill Drift Report**.
 
 **Additional /cast responsibility**: If the resolved forge path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/cast` owns `forge-path:` management.
 
-## Step 1: Sync All Three Pillars
+## Step 1: PLAN Report — Decision Gate
 
-Before touching the project, ensure the user's `~/.claude/` is up to date with forge.
+Build a unified table from the preflight output showing everything that will change across all three pillars (skills, learnings, memory). Use the Learning Details section from `forge-status.sh` for contributor names and summaries.
 
-### 1a: Skill Sync (using preflight drift results)
+```markdown
+## Forge Transfer — /cast | YYYY-MM-DD | PLAN
 
-Use the drift classifications from the preflight Skill Drift Report:
+| What | Action | Contributor |
+|------|--------|-------------|
+| `/fold` skill | update | Pauee OSB |
+| `/temper` skill | update | cygnum |
+| Android 15 Edge-to-Edge Status Bar Overlap | sync | cygnum |
+|   → Android 15 enforces edge-to-edge rendering — only fix is adjustMarginsForEdgeToEdge | | |
+| deploy-practices.md (memory) | sync | — |
 
-| Classification | Action |
-|---------------|--------|
-| `IDENTICAL` | Skip |
-| `FORGE-UPDATED` | Show diff, deploy forge version (forge is newer) |
-| `DEPLOYED-DIFFERS` | Show diff. Advise user to run `/fold` first to absorb deployed changes before overwriting |
-| `CONFLICT` | Show both diffs (forge vs baseline, deployed vs baseline). Ask user to reconcile before proceeding |
-| `ADDED` | Deploy to `~/.claude/skills/<name>/` |
-| `REMOVED` | Remove from `~/.claude/skills/<name>/` |
-
-After user confirms, deploy using the cast-deploy script:
-
-```bash
-# Deploy specific skills (FORGE-UPDATED or ADDED)
-bash <forge>/scripts/cast-deploy.sh skill1 skill2 ...
-
-# Or deploy all (fresh machine)
-bash <forge>/scripts/cast-deploy.sh --all
+17 skills identical, 5 learnings in sync, memory in sync — omitted.
 ```
 
-**NEVER use `cp -r` directly for skill deployment.** Always use `cast-deploy.sh` — it handles the rm-then-copy correctly and verifies no nesting bugs occurred.
+**Action vocabulary**: `update` (skill forge-updated), `create` (skill added), `sync` (learning/memory), `conflict` (both changed — needs resolution), `fold first` (deployed-differs — warn user)
 
-For DEPLOYED-DIFFERS: warn before overwriting — user may want to `/fold` first.
-For REMOVED: `rm -rf ~/.claude/skills/<name>/`.
+If everything is in sync: skip the table, say "Everything in sync." and proceed directly to project scan.
 
-After deploying, verify with:
-```bash
-bash <forge>/scripts/cast-deploy.sh --verify
-```
+Present the table, then **AskUserQuestion**: "Apply all / Adjust / Skip".
 
-If no deployed skills exist (fresh machine):
-- Create `~/.claude/learnings/`, `~/.claude/memory/` if they don't exist
-- Deploy ALL skills: `bash <forge>/scripts/cast-deploy.sh --all`
-- Then continue to Steps 1b and 1c as normal
+## Step 2: Execute Sync
 
-### 1b: Learning Sync (forge → user)
+After user confirms, apply all three pillars:
 
-For each `.md` file in `<forge-path>/learnings/`:
-- If the file doesn't exist in `~/.claude/learnings/`, copy it
-- If it exists, compare with `diff --strip-trailing-cr`: if different, report: "forge has updates — run /fold to reconcile"
-- If identical, skip
+### Skills
+- **FORGE-UPDATED / ADDED**: `bash <forge>/scripts/cast-deploy.sh skill1 skill2 ...` (or `--all` for fresh machine)
+- **DEPLOYED-DIFFERS**: warn before overwriting — user may want to `/fold` first
+- **CONFLICT**: show both diffs, ask user to reconcile
+- **REMOVED**: `rm -rf ~/.claude/skills/<name>/`
+- Verify: `bash <forge>/scripts/cast-deploy.sh --verify`
 
-### 1c: Memory Sync (forge → user)
+**NEVER use `cp -r` directly.** Always use `cast-deploy.sh`.
 
-For each `.md` file in `<forge-path>/memory/`:
-- If the file doesn't exist in `~/.claude/memory/`, copy it (team memory → user)
-- If it exists, compare with `diff --strip-trailing-cr`: if different, report: "forge has updates — user copy may have local additions"
-- If identical, skip
+If no deployed skills exist (fresh machine): create `~/.claude/learnings/`, `~/.claude/memory/` if needed, deploy ALL with `--all`.
 
-### 1d: Record Cast Baseline
+### Learnings (forge → user)
+For each `.md` in `<forge>/learnings/`: copy if missing, skip if identical, report if different.
 
-After all three pillars are synced, record the current forge commit as the deployment baseline:
+### Memory (forge → user)
+For each `.md` in `<forge>/memory/`: copy if missing, skip if identical, report if different.
 
+### Record Baseline
 Write `~/.claude/.last-cast.json`:
 ```json
 { "lastCastCommit": "<output of git -C <forge-path> rev-parse HEAD>" }
 ```
 
-This enables three-way drift detection on subsequent `/mark` and `/fold` runs. The SHA marks what was deployed, so future comparisons can distinguish "forge updated since cast" from "deployed copy was modified".
-
-Report what was synced across all three pillars before proceeding.
-
-## Steps 2-3: Read Forge Reference + Scan Project (parallel)
+## Step 3: Read Forge Reference + Scan Project (parallel)
 
 Launch **all of these reads in parallel** (all independent):
 
@@ -103,7 +85,7 @@ Launch **all of these reads in parallel** (all independent):
 - Read `CLAUDE.md` (if it exists)
 - Read `.claude/settings.json` (if it exists)
 - Glob for `package.json`, `tsconfig*`, `pnpm-workspace.yaml`, `packages/`
-- Check for `memory/`, `docs/`, `restart.sh`, `kill-zombies.sh` (project root)
+- Check for `memory/`, `docs/`, `dev/restart.sh`, `dev/kill-zombies.sh`
 
 ## Step 4: Divergence Report
 
@@ -120,8 +102,8 @@ Produce a table showing what needs to change:
 | memory/ directory | Required | [exists/missing] | [create] |
 | logs/ directory | Required (app projects with services only) | [exists/missing/N/A] | [create/skip] |
 | Shorthand commands | wawa/wrap as skill refs | [present/missing] | [add] |
-| restart.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
-| kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
+| dev/restart.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
+| dev/kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
 | Documentation | `docs/` in-repo OR `## Documentation` section with `**Docs path:**` | [in-repo/external/missing] | [add section] |
 | Logging setup | dev.log + browser forwarding | [present/missing] | [flag for /poke] |
 ```
@@ -167,24 +149,25 @@ Docs are in the `docs/` directory.
 - Create `memory/` if missing
 - Create `logs/` if missing (only for projects with running services — skip for tooling-only repos)
 
-## Step 6: Summary
+## Step 6: DONE Report
 
-Present a **Forge Transfer** table summarizing everything that moved between forge and the user's membrane during Steps 1-5. Build it from what actually happened — only include rows for items that changed.
+Present the receipt of what was actually executed. Only include rows for items that changed — no "in sync" rows.
 
 ```markdown
-## Forge Transfer — /cast | [DATE]
+## Forge Transfer — /cast | YYYY-MM-DD | DONE
 
-| Direction | What |
-|-----------|------|
-| ⬇ RECEIVED | `/temper` skill — hardened evaluation via repeated poke + press |
-| ⬇ RECEIVED | `/probe` update — context-aware target resolution |
-| ⬇ RECEIVED | 2 new learnings — mobile testing progression, integer money pattern |
-| ⬆ SENT | (rare — only if deployed-differs was detected and user chose to overwrite) |
+| What | Result | Contributor |
+|------|--------|-------------|
+| `/fold` skill | updated | Pauee OSB |
+| `/temper` skill | updated | cygnum |
+| Android 15 Edge-to-Edge Status Bar Overlap | synced | cygnum |
+| deploy-practices.md (memory) | synced | — |
+
+Baseline recorded: `abc1234`
 ```
 
-- **⬇ RECEIVED** — skills deployed, learnings synced, memory copied from forge
-- **⬆ SENT** — deployed-differs warnings where user's membrane had changes (advise `/fold` first)
-- If nothing changed: just say "Everything in sync."
-- Each row should have a brief human description of what was transferred, not just a filename
+**Result vocabulary** (past tense of PLAN actions): `updated`, `created`, `synced`, `reconciled`, `skipped (user chose)`
 
-If changes were applied to the project, do NOT commit — use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet". If nothing changed (everything in sync), skip the prompt.
+If nothing changed: just say "Everything in sync." and skip both PLAN and DONE reports.
+
+After the DONE report: include the baseline commit SHA. Do NOT commit project changes — use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
