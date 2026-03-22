@@ -27,7 +27,3 @@
 ## Schema Defaults Must Match Code Defaults (2026-03-21)
 **Learning**: When auditing DB schemas, verify that column defaults match what the application code actually inserts. A default of `'occupied'` when code always inserts `'empty'` is a bug waiting to happen. Unused schema defaults are silent time bombs — they only fire when someone forgets to specify the value explicitly, and then they produce wrong data instead of an error.
 **Apply when**: Reviewing database schemas for tech debt, especially columns with default values that aren't tested by normal application flows.
-
-## Android 15 Edge-to-Edge Status Bar Overlap in Capacitor (2026-03-22)
-**Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView (only `safe-area-inset-bottom` works). The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes (XML opt-out + Java WindowCompat + config) — they each add padding independently.
-**Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.

@@ -119,5 +119,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Fixed forge-path resolution bug in all 4 scripts — `tr -d '[:space:]'` destroyed paths with spaces (e.g., `VS Projects`), replaced with `sed 's/[[:space:]]*$//'` to trim only trailing whitespace.
-- **Pending**: 11 orphan entries in reforge tracker (titles in tracker but not in any forge learning file) — cosmetic, `/purge` can clean.
+- **Recent**: Purge: removed 4 promoted/duplicate/forge-specific entries from learnings, cleaned 8 tracker orphans. Fixed forge-path resolution bug in all 4 scripts.
+- **Pending**: None
