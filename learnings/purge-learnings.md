@@ -24,6 +24,14 @@
 **Learning**: When two arts overlap >50% in findings, merge them. A wider-scope art with more dimensions is better than two overlapping arts that produce duplicate findings. The evaluative trifecta (poke → press → pound) works because each has a distinct scope: code quality, operational readiness, adversarial QA. Adding a fourth art for "universal principles" created redundancy with poke's existing tech debt dimensions.
 **Apply when**: Proposing new arts or reviewing whether existing arts still earn their seat.
 
+## Bidirectional Sync Race Condition on Direct Source Edits (2026-03-22)
+**Learning**: When source-of-truth files are edited directly, deployed copies in the sync target become stale instantly. If the absorption command runs from another session before the deployment command updates the target, it sees DIFFERS and absorbs the stale deployed version — silently reverting the source edit. Prevention: always run the deployment command immediately after direct source edits.
+**Apply when**: Operating any bidirectional sync system (deploy + absorb) where source files are edited directly.
+
+## Parallel Arts Need Explicit "Parallel" Label (2026-03-22)
+**Learning**: When adding a new evaluative art that runs on a different trigger (e.g., "on UI changes") rather than escalating intensity, explicitly label it as "parallel" from the start. Without the label, it gets inserted into existing sequences by default, creating naming inconsistencies (e.g., "trifecta" with 4 items). The trigger determines placement: same trigger escalation = sequential, different trigger = parallel.
+**Apply when**: Adding new arts or evaluative skills to an existing escalation sequence.
+
 ## Output Format Templates Are Low-Value Bloat (2026-03-21)
 **Learning**: Example output tables with placeholder values (X, ..., [repeat for each]) consume 30-70 lines per skill but add near-zero value — the LLM can infer table structure from column headers alone. Replace verbose markdown template blocks with a compact 3-5 line format description listing section names and column headers. Applied across 6 skills for a 38% total reduction (1,350 → 833 lines) with no behavior loss. The trim test still applies: "Would the LLM produce worse output if this section were half the length?"
 **Apply when**: Running /purge Dimension 3 (Skill Fitness) — flag any Output Format section >15 lines as a trim candidate.

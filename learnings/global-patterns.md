@@ -104,14 +104,3 @@
 **Learning**: In projects using TanStack Query, manual `useState` + `useEffect` + fetch patterns for server data indicate framework misuse. These miss caching, deduplication, retry, background refetch, and optimistic updates. Common in admin/settings pages added later in the project lifecycle when the pattern isn't enforced. A quick grep for `useState.*loading.*true` or `useEffect.*api.get` catches these.
 **Apply when**: Reviewing frontend code in TanStack Query projects, especially admin/settings pages.
 
-## Android 15 Edge-to-Edge Status Bar Overlap in Capacitor (2026-03-22)
-**Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView (only `safe-area-inset-bottom` works). The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes (XML `windowOptOutEdgeToEdgeEnforcement` + Java `WindowCompat` + config) — they each add padding independently.
-**Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.
-
-## Fold/Cast Race Condition on Direct Forge Edits (2026-03-22)
-**Learning**: When skill files are edited directly in the source repo (skill development), the deployed copies in the user's membrane become stale instantly. If `/fold` runs from another session before `/cast` updates the membrane, fold sees DEPLOYED-DIFFERS and absorbs the stale deployed version — silently reverting the source edit. This is a race condition in bidirectional sync systems: concurrent sessions can undo each other's work via the absorption path. Prevention: always run the deployment command immediately after direct source edits to keep the membrane in sync.
-**Apply when**: Editing source-of-truth files directly while a bidirectional sync system (deploy + absorb) operates on deployed copies.
-
-## All Transfers Are Guarded by User Wisdom (2026-03-22)
-**Learning**: In bidirectional sync systems, ALL pillars (skills, config, learnings, memory) require user review in BOTH directions. Deploy and absorb operations both present a PLAN table where the user approves/rejects individual items. Nothing transfers without user judgment — no pillar gets a mechanical bypass. A skill can have a bad update, a config can have stale rules, a learning can be wrong. The source of truth for structure is the repo; the source of truth for judgment is the user.
-**Apply when**: Designing or reviewing any transfer mechanism between a source repo and deployed copies. Any time you're tempted to say a transfer is "mechanical" or "automatic" — the user reviews every item.

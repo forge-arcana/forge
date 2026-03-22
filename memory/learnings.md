@@ -26,8 +26,8 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ## Skills
 
 ### Structure (2026-03-18)
-- Arts (7): prime, probe, poke, press, pound, pry, purge — specialist agent skills with self-improving loops
-- Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — poke often, press before milestones, pound before ship
+- Arts (8): prime, probe, poke, preen, press, pound, pry, purge — specialist agent skills with self-improving loops
+- Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design) runs parallel on UI changes. Cadence: poke often, preen on UI changes, press before milestones, pound before ship
 - Task skills (13): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci, dig, temper, eli5
 - `skills/forge/` holds reference docs (stack-guide, rules, conventions, protocol) — not a deployable skill
 - Skills are self-contained packages — reference docs live inside the owning skill directory

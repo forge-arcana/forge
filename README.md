@@ -1,6 +1,6 @@
 # Forge
 
-A maker's forge. Seven arts to shape ideas, challenge architecture, review code, stress-test, crack blockers, and cleanse knowledge — all through AI-guided skills.
+A maker's forge. Eight arts to shape ideas, challenge architecture, review code, evaluate design, stress-test, crack blockers, and cleanse knowledge — all through AI-guided skills.
 
 ---
 
@@ -16,7 +16,7 @@ Three one-syllable commands drive the forge loop:
 
 ---
 
-## Arts (the Seven P's)
+## Arts (the Eight P's)
 
 Arts are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
@@ -30,10 +30,11 @@ Arts are specialist agent skills — they adopt a persona and have a self-improv
 |-----|-------------|
 | `/probe` | Challenge architecture decisions against current best practices — probes blueprints, plans, or conversations (self-improving) |
 | `/poke` | Staff-engineer code review for tech debt and logging hygiene (self-improving) |
+| `/preen` | UI/UX design evaluation — Don Norman's principles applied to interfaces (self-improving) |
 | `/press` | Go-live readiness scorecard across 7 dimensions (self-improving) |
 | `/pound` | Deep QA with 21 adversarial personas — generates tests, finds edge cases |
 
-The evaluative trifecta — **poke → press → pound** — escalates in intensity.
+The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` runs parallel on UI changes. Cadence: poke often, preen on UI changes, press before milestones, pound before ship.
 
 ### When Blocked
 | Art | What it does |
@@ -66,7 +67,7 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 | Skill | What it does |
 |-------|-------------|
 | `/mark` | Inspect membrane — skill drift, learnings, memory status report |
-| `/fold` | Absorb knowledge back into forge — config sync, review & prune, absorb learnings + memories, archive staging (runnable from any project) |
+| `/fold` | Absorb knowledge back into forge — config sync, absorb learnings + memories, membrane compaction (runnable from any project) |
 
 ---
 
@@ -82,10 +83,10 @@ During any work session (automatic):
 /fold from any project (consumes global staging):
   → reads ~/.claude/learnings/ + ~/.claude/memory/
   → triages, genericizes, deduplicates
-  → writes to forge/learnings/{probe,press,poke,prime,pry,purge,global-patterns}.md
+  → writes to forge/learnings/{probe,press,poke,preen,prime,pry,purge,global-patterns}.md
   → never deletes from user's global space
 
-Arts (/prime, /probe, /poke, /press, /pound, /pry, /purge):
+Arts (/prime, /probe, /poke, /preen, /press, /pound, /pry, /purge):
   → read forge/learnings/ first → smarter decisions
   → write back to project memory/ → auto-accumulates → cycle continues
 ```
@@ -103,6 +104,7 @@ forge/
 │   ├── fold/              # Knowledge absorption loop (runnable from any project)
 │   ├── forge/             # Reference docs (no SKILL.md — not a skill)
 │   │   ├── claude-code-rules.md   # Workflow rules
+│   │   ├── claude-code-settings.json  # Universal settings reference
 │   │   ├── stack-guide.md         # Tech stack decisions
 │   │   ├── forge-conventions.md   # Conventions checklist
 │   │   └── protocol.md            # Shared art pre-flight/post-flight protocol
@@ -110,6 +112,7 @@ forge/
 │   ├── monci/             # Monitor CI
 │   ├── poke/              # Tech debt code review (art, self-improving)
 │   ├── ponci/             # Push and monitor CI
+│   ├── preen/             # UI/UX design evaluation (art, self-improving)
 │   ├── pound/             # Deep QA with 21 adversarial personas (art)
 │   ├── press/             # Go-live readiness assessment (art, self-improving)
 │   ├── qt/                # Quick test
@@ -158,6 +161,7 @@ cd forge
 /qt                 → verify your fix
 /dig                → think deeper about this
 /poke               → tech debt scan
+/preen              → UI/UX design review
 /wawa               → where am I?
 /wrap               → commit with full context
 /mark               → check membrane status

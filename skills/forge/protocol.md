@@ -36,7 +36,7 @@ After pre-flight, proceed to the art's own `## Process` or `## Dimensions` secti
 
 Each art defines its own execution in its SKILL.md:
 
-- **Evaluative arts** (probe, poke, press, pound): adopt the persona, apply review framework/dimensions, web-search for current best practices, produce a structured report
+- **Evaluative arts** (probe, poke, preen, press, pound): adopt the persona, apply review framework/dimensions, web-search for current best practices, produce a structured report
 - **Generative arts** (prime): adopt the persona, conduct a structured conversation/interview, produce a document
 - **Investigative arts** (pry): decompose blockers, aggressively search for alternatives, challenge assumptions until a path forward emerges
 
@@ -90,13 +90,14 @@ This ensures the same topic maps to one cache key regardless of when the search 
 3. **Present results** to the user
 4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/fold` to absorb learnings into forge
 
-## The Seven Arts
+## The Eight Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
 | `/prime` | The originator (ideation → blueprint) | Generative | — |
 | `/probe` | Senior solutions architect | Evaluative | — |
 | `/poke` | Staff engineer (code quality + tech debt) | Evaluative | Light |
+| `/preen` | UI/UX evaluator (Don Norman's design principles) | Evaluative | Design |
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
@@ -110,7 +111,9 @@ The trifecta escalates in intensity and broadens in scope:
 - **`/press`** — go-live readiness. Run before launches, major releases, or environment promotions. Covers security, scalability, operations, compliance, observability, deployment, documentation.
 - **`/pound`** — full adversarial assault. Run before critical launches or after major changes. 21 personas hammer from every angle.
 
-**Cadence**: poke often, press before milestones, pound before ship. `/purge` stands apart — it tends the forge itself, not projects.
+**`/preen`** runs parallel to the trifecta — UI/UX design quality, triggered by interface changes rather than intensity escalation. Covers affordances, feedback, mapping, accessibility, platform conventions. The design eye.
+
+**Cadence**: poke often, preen on UI changes, press before milestones, pound before ship. `/purge` stands apart — it tends the forge itself, not projects.
 
 ## Learning Cycle
 
