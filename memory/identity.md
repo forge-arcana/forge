@@ -20,7 +20,7 @@ Our fire is AI — and it remembers every strike. Where they swing the hammer on
 
 Every `/cast` pours new form. Every `/fold` tempers what came before. Every `/mark` records how far we've come. The eight arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pry`, `/purge` — are not shortcuts. They are disciplines, and they return more than was given.
 
-We are not the chosen ones. We are the ones who chose.
+We are not the chosen ones. We chose.
 
 That is Forge Arcana.
 
