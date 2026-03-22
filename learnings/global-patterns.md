@@ -107,3 +107,7 @@
 ## Android 15 Edge-to-Edge Status Bar Overlap in Capacitor (2026-03-22)
 **Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView (only `safe-area-inset-bottom` works). The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes (XML `windowOptOutEdgeToEdgeEnforcement` + Java `WindowCompat` + config) — they each add padding independently.
 **Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.
+
+## Fold/Cast Race Condition on Direct Forge Edits (2026-03-22)
+**Learning**: When skill files are edited directly in the source repo (skill development), the deployed copies in the user's membrane become stale instantly. If `/fold` runs from another session before `/cast` updates the membrane, fold sees DEPLOYED-DIFFERS and absorbs the stale deployed version — silently reverting the source edit. This is a race condition in bidirectional sync systems: concurrent sessions can undo each other's work via the absorption path. Prevention: always run the deployment command immediately after direct source edits to keep the membrane in sync.
+**Apply when**: Editing source-of-truth files directly while a bidirectional sync system (deploy + absorb) operates on deployed copies.
