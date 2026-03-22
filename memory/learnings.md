@@ -7,14 +7,15 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ### Three Pillars (2026-03-15)
 - Forge has three git-tracked pillars: `skills/` (team tools), `learnings/` (team wisdom), `memory/` (team identity)
 - All three flow bidirectionally: DOWN via `/cast`, UP via auto-memory + `/fold`
-- `~/.claude/` is the staging membrane — not a source of truth
+- `~/.claude/` is the staging membrane — forge is the source of truth for structure, but the user is the source of truth for judgment
 
 ### Knowledge Flow (2026-03-21)
-- Cast and fold are symmetric mirrors — both triage before acting, both present tables, both ask for confirmation. See `memory/identity.md` "The Heart of Cast and Fold" for design rationale.
+- Cast and fold are symmetric mirrors — both triage ALL pillars (skills, config, learnings, memory) before acting, both present PLAN tables, both require user approval. The user decides what gets transferred at the PLAN table. Nothing transfers without user judgment — no pillar gets a mechanical bypass.
 - Both use the **universal classification system** (IDENTICAL, FORGE-UPDATED, DEPLOYED-DIFFERS, CONFLICT, ADDED, REMOVED) from `preflight.md`
-- **Cast (forge → user)**: Deploys ADDED and FORGE-UPDATED entries. Skips DEPLOYED-DIFFERS (advises `/fold` first). Never overwrites silently. Actions: `update`, `create`, `sync`, `conflict`, `fold first`.
-- **Fold (user → forge)**: Absorbs REMOVED and DEPLOYED-DIFFERS entries. Adds fold-specific sub-classifications (NEW, CROSS-CUTTING, DUPLICATE, INCORPORATED, SUPERSEDED) for quality gating. Never removes forge-only content. Actions: `absorb`, `merge`, `skip (reason)`, `conflict`.
-- **Config sync**: Cast deploys forge rules → `~/.claude/CLAUDE.md`. Fold absorbs user additions → `claude-code-rules.md`. Neither direction removes the other side's content.
+- **Cast (forge → user)**: Triages ALL pillars in PLAN table. User reviews → approves/rejects individual items → only approved items deploy. Actions: `update`, `create`, `sync`, `conflict`, `fold first`.
+- **Fold (user → forge)**: Triages ALL pillars in PLAN table. User reviews → approves/rejects individual items → only approved items absorb. Fold has richer skip reasons (duplicate, incorporated, superseded, personal) and routes to specific files. Actions: `absorb`, `merge`, `skip (reason)`, `conflict`.
+- **Symmetry principle**: Same gate, both directions. User reviews every item. No direction skips the user's review.
+- **Config sync**: 1:1 mapping — `claude-code-rules.md` ↔ `~/.claude/CLAUDE.md`, `claude-code-settings.json` ↔ `~/.claude/settings.json`. Neither direction removes the other side's content.
 - Arts flag learnings as `Forge-worthy: yes/no` at write time during art runs
 - Learnings accumulate in project memory (`~/.claude/projects/*/memory/*-learnings.md`), then `/fold` Part 3 Step 0 scans for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md`
 - `/fold` Part 3 Steps 1-4 triage and absorb into `forge/learnings/` → next art run reads them first
@@ -30,7 +31,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Task skills (13): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci, dig, temper, eli5
 - `skills/forge/` holds reference docs (stack-guide, rules, conventions, protocol) — not a deployable skill
 - Skills are self-contained packages — reference docs live inside the owning skill directory
-- `skills/` is the git-tracked source of truth; `~/.claude/skills/` is the deployment target
+- `skills/` is the git-tracked shared reference; `~/.claude/skills/` is the deployment target
 
 ### Bootstrap (2026-03-17)
 - `.claude/skills/cast/SKILL.md` is a thin bootstrap pointing to `skills/cast/SKILL.md`
@@ -57,11 +58,11 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Cast acts on the cast column (deploy ADDED/FORGE-UPDATED), fold acts on the fold column (absorb REMOVED/DEPLOYED-DIFFERS)
 - No manual inbox needed — all knowledge flows through auto-memory → staging → `/fold`
 
-### /fold Unified Flow (2026-03-17)
-- Seven parts: classification + config sync → review & prune (auto-triggered) → learning absorption → memory absorption → staging archival → commit & push → report
-- Review fires automatically based on size thresholds (learnings >50, memory >20 files)
-- Review runs BEFORE absorption to prune stale knowledge first
-- Staging archival also auto-triggers (>100 entries, >30 files)
+### /fold Unified Flow (2026-03-22)
+- Six parts: preflight → config & skill sync → learning absorption → memory absorption → membrane compaction → commit & push → DONE report
+- Review & prune of existing forge knowledge moved to `/purge` (fold absorbs new knowledge, purge audits existing)
+- Size-threshold triggers (learnings >50, memory >20 files) now belong to `/purge` or flagged by `/mark`
+- Membrane compaction stays in fold — tied to absorption lifecycle (compact what fold just confirmed as fully absorbed)
 
 ## Conventions
 

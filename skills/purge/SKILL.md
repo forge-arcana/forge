@@ -26,6 +26,19 @@ You are summoned, never scheduled. When the forge grows heavy, when the learning
 
 Build a complete mental model of the forge's current state before proceeding.
 
+## Auto-Trigger Thresholds
+
+These thresholds indicate when the forge needs purging. `/mark` can flag these; the user decides when to run `/purge`.
+
+| Trigger | What it means |
+|---------|--------------|
+| Any `<forge>/learnings/*.md` file > 50 entries | Learning file is bloated — review for staleness, duplication, consolidation |
+| `<forge>/memory/` has > 20 files | Memory directory is growing — review for stale/promoted/redundant files |
+
+When triggered, classify each entry/file: **CURRENT** (keep), **STALE** (remove — web-search to verify), **MERGED** (consolidate with duplicate), **EVOLVED** (rewrite with updated info), **PROMOTED** (already in SKILL.md — redundant).
+
+After purging, reset the learning tracker (`<forge>/learnings/.reforge-tracker.json`) and memory tracker (`<forge>/memory/.memory-tracker.json`) so `/fold` re-evaluates with the cleaned state.
+
 ## Evidence Collection
 
 Run `<forge>/scripts/forge-purge-scan.sh` to collect mechanical evidence across all four dimensions. This single command replaces ~30 sequential file read and grep tool calls.

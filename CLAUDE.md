@@ -1,10 +1,10 @@
 # Forge — Project Rules
 
 ## Purpose
-Forge is the shared tooling, conventions, and reference documentation repo used across all projects. Skills, stack guides, and workflow rules live here as the source of truth.
+Forge is the shared tooling, conventions, and reference documentation repo used across all projects. Skills, stack guides, and workflow rules live here as a shared reference — but forge is NOT the source of truth. The user is the source of truth. Forge is a proposal, not an authority.
 
 ## Key Files & Directories
-- `skills/` — Git-tracked source of truth for all global skills (self-contained packages)
+- `skills/` — Git-tracked shared reference for all global skills (self-contained packages)
 - `learnings/` — Absorbed team wisdom (populated by `/fold`)
 - `memory/` — Team identity & shared conventions (populated by `/fold`)
 - `.claude/skills/cast/` — Thin bootstrap so `/cast` is discoverable on fresh clone
@@ -71,6 +71,23 @@ Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`, `/pry`, `/purge`) write l
 > **NEVER** open the forge repo and edit `learnings/`, `memory/`, or `skills/forge/` files from a project context.
 > The membrane is the inbox. `/fold` is the quality gate. No shortcuts.
 
+## HARD RULE — The User Is the Source of Truth, Not Forge
+> **Forge is a shared reference, not an authority. Neither forge nor the membrane is automatically correct.**
+> Both `/cast` (forge → user) and `/fold` (user → forge) are PROPOSALS that require user confirmation.
+> Cast does NOT blindly deploy learnings and memory — it presents them for triage just like fold does.
+> A learning in forge can be stale. A memory in forge can be wrong. A convention in forge can be outdated.
+> The only source of truth is the user's judgment at the PLAN table.
+>
+> **Corollary**: Both directions need the same quality gate. If fold triages before absorbing,
+> cast must triage before deploying. No direction gets to skip the user's review.
+
+## HARD RULE — All Transfers Are Guarded by User Wisdom
+> **ALL pillars (skills, config, learnings, memory) require user review in BOTH directions.**
+> Cast and fold both present a PLAN table. Both require user approval. Both execute only approved items.
+> Nothing transfers without the user's judgment at the PLAN table.
+> A skill can have a bad update. A config can have stale rules. A learning can be wrong.
+> The user reviews every item — no pillar gets a mechanical bypass.
+
 ## HARD RULE — No Project Names in Forge
 > **Forge is a shared repo. NEVER include project-specific details in learnings, memory, or commit messages.**
 > Strip all project names, specific file paths, domains, and business logic before writing.
@@ -100,5 +117,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Unified PLAN/DONE reporting for cast and fold — same 3-column format (What | Action/Result | Contributor), contributor names via git blame, learning summaries in forge-status.sh, direction column removed
+- **Recent**: Symmetric triage gate for cast and fold — ALL pillars (skills, config, learnings, memory) require user review in BOTH directions. No mechanical bypass. Fold Part 2 (Review & Prune) moved to /purge. Classification checks (dedup, pre-triage, tracker consistency) moved from fold-evidence.sh to forge-status.sh (shared). Config sync now 1:1 mapping (claude-code-rules.md ↔ CLAUDE.md, claude-code-settings.json ↔ settings.json). Fold simplified to 6 parts.
 - **Pending**: None

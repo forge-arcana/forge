@@ -19,15 +19,16 @@ user-invocable: true
 
 ---
 
-Single command to fold all knowledge back into the forge repo. Runnable from **any project**. One flow, seven parts:
+Single command to fold all knowledge back into the forge repo. Runnable from **any project**. One flow, six parts:
 
 1. **Config & skill sync** — push current global config into forge reference + detect deployed skill drift
-2. **Review & prune** — check existing forge knowledge for staleness (auto-triggers based on size)
-3. **Learning absorption** — merge global learnings into forge's learning store
-4. **Memory absorption** — merge global memories into forge's team memory store
-5. **Membrane compaction** — compact fully-absorbed learnings, archive synced memories
-6. **Commit & push** — conflict gate, stage, context update, commit, push with user confirmation
-7. **DONE Report** — receipt of what was executed
+2. **Learning absorption** — merge global learnings into forge's learning store
+3. **Memory absorption** — merge global memories into forge's team memory store
+4. **Membrane compaction** — compact fully-absorbed learnings, archive synced memories
+5. **Commit & push** — conflict gate, stage, context update, commit, push with user confirmation
+6. **DONE Report** — receipt of what was executed
+
+**Note**: Review & prune of existing forge knowledge (staleness audit) is `/purge`'s responsibility, not fold's. Fold absorbs new knowledge; purge audits existing knowledge.
 
 ---
 
@@ -51,42 +52,25 @@ Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the S
 | `CONFLICT` | Show both diffs, ask user to reconcile |
 | `ADDED` / `REMOVED` | Skip — handled by `/cast` |
 
-### 1b-1d: Config Sync
+### 1b: Config Sync
 
-Read in parallel: `~/.claude/CLAUDE.md`, `~/.claude/settings.json`, `<forge>/skills/forge/claude-code-rules.md`.
+1:1 mapping — each membrane config file has a forge reference counterpart:
+- `~/.claude/CLAUDE.md` ↔ `<forge>/skills/forge/claude-code-rules.md`
+- `~/.claude/settings.json` ↔ `<forge>/skills/forge/claude-code-settings.json`
 
-Diff and identify additions, removals, conflicts between global config and forge reference. Present a Config Sync Report table. After user confirms, update `claude-code-rules.md` to match.
+Read all four files in parallel. Diff and identify additions, removals, conflicts. Present a Config Sync Report table. After user confirms, update the forge reference files to match.
 
-Sync rules: CLAUDE.md ↔ reference auto-allowed table, WebFetch domains must match exactly, destructive commands NEVER in allow list, hooks/additionalDirectories are machine-specific — never sync.
-
----
-
-## Part 2: Review & Prune Existing Knowledge
-
-### Triggers (skip if none fire)
-
-| Trigger | What fires |
-|---------|-----------|
-| Any `<forge>/learnings/*.md` file > 50 entries | Learning review (2a) |
-| `<forge>/memory/` has > 20 files | Memory review (2b) |
-
-If no triggers fire, skip Part 2 entirely.
-
-### Evidence Collection
-
-Run `<forge>/scripts/fold-evidence.sh` to collect all forge learnings, forge memories, membrane learnings, membrane memories, and tracker state in one call. Use this output as evidence for Parts 2-4.
-
-### 2a: Forge Learning Review
-
-Classify each entry: **CURRENT** (keep), **STALE** (remove — web-search to verify), **MERGED** (consolidate with duplicate), **EVOLVED** (rewrite with updated info). Present review table, apply after user confirms.
-
-### 2b: Forge Memory Review
-
-Classify each file: **CURRENT** (keep), **STALE** (remove), **MERGED** (consolidate), **EVOLVED** (rewrite), **PROMOTED** (already in SKILL.md — redundant). Present review table, apply after user confirms.
+Sync rules: auto-allowed commands table, WebFetch domains must match exactly, destructive commands NEVER in allow list, hooks/additionalDirectories are machine-specific — never sync.
 
 ---
 
-## Part 3: Learning Absorption
+## Part 1b: Evidence Collection
+
+Run `<forge>/scripts/fold-evidence.sh` to collect all forge learnings, forge memories, membrane learnings, membrane memories, and tracker state in one call. Use this output as evidence for Parts 2-3.
+
+---
+
+## Part 2: Learning Absorption
 
 ### Step 0: Promote Forge-worthy Learnings from Project Memories
 
@@ -126,9 +110,11 @@ Build a unified PLAN table from ALL parts (config sync, skills, learnings, memor
 
 **Action vocabulary**: `absorb` (new learning/memory → forge), `merge` (config drift), `skip (duplicate)`, `skip (personal)`, `skip (superseded)`, `skip (incorporated)`, `conflict` (both changed)
 
-If everything is in sync: skip the table, say "Everything in sync." and proceed to Part 6.
+If everything is in sync: skip the table, say "Everything in sync." and proceed to Part 5.
 
 **Output the PLAN table as console text (markdown), NEVER via AskUserQuestion** — compressed UI makes tables unreadable. Then use AskUserQuestion with "Apply all / Adjust / Skip" prompt.
+
+User reviews → approves/rejects individual items → only approved items execute in Steps 4 and Part 3.
 
 ### Step 4: Genericize & Absorb
 
@@ -145,15 +131,15 @@ Source entries in `~/.claude/learnings/` are NEVER deleted.
 
 ### Processing Tracker
 
-Maintain `<forge>/learnings/.reforge-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked. If Part 2 review fires, reset tracker.
+Maintain `<forge>/learnings/.reforge-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked.
 
 ---
 
-## Part 4: Memory Absorption
+## Part 3: Memory Absorption
 
 ### Memory Tracker
 
-Maintain `<forge>/memory/.memory-tracker.json` with `lastRun` and `skippedFiles` (PERSONAL memories intentionally not absorbed). A file needs triage only if it's in membrane but NOT in forge AND NOT in `skippedFiles`. If Part 2 fires, reset tracker.
+Maintain `<forge>/memory/.memory-tracker.json` with `lastRun` and `skippedFiles` (PERSONAL memories intentionally not absorbed). A file needs triage only if it's in membrane but NOT in forge AND NOT in `skippedFiles`.
 
 ### Triage (unprocessed files only)
 
@@ -174,7 +160,7 @@ Source entries in `~/.claude/memory/` are NEVER deleted.
 
 ---
 
-## Part 5: Membrane Compaction
+## Part 4: Membrane Compaction
 
 ### Triggers (skip if none fire)
 
@@ -208,7 +194,7 @@ Never delete — archival is a move.
 
 ---
 
-## Part 6: Commit & Push
+## Part 5: Commit & Push
 
 `/fold` owns its own commit flow — no `/wrap` needed.
 
@@ -219,7 +205,7 @@ Never delete — archival is a move.
 5. **Commit**: descriptive message (what was absorbed, not where from — no project names) with `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
 6. **Push decision**: AskUserQuestion — "Yes, push" / "No, keep local"
 
-## Part 7: DONE Report
+## Part 6: DONE Report
 
 Present the receipt of what was actually executed. Only include rows for items that changed — no "in sync" rows.
 

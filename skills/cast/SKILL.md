@@ -23,7 +23,9 @@ This resolves the forge path, pulls the latest forge (aborting if diverged), and
 
 ## Step 1: PLAN Report — Decision Gate
 
-Build a unified table from the preflight output showing everything that will change across all three pillars (skills, learnings, memory). Use the Learning Details section from `forge-status.sh` for contributor names and summaries.
+Build a unified table from the preflight output showing everything that will change across ALL pillars (skills, config, learnings, memory). Use the Learning Details section from `forge-status.sh` for contributor names and summaries.
+
+**ALL pillars require user review.** No pillar gets a mechanical bypass — a skill can have a bad update, a config can have stale rules, a learning can be wrong.
 
 ```markdown
 ## Forge Transfer — /cast | YYYY-MM-DD | PLAN
@@ -32,6 +34,8 @@ Build a unified table from the preflight output showing everything that will cha
 |------|--------|-------------|
 | `/fold` skill | update | Pauee OSB |
 | `/temper` skill | update | cygnum |
+| claude-code-rules.md (config) | sync | — |
+| claude-code-settings.json (config) | sync | — |
 | Android 15 Edge-to-Edge Status Bar Overlap | sync | cygnum |
 |   → Android 15 enforces edge-to-edge rendering — only fix is adjustMarginsForEdgeToEdge | | |
 | deploy-practices.md (memory) | sync | — |
@@ -39,17 +43,19 @@ Build a unified table from the preflight output showing everything that will cha
 17 skills identical, 5 learnings in sync, memory in sync — omitted.
 ```
 
-**Action vocabulary**: `update` (skill forge-updated), `create` (skill added), `sync` (learning/memory), `conflict` (both changed — needs resolution), `fold first` (deployed-differs — warn user)
+**Action vocabulary**: `update` (skill forge-updated), `create` (skill added), `sync` (learning/memory/config new in forge), `conflict` (both changed — needs resolution), `fold first` (deployed-differs — warn user)
 
 If everything is in sync: skip the table, say "Everything in sync." and proceed directly to project scan.
 
-Present the table, then **AskUserQuestion**: "Apply all / Adjust / Skip".
+**Output the PLAN table as console text (markdown), NEVER via AskUserQuestion** — compressed UI makes tables unreadable. Then use AskUserQuestion with "Apply all / Adjust / Skip" prompt.
+
+User reviews → approves/rejects individual items → Step 2 executes only approved.
 
 ## Step 2: Execute Sync
 
-After user confirms, apply all three pillars:
+**Only execute items the user approved in the PLAN table.** Skip any items the user rejected.
 
-### Skills
+### Skills (approved items only)
 - **FORGE-UPDATED / ADDED**: `bash <forge>/scripts/cast-deploy.sh skill1 skill2 ...` (or `--all` for fresh machine)
 - **DEPLOYED-DIFFERS**: warn before overwriting — user may want to `/fold` first
 - **CONFLICT**: show both diffs, ask user to reconcile
@@ -60,11 +66,16 @@ After user confirms, apply all three pillars:
 
 If no deployed skills exist (fresh machine): create `~/.claude/learnings/`, `~/.claude/memory/` if needed, deploy ALL with `--all`.
 
-### Learnings (forge → user)
-For each `.md` in `<forge>/learnings/`: copy if missing, skip if identical, report if different.
+### Config (approved items only)
+- `claude-code-rules.md` → diff against `~/.claude/CLAUDE.md`, propose additions/removals
+- `claude-code-settings.json` → diff against `~/.claude/settings.json`, propose additions/removals
+- Machine-specific entries (hooks, additionalDirectories) are never synced
 
-### Memory (forge → user)
-For each `.md` in `<forge>/memory/`: copy if missing, skip if identical, report if different.
+### Learnings (approved items only)
+Deploy only the learning files the user approved. Copy if missing in membrane, update if forge has newer version. Skip items the user rejected.
+
+### Memory (approved items only)
+Deploy only the memory files the user approved. Copy if missing in membrane, update if forge has newer version. Skip items the user rejected.
 
 ### Record Baseline
 Write `~/.claude/.last-cast.json`:
@@ -160,6 +171,7 @@ Present the receipt of what was actually executed. Only include rows for items t
 |------|--------|-------------|
 | `/fold` skill | updated | Pauee OSB |
 | `/temper` skill | updated | cygnum |
+| claude-code-rules.md (config) | synced | — |
 | Android 15 Edge-to-Edge Status Bar Overlap | synced | cygnum |
 | deploy-practices.md (memory) | synced | — |
 
