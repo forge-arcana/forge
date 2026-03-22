@@ -35,6 +35,14 @@
 **Learning**: When a validation schema accepts an identity field (e.g., `targetUserId`, `ownerUserId`) from the request body for an authenticated endpoint, the backend must verify the relationship between the caller and the referenced entity — not just that the entity exists. Without engagement/relationship verification, any authenticated user can target arbitrary entities with false claims. Especially dangerous for complaint, dispute, and review endpoints.
 **Apply when**: Reviewing any endpoint that accepts an entity ID from the request body and creates a record linking the caller to that entity.
 
+## Android 15 Edge-to-Edge Status Bar Overlap in Capacitor (2026-03-22)
+**Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView (only `safe-area-inset-bottom` works). `WindowCompat.setDecorFitsSystemWindows(window, true)` in MainActivity also fails — Capacitor's BridgeActivity overrides it. The **only working fix** in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes (XML `windowOptOutEdgeToEdgeEnforcement` + Java `WindowCompat` + config) — they each add padding independently, causing a visible gap.
+**Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.
+
+## Leaflet Map Z-Index Blocks Nearby Dropdowns (2026-03-22)
+**Learning**: Leaflet map tiles use `z-index: 200-800` internally. Any absolutely positioned dropdown (autocomplete, select, popover) rendered near a Leaflet map container will be hidden behind the map tiles if using standard z-index values (e.g., `z-50`). Use `z-[1000]` or higher for dropdowns adjacent to maps.
+**Apply when**: Building search/autocomplete UI components that render near Leaflet or similar map libraries.
+
 ## Schema Defaults Must Match Code Defaults (2026-03-21)
 **Learning**: When auditing DB schemas, verify that column defaults match what the application code actually inserts. A default of `'occupied'` when code always inserts `'empty'` is a bug waiting to happen. Unused schema defaults are silent time bombs — they only fire when someone forgets to specify the value explicitly, and then they produce wrong data instead of an error.
 **Apply when**: Reviewing database schemas for tech debt, especially columns with default values that aren't tested by normal application flows.

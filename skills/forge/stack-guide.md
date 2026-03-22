@@ -257,6 +257,8 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 
 **Vite `envDir` in monorepos:** Vite reads `.env` from the package root by default, not the monorepo root. Set `envDir: path.resolve(__dirname, "../..")` in every SPA's vite.config.ts so shared `VITE_*` vars from the root `.env.local` reach all SPAs in local dev. Docker builds are unaffected (use `--build-arg`).
 
+**Android 15 edge-to-edge:** Android 15 (API 35+) enforces edge-to-edge rendering — app content renders behind the status bar by default. `StatusBar.setOverlaysWebView(false)` and CSS `env(safe-area-inset-top)` do NOT work on Android WebView. The fix is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do not stack with XML `windowOptOutEdgeToEdgeEnforcement` or Java `WindowCompat.setDecorFitsSystemWindows` — they add padding independently, causing a visible gap.
+
 **Android SDK in WSL:** Gradle needs native Linux binaries — Windows `.exe` tools don't execute under WSL. Install cmdline-tools + build-tools natively (e.g., `/root/android-sdk`). Emulator stays on Windows (needs GPU passthrough) — manage via `powershell.exe` or a Node.js helper script for reliable argument handling.
 
 **APK distribution via GCS:**
