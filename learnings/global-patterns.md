@@ -104,3 +104,7 @@
 **Learning**: In projects using TanStack Query, manual `useState` + `useEffect` + fetch patterns for server data indicate framework misuse. These miss caching, deduplication, retry, background refetch, and optimistic updates. Common in admin/settings pages added later in the project lifecycle when the pattern isn't enforced. A quick grep for `useState.*loading.*true` or `useEffect.*api.get` catches these.
 **Apply when**: Reviewing frontend code in TanStack Query projects, especially admin/settings pages.
 
+## Android 15 Edge-to-Edge Status Bar Overlap in Capacitor (2026-03-22)
+**Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView (only `safe-area-inset-bottom` works). The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes (XML opt-out + Java WindowCompat + config) — they each add padding independently.
+**Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.
+
