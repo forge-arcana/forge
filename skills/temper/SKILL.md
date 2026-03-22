@@ -149,7 +149,11 @@ If a finding appears at different severities across passes, use the **highest** 
 
 For each press dimension, average the scores across passes (round to nearest 0.5).
 
-## Step 4: Output — The Temper Report
+## Step 4: Persist & Output — The Temper Report
+
+**HARD RULE — Always persist the report before displaying it.**
+
+Write the full report to `memory/YYYY-MM-DD-temper-report.md` in the project directory (create `memory/` if needed). This ensures the report survives context compaction, distractions, and session breaks. The user can delete it when done acting on it.
 
 Produce a markdown report with these sections in order:
 
@@ -165,6 +169,7 @@ Produce a markdown report with these sections in order:
 ## Step 5: Next Steps
 
 After presenting the report, suggest:
+- "Report saved to `memory/YYYY-MM-DD-temper-report.md` — delete when done acting on it."
 - "Want me to fix the confirmed criticals? Specify by finding title."
 - "Run `/pound` for adversarial QA on the weak dimensions."
 - Use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
