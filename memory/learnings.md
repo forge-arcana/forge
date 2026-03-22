@@ -12,15 +12,15 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ### Knowledge Flow (2026-03-21)
 - Cast and fold are symmetric mirrors — both triage before acting, both present tables, both ask for confirmation. See `memory/identity.md` "The Heart of Cast and Fold" for design rationale.
 - Both use the **universal classification system** (IDENTICAL, FORGE-UPDATED, DEPLOYED-DIFFERS, CONFLICT, ADDED, REMOVED) from `preflight.md`
-- **Cast (forge → user)**: Deploys ADDED and FORGE-UPDATED entries. Skips DEPLOYED-DIFFERS (advises `/fold` first). Never overwrites silently.
-- **Fold (user → forge)**: Absorbs REMOVED and DEPLOYED-DIFFERS entries. Adds fold-specific sub-classifications (NEW, CROSS-CUTTING, DUPLICATE, INCORPORATED, SUPERSEDED) for quality gating. Never removes forge-only content.
+- **Cast (forge → user)**: Deploys ADDED and FORGE-UPDATED entries. Skips DEPLOYED-DIFFERS (advises `/fold` first). Never overwrites silently. Actions: `update`, `create`, `sync`, `conflict`, `fold first`.
+- **Fold (user → forge)**: Absorbs REMOVED and DEPLOYED-DIFFERS entries. Adds fold-specific sub-classifications (NEW, CROSS-CUTTING, DUPLICATE, INCORPORATED, SUPERSEDED) for quality gating. Never removes forge-only content. Actions: `absorb`, `merge`, `skip (reason)`, `conflict`.
 - **Config sync**: Cast deploys forge rules → `~/.claude/CLAUDE.md`. Fold absorbs user additions → `claude-code-rules.md`. Neither direction removes the other side's content.
 - Arts flag learnings as `Forge-worthy: yes/no` at write time during art runs
 - Learnings accumulate in project memory (`~/.claude/projects/*/memory/*-learnings.md`), then `/fold` Part 3 Step 0 scans for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md`
 - `/fold` Part 3 Steps 1-4 triage and absorb into `forge/learnings/` → next art run reads them first
 - `/fold` NEVER deletes from user's global space — tracks processed entries via title-based tracker
 - Promotion is always a COPY, never a move — project entries persist after promotion
-- `/fold` triage must output as console text, never AskUserQuestion (compressed UI is unreadable for large tables)
+- `/fold` and `/cast` both use unified PLAN/DONE two-report system — same 3-column format (What | Action/Result | Contributor). PLAN table is always output as console text (compressed UI makes tables unreadable), then AskUserQuestion for confirmation. DONE table is the post-execution receipt.
 
 ## Skills
 
