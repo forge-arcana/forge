@@ -171,3 +171,11 @@ Baseline recorded: `abc1234`
 If nothing changed: just say "Everything in sync." and skip both PLAN and DONE reports.
 
 After the DONE report: include the baseline commit SHA. Do NOT commit project changes — use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
+
+## IMPORTANT — Stale Context Warning
+
+If ANY skills were deployed (updated or created), warn the user:
+
+> **Skills updated on disk.** Other running Claude Code sessions still have the OLD skill text in their context window. Run `/compact` or restart those sessions before running `/fold` — otherwise fold may revert these changes using stale in-context instructions.
+
+This warning is critical because `/cast` writes new SKILL.md files to `~/.claude/skills/`, but already-running sessions have the old skill text baked into their conversation. A `/fold` run in a stale session will treat its in-context (old) skill definitions as authoritative and "merge" them back into forge, silently undoing the cast.

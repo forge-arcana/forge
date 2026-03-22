@@ -37,10 +37,13 @@ Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the S
 
 ### 1a: Skill Reverse-Sync (using preflight drift results)
 
+> **HARD RULE — Disk is truth, context is stale.**
+> When diffing DEPLOYED-DIFFERS, read the deployed file FROM DISK (`~/.claude/skills/<name>/SKILL.md`), NOT from your in-context memory of the skill. Your context window may contain an older version of the skill that was loaded before the last `/cast`. If you use in-context knowledge to "merge" or "improve" the diff, you will silently revert changes made by other sessions. Always `Read` the file, never recall it.
+
 | Classification | /fold Action |
 |---------------|-------------|
 | `IDENTICAL` | Skip |
-| `DEPLOYED-DIFFERS` | Diff deployed vs forge, show changes, absorb into forge after user confirms |
+| `DEPLOYED-DIFFERS` | `Read` deployed file from disk, diff against forge, show changes, absorb into forge after user confirms |
 | `FORGE-UPDATED` | Skip — deploy on next `/cast` |
 | `CONFLICT` | Show both diffs, ask user to reconcile |
 | `ADDED` / `REMOVED` | Skip — handled by `/cast` |
