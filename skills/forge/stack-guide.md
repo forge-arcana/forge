@@ -48,7 +48,6 @@ packages/
   server/    — Hono server, routes, services, middleware, auth
   web/       — Vite + React frontend, TanStack Router, components
 scripts/     — Production scripts only (build, deploy, release, CI)
-dev/         — Local dev tooling (restart.sh, kill-zombies.sh, emulator.js)
 logs/        — Dev server output (gitignored)
 ```
 
