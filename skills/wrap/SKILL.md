@@ -72,6 +72,5 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
 - If the user declines, skip the push
 
 ## Step 8: Context Window Compact
-- After the commit (and optional push), remind the user: "Run `/compact` or start a new conversation for a fresh context window."
-- `/compact` is a built-in CLI command — only the user can invoke it, not the agent
-- The commit is the natural break point — next task benefits from a clean context
+- After the commit (and optional push), output: "Run `/compact` or start a new conversation for a fresh context window."
+- `/compact` is a built-in CLI command — only the user can invoke it, not the agent. Do NOT use AskUserQuestion here — it can't execute `/compact`, so prompting is redundant.
