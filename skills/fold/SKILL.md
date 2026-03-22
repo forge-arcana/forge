@@ -19,7 +19,7 @@ Single command to fold all knowledge back into the forge repo. Runnable from **a
 2. **Review & prune** — check existing forge knowledge for staleness (auto-triggers based on size)
 3. **Learning absorption** — merge global learnings into forge's learning store
 4. **Memory absorption** — merge global memories into forge's team memory store
-5. **Staging archival** — archive fully-absorbed entries from `~/.claude/` staging area
+5. **Membrane compaction** — compact fully-absorbed learnings, archive synced memories
 6. **Commit & push** — conflict gate, stage, context update, commit, push with user confirmation
 7. **Report** — summary of all changes
 
@@ -146,18 +146,35 @@ Source entries in `~/.claude/memory/` are NEVER deleted.
 
 ---
 
-## Part 5: Staging Archival
+## Part 5: Membrane Compaction
 
 ### Triggers (skip if none fire)
 
 | Trigger | What fires |
 |---------|-----------|
-| `~/.claude/learnings/general.md` > 100 entries | Learning archival |
+| `~/.claude/learnings/general.md` > 30 entries | Learning compaction |
 | `~/.claude/memory/` has > 30 files | Memory archival |
 
-For **learning archival**: cross-reference entries against tracker `processedEntries` AND forge learnings files. Entries that are BOTH processed AND present in forge → offer to move to `~/.claude/learnings/archive/general.md`.
+### Learning compaction
 
-For **memory archival**: files identical in both membrane and forge → offer to move to `~/.claude/memory/archive/`.
+Cross-reference every entry in `general.md` against:
+1. Tracker `processedEntries` — was it triaged by /fold?
+2. Forge learnings files (`<forge>/learnings/*.md`) — is the content present in forge?
+
+Entries that are BOTH processed AND present in forge are **fully absorbed** — they've completed the journey from membrane into the source of truth. Replace each fully-absorbed entry with a one-line stub:
+
+```markdown
+## [Original Title] (YYYY-MM-DD)
+<!-- Absorbed into forge/learnings/[file].md -->
+```
+
+This preserves the title (so the tracker doesn't re-process it) while shrinking the file. Present the compaction list for user confirmation before applying.
+
+Entries NOT yet in forge (unprocessed, or processed but not yet absorbed) remain untouched.
+
+### Memory archival
+
+Files identical in both membrane and forge → offer to move to `~/.claude/memory/archive/`.
 
 Never delete — archival is a move.
 
