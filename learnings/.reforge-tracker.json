@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-03-21T18:00:00Z",
+  "lastRun": "2026-03-22T00:00:00Z",
   "processedEntries": [
     "SKILL.md Frontmatter",
     "WSL Path Compatibility",
@@ -31,7 +31,8 @@
     "Three-Layer Architecture as Cost Control",
     "Offline-First Is Non-Negotiable for Capture Apps",
     "Trust Ladder Onboarding for Sensitive Features",
-    "Modes as a Volume Dial, Not Separate Machines"
+    "Modes as a Volume Dial, Not Separate Machines",
+    "Android 15 Edge-to-Edge Status Bar Overlap in Capacitor"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

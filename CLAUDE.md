@@ -63,6 +63,13 @@ Arts (`/prime`, `/probe`, `/poke`, `/press`, `/pound`, `/pry`, `/purge`) write l
 > **No project, no skill, no manual edit touches forge repo files directly.**
 > `/fold` is the gatekeeper for learnings, memory, and config sync.
 > Direct edits to forge are only for skill development (editing SKILL.md files in `skills/`).
+>
+> **When a user says "add this to forge" from a project context**, they mean:
+> 1. Write the learning to `~/.claude/learnings/general.md` (the membrane)
+> 2. Tell the user to run `/fold` from forge to absorb it
+>
+> **NEVER** open the forge repo and edit `learnings/`, `memory/`, or `skills/forge/` files from a project context.
+> The membrane is the inbox. `/fold` is the quality gate. No shortcuts.
 
 ## HARD RULE — No Project Names in Forge
 > **Forge is a shared repo. NEVER include project-specific details in learnings, memory, or commit messages.**
