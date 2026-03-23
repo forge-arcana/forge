@@ -41,10 +41,7 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 |-----|-------------|
 | `/pry` | The Lever — relentless solution-finder that cracks "can't be done" claims (self-improving) |
 
-### Forge Hygiene
-| Art | What it does |
-|-----|-------------|
-| `/purge` | The Purist — cleanses stale knowledge, deduplication, and drift across the forge (self-improving) |
+*`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift.*
 
 ## Task Skills
 
@@ -86,7 +83,7 @@ During any work session (automatic):
   → writes to forge/learnings/{probe,press,poke,preen,prime,pry,global-patterns}.md
   → never deletes from user's global space
 
-Arts (/prime, /probe, /poke, /preen, /press, /pound, /pry, /purge):
+Arts (/prime, /probe, /poke, /preen, /press, /pound, /pry):
   → read forge/learnings/ first → smarter decisions
   → write back to project memory/ → auto-accumulates → cycle continues
 ```
@@ -125,10 +122,10 @@ forge/
 │   ├── wawa/              # Outstanding work summary
 │   └── wrap/              # Pre-commit ritual
 ├── learnings/             # Absorbed team wisdom (art-specific + global patterns)
-├── memory/                # Team identity, shared conventions, purge learnings
+├── memory/                # Team identity & shared conventions
 ├── .claude/skills/
 │   ├── cast/              # Thin bootstrap (so /cast is discoverable on fresh clone)
-│   └── purge/             # The Purist — forge hygiene (art, forge-only)
+│   └── purge/             # Forge-internal hygiene art (maintainers only)
 └── CLAUDE.md
 ```
 

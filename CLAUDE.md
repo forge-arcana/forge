@@ -28,11 +28,12 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/press` | Staff engineer (go-live readiness) | Evaluative — medium |
 | `/pound` | 21 adversarial QA personas | Evaluative — heavy |
 | `/pry` | The Lever (relentless solution-finder) | Investigative |
-| `/purge` | The Purist (forge master) | Cleansing |
 
 **Evaluative trifecta** — poke often, press before milestones, pound before ship.
 **When blocked** — `/pry` to crack the wall.
 **For UI/UX** — `/preen` to evaluate interfaces through Don Norman's lens.
+
+*`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift.*
 
 ## Task Skills
 | Skill | Purpose |
@@ -59,7 +60,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `memory/` | `/cast` syncs to `~/.claude/memory/` | Auto-accumulates → `/fold` absorbs |
 
 ## Self-Improving Loop
-Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pry`, `/purge`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/fold` scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md` → `/fold` absorbs into `forge/learnings/` → next art run reads global learnings in pre-flight.
+Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pry`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/fold` scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md` → `/fold` absorbs into `forge/learnings/` → next art run reads global learnings in pre-flight.
 
 ## HARD RULE — Only /fold Writes to Forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
@@ -110,8 +111,8 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 20 deployed skills (7 arts + 13 task skills) + 1 forge-only art (/purge), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
-- **Arts**: prime, probe, poke, preen, press, pound, pry (deployed) + purge (forge-only in `.claude/skills/purge/`) — shared protocol in `skills/forge/protocol.md`
+- **Completed**: Three-pillar architecture, git-based drift detection, 20 deployed skills (7 arts + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
+- **Arts**: prime, probe, poke, preen, press, pound, pry — shared protocol in `skills/forge/protocol.md`. Purge is forge-internal (`.claude/skills/purge/`).
 - **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (universal classification system for /mark, /cast, /fold)
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
