@@ -26,7 +26,7 @@ Output the drift report as **Section 1: Skill Status**.
 
 Launch **all of these reads in parallel** before processing (all independent):
 - Read `~/.claude/learnings/general.md`
-- Read `<forge>/learnings/.fold-tracker.json`
+- Read `<forge>/learnings/.reforge-tracker.json`
 - Glob and read all `~/.claude/learnings/*.md` files
 - Glob and read all `<forge>/learnings/*.md` files
 - Glob and read all `~/.claude/memory/*.md` files (exclude MEMORY.md)
