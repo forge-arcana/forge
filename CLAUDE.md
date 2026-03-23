@@ -73,15 +73,13 @@ Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pry`, `/purge
 > **NEVER** open the forge repo and edit `learnings/`, `memory/`, or `skills/forge/` files from a project context.
 > The membrane is the inbox. `/fold` is the quality gate. No shortcuts.
 
-## HARD RULE — The User Is the Source of Truth, Not Forge
-> **Forge is a shared reference, not an authority. Neither forge nor the membrane is automatically correct.**
-> Both `/cast` (forge → user) and `/fold` (user → forge) are PROPOSALS that require user confirmation.
-> Cast does NOT blindly deploy learnings and memory — it presents them for triage just like fold does.
-> A learning in forge can be stale. A memory in forge can be wrong. A convention in forge can be outdated.
-> The only source of truth is the user's judgment at the PLAN table.
+## HARD RULE — Forge Brings Intelligence, Users Bring Wisdom
+> **Forge classifies, deduplicates, detects conflicts, routes knowledge, and flags anomalies.**
+> **Users review, approve, reject, and reconcile at the PLAN table.**
+> Both `/cast` (forge → user) and `/fold` (user → forge) present PLAN tables where forge's classification meets the user's judgment. Together, both grow the knowledge base.
 >
-> **Corollary**: Both directions need the same quality gate. If fold triages before absorbing,
-> cast must triage before deploying. No direction gets to skip the user's review.
+> **Corollary**: Both directions use the same quality gate. Fold triages before absorbing,
+> cast triages before deploying. Every transfer goes through the PLAN table.
 
 ## HARD RULE — All Transfers Are Guarded by User Wisdom
 > **ALL pillars (skills, config, learnings, memory) require user review in BOTH directions.**
@@ -112,8 +110,8 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 21 global skills (8 arts + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
-- **Arts**: prime, probe, poke, preen, press, pound, pry, purge — shared protocol in `skills/forge/protocol.md`
+- **Completed**: Three-pillar architecture, git-based drift detection, 20 deployed skills (7 arts + 13 task skills) + 1 forge-only art (/purge), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
+- **Arts**: prime, probe, poke, preen, press, pound, pry (deployed) + purge (forge-only in `.claude/skills/purge/`) — shared protocol in `skills/forge/protocol.md`
 - **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (universal classification system for /mark, /cast, /fold)
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)

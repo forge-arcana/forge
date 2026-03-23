@@ -80,6 +80,7 @@ Deploy only the memory files the user approved. Copy if missing in membrane, upd
 ### One-Off Migrations
 Remove stale files from previous forge layouts:
 - If `~/.claude/learnings/purge-learnings.md` exists, delete it (moved to forge-internal `memory/`)
+- If `~/.claude/skills/purge/` exists, remove it (`rm -rf`) — /purge is forge-only, no longer deployed to users
 
 ### Record Baseline
 Write `~/.claude/.last-cast.json`:

@@ -1,6 +1,6 @@
 # Forge
 
-A maker's forge. Eight arts to shape ideas, challenge architecture, review code, evaluate design, stress-test, crack blockers, and cleanse knowledge — all through AI-guided skills.
+A shared tooling repo for AI-guided skills, conventions, and accumulated team wisdom. Forge classifies, deduplicates, and routes knowledge automatically. Users review and decide at the PLAN table. Together, both grow the knowledge base — forge brings the intelligence, users bring the wisdom.
 
 ---
 
@@ -83,7 +83,7 @@ During any work session (automatic):
 /fold from any project (consumes global staging):
   → reads ~/.claude/learnings/ + ~/.claude/memory/
   → triages, genericizes, deduplicates
-  → writes to forge/learnings/{probe,press,poke,preen,prime,pry,purge,global-patterns}.md
+  → writes to forge/learnings/{probe,press,poke,preen,prime,pry,global-patterns}.md
   → never deletes from user's global space
 
 Arts (/prime, /probe, /poke, /preen, /press, /pound, /pry, /purge):
@@ -121,14 +121,14 @@ forge/
 │   ├── dig/               # Think deeper — staff engineer stance
 │   ├── eli5/              # Explain Like I'm 5
 │   ├── pry/               # The Lever — relentless solution-finder (art)
-│   ├── purge/             # The Purist — forge hygiene (art, self-improving)
 │   ├── temper/            # Hardened evaluation — repeated poke + press
 │   ├── wawa/              # Outstanding work summary
 │   └── wrap/              # Pre-commit ritual
-├── learnings/             # Absorbed team wisdom
-├── memory/                # Team identity & shared conventions
+├── learnings/             # Absorbed team wisdom (art-specific + global patterns)
+├── memory/                # Team identity, shared conventions, purge learnings
 ├── .claude/skills/
-│   └── cast/              # Thin bootstrap (so /cast is discoverable on fresh clone)
+│   ├── cast/              # Thin bootstrap (so /cast is discoverable on fresh clone)
+│   └── purge/             # The Purist — forge hygiene (art, forge-only)
 └── CLAUDE.md
 ```
 
