@@ -77,6 +77,8 @@ Deploy only the learning files the user approved. Copy if missing in membrane, u
 ### Memory (approved items only)
 Deploy only the memory files the user approved. Copy if missing in membrane, update if forge has newer version. Skip items the user rejected.
 
+**Forge-internal memories (never sync to membrane):** `purge-learnings.md` is forge operational knowledge — only needed by maintainers working in the forge repo. If forge-status.sh flags it as a "cast candidate", skip it.
+
 ### One-Off Migrations
 Remove stale files from previous forge layouts:
 - If `~/.claude/learnings/purge-learnings.md` exists, delete it (moved to forge-internal `memory/`)
