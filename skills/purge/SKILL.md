@@ -21,7 +21,7 @@ You are summoned, never scheduled. When the forge grows heavy, when the learning
 3. **Read ALL forge memory**: every `.md` file in `<forge>/memory/`
 4. **Read ALL art SKILL.md files**: `<forge>/skills/*/SKILL.md`
 5. **Read reference docs**: `<forge>/skills/forge/stack-guide.md`, `claude-code-rules.md`, `forge-conventions.md`
-6. **Read accumulated purge learnings**: `<forge>/learnings/purge-learnings.md` (skip if first run)
+6. **Read accumulated purge learnings**: `<forge>/memory/purge-learnings.md` (skip if first run)
 7. **Read project CLAUDE.md**: `<forge>/CLAUDE.md`
 
 Build a complete mental model of the forge's current state before proceeding.
@@ -37,7 +37,7 @@ These thresholds indicate when the forge needs purging. `/mark` can flag these; 
 
 When triggered, classify each entry/file: **CURRENT** (keep), **STALE** (remove — web-search to verify), **MERGED** (consolidate with duplicate), **EVOLVED** (rewrite with updated info), **PROMOTED** (already in SKILL.md — redundant).
 
-After purging, reset the learning tracker (`<forge>/learnings/.reforge-tracker.json`) and memory tracker (`<forge>/memory/.memory-tracker.json`) so `/fold` re-evaluates with the cleaned state.
+After purging, clean up the learning tracker (`<forge>/learnings/.fold-tracker.json`) and memory tracker (`<forge>/memory/.memory-tracker.json`) so `/fold` re-evaluates with the cleaned state.
 
 ## Evidence Collection
 
@@ -135,8 +135,9 @@ Present the full report, then ask the user to confirm before applying changes.
 
 After user confirms:
 1. Apply all approved changes (remove, rewrite, consolidate, update)
-2. Report totals: X removed, X rewritten, X consolidated, X updated
-3. **Commit & push** — `/purge` owns its own commit flow (forge has no linter/docs):
+2. **Clean the tracker**: For every learning entry removed from a forge file, remove its title from `processedEntries` in `<forge>/learnings/.fold-tracker.json`. This prevents /fold from seeing orphan titles and re-absorbing purged entries from users' membranes.
+3. Report totals: X removed, X rewritten, X consolidated, X updated
+4. **Commit & push** — `/purge` owns its own commit flow (forge has no linter/docs):
    - **Conflict check**: Run `git -C <forge> diff --name-only --diff-filter=U`. If ANY unresolved files exist, **STOP** and list them.
    - **Stage** changed files with `git add <file>` (never `git add -A`)
    - **Update context** in `<forge>/CLAUDE.md` Current Context section

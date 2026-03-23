@@ -212,7 +212,7 @@ echo "## Learning Status"
 echo ""
 
 GENERAL="$HOME/.claude/learnings/general.md"
-TRACKER="$FORGE_PATH/learnings/.reforge-tracker.json"
+TRACKER="$FORGE_PATH/learnings/.fold-tracker.json"
 
 if [[ -f "$GENERAL" ]]; then
   # Extract all ## titles (strip date suffix)
@@ -603,7 +603,7 @@ for fname in sorted(os.listdir(learnings_dir)):
 
 # Get tracker processedEntries
 processed = set()
-tracker_path = os.path.join('$FORGE_PATH', 'learnings', '.reforge-tracker.json')
+tracker_path = os.path.join('$FORGE_PATH', 'learnings', '.fold-tracker.json')
 try:
     with open(tracker_path) as f:
         data = json.load(f)
@@ -655,7 +655,7 @@ for fname in sorted(os.listdir(learnings_dir)):
                     forge_titles.add(m.group(1).strip())
     except: pass
 
-tracker_path = os.path.join('$FORGE_PATH', 'learnings', '.reforge-tracker.json')
+tracker_path = os.path.join('$FORGE_PATH', 'learnings', '.fold-tracker.json')
 try:
     with open(tracker_path) as f:
         data = json.load(f)

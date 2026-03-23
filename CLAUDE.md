@@ -117,7 +117,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (universal classification system for /mark, /cast, /fold)
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
-- **Trackers**: `learnings/.reforge-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
+- **Trackers**: `learnings/.fold-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Purge: removed 4 promoted/duplicate/forge-specific entries from learnings, cleaned 8 tracker orphans. Fixed forge-path resolution bug in all 4 scripts.
+- **Recent**: Moved purge-learnings.md to memory/ (forge-internal). Renamed .reforge-tracker.json → .fold-tracker.json, cleaned 10 orphan entries. Fixed re-absorption bug: /purge now cleans tracker, /fold skips TRACKED-ONLY entries. Added cast one-off migration for stale membrane files.
 - **Pending**: None

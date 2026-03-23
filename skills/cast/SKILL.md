@@ -77,6 +77,10 @@ Deploy only the learning files the user approved. Copy if missing in membrane, u
 ### Memory (approved items only)
 Deploy only the memory files the user approved. Copy if missing in membrane, update if forge has newer version. Skip items the user rejected.
 
+### One-Off Migrations
+Remove stale files from previous forge layouts:
+- If `~/.claude/learnings/purge-learnings.md` exists, delete it (moved to forge-internal `memory/`)
+
 ### Record Baseline
 Write `~/.claude/.last-cast.json`:
 ```json

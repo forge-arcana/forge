@@ -75,7 +75,7 @@ Run `<forge>/scripts/fold-evidence.sh` to collect all forge learnings, forge mem
 ### Step 0: Promote Forge-worthy Learnings from Project Memories
 
 Scan `~/.claude/projects/*/memory/*-learnings.md` for entries tagged `Forge-worthy: yes`. For each:
-1. Skip if title already in `<forge>/learnings/.reforge-tracker.json` `promotedEntries` or in `~/.claude/learnings/general.md`
+1. Skip if title already in `<forge>/learnings/.fold-tracker.json` `promotedEntries` or in `~/.claude/learnings/general.md`
 2. Genericize (strip project names, paths, domains — see forge CLAUDE.md "No Project Names" rule)
 3. Append to `~/.claude/learnings/general.md` with `<!-- promoted from project memory, YYYY-MM-DD -->` comment
 4. Add title to tracker `promotedEntries`
@@ -88,7 +88,7 @@ Use fold-evidence.sh output for membrane learnings (Section 3) and forge learnin
 
 ### Step 3: PLAN Report — Decision Gate
 
-Classify each candidate: **NEW** (absorb), **DUPLICATE** (skip), **INCORPORATED** (already in SKILL.md — skip), **SUPERSEDED** (flag), **CROSS-CUTTING** (route to global-patterns + relevant skill files).
+Classify each candidate: **NEW** (absorb), **DUPLICATE** (skip), **INCORPORATED** (already in SKILL.md — skip), **SUPERSEDED** (flag), **CROSS-CUTTING** (route to global-patterns + relevant skill files), **TRACKED-ONLY** (in processedEntries but NOT in any forge file — was intentionally removed by /purge, skip).
 
 Build a unified PLAN table from ALL parts (config sync, skills, learnings, memories) — one table, one decision point. Use contributor names from `git blame` on forge files and first-sentence summaries from the Learning Details in `forge-status.sh` output.
 
@@ -108,7 +108,7 @@ Build a unified PLAN table from ALL parts (config sync, skills, learnings, memor
 3 skills identical, 2 learnings in forge — omitted.
 ```
 
-**Action vocabulary**: `absorb` (new learning/memory → forge), `merge` (config drift), `skip (duplicate)`, `skip (personal)`, `skip (superseded)`, `skip (incorporated)`, `conflict` (both changed)
+**Action vocabulary**: `absorb` (new learning/memory → forge), `merge` (config drift), `skip (duplicate)`, `skip (personal)`, `skip (superseded)`, `skip (incorporated)`, `skip (purged)` (TRACKED-ONLY — removed by /purge), `conflict` (both changed)
 
 If everything is in sync: skip the table, say "Everything in sync." and proceed to Part 5.
 
@@ -131,7 +131,7 @@ Source entries in `~/.claude/learnings/` are NEVER deleted.
 
 ### Processing Tracker
 
-Maintain `<forge>/learnings/.reforge-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked.
+Maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked.
 
 ---
 

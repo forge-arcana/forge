@@ -171,7 +171,7 @@ echo ""
 
 echo "### Reforge tracker"
 echo '```'
-cat "$FORGE_PATH/learnings/.reforge-tracker.json" 2>/dev/null || echo "(not found)"
+cat "$FORGE_PATH/learnings/.fold-tracker.json" 2>/dev/null || echo "(not found)"
 echo '```'
 echo ""
 
