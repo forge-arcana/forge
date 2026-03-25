@@ -34,8 +34,12 @@ For each technical section in the blueprint (Sections 13-19: Tech Architecture, 
 3. **Challenge** the decision:
    - Is this still the best choice? Has something better emerged?
    - Are there known pitfalls with this approach at the expected scale?
-   - Does this align with the stack guide's proven patterns?
    - Are there simpler alternatives that achieve the same outcome?
+   - **Language fit check** (for Section 13 specifically):
+     - Does the chosen language match the project's performance envelope? (CRUD app in Rust = over-engineered; high-throughput pipeline in Node.js = potential bottleneck)
+     - Are there integration mismatches? (ML-heavy project without Python; mobile app without TypeScript)
+     - Would a multi-language architecture serve better? (e.g., TypeScript API + Python ML service)
+     - Does the blueprint justify the language choice, or did it just default without evaluation?
 4. **Enhance or confirm** the section with:
    - Updated recommendations with justification
    - Specific configuration guidance
@@ -45,6 +49,7 @@ For each technical section in the blueprint (Sections 13-19: Tech Architecture, 
 Additionally, verify the blueprint includes:
 - **Logging strategy** aligned with `<forge>/skills/forge/stack-guide.md` Logging Convention (structured logging, dev vs prod verbosity, browser console forwarding). If absent, flag it.
 - **Dev setup plan** that includes `restart.sh` and `kill-zombies.sh` (see `<forge>/skills/forge/forge-conventions.md` items 6-7). If absent, flag it.
+- **Language justification**: Section 13 must include explicit reasoning for the backend language choice — not just "we're using TypeScript" but WHY it fits this project's signals. If the justification is missing or generic ("it's popular"), flag as IMPORTANT.
 
 ## Output
 

@@ -250,6 +250,39 @@ Present these as recommendations: "Based on your product type, I'd recommend inc
     - Scale expectations? ("We expect 100 users" vs. "We expect 100,000 users")
     - Platform target? ("Mobile-first" vs. "Desktop" vs. "Both")
 
+### Agent Step — Language Fit Evaluation
+
+Before continuing to Q31, evaluate which backend language fits this project. Use everything you've learned in Rounds 1-5 plus the answer to Q30.
+
+**Evaluate these signals:**
+
+1. **Project shape** — Is this a full-stack web app? A CLI? An API-only service? A data pipeline?
+2. **Performance envelope** — Expected load (100 users vs 100K), latency requirements (best-effort vs sub-ms p99), throughput needs (CRUD vs streaming/processing)
+3. **Integration surface** — Does it need ML models? Capacitor/mobile? Real-time? Heavy filesystem/OS work?
+4. **Team reality** — Existing skills from Q30 (a solo non-engineer is different from a team with Go experience)
+5. **Deployment model** — Serverless functions? Containers? Single binary on edge? Embedded?
+
+**Decision logic:**
+
+- Web app + frontend + payments + auth + CRUD → **TypeScript/Node.js** (shared types, ecosystem depth)
+- High concurrency + simple logic + no shared frontend → consider **Go** (goroutines, single binary)
+- Hard latency/throughput requirements (real-time processing, game servers) → consider **Rust** (zero-cost abstractions, but acknowledge the development speed trade-off)
+- ML models, data processing, scientific computing → consider **Python/FastAPI** (unmatched ML ecosystem, but note concurrency limitations for high-load APIs)
+- Conflicting signals (e.g., web app + ML) → recommend a **split**: TypeScript API + Python ML service
+
+**Present to the founder:**
+
+> "Based on what you've told me, here's what I'd recommend for the backend language:"
+
+| Option | Fit for your project | Trade-off |
+|--------|---------------------|-----------|
+| [Best fit] | [Why it matches their signals] | [What you give up] |
+| [Alternative] | [When it would be better] | [Why it's not the default pick] |
+
+> "I'm recommending [X] because [concise reason]. Does that feel right, or do you have a strong pull toward something else?"
+
+Only after the founder confirms (or redirects), proceed to Q31. Language choice cascades into every downstream decision — hosting, CI/CD, testing tools, project structure.
+
 31. **"Should users get real-time updates, or is refresh/polling fine?"**
     - Chat, live tracking, dashboards → WebSocket/SSE
     - Email notifications, batch processing → No real-time needed

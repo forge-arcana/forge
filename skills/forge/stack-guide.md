@@ -296,17 +296,32 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 
 ---
 
-## When NOT To Use This Stack
+## Language Decision Framework
 
-This stack is optimized for **server-rendered APIs + client-side React SPAs** targeting **mobile + web**. Consider alternatives when:
+The default stack above is optimized for **server-rendered APIs + client-side React SPAs** targeting **mobile + web**. It's the right choice for most projects — but not all. Use the signals below to evaluate fit.
 
-| Scenario | Consider Instead |
-|---|---|
-| Static/content site | Astro, Hugo |
-| Heavy SSR/SEO needs | Next.js (but beware the complexity tax) |
-| Embedded/IoT | Go, Rust |
-| ML/data pipeline | Python (FastAPI + SQLAlchemy) |
-| Real-time game | Elixir/Phoenix, or raw WebSockets |
-| Solo prototype (< 1 week) | Whatever ships fastest |
+### Decision Signals
+
+| Signal | Points toward | Why |
+|--------|---------------|-----|
+| Full-stack web app (API + SPA) | TypeScript/Node.js | Shared types DB-to-UI, one language for everything |
+| Mobile + web (Capacitor) | TypeScript/Node.js | Capacitor needs JS frontend, shared types with API |
+| CRUD / auth / payments | TypeScript/Node.js | Library ecosystem maturity, rapid iteration |
+| High-concurrency API (10K+ req/s) | Go | Goroutines, tiny memory footprint, single binary deploy |
+| CLI tool or standalone microservice | Go | Fast compile, zero dependencies, cross-compile |
+| Latency-critical (sub-ms p99) | Rust | Zero-cost abstractions, no GC pauses |
+| High-throughput data processing | Rust | Memory safety without GC overhead |
+| ML/AI-adjacent (model serving, embeddings) | Python/FastAPI | PyTorch, transformers, numpy — unmatched ML ecosystem |
+| Data pipeline / ETL | Python | pandas, polars, native Jupyter support |
+| Static/content site | Astro, Hugo | Not a backend language decision |
+| Rapid prototype (< 1 week) | Whatever ships fastest | Pragmatism over purity |
+
+### AI-Assisted Development
+
+Claude writes production-quality code in TypeScript, Go, Rust, and Python. AI-assisted velocity is no longer a TypeScript-only advantage. The differentiator is ecosystem depth — Claude's knowledge of TypeScript libraries (React, Drizzle, Hono, Better Auth) is deeper than its knowledge of Go/Rust web frameworks, but this gap narrows over time.
+
+### The Rule
+
+If no signals point away from TypeScript, use the default stack above. If signals point elsewhere, `/prime`'s blueprint process walks through the evaluation. If signals conflict (e.g., web app + ML model serving), the answer may be two languages — TypeScript API + Python ML service. Multi-language architectures are a valid choice, not a compromise.
 
 The goal is never dogma — it's velocity with quality. If a better tool exists for the job, use it.
