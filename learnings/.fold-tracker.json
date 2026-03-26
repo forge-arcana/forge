@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-03-22T22:00:00Z",
+  "lastRun": "2026-03-26T00:00:00Z",
   "processedEntries": [
     "WSL Path Compatibility",
     "Configurable Paths via Resolution Chain",
@@ -25,7 +25,18 @@
     "Offline-First Is Non-Negotiable for Capture Apps",
     "Trust Ladder Onboarding for Sensitive Features",
     "Modes as a Volume Dial, Not Separate Machines",
-    "Android 15 Edge-to-Edge Status Bar Overlap in Capacitor"
+    "Android 15 Edge-to-Edge Status Bar Overlap in Capacitor",
+    "SKILL.md Frontmatter",
+    "Self-Flagging Learnings",
+    "Processing Tracker for Idempotent Absorption",
+    "Self-Contained Skill Packages",
+    "Thin Bootstrap for Skill Discovery",
+    "AI Timestamps Are Unreliable",
+    "Three-Way Drift Detection for Bidirectional Sync",
+    "Test Factories Must Mirror Production DI Container",
+    "Fold/Cast Race Condition on Direct Forge Edits",
+    "All Transfers Are Guarded by User Wisdom",
+    "Real-Time WebSocket ≠ Push Notifications"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
