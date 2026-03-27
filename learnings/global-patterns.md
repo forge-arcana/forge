@@ -8,13 +8,6 @@
 **Learning**: When running across Windows + WSL2, tool configuration that references directories must include all 3 path formats: Windows (`D:\`), WSL-mount (`/mnt/d/`), native Linux (`/root/dev/`). Without all three, permission prompts re-appear depending on which environment the session runs from.
 **Apply when**: Setting up any tool that uses directory allow-lists on a WSL2 machine.
 
-## Configurable Paths via Resolution Chain (2026-03-15)
-**Learning**: Never hardcode absolute paths in portable tools or skills. Use a resolution chain: (1) env var, (2) config file entry, (3) fallback default. This makes tools portable across machines and environments.
-**Apply when**: Any tool or skill references a directory that varies by machine (repos, config dirs, data dirs).
-
-## Global Config Over Per-Project Duplication (2026-03-15)
-**Learning**: When a tool supports both global and per-project configuration, put all standard settings in the global config. Only create per-project config for overrides. Duplicating the full config into every project is a DRY violation that creates drift and maintenance burden.
-**Apply when**: Setting up project-level configuration files for tools that also have a global config.
 
 ## Disable Rate Limiting in E2E Test Mode (2026-03-15)
 **Learning**: E2E test suites run dozens of tests from a single IP in minutes, easily exceeding production rate limits. Gate rate limiting middleware with an environment check (e.g., `NODE_ENV !== "test"`) so tests aren't blocked. Rate limiting itself should have its own unit tests, not be tested implicitly via E2E.
@@ -105,29 +98,9 @@
 **Apply when**: Reviewing frontend code in TanStack Query projects, especially admin/settings pages.
 
 
-## Self-Flagging Learnings (2026-03-26)
-**Learning**: When a skill generates learnings, it should self-classify each as "forge-worthy" or "project-specific" at write time. Downstream consumers (like commit rituals or absorption tools) can then auto-promote flagged entries without heuristic judgment. This eliminates guessing and ensures universal patterns reach the shared knowledge base.
-**Apply when**: Designing learning/knowledge capture systems where entries need to be triaged for promotion to a shared store.
-
-## Processing Tracker for Idempotent Absorption (2026-03-26)
-**Learning**: When a system absorbs entries from a source it doesn't own (and can't delete from), maintain a tracker file with content hashes or titles of already-processed entries. This makes absorption idempotent — each run only evaluates new entries, not the full history. Without a tracker, every run re-triages everything, leading to duplicate work and potential inconsistencies.
-**Apply when**: Building any pipeline that reads from append-only sources (log files, learning files, changelog) and needs to process each entry exactly once.
-
-## Self-Contained Skill Packages (2026-03-26)
-**Learning**: When skills reference documentation or frameworks, those files must live inside the skill's directory — not in a separate shared location. Static reference docs at repo root become stale orphans because the skill self-iterates but the orphaned doc doesn't. Co-locating ensures everything evolves together.
-**Apply when**: Structuring skill or plugin directories in any system where skills/plugins reference supplementary docs or frameworks.
-
-## Thin Bootstrap for Skill Discovery (2026-03-26)
-**Learning**: When a skill repo needs a particular skill to be discoverable on fresh clone (before global deployment), use a thin bootstrap file in the project's local skill directory that simply points to the real skill file. Avoids symlinks (OS-dependent behavior) and full duplication (drift risk). The bootstrap is 3 lines; the real skill lives in the source directory.
-**Apply when**: Setting up local skill discovery in repos that are also the source of truth for those skills.
-
 ## AI Timestamps Are Unreliable (2026-03-26)
 **Learning**: Do not add conventions requiring AI agents to prefix messages with wall-clock timestamps (e.g., `[HH:MM]`) or report elapsed times after tool calls. The agent's reported times are not accurate and add noise without value. If timing matters, instrument it at the tool/platform level, not in agent output formatting.
 **Apply when**: Designing output formatting conventions for AI agents or reviewing proposals that include timestamp requirements.
-
-## Three-Way Drift Detection for Bidirectional Sync (2026-03-26)
-**Learning**: When a system syncs files bidirectionally (source repo ↔ deployed copies), use a three-way comparison: source vs manifest vs deployed. This catches four cases: source updated (deploy it), deployed updated (reverse-sync it back), both updated (conflict — manual review), neither (skip). A two-way comparison (source vs deployed) can't distinguish "source is newer" from "deployed is newer" without a baseline.
-**Apply when**: Designing any bidirectional file sync mechanism between a source of truth and deployed copies.
 
 
 ## Real-Time WebSocket ≠ Push Notifications (2026-03-26)
