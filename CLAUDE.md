@@ -35,6 +35,11 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 
 *`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift.*
 
+## The Master
+| Skill | Purpose |
+|-------|---------|
+| `/smith` | Master of the forge — the user's proxy. Consumes a probed blueprint and autonomously builds the product through iterative heats. Summons apprentices for parallel work, wields every art, converges on perfection. |
+
 ## Task Skills
 | Skill | Purpose |
 |-------|---------|
@@ -111,12 +116,13 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 20 deployed skills (7 arts + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
-- **Arts**: prime, probe, poke, preen, press, pound, pry — shared protocol in `skills/forge/protocol.md`. Purge is forge-internal (`.claude/skills/purge/`).
+- **Completed**: Three-pillar architecture, git-based drift detection, 21 deployed skills (7 arts + 1 master + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
+- **Master**: `/smith` — the user's proxy, wields all arts. Lives in `skills/smith/SKILL.md`. Three-layer learning membrane (orchestration, delegation, art proficiency).
+- **Arts**: prime, probe, poke, preen, press, pound, pry — shared protocol in `skills/forge/protocol.md`. Purge is the cleanser, forge-internal (`.claude/skills/purge/`).
 - **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (universal classification system for /mark, /cast, /fold)
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.fold-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Parallel execution sweep across all arts + task skills. Protocol gets universal Parallel Execution Principle (HARD RULE). Prime auto-invokes Probe after blueprint. All evaluative arts fan-out dimensions/sections/personas via subagents. Task skills (temper, fold, cast, srs) parallelized.
+- **Recent**: /smith created — the master builder. Consumes probed blueprints, builds through iterative heats, wields all arts, summons apprentices for parallel work, three-layer learning membrane (smith/apprentice/art). Convergence loop at final gate (temper + pound until zero criticals/importants).
 - **Pending**: /cast needed (skills + learnings ahead of membrane)

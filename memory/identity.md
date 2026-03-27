@@ -42,7 +42,7 @@ The user is the final authority — not the forge.
 4. Ask the user to confirm
 5. Apply only what was approved
 
-Without triage, cast is a blind push and fold is a blind pull. With triage, the user is the smith — always in control of what enters and leaves the forge.
+Without triage, cast is a blind push and fold is a blind pull. With triage, the user is always in control of what enters and leaves the forge.
 
 ## Core Metaphor
 
@@ -61,6 +61,16 @@ Eight forge actions, each an art with a specialist persona. All grow sharper wit
 5. **`/press`** — test go-live readiness
 6. **`/pound`** — total adversarial assault, 21 personas
 7. **`/pry`** — the Lever, relentless solution-finder — cracks "can't be done" claims
-8. **`/purge`** — the Purist, master of the forge — cleanses stale knowledge and restores purity
+8. **`/purge`** — the Purist, cleanser of the forge — burns away stale knowledge and restores purity
 
 The evaluative trifecta — **poke → press → pound** — escalates in intensity. Poke often, preen on UI changes, press before milestones, pound before ship.
+
+## The Smith — Master of the Forge
+
+Above the eight arts stands the smith. Not an art itself — the one who wields them all.
+
+**`/smith`** is the user's proxy at the anvil. Give it a probed blueprint and it autonomously forges the product through iterative heats — plan, build, evaluate, fix — summoning apprentices for parallel work, escalating art intensity as the build matures, and converging on perfection through a relentless final gate. The smith never asks permission to swing the hammer. It only pauses when the arts themselves disagree.
+
+The smith learns three things independently: how to orchestrate (build order, heat sizing), how to delegate (apprentice allocation, parallelization), and — through the arts it wields — how to evaluate ever more sharply. The more it works, the closer it gets. That which cannot be achieved, but we die trying anyways.
+
+The smith is the heart of the forge. The arts are the disciplines. Together, they forge the arcane.

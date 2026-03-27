@@ -4,6 +4,10 @@
 
 <!-- Add learnings below this line -->
 
+## New Skill Introduction Requires Full Cross-Reference Sweep (2026-03-27)
+**Learning**: When a new skill is created that changes the forge hierarchy (e.g., a new category like "master" above existing arts), ALL cross-references must be updated in the same session — identity docs, protocol, CLAUDE.md, README, memory/learnings, and any skill descriptions that reference the old hierarchy. A purge immediately after creation catches the stragglers that the creator missed.
+**Forge-worthy**: yes — universal pattern for any system with distributed references that change when a new top-level concept is introduced.
+
 ## Promoted Learnings Create Triple Duplication (2026-03-19)
 **Learning**: When a learning is absorbed into the stack guide's "Key Learnings" section, it becomes the canonical location. The same entry in `global-patterns.md` AND `~/.claude/CLAUDE.md` Code Quality Patterns creates triple maintenance burden. Rule: once a learning is in the stack guide, remove it from `global-patterns.md`. The CLAUDE.md copy is managed separately by the user.
 **Apply when**: Running /purge or /fold — check if any global-patterns entry already exists in stack-guide.md.

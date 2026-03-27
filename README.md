@@ -4,6 +4,31 @@ A shared tooling repo for AI-guided skills, conventions, and accumulated team wi
 
 ---
 
+## The Smith — Heart of the Forge
+
+At the center of the forge stands the smith. Not an art — the master who wields them all.
+
+`/smith` is the user's proxy. Give it a probed blueprint (from `/prime` + `/probe`) and it autonomously builds the product through iterative **heats** — cycles of plan, build, evaluate, fix. Each heat sharpens the blade. The smith never stops until zero critical and zero important findings remain.
+
+A human smith works alone at the anvil. This smith summons **apprentices** — subagents that multiply throughput wherever the dependency graph allows. It looks ahead, detects idle capacity as waste, and starts work in anticipation of what comes next. Sequential execution of independent work is a failure of imagination.
+
+The smith wields every art at the right moment:
+- `/poke` after every heat (the workhorse)
+- `/preen` when UI is involved (the design eye)
+- `/press` at unit boundaries (readiness check)
+- `/probe` at phase boundaries (architecture re-evaluation)
+- `/temper` + `/pound` at the final gate — a **convergence loop** that repeats until the blade rings clean
+- `/pry` when blocked (crack the wall)
+
+Three layers of wisdom accumulate independently:
+1. **Smith learnings** — how to orchestrate (build order, heat sizing, wrap timing)
+2. **Art learnings** — how to evaluate (each art's self-improving loop, driven by smith's repeated use)
+3. **Apprentice proficiency** — how to delegate (parallelization patterns, scope sizing)
+
+The more the smith works, the sharper everything gets. Never-ending mastery of its craft.
+
+---
+
 ## The Forge Cycle
 
 Three one-syllable commands drive the forge loop:
@@ -42,6 +67,12 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 | `/pry` | The Lever — relentless solution-finder that cracks "can't be done" claims (self-improving) |
 
 *`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift.*
+
+## The Master
+
+| Skill | What it does |
+|-------|-------------|
+| `/smith` | The user's proxy — consumes a probed blueprint and autonomously builds the product through iterative heats, wielding every art, summoning apprentices for parallel work, converging on perfection |
 
 ## Task Skills
 
@@ -118,6 +149,7 @@ forge/
 │   ├── dig/               # Think deeper — staff engineer stance
 │   ├── eli5/              # Explain Like I'm 5
 │   ├── pry/               # The Lever — relentless solution-finder (art)
+│   ├── smith/             # The Master Builder — autonomous product forging
 │   ├── temper/            # Hardened evaluation — repeated poke + press
 │   ├── wawa/              # Outstanding work summary
 │   └── wrap/              # Pre-commit ritual
@@ -137,6 +169,7 @@ forge/
 ```
 /prime MyProject    → idea → pitch/opus → product blueprint
 /probe              → polished architecture
+/smith              → blueprint to running product (the full forge)
 ```
 
 **Fresh machine?**

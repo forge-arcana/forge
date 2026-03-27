@@ -102,6 +102,14 @@ This ensures the same topic maps to one cache key regardless of when the search 
 3. **Present results** to the user
 4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/fold` to absorb learnings into forge
 
+## The Smith — Master of the Forge
+
+Above the arts stands `/smith` — the master builder, the user's proxy. Smith is not an art. It is the one who wields them all.
+
+Smith consumes a probed blueprint (from `/prime` + `/probe`) and autonomously forges the product through iterative **heats** — cycles of plan, build, evaluate, fix. It summons **apprentices** (subagents) for parallel work, selects arts by escalation ladder, and converges on perfection through a relentless final gate. The arts sharpen themselves through smith's repeated use. The more the smith works, the sharper everything gets.
+
+Smith has its own learning membrane (three layers: orchestration, delegation, art proficiency) and invokes `/wrap` at milestones autonomously. See `skills/smith/SKILL.md` for the full architecture.
+
 ## The Eight Arts
 
 | Art | Persona | Mode | Intensity |
@@ -113,7 +121,7 @@ This ensures the same topic maps to one cache key regardless of when the search 
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
-| `/purge` | The Purist (forge master) | Cleansing | — |
+| `/purge` | The Purist (cleanser of the forge) | Cleansing | — |
 
 ### The Evaluative Trifecta — poke → press → pound
 

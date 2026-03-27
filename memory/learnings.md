@@ -22,11 +22,13 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - `/fold` NEVER deletes from user's global space — tracks processed entries via title-based tracker
 - Promotion is always a COPY, never a move — project entries persist after promotion
 - `/fold` and `/cast` both use unified PLAN/DONE two-report system — same 3-column format (What | Action/Result | Contributor). PLAN table is always output as console text (compressed UI makes tables unreadable), then AskUserQuestion for confirmation. DONE table is the post-execution receipt.
+- **Smith learning membrane** (three independent layers): Layer 1 — smith-learnings.md (orchestration: build order, heat sizing, art selection, wrap timing). Layer 3 — smith-apprentice-log.md (delegation: parallelization patterns, scope sizing). Layer 2 — art learnings (unchanged, each art writes to its own file via forge protocol). Smith reads all three in preflight. Arts evolve independently through smith's repeated use.
 
 ## Skills
 
-### Structure (2026-03-18)
-- Arts (8): prime, probe, poke, preen, press, pound, pry, purge — specialist agent skills with self-improving loops
+### Structure (2026-03-27)
+- **The Master**: `/smith` — the user's proxy, wields all arts autonomously through iterative heats. Summons apprentices for parallel work. Converges on perfection via temper+pound convergence loop. Has its own three-layer learning membrane (orchestration, delegation, art proficiency).
+- Arts (8): prime, probe, poke, preen, press, pound, pry, purge — specialist agent skills with self-improving loops. Purge is the cleanser (forge-internal, `.claude/skills/purge/`).
 - Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design) runs parallel on UI changes. Cadence: poke often, preen on UI changes, press before milestones, pound before ship
 - Task skills (13): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci, dig, temper, eli5
 - `skills/forge/` holds reference docs (stack-guide, rules, conventions, protocol) — not a deployable skill
