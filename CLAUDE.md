@@ -118,5 +118,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.fold-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Language Decision Framework added to stack-guide.md, /prime blueprint-framework.md, and /probe SKILL.md. Arts now evaluate language fit against project signals instead of defaulting to TypeScript. Minimized purge visibility in user-facing docs.
-- **Pending**: None
+- **Recent**: /fold absorbed identity.md phrasing update, synced fold-tracker (11 untracked entries), added 4 Tattler-domain memories to skippedFiles. Language Decision Framework added to stack-guide.md, /prime, /probe.
+- **Pending**: /cast needed (4 skills + learnings ahead of membrane)

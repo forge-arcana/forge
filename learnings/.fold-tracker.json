@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-03-26T00:00:00Z",
+  "lastRun": "2026-03-28T00:00:00Z",
   "processedEntries": [
     "WSL Path Compatibility",
     "Configurable Paths via Resolution Chain",
@@ -36,7 +36,18 @@
     "Test Factories Must Mirror Production DI Container",
     "Fold/Cast Race Condition on Direct Forge Edits",
     "All Transfers Are Guarded by User Wisdom",
-    "Real-Time WebSocket ≠ Push Notifications"
+    "Real-Time WebSocket ≠ Push Notifications",
+    "Barrel Imports Break Vite in Monorepos",
+    "Shared Package @/ Alias Breaks in Consumers",
+    "Integer Money Pattern",
+    "Error Handler Environment Check",
+    "Cross-SPA Navigation Must Use window.location.href",
+    "XHR withCredentials for Cookie-Based Auth",
+    "Mobile Testing Progression: Browser → Emulator → Device → Store",
+    "Camera getUserMedia Succeeds But Produces Black Feed on Emulators",
+    "Provider Factory Consistency",
+    "ML/OCR Confidence Defaults Must Reject, Not Pass",
+    "Manual useState+useEffect for Server Data"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

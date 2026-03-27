@@ -1,4 +1,9 @@
 {
-  "lastRun": "2026-03-22T12:00:00Z",
-  "skippedFiles": []
+  "lastRun": "2026-03-28T00:00:00Z",
+  "skippedFiles": [
+    "audiences.md",
+    "brand-voice.md",
+    "channel-playbooks.md",
+    "vendor-notes.md"
+  ]
 }
