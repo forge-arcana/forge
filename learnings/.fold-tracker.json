@@ -33,7 +33,6 @@
     "Thin Bootstrap for Skill Discovery",
     "AI Timestamps Are Unreliable",
     "Three-Way Drift Detection for Bidirectional Sync",
-    "Test Factories Must Mirror Production DI Container",
     "Fold/Cast Race Condition on Direct Forge Edits",
     "All Transfers Are Guarded by User Wisdom",
     "Real-Time WebSocket ≠ Push Notifications",

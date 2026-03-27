@@ -104,9 +104,6 @@
 **Learning**: In projects using TanStack Query, manual `useState` + `useEffect` + fetch patterns for server data indicate framework misuse. These miss caching, deduplication, retry, background refetch, and optimistic updates. Common in admin/settings pages added later in the project lifecycle when the pattern isn't enforced. A quick grep for `useState.*loading.*true` or `useEffect.*api.get` catches these.
 **Apply when**: Reviewing frontend code in TanStack Query projects, especially admin/settings pages.
 
-## Android 15 Edge-to-Edge Status Bar Overlap in Capacitor (2026-03-22)
-**Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView. The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes (XML opt-out + Java WindowCompat + config) — they each add padding independently.
-**Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.
 
 ## Self-Flagging Learnings (2026-03-26)
 **Learning**: When a skill generates learnings, it should self-classify each as "forge-worthy" or "project-specific" at write time. Downstream consumers (like commit rituals or absorption tools) can then auto-promote flagged entries without heuristic judgment. This eliminates guessing and ensures universal patterns reach the shared knowledge base.
@@ -132,9 +129,6 @@
 **Learning**: When a system syncs files bidirectionally (source repo ↔ deployed copies), use a three-way comparison: source vs manifest vs deployed. This catches four cases: source updated (deploy it), deployed updated (reverse-sync it back), both updated (conflict — manual review), neither (skip). A two-way comparison (source vs deployed) can't distinguish "source is newer" from "deployed is newer" without a baseline.
 **Apply when**: Designing any bidirectional file sync mechanism between a source of truth and deployed copies.
 
-## Fold/Cast Race Condition on Direct Source Edits (2026-03-26)
-**Learning**: When source-of-truth files are edited directly, deployed copies in the sync target become stale instantly. If the absorption command runs from another session before the deployment command updates the target, it sees DIFFERS and absorbs the stale deployed version — silently reverting the source edit. This is a race condition in bidirectional sync: concurrent sessions can undo each other's work via the absorption path. Prevention: always run the deployment command immediately after direct source edits.
-**Apply when**: Operating any bidirectional sync system (deploy + absorb) where source files are edited directly.
 
 ## Real-Time WebSocket ≠ Push Notifications (2026-03-26)
 **Learning**: WebSocket real-time (Ably, Pusher, Socket.io) and push notifications (FCM/APNs) solve different problems. WebSockets deliver updates while the app is open — they require an active connection. Push notifications reach users when the app is closed or backgrounded — they require platform-specific infrastructure (Firebase project, APNs key, server-side device token storage). For pilot/MVP launches with small user bases, WebSocket real-time is sufficient. Push notifications add significant infrastructure complexity (two vendor integrations, token lifecycle management, platform review requirements) and can be deferred to a post-launch sprint informed by real engagement data.
