@@ -87,6 +87,8 @@ Launch **all of these reads in parallel** (all independent):
 - Glob for `package.json`, `tsconfig*`, `pnpm-workspace.yaml`, `packages/`
 - Check for `memory/`, `docs/`, `dev/restart.sh`, `dev/kill-zombies.sh`
 
+**After all parallel reads complete**, proceed to:
+
 ## Step 4: Divergence Report
 
 Produce a table showing what needs to change:

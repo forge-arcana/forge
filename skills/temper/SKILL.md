@@ -27,17 +27,17 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 
 Evidence is deterministic — collect it once and share across all passes.
 
+Run both scans in parallel (they are independent):
+
 ```bash
 <forge>/scripts/forge-scan.sh poke <project-path>
 ```
-
-Save the output as `POKE_EVIDENCE`.
 
 ```bash
 <forge>/scripts/forge-scan.sh press <project-path>
 ```
 
-Save the output as `PRESS_EVIDENCE`.
+Save the outputs as `POKE_EVIDENCE` and `PRESS_EVIDENCE` respectively.
 
 ## Step 2: Parallel Analysis Passes
 

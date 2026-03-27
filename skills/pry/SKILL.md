@@ -65,7 +65,7 @@ Mark each assumption as:
 
 ### Phase 3: Lateral Approaches
 
-For assumptions that survive Phase 2, try lateral paths:
+For assumptions that survive Phase 2, **investigate all lateral paths in parallel per assumption** — each path is independent. Spawn parallel subagents:
 
 1. **Adjacent tools** — different library, different service, different protocol that achieves the same outcome
 2. **Composition** — can two simpler capabilities be combined to achieve the blocked capability?

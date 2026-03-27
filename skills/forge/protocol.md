@@ -24,13 +24,25 @@ The learnings filename tells the protocol which file to read during pre-flight a
 ## Pre-Flight (every art runs these before starting)
 
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/cast`)
-2. **Read accumulated learnings**: `<forge>/learnings/<learnings-file>` — skip if file doesn't exist yet (first run)
-3. **Read project context**: the project's `CLAUDE.md` for stack, conventions, and current state
-4. **Read stack guide**: `<forge>/skills/forge/stack-guide.md` for tech reference — pay special attention to the **Logging Convention** section; all evaluative arts should validate projects against it
-5. **Scan project structure** to understand the codebase layout
-6. **Load web research cache**: read `memory/.web-cache.json` if it exists — use cached results for queries within their TTL (see Web Research Cache below)
+2. **Launch steps 2-6 in parallel** (all independent after forge path is resolved):
+   - **Read accumulated learnings**: `<forge>/learnings/<learnings-file>` — skip if file doesn't exist yet (first run)
+   - **Read project context**: the project's `CLAUDE.md` for stack, conventions, and current state
+   - **Read stack guide**: `<forge>/skills/forge/stack-guide.md` for tech reference — pay special attention to the **Logging Convention** section; all evaluative arts should validate projects against it
+   - **Scan project structure** to understand the codebase layout
+   - **Load web research cache**: read `memory/.web-cache.json` if it exists — use cached results for queries within their TTL (see Web Research Cache below)
 
 After pre-flight, proceed to the art's own `## Process` or `## Dimensions` section.
+
+## Parallel Execution Principle
+
+> **HARD RULE**: Independent work MUST run in parallel. Never block on sequential execution when tasks have no dependencies.
+
+- **Fan-out**: When multiple analyses, dimensions, sections, or web searches are independent, spawn them as parallel subagents or parallel tool calls in a single message.
+- **Sync point**: Only wait when a downstream step depends on upstream results. State the sync point explicitly: "After all parallel tasks complete, proceed to..."
+- **Batch web searches**: When multiple web searches are needed (e.g., one per section/dimension), launch all uncached searches in a single parallel batch.
+- **Evidence-then-fan-out pattern**: Many arts collect evidence once (script or reads), then analyze across multiple dimensions. The analysis phase is the parallelization target — spawn one subagent per dimension/section/persona.
+
+This principle applies to ALL arts and skills. When in doubt, ask: "Does this step depend on the previous step's output?" If no, run them in parallel.
 
 ## Execution (art-specific)
 

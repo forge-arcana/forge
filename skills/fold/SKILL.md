@@ -70,6 +70,8 @@ If no triggers fire, skip Part 2 entirely.
 
 Run `<forge>/scripts/fold-evidence.sh` to collect all forge learnings, forge memories, membrane learnings, membrane memories, and tracker state in one call. Use this output as evidence for Parts 2-4.
 
+Launch Parts 2a and 2b in parallel (independent reviews):
+
 ### 2a: Forge Learning Review
 
 Classify each entry: **CURRENT** (keep), **STALE** (remove — web-search to verify), **MERGED** (consolidate with duplicate), **EVOLVED** (rewrite with updated info). Present review table, apply after user confirms.
@@ -79,6 +81,8 @@ Classify each entry: **CURRENT** (keep), **STALE** (remove — web-search to ver
 Classify each file: **CURRENT** (keep), **STALE** (remove), **MERGED** (consolidate), **EVOLVED** (rewrite), **PROMOTED** (already in SKILL.md — redundant). Present review table, apply after user confirms.
 
 ---
+
+Launch Parts 3 and 4 in parallel (independent absorptions):
 
 ## Part 3: Learning Absorption
 

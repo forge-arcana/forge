@@ -35,6 +35,8 @@ Run `<forge>/scripts/forge-scan.sh poke <project-path>` to collect mechanical ev
 
 Use the script's output as your evidence base for the judgment phase below. The script finds patterns — you classify severity, trace root causes, and recommend fixes.
 
+**After evidence is collected, analyze all 7 dimensions in parallel via subagents.** Each dimension's analysis is independent — spawn one subagent per dimension with the shared evidence as input. Merge results into the final report.
+
 ## Dimension 1: SOLID & Strategy Patterns
 
 ### SOLID principles — apply these practical tests:

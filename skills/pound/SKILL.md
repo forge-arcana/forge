@@ -33,9 +33,10 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
    - `[JURISDICTION]` — ask user if not obvious from project context
 
 4. **Execute the review** (all 3 parts from the framework):
-   - **Part 1**: Practical QA review — systematic testing of the scoped feature
-   - **Part 2**: Persona-based simulation — run through all 21 personas (confused user, clipboard paster, mobile user, power user, lawyer, security expert, spammer, fraudster, accessibility auditor, competitor, international user, support staff, offline user, returning user, multi-device user, elite developer, alien, radical inclusion auditor, testing strategist, growth/business strategist)
-   - **Part 3**: Adversarial input generation — craft malicious/edge-case inputs
+   - **Part 1**: Practical QA review — systematic testing of the scoped feature (runs first to establish baseline context)
+   - **After Part 1 completes, launch Parts 2 and 3 in parallel:**
+     - **Part 2**: Persona-based simulation — **spawn parallel subagents in batches** across the 21 personas (confused user, clipboard paster, mobile user, power user, lawyer, security expert, spammer, fraudster, accessibility auditor, competitor, international user, support staff, offline user, returning user, multi-device user, elite developer, alien, radical inclusion auditor, testing strategist, growth/business strategist). Each persona's review is independent.
+     - **Part 3**: Adversarial input generation — craft malicious/edge-case inputs (runs as parallel subagent alongside Part 2)
 
 5. **Output findings** grouped by severity:
 

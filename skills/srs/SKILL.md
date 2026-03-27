@@ -11,6 +11,9 @@ Generate or update `restart.sh` and `kill-zombies.sh` in the **project root** (n
 ## Pre-Flight
 
 1. **Check project readiness**: Verify `package.json` exists and dependencies are installed. If not, tell the user: "Project isn't ready to start. Run `pnpm install` first."
+
+Launch all pre-flight reads in parallel (all independent):
+
 2. Read the project's `CLAUDE.md` and `package.json` to understand the stack
 3. Read the stack guide: `<forge>/skills/forge/stack-guide.md` (resolve `<forge>` from `~/.claude/CLAUDE.md` `forge-path:` line, managed by `/cast`)
 4. Scan for existing `restart.sh` — if found, read it and propose updates rather than overwriting

@@ -27,11 +27,11 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
 
 ## Process
 
-For each technical section in the blueprint (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD):
+**Spawn parallel subagents** — one per technical section (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD). Each subagent independently:
 
-1. **Analyze** the current recommendation
-2. **Search the web** for current best practices — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache). **Batch all uncached web searches in parallel** (each section's search is independent — don't wait for one to finish before starting the next).
-3. **Challenge** the decision:
+1. **Analyzes** the current recommendation
+2. **Searches the web** for current best practices — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache). **Batch all uncached web searches in parallel.**
+3. **Challenges** the decision:
    - Is this still the best choice? Has something better emerged?
    - Are there known pitfalls with this approach at the expected scale?
    - Are there simpler alternatives that achieve the same outcome?
@@ -45,6 +45,8 @@ For each technical section in the blueprint (Sections 13-19: Tech Architecture, 
    - Specific configuration guidance
    - Known gotchas and mitigation strategies
    - Links to relevant documentation
+
+**Run the additional checks as a parallel subagent** alongside the section reviews:
 
 Additionally, verify the blueprint includes:
 - **Logging strategy** aligned with `<forge>/skills/forge/stack-guide.md` Logging Convention (structured logging, dev vs prod verbosity, browser console forwarding). If absent, flag it.

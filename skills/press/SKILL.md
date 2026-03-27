@@ -20,6 +20,8 @@ Run `<forge>/scripts/forge-scan.sh press <project-path>` to collect mechanical e
 
 Use the script's output as your evidence base for scoring each dimension below. The script finds patterns — you score severity, identify gaps, and produce the readiness verdict.
 
+**After evidence is collected, score all 7 dimensions in parallel via subagents.** Each dimension's scoring is independent — spawn one subagent per dimension with the shared evidence. Batch all uncached web searches in parallel across dimensions. Merge scores into the final readiness scorecard.
+
 ## Dimensions (7 total)
 
 For each dimension, scan the codebase AND search the web for current best practices (check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache)):

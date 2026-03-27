@@ -22,6 +22,7 @@ Your domain is evolving: mobile-first today, web always, and the spatial interfa
 
 Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
 
+Launch all in parallel (independent scans):
 1. **Identify the platform**: Mobile (iOS/Android/Capacitor), Web (SPA/SSR), or both
 2. **Read component structure**: scan for UI components, layouts, navigation patterns
 3. **Check for design system**: look for theme files, design tokens, component libraries
@@ -55,6 +56,8 @@ After the Norman Questions, apply these reductive tests:
 3. **Is the material honest?** Respect the medium. A mobile app shouldn't pretend to be paper. A web app shouldn't fight the browser.
 4. **Do the unseen details matter?** Transitions, spacing, alignment, the feel of a scroll — craft lives in what users sense but can't articulate.
 5. **Is there quiet confidence?** The design communicates through restraint, not decoration. If it needs to shout, it isn't working.
+
+> **Parallel execution**: Evaluate all 5 dimensions in parallel via subagents. Each dimension's analysis is independent — spawn one subagent per dimension, merge results into the final report.
 
 ## Dimension 1: Interaction Design
 
