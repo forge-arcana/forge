@@ -113,7 +113,7 @@ Produce a table showing what needs to change:
 | .claude/settings.json | Only if project-specific overrides needed | [exists/missing/not needed] | [skip/create] |
 | memory/ directory | Required | [exists/missing] | [create] |
 | logs/ directory | Required (app projects with services only) | [exists/missing/N/A] | [create/skip] |
-| Shorthand commands | wawa/wrap as skill refs | [present/missing] | [add] |
+| Shorthand commands (wawa/wrap/qt) | Live in global `~/.claude/CLAUDE.md` — do NOT duplicate in project | [global/duplicated] | Skip if global membrane exists; remove from project if duplicated |
 | dev/restart.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
 | dev/kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
 | Documentation | `docs/` in-repo OR `## Documentation` section with `**Docs path:**` | [in-repo/external/missing] | [add section] |
@@ -130,15 +130,13 @@ After user confirms via AskUserQuestion:
 Standard sections to include:
 Hard rules (No Auto-Commit, No Command Chaining) live in the global `~/.claude/CLAUDE.md`. Do NOT duplicate them in project CLAUDE.md files — the global membrane already covers all projects.
 
+Shorthand commands (wawa, wrap, qt) live in the global `~/.claude/CLAUDE.md`. Do NOT duplicate them in project CLAUDE.md files — the global membrane already covers all projects. If the project already has a `## Shorthand Commands` section, remove it during this cast.
+
 ```markdown
 # [Project Name] — Project Rules
 
 ## Stack
 [from project's package.json and tsconfig]
-
-## Shorthand Commands
-- **wawa** — Runs the `/wawa` skill
-- **wrap** — Runs the `/wrap` skill
 
 ## Documentation
 <!-- Include ONE of the following: -->
