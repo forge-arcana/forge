@@ -44,7 +44,7 @@ Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the S
 
 > **HARD RULE — No baseline = no absorb.**
 > `forge-status.sh` uses a three-way comparison (forge vs baseline vs deployed) to determine direction.
-> If no baseline exists (`.last-cast.json` missing or SHA unreachable), the script falls back to a two-way heuristic that **cannot safely determine direction**. Any skill classified `DEPLOYED-DIFFERS` without a valid baseline must be treated as `CONFLICT`, never absorbed. Run `/cast` first to establish a baseline, then re-run `/fold`.
+> If no baseline exists (`.last-cast.json` missing or SHA unreachable), the script emits `CONFLICT (no-baseline)` for all differing skills — it does **not** attempt a two-way heuristic. Treat every `CONFLICT (no-baseline)` as unresolvable by fold. Tell the user to run `/cast` first to establish a baseline, then re-run `/fold`.
 
 | Classification | /fold Action |
 |---------------|-------------|

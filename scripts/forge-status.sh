@@ -34,7 +34,7 @@ fi
 
 # Validate baseline SHA is reachable in git history
 if [[ -n "$LAST_CAST_SHA" ]]; then
-  git -C "$FORGE_PATH" cat-file -t "$LAST_CAST_SHA" >/dev/null 2>&1 || LAST_CAST_SHA=""
+  git -C "$FORGE_PATH" merge-base --is-ancestor "$LAST_CAST_SHA" HEAD >/dev/null 2>&1 || LAST_CAST_SHA=""
 fi
 
 echo "## Forge Preflight Report"
@@ -43,7 +43,7 @@ echo "**Mode**: $MODE"
 if [[ -n "$LAST_CAST_SHA" ]]; then
   echo "**Baseline**: \`${LAST_CAST_SHA:0:7}\` (last cast commit)"
 else
-  echo "**Baseline**: none (two-way fallback)"
+  echo "**Baseline**: none (all diffs will be CONFLICT — run /cast to establish baseline)"
 fi
 echo ""
 
@@ -107,17 +107,10 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
     IDENTICAL=$((IDENTICAL + 1))
   else
     if [[ -z "$LAST_CAST_SHA" ]]; then
-      # No baseline — fall back to two-way heuristic
-      git_diff=$(git -C "$FORGE_PATH" diff HEAD origin/main -- "skills/$skill" 2>/dev/null || true)
-      if [[ -n "$git_diff" ]]; then
-        echo "| $skill | FORGE-UPDATED | cast needed |"
-        NEED_CAST=$((NEED_CAST + 1))
-        CHANGED_SKILLS+=("$skill")
-      else
-        echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
-        NEED_FOLD=$((NEED_FOLD + 1))
-        CHANGED_SKILLS+=("$skill")
-      fi
+      # No baseline — cannot safely determine direction; emit CONFLICT
+      echo "| $skill | CONFLICT (no-baseline) | run /cast first to establish baseline |"
+      CONFLICT=$((CONFLICT + 1))
+      CHANGED_SKILLS+=("$skill")
     else
       # Three-way comparison using baseline
       # Q1: Did forge change since last cast?
@@ -126,25 +119,34 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
 
       if [[ "$forge_changed" == "no" ]]; then
         # Forge didn't move — membrane was edited
-        echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
+        if [[ "$skill" == "fold" || "$skill" == "cast" || "$skill" == "purge" ]]; then
+          echo "| $skill | DEPLOYED-DIFFERS (protected) | cast needed — /fold must NOT absorb |"
+        else
+          echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
+        fi
         NEED_FOLD=$((NEED_FOLD + 1))
         CHANGED_SKILLS+=("$skill")
       else
         # Forge moved — check if deployed matches baseline (stale) or was also modified (conflict)
-        # Get baseline SKILL.md content
-        baseline_content=$(git -C "$FORGE_PATH" show "$LAST_CAST_SHA:skills/$skill/SKILL.md" 2>/dev/null || echo "")
+        # Check if skill existed at baseline
+        baseline_skill_exists=$(git -C "$FORGE_PATH" ls-tree "$LAST_CAST_SHA" "skills/$skill/" 2>/dev/null | head -1)
 
-        if [[ -z "$baseline_content" ]]; then
+        if [[ -z "$baseline_skill_exists" ]]; then
           # Skill didn't exist at baseline — forge added it, needs cast
           echo "| $skill | FORGE-UPDATED | cast needed |"
           NEED_CAST=$((NEED_CAST + 1))
           CHANGED_SKILLS+=("$skill")
         else
-          # Compare deployed SKILL.md against baseline
-          deployed_vs_baseline=$(diff --strip-trailing-cr <(echo "$baseline_content") "$deployed/SKILL.md" 2>/dev/null || true)
+          # Compare FULL deployed skill dir against baseline (not just SKILL.md)
+          tmp_baseline=$(mktemp -d)
+          git -C "$FORGE_PATH" archive --format=tar "$LAST_CAST_SHA" "skills/$skill/" 2>/dev/null \
+            | tar -x -C "$tmp_baseline" 2>/dev/null || true
+          deployed_vs_baseline=$(diff -rq --strip-trailing-cr \
+            "$tmp_baseline/skills/$skill" "$deployed" 2>/dev/null || true)
+          rm -rf "$tmp_baseline"
 
           if [[ -z "$deployed_vs_baseline" ]]; then
-            # Deployed matches baseline — membrane is just stale
+            # Deployed matches baseline exactly — membrane is just stale
             echo "| $skill | FORGE-UPDATED | cast needed |"
             NEED_CAST=$((NEED_CAST + 1))
             CHANGED_SKILLS+=("$skill")
@@ -230,7 +232,10 @@ print(len(data.get('processedEntries', [])))
   fi
 
   UNPROCESSED=$((TOTAL_ENTRIES - PROCESSED))
-  [[ $UNPROCESSED -lt 0 ]] && UNPROCESSED=0
+  if [[ $UNPROCESSED -lt 0 ]]; then
+    echo "**WARNING**: Tracker has $((PROCESSED - TOTAL_ENTRIES)) processed entries not found in general.md — tracker is ahead of file. Run /fold to reconcile."
+    UNPROCESSED=0
+  fi
 
   echo "| Source | Total | Processed | Unprocessed |"
   echo "|--------|-------|-----------|-------------|"
@@ -279,7 +284,12 @@ for forge_file in "$FORGE_PATH"/learnings/*.md; do
     user_count=$(grep -c '^## ' "$user_file" 2>/dev/null || true)
     user_count=${user_count:-0}
     if [[ "$user_count" -eq "$forge_count" ]]; then
-      echo "| $fname | $user_count | $forge_count | In sync |"
+      content_diff=$(diff --strip-trailing-cr "$user_file" "$forge_file" 2>/dev/null || true)
+      if [[ -z "$content_diff" ]]; then
+        echo "| $fname | $user_count | $forge_count | In sync |"
+      else
+        echo "| $fname | $user_count | $forge_count | Same count but content differs -- fold needed |"
+      fi
     elif [[ "$user_count" -gt "$forge_count" ]]; then
       diff=$((user_count - forge_count))
       echo "| $fname | $user_count | $forge_count | $diff new in user -- fold needed |"
@@ -302,22 +312,9 @@ def get_entries(path):
                     entries[current_title] = s
     except: pass
     return entries
-def get_blame_authors(path, forge_path):
-    authors = {}
-    try:
-        out = subprocess.run(['git', '-C', forge_path, 'blame', '--line-porcelain', path],
-            capture_output=True, text=True, timeout=10).stdout
-        author = ''
-        for line in out.split('\n'):
-            if line.startswith('author '): author = line[7:]
-            elif line.startswith('\t'):
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line[1:])
-                if m: authors[m.group(1).strip()] = author
-    except: pass
-    return authors
 user_e = get_entries('$user_file')
 forge_e = get_entries('$forge_file')
-blame = get_blame_authors('$user_file', '$FORGE_PATH') if False else {}
+blame = {}
 # For user-only entries, blame the user file
 try:
     out = subprocess.run(['git', '-C', '$FORGE_PATH', 'blame', '--line-porcelain', '$user_file'],

@@ -16,7 +16,7 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/cast` | Deploy forge → membrane | Pour molten metal into the mold |
 | `/fold` | Absorb membrane → forge | Layer experience into the steel |
 
-## Arts (Eight P's)
+## Arts (Nine P's)
 Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
 | Art | Persona | Mode |
@@ -27,11 +27,13 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/preen` | UI/UX evaluator (Don Norman's design principles) | Evaluative — design |
 | `/press` | Staff engineer (go-live readiness) | Evaluative — medium |
 | `/pound` | 21 adversarial QA personas | Evaluative — heavy |
+| `/pitch` | VC partner / business strategist | Evaluative — business |
 | `/pry` | The Lever (relentless solution-finder) | Investigative |
 
 **Evaluative trifecta** — poke often, press before milestones, pound before ship.
 **When blocked** — `/pry` to crack the wall.
 **For UI/UX** — `/preen` to evaluate interfaces through Don Norman's lens.
+**For business model** — `/pitch` before committing build resources and before ship.
 
 *`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift.*
 
@@ -65,7 +67,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `memory/` | `/cast` syncs to `~/.claude/memory/` | Auto-accumulates → `/fold` absorbs |
 
 ## Self-Improving Loop
-Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pry`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/fold` scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md` → `/fold` absorbs into `forge/learnings/` → next art run reads global learnings in pre-flight.
+Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/fold` scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md` → `/fold` absorbs into `forge/learnings/` → next art run reads global learnings in pre-flight.
 
 ## HARD RULE — Only /fold Writes to Forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
@@ -116,13 +118,13 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 21 deployed skills (7 arts + 1 master + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
+- **Completed**: Three-pillar architecture, git-based drift detection, 22 deployed skills (8 arts + 1 master + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
 - **Master**: `/smith` — the user's proxy, wields all arts. Lives in `skills/smith/SKILL.md`. Three-layer learning membrane (orchestration, delegation, art proficiency).
-- **Arts**: prime, probe, poke, preen, press, pound, pry — shared protocol in `skills/forge/protocol.md`. Purge is the cleanser, forge-internal (`.claude/skills/purge/`).
+- **Arts**: prime, probe, poke, preen, press, pound, pitch, pry — shared protocol in `skills/forge/protocol.md`. Purge is the cleanser, forge-internal (`.claude/skills/purge/`).
 - **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
 - **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (universal classification system for /mark, /cast, /fold)
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.fold-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: PLAN/DONE reports sharpened — every changed row now requires a sub-row showing the rule, principle, or knowledge transferred (not filename/commit title). /fold write-back bug fixed (absorbed learnings must go to forge, not membrane). 14 learnings backfilled to forge (lost to write-back bug). .fold-tracker.json repaired (10 missing titles added, 2 orphans removed). Stale `.reforge-tracker.json` reference purged from fold SKILL.md.
-- **Pending**: nothing — all pillars in sync
+- **Recent**: /temper run on forge-status.sh + fold/cast SKILL.md — 4 confirmed criticals fixed: (1) `git cat-file -t` → `merge-base --is-ancestor` for real ancestry validation, (2) two-way fallback replaced — no-baseline now emits `CONFLICT (no-baseline)` instead of contradictory `DEPLOYED-DIFFERS`, (3) baseline comparison expanded from SKILL.md-only to full skill directory via git archive, (4) cast crash recovery documented. Also: fold/cast/purge emits `DEPLOYED-DIFFERS (protected)` to prevent accidental absorption; silent UNPROCESSED clamp replaced with warning; count-only sync check now diffs content; dead `get_blame_authors` code removed. /pitch art added (9th art — business viability, VC partner persona). Smith updated to offer /pitch gate for blueprints with monetization sections and at final gate.
+- **Pending**: /cast needed (pitch skill + purge changes + all script/skill fixes ahead of membrane)

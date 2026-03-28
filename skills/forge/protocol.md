@@ -110,7 +110,7 @@ Smith consumes a probed blueprint (from `/prime` + `/probe`) and autonomously fo
 
 Smith has its own learning membrane (three layers: orchestration, delegation, art proficiency) and invokes `/wrap` at milestones autonomously. See `skills/smith/SKILL.md` for the full architecture.
 
-## The Eight Arts
+## The Nine Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
@@ -120,6 +120,7 @@ Smith has its own learning membrane (three layers: orchestration, delegation, ar
 | `/preen` | UI/UX evaluator (Don Norman's design principles) | Evaluative | Design |
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
+| `/pitch` | VC partner / business strategist | Evaluative | Business |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
 | `/purge` | The Purist (cleanser of the forge) | Cleansing | — |
 
@@ -133,7 +134,9 @@ The trifecta escalates in intensity and broadens in scope:
 
 **`/preen`** runs parallel to the trifecta — UI/UX design quality, triggered by interface changes rather than intensity escalation. Covers affordances, feedback, mapping, accessibility, platform conventions. The design eye.
 
-**Cadence**: poke often, preen on UI changes, press before milestones, pound before ship. `/purge` stands apart — it tends the forge itself, not projects.
+**`/pitch`** runs orthogonal to the trifecta — business model viability, invocable at any lifecycle stage. Validate the business model before committing build resources (pre-build gate), and re-validate before ship (final gate) when the product has monetization. The investor's eye.
+
+**Cadence**: poke often, preen on UI changes, pitch before building and before shipping, press before milestones, pound before ship. `/purge` stands apart — it tends the forge itself, not projects.
 
 ## Learning Cycle
 

@@ -41,7 +41,7 @@ Three one-syllable commands drive the forge loop:
 
 ---
 
-## Arts (the Eight P's)
+## Arts (the Nine P's)
 
 Arts are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
@@ -59,7 +59,12 @@ Arts are specialist agent skills — they adopt a persona and have a self-improv
 | `/press` | Go-live readiness scorecard across 7 dimensions (self-improving) |
 | `/pound` | Deep QA with 21 adversarial personas — generates tests, finds edge cases |
 
-The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` runs parallel on UI changes. Cadence: poke often, preen on UI changes, press before milestones, pound before ship.
+The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` runs parallel on UI changes. `/pitch` runs orthogonal — business model viability, before building and before ship. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship.
+
+### Business Model
+| Art | What it does |
+|-----|-------------|
+| `/pitch` | VC-style business model critique — market, value prop, revenue model, moat, GTM, kill conditions (self-improving) |
 
 ### When Blocked
 | Art | What it does |

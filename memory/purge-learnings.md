@@ -4,6 +4,14 @@
 
 <!-- Add learnings below this line -->
 
+## New Art Addition Triggers Cross-Reference Sweep (2026-03-28)
+- **Learning**: Adding a new art creates stale references in README.md, CLAUDE.md (learning cycle arts list), memory/identity.md (counts, ethos prose, arts list + persona), and memory/learnings.md (arts list + cadence note). The art-specific file (SKILL.md) and protocol.md get updated in the same session, but identity/learnings docs lag. Run /purge immediately after any new art addition to catch the stragglers. Specifically: identity.md has 5+ locations with hardcoded art counts; learnings.md has 2; CLAUDE.md learning cycle has 1; README.md has 1 header + 1 section + 1 cadence note.
+- **Forge-worthy**: yes — universal pattern: new art addition → immediate /purge to sweep stale cross-references
+
+## Promoted-Duplicate Detection Is Underused (2026-03-28)
+- **Learning**: When learnings are promoted from art-specific files (poke-learnings.md, etc.) to global-patterns.md, the source entry is rarely removed. Over time, art-specific files accumulate entries that are exact duplicates of global-patterns.md — invisible to humans, caught by the scan's duplicate title detection. The fix is always the same: global copy wins, source entry removed. Note: the global copy may be less complete than the source — always compare before removing.
+- **Forge-worthy**: yes — universal pattern for any learning system where entries can be promoted to a shared store without removing from the source
+
 ## New Skill Introduction Requires Full Cross-Reference Sweep (2026-03-27)
 **Learning**: When a new skill is created that changes the forge hierarchy (e.g., a new category like "master" above existing arts), ALL cross-references must be updated in the same session — identity docs, protocol, CLAUDE.md, README, memory/learnings, and any skill descriptions that reference the old hierarchy. A purge immediately after creation catches the stragglers that the creator missed.
 **Forge-worthy**: yes — universal pattern for any system with distributed references that change when a new top-level concept is introduced.

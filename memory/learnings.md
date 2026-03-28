@@ -28,8 +28,8 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ### Structure (2026-03-27)
 - **The Master**: `/smith` — the user's proxy, wields all arts autonomously through iterative heats. Summons apprentices for parallel work. Converges on perfection via temper+pound convergence loop. Has its own three-layer learning membrane (orchestration, delegation, art proficiency).
-- Arts (8): prime, probe, poke, preen, press, pound, pry, purge — specialist agent skills with self-improving loops. Purge is the cleanser (forge-internal, `.claude/skills/purge/`).
-- Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design) runs parallel on UI changes. Cadence: poke often, preen on UI changes, press before milestones, pound before ship
+- Arts (9): prime, probe, poke, preen, press, pound, pitch, pry + purge (forge-internal) — specialist agent skills with self-improving loops. Purge is the cleanser (forge-internal, `.claude/skills/purge/`).
+- Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design) and pitch (business model) run orthogonal — triggered by domain, not intensity. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship
 - Task skills (13): cast, fold, mark, wawa, wrap, qt, srs, vsix, ponci, monci, dig, temper, eli5
 - `skills/forge/` holds reference docs (stack-guide, rules, conventions, protocol) — not a deployable skill
 - Skills are self-contained packages — reference docs live inside the owning skill directory

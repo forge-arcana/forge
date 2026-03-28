@@ -116,7 +116,7 @@
 **Apply when**: Setting up project-level configuration files for tools that also have a global config.
 
 ## Android 15 Edge-to-Edge Status Bar Overlap in Capacitor (2026-03-22)
-**Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView. The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes (XML opt-out + Java WindowCompat + config) — they each add padding independently.
+**Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView (only `safe-area-inset-bottom` works). `WindowCompat.setDecorFitsSystemWindows(window, true)` in MainActivity also fails — Capacitor's BridgeActivity overrides it. The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes — they each add padding independently, causing a visible gap.
 **Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.
 
 ## Self-Flagging Learnings (2026-03-26)

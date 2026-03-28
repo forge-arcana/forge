@@ -75,10 +75,12 @@ For each `.md` in `<forge>/learnings/`: copy if missing, skip if identical, repo
 For each `.md` in `<forge>/memory/`: copy if missing, skip if identical, report if different.
 
 ### Record Baseline
-Write `~/.claude/.last-cast.json`:
+Write `~/.claude/.last-cast.json` **after** all pillars are synced:
 ```json
 { "lastCastCommit": "<output of git -C <forge-path> rev-parse HEAD>" }
 ```
+
+> **Crash recovery**: If the session ends before this write completes, the baseline will be missing. On the next `/mark` or `/fold` run, all differing skills will appear as `CONFLICT (no-baseline)`. Fix: re-run `/cast` — it will re-deploy from current HEAD and write a fresh baseline. No manual intervention needed.
 
 ## Step 3: Read Forge Reference + Scan Project (parallel)
 

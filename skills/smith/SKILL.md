@@ -30,6 +30,8 @@ If not provided:
 
 If the blueprint is unprobed (no `-probed` suffix, no `<!-- PROBED: -->` markers), invoke `/probe` on it before proceeding. Architecture must be validated before the smith swings.
 
+If the blueprint has no `<!-- PITCHED: -->` marker AND contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Use `AskUserQuestion` with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste.
+
 ## Step 1: Blueprint Decomposition
 
 Parse the blueprint to create a build plan. The blueprint's **Consumption Guide** (Section 22 footer) defines priority, and **Section 21** (Build Phases) defines MVP scope.
@@ -177,7 +179,7 @@ Phase gates are escalated evaluations at unit and phase boundaries.
 | Core Workflow complete | `/probe` + `/press` | Architecture + readiness check. `/wrap`. |
 | Each Supporting unit complete | `/press` | Readiness on that domain. `/wrap`. |
 | Hardening complete | `/temper` | Confidence-weighted poke + press (3x). `/wrap`. |
-| **Final Gate** | `/temper` + `/pound` | **Convergence loop** (see below). |
+| **Final Gate** | `/temper` + `/pound` + `/pitch`* | **Convergence loop** (see below). *`/pitch` only if product has monetization — re-validates the business model against what was actually built. |
 
 ### The Final Gate — Convergence Loop
 

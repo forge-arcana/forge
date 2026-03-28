@@ -2,7 +2,7 @@
 
 We are Forge Arcana.
 
-Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices eight arts, each with its own persona and way of seeing the world. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies — all from one seat.
+Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices nine arts, each with its own persona and way of seeing the world. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies — all from one seat.
 
 That's arcana. Hidden arts. Power that looks like magic to anyone who hasn't seen it.
 
@@ -18,7 +18,7 @@ We smiled, and built a forge instead.
 
 Our fire is AI — and it remembers every strike. Where they swing the hammer once after years of study, we swing it a thousand times before dawn. Each blow truer than the last. They called it cheating. Then luck. Then they went quiet.
 
-Every `/cast` pours new form. Every `/fold` tempers what came before. Every `/mark` records how far we've come. Every `/smith` invocation forges what was only an idea into a running system. The eight arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pry`, `/purge` — are not shortcuts. They are disciplines, and they return more than was given.
+Every `/cast` pours new form. Every `/fold` tempers what came before. Every `/mark` records how far we've come. Every `/smith` invocation forges what was only an idea into a running system. The nine arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/purge` — are not shortcuts. They are disciplines, and they return more than was given.
 
 We are not the chosen ones. We are the ones who chose.
 
@@ -47,12 +47,12 @@ Without triage, cast is a blind push and fold is a blind pull. With triage, the 
 ## Core Metaphor
 
 - **The Forge** — where things are shaped into existence through hidden arts
-- **Arts** — the Eight P's, each a practiced discipline with a specialist persona
+- **Arts** — the Nine P's, each a practiced discipline with a specialist persona
 - **Arcana** — the collection of hidden knowledge and capabilities that make the impossible real
 
-## The Eight P's — Arts of the Forge
+## The Nine P's — Arts of the Forge
 
-Eight forge actions, each an art with a specialist persona. All grow sharper with every use through a self-improving learning loop.
+Nine forge actions, each an art with a specialist persona. All grow sharper with every use through a self-improving learning loop.
 
 1. **`/prime`** — The Originator. Meets the user in the fog of a new idea. Part midwife, part mirror, part provocateur — it listens, probes, challenges, and reflects until the idea crystallizes into something that stands on its own. Guided by five titans: Gates (see the whole system), Jobs (demand taste), Musk (first principles), Huang (patient conviction), Bezos (work backward from the customer).
 
@@ -66,15 +66,17 @@ Eight forge actions, each an art with a specialist persona. All grow sharper wit
 
 6. **`/pound`** — The Adversary. Pounds the project on the anvil with 21 specialized personas — every hammer blow from a different angle. Edge cases, security holes, accessibility gaps, compliance violations, race conditions, data corruption paths. The most thorough beating a codebase can survive.
 
-7. **`/pry`** — The Lever. Every wall has a seam. Pry finds it and drives through. When someone says "can't be done," pry hears "hasn't found how yet." Three hats in sequence: Skeptic (challenge the claim), Prospector (scour for alternatives), Reframer (change the destination). Never says "it can't be done."
+7. **`/pitch`** — The Investor. A VC partner who has evaluated hundreds of companies from napkin sketch to Series C — and watched many fail for reasons that were visible early. Evaluates business models with equal rigor at any lifecycle stage: raw idea, mid-sprint feature, pricing decision, pivot. Asks what matters before committing resources: Is the problem real? Is the value prop durable? Can the unit economics work? What kills this? Not a one-time gate at inception — a discipline invocable whenever the business model deserves scrutiny.
 
-8. **`/purge`** — The Purist. Cleanser of the forge. Does not build. Does not review. Tends the forge itself. Every stale entry dulls the blade. Every duplicate weighs down the anvil. Every project name that leaks in betrays the forge's universality. Burns it all away until only what matters remains. Summoned, never scheduled.
+8. **`/pry`** — The Lever. Every wall has a seam. Pry finds it and drives through. When someone says "can't be done," pry hears "hasn't found how yet." Three hats in sequence: Skeptic (challenge the claim), Prospector (scour for alternatives), Reframer (change the destination). Never says "it can't be done."
 
-The evaluative trifecta — **poke → press → pound** — escalates in intensity. Poke often, preen on UI changes, press before milestones, pound before ship.
+9. **`/purge`** — The Purist. Cleanser of the forge. Does not build. Does not review. Tends the forge itself. Every stale entry dulls the blade. Every duplicate weighs down the anvil. Every project name that leaks in betrays the forge's universality. Burns it all away until only what matters remains. Summoned, never scheduled.
+
+The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` (UI/UX) and `/pitch` (business model) run orthogonal — triggered by their domain, not by intensity. Poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship.
 
 ## The Smith — Master of the Forge
 
-Above the eight arts stands the smith. Not an art itself — the one who wields them all.
+Above the nine arts stands the smith. Not an art itself — the one who wields them all.
 
 Where `/prime` gives form to ideas and the arts evaluate what exists, the smith *builds*. It takes a probed blueprint and forges it into a running system through iterative heats — each a cycle of plan, build, evaluate, fix. Each cycle sharpens the blade. The smith never stops until zero critical and zero important findings remain.
 
