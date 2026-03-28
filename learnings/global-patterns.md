@@ -106,3 +106,39 @@
 ## Real-Time WebSocket ≠ Push Notifications (2026-03-26)
 **Learning**: WebSocket real-time (Ably, Pusher, Socket.io) and push notifications (FCM/APNs) solve different problems. WebSockets deliver updates while the app is open — they require an active connection. Push notifications reach users when the app is closed or backgrounded — they require platform-specific infrastructure (Firebase project, APNs key, server-side device token storage). For pilot/MVP launches with small user bases, WebSocket real-time is sufficient. Push notifications add significant infrastructure complexity (two vendor integrations, token lifecycle management, platform review requirements) and can be deferred to a post-launch sprint informed by real engagement data.
 **Apply when**: Scoping real-time features for mobile apps. Don't conflate "real-time updates" with "push notifications" — decide which you actually need for launch.
+
+## Configurable Paths via Resolution Chain (2026-03-15)
+**Learning**: Never hardcode absolute paths in portable tools or skills. Use a resolution chain: (1) env var, (2) config file entry, (3) fallback default. This makes tools portable across machines and environments.
+**Apply when**: Any tool or skill references a directory that varies by machine (repos, config dirs, data dirs).
+
+## Global Config Over Per-Project Duplication (2026-03-15)
+**Learning**: When a tool supports both global and per-project configuration, put all standard settings in the global config. Only create per-project config for overrides. Duplicating the full config into every project is a DRY violation that creates drift and maintenance burden.
+**Apply when**: Setting up project-level configuration files for tools that also have a global config.
+
+## Android 15 Edge-to-Edge Status Bar Overlap in Capacitor (2026-03-22)
+**Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView. The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes (XML opt-out + Java WindowCompat + config) — they each add padding independently.
+**Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.
+
+## Self-Flagging Learnings (2026-03-26)
+**Learning**: When a skill generates learnings, it should self-classify each as "forge-worthy" or "project-specific" at write time. Downstream consumers (like commit rituals or absorption tools) can then auto-promote flagged entries without heuristic judgment. This eliminates guessing and ensures universal patterns reach the shared knowledge base.
+**Apply when**: Designing learning/knowledge capture systems where entries need to be triaged for promotion to a shared store.
+
+## Processing Tracker for Idempotent Absorption (2026-03-26)
+**Learning**: When a system absorbs entries from a source it doesn't own (and can't delete from), maintain a tracker file with content hashes or titles of already-processed entries. This makes absorption idempotent — each run only evaluates new entries, not the full history. Without a tracker, every run re-triages everything, leading to duplicate work and potential inconsistencies.
+**Apply when**: Building any pipeline that reads from append-only sources (log files, learning files, changelog) and needs to process each entry exactly once.
+
+## Self-Contained Skill Packages (2026-03-26)
+**Learning**: When skills reference documentation or frameworks, those files must live inside the skill's directory — not in a separate shared location. Static reference docs at repo root become stale orphans because the skill self-iterates but the orphaned doc doesn't. Co-locating ensures everything evolves together.
+**Apply when**: Structuring skill or plugin directories in any system where skills/plugins reference supplementary docs or frameworks.
+
+## Thin Bootstrap for Skill Discovery (2026-03-26)
+**Learning**: When a skill repo needs a particular skill to be discoverable on fresh clone (before global deployment), use a thin bootstrap file in the project's local skill directory that simply points to the real skill file. Avoids symlinks (OS-dependent behavior) and full duplication (drift risk). The bootstrap is 3 lines; the real skill lives in the source directory.
+**Apply when**: Setting up local skill discovery in repos that are also the source of truth for those skills.
+
+## Three-Way Drift Detection for Bidirectional Sync (2026-03-26)
+**Learning**: When a system syncs files bidirectionally (source repo ↔ deployed copies), use a three-way comparison: source vs manifest vs deployed. This catches four cases: source updated (deploy it), deployed updated (reverse-sync it back), both updated (conflict — manual review), neither (skip). A two-way comparison (source vs deployed) can't distinguish "source is newer" from "deployed is newer" without a baseline.
+**Apply when**: Designing any bidirectional file sync mechanism between a source of truth and deployed copies.
+
+## Fold/Cast Race Condition on Direct Source Edits (2026-03-26)
+**Learning**: When source-of-truth files are edited directly, deployed copies in the sync target become stale instantly. If the absorption command runs from another session before the deployment command updates the target, it sees DIFFERS and absorbs the stale deployed version — silently reverting the source edit. This is a race condition in bidirectional sync: concurrent sessions can undo each other's work via the absorption path. Prevention: always run the deployment command immediately after direct source edits.
+**Apply when**: Operating any bidirectional sync system (deploy + absorb) where source files are edited directly.

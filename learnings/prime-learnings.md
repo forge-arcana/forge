@@ -11,3 +11,7 @@
 ## Cross-Project Stack Reuse Reduces Cost and Risk (2026-03-21)
 **Learning**: When a founder has an existing project with a proven stack, the strongest blueprint recommendation is "reuse what you know." An established stack transfers directly to a new project with zero learning curve. Cost analysis should explicitly call out "no learning curve" as a savings — time is the most expensive resource for a solo founder.
 **Apply when**: Recommending technology for a new project — always check for existing projects/stacks first.
+
+## SKILL.md Frontmatter Attributes (2026-03-26)
+**Learning**: `allowed-tools` and `context` are NOT valid SKILL.md frontmatter attributes. Use `user-invocable: true` for user-invocable skills. Valid attributes: argument-hint, compatibility, description, disable-model-invocation, license, metadata, name, user-invocable.
+**Apply when**: Authoring or reviewing SKILL.md files for any skill.
