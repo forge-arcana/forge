@@ -132,7 +132,12 @@ If everything is in sync: skip the table, say "Everything in sync." and proceed 
 
 **No project-specific details in forge** — strip all project names, paths, domains, business logic. See forge CLAUDE.md "No Project Names" rule for the full list.
 
-Append to the appropriate `<forge>/learnings/` file:
+> **HARD RULE — Write to forge, NOT the membrane.**
+> Append absorbed entries to `<forge>/learnings/<file>.md` (e.g., `/root/dev/forge/learnings/global-patterns.md`).
+> **NEVER write to `~/.claude/learnings/<file>.md`** — that is the membrane (deployed copy), NOT the source of truth.
+> Forge is the source. `/cast` deploys forge → membrane afterward. Writing to membrane silently skips forge, creating a permanent gap that every future `/mark` will flag as "fold needed" — and `/fold` won't fix it because the tracker already marked the entries as processed.
+
+Target files in `<forge>/learnings/`:
 - `probe-learnings.md` — architecture | `press-learnings.md` — go-live readiness
 - `poke-learnings.md` — tech debt/logging | `prime-learnings.md` — ideation/blueprint
 - `global-patterns.md` — cross-cutting
