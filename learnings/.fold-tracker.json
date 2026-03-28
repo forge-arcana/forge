@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-03-28T00:00:00Z",
+  "lastRun": "2026-03-28T12:00:00Z",
   "processedEntries": [
     "WSL Path Compatibility",
     "Disable Rate Limiting in E2E Test Mode",
@@ -49,7 +49,9 @@
     "Fold/Cast Race Condition on Direct Forge Edits",
     "SKILL.md Frontmatter Attributes",
     "SKILL.md Frontmatter",
-    "/fold Skill-Specific Learning Write-Back Bug"
+    "/fold Skill-Specific Learning Write-Back Bug",
+    "All Transfers Are Guarded by User Wisdom",
+    "/cast Must Not Duplicate Global Membrane Content"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
