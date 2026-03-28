@@ -246,38 +246,61 @@ W_GENERAL="$W_HOME/.claude/learnings/general.md"
 W_TRACKER="$W_FORGE/learnings/.fold-tracker.json"
 
 if [[ -f "$GENERAL" ]]; then
-  # Extract all ## titles (strip date suffix)
-  TOTAL_ENTRIES=$(grep -c '^## ' "$GENERAL" 2>/dev/null || echo "0")
-
-  if [[ -f "$TRACKER" ]]; then
-    PROCESSED=$("$NODE_BIN" -e "
-const d = JSON.parse(require('fs').readFileSync('$W_TRACKER','utf8'));
-console.log((d.processedEntries || []).length);
-" 2>/dev/null || echo "0")
-  else
-    PROCESSED=0
-  fi
-
-  UNPROCESSED=$((TOTAL_ENTRIES - PROCESSED))
-  if [[ $UNPROCESSED -lt 0 ]]; then
-    echo "**WARNING**: Tracker has $((PROCESSED - TOTAL_ENTRIES)) processed entries not found in general.md — tracker is ahead of file. Run /fold to reconcile."
-    UNPROCESSED=0
-  fi
+  # Title-based UNPROCESSED calculation: checks BOTH tracker AND forge files
+  # A membrane entry is "processed" if its title is in the tracker OR in any forge learning file
+  eval "$("$NODE_BIN" -e "
+const fs = require('fs'), path = require('path');
+const dir = path.join('$W_FORGE', 'learnings');
+const forgeTitles = new Set();
+for (const fname of fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()) {
+  for (const l of fs.readFileSync(path.join(dir, fname),'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) forgeTitles.add(m[1].trim());
+  }
+}
+let tracked = new Set();
+try {
+  const d = JSON.parse(fs.readFileSync(path.join(dir, '.fold-tracker.json'),'utf8'));
+  tracked = new Set(d.processedEntries || []);
+} catch(e) {}
+const membraneTitles = [];
+for (const l of fs.readFileSync('$W_GENERAL','utf8').split('\n')) {
+  const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+  if (m) membraneTitles.push(m[1].trim());
+}
+const unprocessed = membraneTitles.filter(t => !tracked.has(t) && !forgeTitles.has(t));
+const processed = membraneTitles.length - unprocessed.length;
+console.log('TOTAL_ENTRIES=' + membraneTitles.length);
+console.log('PROCESSED=' + processed);
+console.log('UNPROCESSED=' + unprocessed.length);
+" 2>/dev/null || echo "TOTAL_ENTRIES=0; PROCESSED=0; UNPROCESSED=0")"
 
   echo "| Source | Total | Processed | Unprocessed |"
   echo "|--------|-------|-----------|-------------|"
   echo "| general.md | $TOTAL_ENTRIES | $PROCESSED | $UNPROCESSED |"
   echo ""
 
-  if [[ $UNPROCESSED -gt 0 && -f "$TRACKER" ]]; then
+  if [[ $UNPROCESSED -gt 0 ]]; then
     echo "**Unprocessed entries** (ready for /fold):"
-    # Get titles from general.md, filter out ones in tracker
+    # Title-based: show membrane entries NOT in tracker AND NOT in any forge file
     "$NODE_BIN" -e "
-const fs = require('fs');
-const processed = new Set(JSON.parse(fs.readFileSync('$W_TRACKER','utf8')).processedEntries || []);
+const fs = require('fs'), path = require('path');
+const dir = path.join('$W_FORGE', 'learnings');
+const forgeTitles = new Set();
+for (const fname of fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()) {
+  for (const l of fs.readFileSync(path.join(dir, fname),'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) forgeTitles.add(m[1].trim());
+  }
+}
+let tracked = new Set();
+try {
+  const d = JSON.parse(fs.readFileSync(path.join(dir, '.fold-tracker.json'),'utf8'));
+  tracked = new Set(d.processedEntries || []);
+} catch(e) {}
 for (const line of fs.readFileSync('$W_GENERAL','utf8').split('\n')) {
   const m = line.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
-  if (m && !processed.has(m[1].trim())) console.log('- ' + m[1].trim());
+  if (m) { const t = m[1].trim(); if (!tracked.has(t) && !forgeTitles.has(t)) console.log('- ' + t); }
 }
 " 2>/dev/null || true
     echo ""

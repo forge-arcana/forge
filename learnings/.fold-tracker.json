@@ -10,7 +10,6 @@
     "Batch-Added Routes Skip Error Path Logging",
     "Drizzle Programmatic Migration Journal Schema",
     "Test Factories Must Mirror DI Container",
-    "Test Factories Must Mirror Production DI Container",
     "pnpm --filter: exec vs Script Name",
     "Toast/Snackbar Redundancy — Platform Guidelines",
     "Migration Fixup Scripts Must Guard Against Fresh DBs",
@@ -49,9 +48,18 @@
     "Fold/Cast Race Condition on Direct Forge Edits",
     "SKILL.md Frontmatter Attributes",
     "SKILL.md Frontmatter",
+    "Test Factories Must Mirror Production DI Container",
     "/fold Skill-Specific Learning Write-Back Bug",
     "All Transfers Are Guarded by User Wisdom",
-    "/cast Must Not Duplicate Global Membrane Content"
+    "/cast Must Not Duplicate Global Membrane Content",
+    "Client-Supplied Identity in Validation Schemas",
+    "Leaflet Map Z-Index Blocks Nearby Dropdowns",
+    "Schema Defaults Must Match Code Defaults",
+    "Mobile Auth Path Exposure",
+    "Visual Mode Differentiation in Multi-Role Apps",
+    "Onboarding Bridge Before Multi-Step Wizards",
+    "Action Frequency Must Correlate With Visibility",
+    "Drizzle Migration Strategy: Versioned for Persistent, Push for Ephemeral"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
