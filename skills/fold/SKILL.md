@@ -37,12 +37,23 @@ Run `<forge>/scripts/forge-status.sh --pull` to execute the preflight. Use the S
 
 ### 1a: Skill Reverse-Sync (using preflight drift results)
 
+> **HARD RULE — fold and cast skills are never absorbed.**
+> If `fold` or `cast` appear as `DEPLOYED-DIFFERS`, skip them unconditionally — do NOT absorb.
+> Absorbing fold's own SKILL.md mid-execution would silently overwrite the rules currently running.
+> Absorbing cast's SKILL.md could break the next deploy. Both are protected. Flag them as `CONFLICT` in the PLAN table and tell the user to reconcile manually after this run.
+
+> **HARD RULE — No baseline = no absorb.**
+> `forge-status.sh` uses a three-way comparison (forge vs baseline vs deployed) to determine direction.
+> If no baseline exists (`.last-cast.json` missing or SHA unreachable), the script falls back to a two-way heuristic that **cannot safely determine direction**. Any skill classified `DEPLOYED-DIFFERS` without a valid baseline must be treated as `CONFLICT`, never absorbed. Run `/cast` first to establish a baseline, then re-run `/fold`.
+
 | Classification | /fold Action |
 |---------------|-------------|
 | `IDENTICAL` | Skip |
-| `DEPLOYED-DIFFERS` | Diff deployed vs forge, show changes, absorb into forge after user confirms |
+| `DEPLOYED-DIFFERS` (baseline valid, skill ≠ fold/cast) | Diff deployed vs forge, show changes in PLAN sub-row, absorb after user confirms |
+| `DEPLOYED-DIFFERS` (no valid baseline) | Treat as `CONFLICT` — cannot determine direction safely |
+| `DEPLOYED-DIFFERS` (skill = fold or cast) | Skip — flag as `CONFLICT` in PLAN, reconcile manually |
 | `FORGE-UPDATED` | Skip — deploy on next `/cast` |
-| `CONFLICT` | Show both diffs, ask user to reconcile |
+| `CONFLICT` | Show both diffs with full content in PLAN sub-rows, AskUserQuestion: keep forge / keep membrane / manual merge |
 | `ADDED` / `REMOVED` | Skip — handled by `/cast` |
 
 ### 1b-1d: Config Sync

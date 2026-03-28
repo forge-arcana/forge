@@ -169,7 +169,7 @@ fi
 echo "# Section 5: Trackers"
 echo ""
 
-echo "### Reforge tracker"
+echo "### Fold tracker"
 echo '```'
 cat "$FORGE_PATH/learnings/.fold-tracker.json" 2>/dev/null || echo "(not found)"
 echo '```'
