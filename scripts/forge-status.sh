@@ -6,6 +6,29 @@ set -euo pipefail
 
 MODE="${1:---fetch}"
 
+# --- Resolve node binary (may not be on PATH in Git Bash on Windows) ---
+NODE_BIN=""
+for candidate in node "/c/Program Files/nodejs/node.exe" "/c/Program Files/nodejs/node"; do
+  if command -v "$candidate" >/dev/null 2>&1 || [[ -x "$candidate" ]]; then
+    NODE_BIN="$candidate"
+    break
+  fi
+done
+if [[ -z "$NODE_BIN" ]]; then
+  echo "ERROR: node not found. Ensure Node.js is installed."
+  exit 1
+fi
+
+# Convert MSYS/Git Bash paths (/c/Users/...) to Windows paths (C:/Users/...) for Node.js
+winpath() {
+  local p="$1"
+  if [[ "$p" =~ ^/([a-zA-Z])/ ]]; then
+    echo "${BASH_REMATCH[1]}:/${p:3}"
+  else
+    echo "$p"
+  fi
+}
+
 # --- Step 1: Resolve forge path ---
 FORGE_PATH=""
 if [[ -f "$HOME/.claude/CLAUDE.md" ]]; then
@@ -16,14 +39,18 @@ if [[ -z "$FORGE_PATH" ]]; then
   exit 1
 fi
 
+# --- Windows-safe paths for Node.js (MSYS /c/... → C:/...) ---
+W_HOME=$(winpath "$HOME")
+W_FORGE=$(winpath "$FORGE_PATH")
+
 # --- Load last-cast baseline SHA (written by /cast after successful deploy) ---
 LAST_CAST_SHA=""
 LAST_CAST_FILE="$HOME/.claude/.last-cast.json"
+W_LAST_CAST_FILE="$W_HOME/.claude/.last-cast.json"
 if [[ -f "$LAST_CAST_FILE" ]]; then
-  LAST_CAST_SHA=$(python3 -c "
-import json
-with open('$LAST_CAST_FILE') as f:
-    print(json.load(f).get('lastCastCommit', ''))
+  LAST_CAST_SHA=$("$NODE_BIN" -e "
+const d = require('fs').readFileSync('$W_LAST_CAST_FILE','utf8');
+console.log(JSON.parse(d).lastCastCommit || '');
 " 2>/dev/null || true)
 fi
 
@@ -215,17 +242,17 @@ echo ""
 
 GENERAL="$HOME/.claude/learnings/general.md"
 TRACKER="$FORGE_PATH/learnings/.fold-tracker.json"
+W_GENERAL="$W_HOME/.claude/learnings/general.md"
+W_TRACKER="$W_FORGE/learnings/.fold-tracker.json"
 
 if [[ -f "$GENERAL" ]]; then
   # Extract all ## titles (strip date suffix)
   TOTAL_ENTRIES=$(grep -c '^## ' "$GENERAL" 2>/dev/null || echo "0")
 
   if [[ -f "$TRACKER" ]]; then
-    PROCESSED=$(python3 -c "
-import json
-with open('$TRACKER') as f:
-    data = json.load(f)
-print(len(data.get('processedEntries', [])))
+    PROCESSED=$("$NODE_BIN" -e "
+const d = JSON.parse(require('fs').readFileSync('$W_TRACKER','utf8'));
+console.log((d.processedEntries || []).length);
 " 2>/dev/null || echo "0")
   else
     PROCESSED=0
@@ -245,17 +272,13 @@ print(len(data.get('processedEntries', [])))
   if [[ $UNPROCESSED -gt 0 && -f "$TRACKER" ]]; then
     echo "**Unprocessed entries** (ready for /fold):"
     # Get titles from general.md, filter out ones in tracker
-    python3 -c "
-import json, re
-with open('$TRACKER') as f:
-    processed = set(json.load(f).get('processedEntries', []))
-with open('$GENERAL') as f:
-    for line in f:
-        m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
-        if m:
-            title = m.group(1).strip()
-            if title not in processed:
-                print(f'- {title}')
+    "$NODE_BIN" -e "
+const fs = require('fs');
+const processed = new Set(JSON.parse(fs.readFileSync('$W_TRACKER','utf8')).processedEntries || []);
+for (const line of fs.readFileSync('$W_GENERAL','utf8').split('\n')) {
+  const m = line.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+  if (m && !processed.has(m[1].trim())) console.log('- ' + m[1].trim());
+}
 " 2>/dev/null || true
     echo ""
   fi
@@ -277,6 +300,8 @@ for forge_file in "$FORGE_PATH"/learnings/*.md; do
   [[ "$fname" == "general.md" ]] && continue
 
   user_file="$HOME/.claude/learnings/$fname"
+  w_user_file="$W_HOME/.claude/learnings/$fname"
+  w_forge_file=$(winpath "$forge_file")
   forge_count=$(grep -c '^## ' "$forge_file" 2>/dev/null || true)
   forge_count=${forge_count:-0}
 
@@ -294,44 +319,29 @@ for forge_file in "$FORGE_PATH"/learnings/*.md; do
       diff=$((user_count - forge_count))
       echo "| $fname | $user_count | $forge_count | $diff new in user -- fold needed |"
       # Collect detail: titles + summaries for entries in user but not in forge
-      detail_lines=$(python3 -c "
-import re, subprocess
-def get_entries(path):
-    entries = {}
-    current_title = None
-    try:
-        with open(path) as f:
-            for line in f:
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
-                if m:
-                    current_title = m.group(1).strip()
-                    entries[current_title] = ''
-                elif current_title and line.startswith('**Learning**:'):
-                    s = line.replace('**Learning**:', '').strip()
-                    if len(s) > 100: s = s[:97] + '...'
-                    entries[current_title] = s
-    except: pass
-    return entries
-user_e = get_entries('$user_file')
-forge_e = get_entries('$forge_file')
-blame = {}
-# For user-only entries, blame the user file
-try:
-    out = subprocess.run(['git', '-C', '$FORGE_PATH', 'blame', '--line-porcelain', '$user_file'],
-        capture_output=True, text=True, timeout=10).stdout
-    author = ''
-    for line in out.split('\n'):
-        if line.startswith('author '): author = line[7:]
-        elif line.startswith('\t'):
-            m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line[1:])
-            if m: blame[m.group(1).strip()] = author
-except: pass
-new_titles = sorted(set(user_e.keys()) - set(forge_e.keys()))
-for t in new_titles:
-    a = blame.get(t, '')
-    suffix = f' ({a})' if a else ''
-    print(f'{t}{suffix}')
-    if user_e.get(t): print(f'  -> {user_e[t]}')
+      detail_lines=$("$NODE_BIN" -e "
+const fs = require('fs');
+const {execSync} = require('child_process');
+function getEntries(p) {
+  const e = {}; let cur = null;
+  try { for (const l of fs.readFileSync(p,'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) { cur = m[1].trim(); e[cur] = ''; }
+    else if (cur && l.startsWith('**Learning**:')) {
+      let s = l.replace('**Learning**:','').trim();
+      if (s.length > 100) s = s.slice(0,97) + '...';
+      e[cur] = s;
+    }
+  }} catch(e) {}
+  return e;
+}
+const userE = getEntries('$w_user_file');
+const forgeE = getEntries('$w_forge_file');
+const newTitles = Object.keys(userE).filter(t => !(t in forgeE)).sort();
+for (const t of newTitles) {
+  console.log(t);
+  if (userE[t]) console.log('  -> ' + userE[t]);
+}
 " 2>/dev/null || true)
       if [[ -n "$detail_lines" ]]; then
         LEARNING_DETAILS_LINES+=("**${fname}** (new in user):")
@@ -347,46 +357,46 @@ for t in new_titles:
       diff=$((forge_count - user_count))
       echo "| $fname | $user_count | $forge_count | $diff new in forge -- cast needed |"
       # Collect detail: titles + summaries for entries in forge but not in user
-      detail_lines=$(python3 -c "
-import re, subprocess
-def get_entries(path):
-    entries = {}
-    current_title = None
-    try:
-        with open(path) as f:
-            for line in f:
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
-                if m:
-                    current_title = m.group(1).strip()
-                    entries[current_title] = ''
-                elif current_title and line.startswith('**Learning**:'):
-                    s = line.replace('**Learning**:', '').strip()
-                    if len(s) > 100: s = s[:97] + '...'
-                    entries[current_title] = s
-    except: pass
-    return entries
-def get_blame_authors(path, forge_path):
-    authors = {}
-    try:
-        out = subprocess.run(['git', '-C', forge_path, 'blame', '--line-porcelain', path],
-            capture_output=True, text=True, timeout=10).stdout
-        author = ''
-        for line in out.split('\n'):
-            if line.startswith('author '): author = line[7:]
-            elif line.startswith('\t'):
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line[1:])
-                if m: authors[m.group(1).strip()] = author
-    except: pass
-    return authors
-forge_e = get_entries('$forge_file')
-user_e = get_entries('$user_file')
-blame = get_blame_authors('$forge_file', '$FORGE_PATH')
-new_titles = sorted(set(forge_e.keys()) - set(user_e.keys()))
-for t in new_titles:
-    a = blame.get(t, '')
-    suffix = f' ({a})' if a else ''
-    print(f'{t}{suffix}')
-    if forge_e.get(t): print(f'  -> {forge_e[t]}')
+      detail_lines=$("$NODE_BIN" -e "
+const fs = require('fs');
+const {execSync} = require('child_process');
+function getEntries(p) {
+  const e = {}; let cur = null;
+  try { for (const l of fs.readFileSync(p,'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) { cur = m[1].trim(); e[cur] = ''; }
+    else if (cur && l.startsWith('**Learning**:')) {
+      let s = l.replace('**Learning**:','').trim();
+      if (s.length > 100) s = s.slice(0,97) + '...';
+      e[cur] = s;
+    }
+  }} catch(e) {}
+  return e;
+}
+function getBlame(p, forgePath) {
+  const authors = {};
+  try {
+    const out = execSync('git -C \"'+forgePath+'\" blame --line-porcelain \"'+p+'\"', {timeout:10000}).toString();
+    let author = '';
+    for (const l of out.split('\n')) {
+      if (l.startsWith('author ')) author = l.slice(7);
+      else if (l.startsWith('\t')) {
+        const m = l.slice(1).match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+        if (m) authors[m[1].trim()] = author;
+      }
+    }
+  } catch(e) {}
+  return authors;
+}
+const forgeE = getEntries('$w_forge_file');
+const userE = getEntries('$w_user_file');
+const blame = getBlame('$w_forge_file', '$W_FORGE');
+const newTitles = Object.keys(forgeE).filter(t => !(t in userE)).sort();
+for (const t of newTitles) {
+  const a = blame[t] || '';
+  console.log(t + (a ? ' (' + a + ')' : ''));
+  if (forgeE[t]) console.log('  -> ' + forgeE[t]);
+}
 " 2>/dev/null || true)
       if [[ -n "$detail_lines" ]]; then
         LEARNING_DETAILS_LINES+=("**${fname}** (new in forge):")
@@ -402,44 +412,44 @@ for t in new_titles:
   else
     echo "| $fname | missing | $forge_count | cast needed |"
     # Collect detail: all titles + summaries (file missing in membrane)
-    detail_lines=$(python3 -c "
-import re, subprocess
-def get_entries(path):
-    entries = {}
-    current_title = None
-    try:
-        with open(path) as f:
-            for line in f:
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
-                if m:
-                    current_title = m.group(1).strip()
-                    entries[current_title] = ''
-                elif current_title and line.startswith('**Learning**:'):
-                    s = line.replace('**Learning**:', '').strip()
-                    if len(s) > 100: s = s[:97] + '...'
-                    entries[current_title] = s
-    except: pass
-    return entries
-def get_blame_authors(path, forge_path):
-    authors = {}
-    try:
-        out = subprocess.run(['git', '-C', forge_path, 'blame', '--line-porcelain', path],
-            capture_output=True, text=True, timeout=10).stdout
-        author = ''
-        for line in out.split('\n'):
-            if line.startswith('author '): author = line[7:]
-            elif line.startswith('\t'):
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line[1:])
-                if m: authors[m.group(1).strip()] = author
-    except: pass
-    return authors
-forge_e = get_entries('$forge_file')
-blame = get_blame_authors('$forge_file', '$FORGE_PATH')
-for t in sorted(forge_e.keys()):
-    a = blame.get(t, '')
-    suffix = f' ({a})' if a else ''
-    print(f'{t}{suffix}')
-    if forge_e.get(t): print(f'  -> {forge_e[t]}')
+    detail_lines=$("$NODE_BIN" -e "
+const fs = require('fs');
+const {execSync} = require('child_process');
+function getEntries(p) {
+  const e = {}; let cur = null;
+  try { for (const l of fs.readFileSync(p,'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) { cur = m[1].trim(); e[cur] = ''; }
+    else if (cur && l.startsWith('**Learning**:')) {
+      let s = l.replace('**Learning**:','').trim();
+      if (s.length > 100) s = s.slice(0,97) + '...';
+      e[cur] = s;
+    }
+  }} catch(e) {}
+  return e;
+}
+function getBlame(p, forgePath) {
+  const authors = {};
+  try {
+    const out = execSync('git -C \"'+forgePath+'\" blame --line-porcelain \"'+p+'\"', {timeout:10000}).toString();
+    let author = '';
+    for (const l of out.split('\n')) {
+      if (l.startsWith('author ')) author = l.slice(7);
+      else if (l.startsWith('\t')) {
+        const m = l.slice(1).match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+        if (m) authors[m[1].trim()] = author;
+      }
+    }
+  } catch(e) {}
+  return authors;
+}
+const forgeE = getEntries('$w_forge_file');
+const blame = getBlame('$w_forge_file', '$W_FORGE');
+for (const t of Object.keys(forgeE).sort()) {
+  const a = blame[t] || '';
+  console.log(t + (a ? ' (' + a + ')' : ''));
+  if (forgeE[t]) console.log('  -> ' + forgeE[t]);
+}
 " 2>/dev/null || true)
     if [[ -n "$detail_lines" ]]; then
       LEARNING_DETAILS_LINES+=("**${fname}** (new file):")
@@ -477,14 +487,12 @@ MEM_SKIPPED=0
 
 # Load memory tracker skippedFiles
 MEM_TRACKER="$FORGE_PATH/memory/.memory-tracker.json"
+W_MEM_TRACKER="$W_FORGE/memory/.memory-tracker.json"
 SKIPPED_FILES=""
 if [[ -f "$MEM_TRACKER" ]]; then
-  SKIPPED_FILES=$(python3 -c "
-import json
-with open('$MEM_TRACKER') as f:
-    data = json.load(f)
-for f in data.get('skippedFiles', []):
-    print(f)
+  SKIPPED_FILES=$("$NODE_BIN" -e "
+const d = JSON.parse(require('fs').readFileSync('$W_MEM_TRACKER','utf8'));
+(d.skippedFiles || []).forEach(f => console.log(f));
 " 2>/dev/null || true)
 fi
 
@@ -551,83 +559,55 @@ echo ""
 
 # 6a: Cross-file duplicate titles within forge learnings
 echo "### Cross-file duplicate titles (forge learnings)"
-python3 -c "
-import re, os
-titles = {}  # title -> [files]
-learnings_dir = os.path.join('$FORGE_PATH', 'learnings')
-for fname in sorted(os.listdir(learnings_dir)):
-    if not fname.endswith('.md'):
-        continue
-    fpath = os.path.join(learnings_dir, fname)
-    try:
-        with open(fpath) as f:
-            for line in f:
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*$', line)
-                if m:
-                    t = m.group(1).strip()
-                    titles.setdefault(t, []).append(fname)
-    except: pass
-dupes = {t: fs for t, fs in titles.items() if len(fs) > 1}
-if dupes:
-    for t, fs in sorted(dupes.items()):
-        print(f'DUPLICATE: \"{t}\" in {\" + \".join(fs)}')
-else:
-    print('No duplicates found.')
+"$NODE_BIN" -e "
+const fs = require('fs'), path = require('path');
+const dir = path.join('$W_FORGE', 'learnings');
+const titles = {};
+for (const fname of fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()) {
+  for (const l of fs.readFileSync(path.join(dir, fname),'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) { const t = m[1].trim(); (titles[t] = titles[t] || []).push(fname); }
+  }
+}
+const dupes = Object.entries(titles).filter(([,fs]) => fs.length > 1).sort();
+if (dupes.length) dupes.forEach(([t,fs]) => console.log('DUPLICATE: \"'+t+'\" in '+fs.join(' + ')));
+else console.log('No duplicates found.');
 " 2>/dev/null || echo "(dedup check failed)"
 echo ""
 
 # 6b: Pre-triage candidates from general.md against forge learnings
 echo "### Candidate pre-triage (general.md vs forge)"
 MEMBRANE_LEARNINGS="$HOME/.claude/learnings/general.md"
+W_MEMBRANE_LEARNINGS="$W_HOME/.claude/learnings/general.md"
 if [[ -f "$MEMBRANE_LEARNINGS" ]]; then
-  python3 -c "
-import re, os, json
-
-# Get all titles in forge learnings
-forge_titles = {}  # title -> file
-learnings_dir = os.path.join('$FORGE_PATH', 'learnings')
-for fname in sorted(os.listdir(learnings_dir)):
-    if not fname.endswith('.md'):
-        continue
-    fpath = os.path.join(learnings_dir, fname)
-    try:
-        with open(fpath) as f:
-            for line in f:
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*\$', line)
-                if m:
-                    forge_titles[m.group(1).strip()] = fname
-    except: pass
-
-# Get tracker processedEntries
-processed = set()
-tracker_path = os.path.join('$FORGE_PATH', 'learnings', '.fold-tracker.json')
-try:
-    with open(tracker_path) as f:
-        data = json.load(f)
-        processed = set(data.get('processedEntries', []))
-except: pass
-
-# Get all titles in general.md
-membrane_titles = []
-try:
-    with open('$MEMBRANE_LEARNINGS') as f:
-        for line in f:
-            m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*\$', line)
-            if m:
-                membrane_titles.append(m.group(1).strip())
-except: pass
-
-for t in membrane_titles:
-    in_forge = forge_titles.get(t)
-    in_tracker = t in processed
-    if in_forge and in_tracker:
-        print(f'ABSORBED: \"{t}\" -> {in_forge} (in tracker)')
-    elif in_forge:
-        print(f'IN-FORGE: \"{t}\" -> {in_forge} (NOT in tracker -- tracker stale?)')
-    elif in_tracker:
-        print(f'TRACKED-ONLY: \"{t}\" (in tracker but NOT in forge -- orphan?)')
-    else:
-        print(f'NEW: \"{t}\" (not in forge, not in tracker)')
+  "$NODE_BIN" -e "
+const fs = require('fs'), path = require('path');
+const dir = path.join('$W_FORGE', 'learnings');
+const forgeTitles = {};
+for (const fname of fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()) {
+  for (const l of fs.readFileSync(path.join(dir, fname),'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) forgeTitles[m[1].trim()] = fname;
+  }
+}
+let processed = new Set();
+try {
+  const d = JSON.parse(fs.readFileSync(path.join(dir, '.fold-tracker.json'),'utf8'));
+  processed = new Set(d.processedEntries || []);
+} catch(e) {}
+const membraneTitles = [];
+for (const l of fs.readFileSync('$W_MEMBRANE_LEARNINGS','utf8').split('\n')) {
+  const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+  if (m) membraneTitles.push(m[1].trim());
+}
+for (const t of membraneTitles) {
+  const inForge = forgeTitles[t];
+  const inTracker = processed.has(t);
+  if (inForge && inTracker) console.log('ABSORBED: \"'+t+'\" -> '+inForge+' (in tracker)');
+  else if (inForge) console.log('IN-FORGE: \"'+t+'\" -> '+inForge+' (NOT in tracker -- tracker stale?)');
+  else if (inTracker) console.log('TRACKED-ONLY: \"'+t+'\" (in tracker but NOT in forge -- orphan?)');
+  else console.log('NEW: \"'+t+'\" (not in forge, not in tracker)');
+}
 " 2>/dev/null || echo "(pre-triage check failed)"
 else
   echo "(no membrane learnings file found)"
@@ -636,37 +616,24 @@ echo ""
 
 # 6c: Tracker consistency check
 echo "### Tracker consistency"
-python3 -c "
-import re, os, json
-
-forge_titles = set()
-learnings_dir = os.path.join('$FORGE_PATH', 'learnings')
-for fname in sorted(os.listdir(learnings_dir)):
-    if not fname.endswith('.md'):
-        continue
-    try:
-        with open(os.path.join(learnings_dir, fname)) as f:
-            for line in f:
-                m = re.match(r'^## (.+?)(?:\s*\([\d-]+\))?\s*\$', line)
-                if m:
-                    forge_titles.add(m.group(1).strip())
-    except: pass
-
-tracker_path = os.path.join('$FORGE_PATH', 'learnings', '.fold-tracker.json')
-try:
-    with open(tracker_path) as f:
-        data = json.load(f)
-        processed = set(data.get('processedEntries', []))
-except:
-    processed = set()
-    print('(tracker not found)')
-
-orphans = processed - forge_titles
-if orphans:
-    for o in sorted(orphans):
-        print(f'ORPHAN: \"{o}\" in tracker but not in any forge learning file')
-else:
-    print('Tracker consistent -- all processed entries found in forge.')
+"$NODE_BIN" -e "
+const fs = require('fs'), path = require('path');
+const dir = path.join('$W_FORGE', 'learnings');
+const forgeTitles = new Set();
+for (const fname of fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()) {
+  for (const l of fs.readFileSync(path.join(dir, fname),'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) forgeTitles.add(m[1].trim());
+  }
+}
+let processed = new Set();
+try {
+  const d = JSON.parse(fs.readFileSync(path.join(dir, '.fold-tracker.json'),'utf8'));
+  processed = new Set(d.processedEntries || []);
+} catch(e) { console.log('(tracker not found)'); }
+const orphans = [...processed].filter(t => !forgeTitles.has(t)).sort();
+if (orphans.length) orphans.forEach(o => console.log('ORPHAN: \"'+o+'\" in tracker but not in any forge learning file'));
+else console.log('Tracker consistent -- all processed entries found in forge.');
 " 2>/dev/null || echo "(consistency check failed)"
 echo ""
 
