@@ -28,3 +28,10 @@
 **Learning**: When auditing DB schemas, verify that column defaults match what the application code actually inserts. A default of `'occupied'` when code always inserts `'empty'` is a bug waiting to happen. Unused schema defaults are silent time bombs — they only fire when someone forgets to specify the value explicitly, and then they produce wrong data instead of an error.
 **Apply when**: Reviewing database schemas for tech debt, especially columns with default values that aren't tested by normal application flows.
 
+## Pino Logger Exists But Nobody Calls It (2026-03-28)
+**Learning**: When agents build modules in parallel, they all import and instantiate the logger but may not actually call log.info/warn/error in the code paths. Verify that logger calls exist on both success AND failure paths — not just the import statement. The forge-scan detects `logger.` calls, so zero matches despite imports means the logger is dead code. In this case, the server actions DID log correctly (58 calls), but middleware and auth had zero logging despite being the security layer.
+**Apply when**: Reviewing any codebase where logging infrastructure was set up by one agent and consumed by others. Check for dead logger imports.
+
+## Edge Runtime Logger Compatibility (2026-03-28)
+**Learning**: Next.js middleware runs in the Edge Runtime, which does not support Node.js APIs like `fs` or `net`. Pino relies on Node.js streams and won't work in edge middleware. For edge-compatible logging, use `console.warn` with structured JSON objects as a fallback, or a lightweight edge-compatible logger. Don't import Pino in middleware.ts.
+**Apply when**: Adding logging to Next.js middleware or any Edge Runtime code.

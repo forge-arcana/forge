@@ -15,3 +15,23 @@
 ## SKILL.md Frontmatter Attributes (2026-03-26)
 **Learning**: `allowed-tools` and `context` are NOT valid SKILL.md frontmatter attributes. Use `user-invocable: true` for user-invocable skills. Valid attributes: argument-hint, compatibility, description, disable-model-invocation, license, metadata, name, user-invocable.
 **Apply when**: Authoring or reviewing SKILL.md files for any skill.
+
+## Parallel Research Agents Accelerate Blueprint Interviews (2026-03-28)
+**Learning**: For domain-specific products (legal tech, healthcare, fintech), launching 5+ parallel research agents at the start of the blueprint phase — covering market landscape, regulatory requirements, domain workflows, tech stack options, and AI capabilities — dramatically accelerates the interview rounds. The founder only needs to answer questions about their specific context; research agents fill in the domain knowledge. This turned a 7-round interview into ~4 focused conversations.
+**Apply when**: Starting a blueprint for any product in a regulated or domain-specific industry. Launch research agents before the first blueprint round.
+
+## Localization as Moat in Underserved Markets (2026-03-28)
+**Learning**: In markets where the total addressable user base is too small for international SaaS players to localize (e.g., 70,000 Philippine lawyers), the strongest competitive moat is deep localization — local court rules, local billing customs, local regulatory compliance, local language. No competitor will invest engineering effort to serve a market this size. The real competitor is the status quo (Excel + Word + Viber + paper), not other software.
+**Apply when**: Positioning any product targeting a professional market in a developing country. Check whether international alternatives have localized — if not, localization IS the moat.
+
+## Founders Who Don't Know Internal Operations Still Reveal Key Insights (2026-03-28)
+**Learning**: When a founder is building for someone else's organization (a friend's firm) and doesn't know internal details (billing structure, staffing, workflows), they still reveal critical design constraints through their observations: "the lawyers handle their own appointments" (= no dedicated scheduling staff, so the tool must be self-service), "they have a collections officer" (= billing and collections are real pain points). These casual observations are more valuable than detailed org charts — they reveal what the founder has noticed as broken or noteworthy.
+**Apply when**: Interviewing a founder who is building for an organization they observe but don't operate. Listen for what they've noticed, not what they can describe in detail.
+
+## Role-Play Walkthroughs Catch What Specs Miss (2026-03-28)
+**Learning**: After completing a product blueprint, walking through it as each user persona (partner, associate, secretary, client) reveals critical operational gaps that spec-writing misses. Engineering-minded specs are strong on data models and workflows but weak on daily-use UX (no "my day" dashboard, no action queue), people management (no offboarding, no leave coverage), and edge cases (incoming mail receipt triggering deadlines). A regulatory persona walkthrough (IBP inspector) catches compliance gaps that even domain-aware engineering misses (privilege waiver through AI APIs, AML obligations, Neypes fresh period rule). This three-pass approach (spec → persona walkthroughs → regulatory review) should be standard for any product in a regulated industry.
+**Apply when**: After completing any blueprint for a regulated industry product. Always run persona walkthroughs and a regulatory review pass before declaring the blueprint final.
+
+## Blueprint Versioning Keeps the Process Clean (2026-03-28)
+**Learning**: Publishing V1.0 first, then running reviews against it, then producing V2.0 with fixes is cleaner than trying to get it perfect in one pass. V1.0 establishes the baseline. The gap analysis and compliance review become standalone reference documents. V2.0 incorporates everything with a clear audit trail of what changed and why. The founder can also compare versions to understand what was improved.
+**Apply when**: Any blueprint that will undergo review cycles. Publish V1.0 early, run reviews, produce V2.0. Don't try to make V1.0 perfect.

@@ -15,3 +15,15 @@
 ## Drizzle Migration Strategy: Versioned for Persistent, Push for Ephemeral (2026-03-19)
 **Learning**: Use versioned migrations (`db:migrate`) for production and any persistent database. Reserve `drizzle-kit push` only for ephemeral/throwaway databases (CI test runs, local dev reset). Mixing push and migrate on the same persistent DB causes drift — push doesn't track migration history, so `migrate()` can't know what's already applied. Deploy pipelines should auto-stamp the baseline migration before running `db:migrate` on databases that were originally created via push.
 **Apply when**: Setting up a Drizzle project's migration strategy, or transitioning from push-only to versioned migrations.
+
+## Supabase RLS Must Use JWT Claims, Not Subqueries (2026-03-28)
+**Learning**: RLS policies with subqueries like `WHERE firm_id = (SELECT firm_id FROM profiles WHERE id = auth.uid())` re-execute the subquery per row — O(N) instead of O(1). The fix: store `firm_id` and `role` as custom JWT claims via a Supabase Auth hook, then use `auth.jwt()->'app_metadata'->>'firm_id'` in policies. This is a constant comparison with no subquery. Mark helper functions as `STABLE` not `IMMUTABLE` to avoid stale cache issues within transactions.
+**Apply when**: Writing Supabase RLS policies for any multi-tenant app. Always use JWT claims over subqueries.
+
+## Supabase + Drizzle Dual-Access Pattern for Complex Apps (2026-03-28)
+**Learning**: For apps with 20+ tables and complex queries (joins, CTEs, aggregations, transactions), use BOTH Supabase JS client and Drizzle ORM. Supabase JS for: auth, realtime, storage, and simple client-side CRUD (benefits from RLS). Drizzle for: server-side queries, reports, transactions, and complex joins (bypasses RLS, so enforce auth in application code). Connect Drizzle via Supabase's connection pooler URL (port 6543, transaction mode), not direct connections (which exhaust limits from serverless functions).
+**Apply when**: Starting any Supabase project with more than 15 tables or complex reporting requirements.
+
+## LibreOffice in Docker Needs a Persistent Daemon (2026-03-28)
+**Learning**: LibreOffice headless Docker images are 400MB-1.2GB. Each conversion spawns a fresh `soffice` process (1-3 second cold start, 200-500MB memory spike). For production: use Gotenberg (Go microservice wrapping LibreOffice with queuing) or unoserver (keeps LibreOffice as a persistent daemon). Never convert documents synchronously in an API request — always queue conversions. Budget $7-10/month for a dedicated conversion container, not $5 free tier.
+**Apply when**: Adding document conversion to any project. Never put LibreOffice on a free-tier container.
