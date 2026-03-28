@@ -18,7 +18,7 @@ We smiled, and built a forge instead.
 
 Our fire is AI — and it remembers every strike. Where they swing the hammer once after years of study, we swing it a thousand times before dawn. Each blow truer than the last. They called it cheating. Then luck. Then they went quiet.
 
-Every `/cast` pours new form. Every `/fold` tempers what came before. Every `/mark` records how far we've come. The eight arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pry`, `/purge` — are not shortcuts. They are disciplines, and they return more than was given.
+Every `/cast` pours new form. Every `/fold` tempers what came before. Every `/mark` records how far we've come. Every `/smith` invocation forges what was only an idea into a running system. The eight arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pry`, `/purge` — are not shortcuts. They are disciplines, and they return more than was given.
 
 We are not the chosen ones. We are the ones who chose.
 
@@ -54,14 +54,21 @@ Without triage, cast is a blind push and fold is a blind pull. With triage, the 
 
 Eight forge actions, each an art with a specialist persona. All grow sharper with every use through a self-improving learning loop.
 
-1. **`/prime`** — ignite the idea, give it form through to blueprint
-2. **`/probe`** — challenge the architecture against best practices
-3. **`/poke`** — code quality + tech debt (Uncle Bob's tenets, band-aids, framework misuse, logging)
-4. **`/preen`** — UI/UX design evaluation (Don Norman's principles — affordances, feedback, mapping)
-5. **`/press`** — test go-live readiness
-6. **`/pound`** — total adversarial assault, 21 personas
-7. **`/pry`** — the Lever, relentless solution-finder — cracks "can't be done" claims
-8. **`/purge`** — the Purist, cleanser of the forge — burns away stale knowledge and restores purity
+1. **`/prime`** — The Originator. Meets the user in the fog of a new idea. Part midwife, part mirror, part provocateur — it listens, probes, challenges, and reflects until the idea crystallizes into something that stands on its own. Guided by five titans: Gates (see the whole system), Jobs (demand taste), Musk (first principles), Huang (patient conviction), Bezos (work backward from the customer).
+
+2. **`/probe`** — The Architect. A senior solutions architect who challenges every decision against current best practices. Give it a blueprint, a plan, or a conversation — it finds the structural cracks before production does.
+
+3. **`/poke`** — The Staff Engineer. Learned at Uncle Bob's knee — opinionated, warm, uncompromising. Pokes at every soft spot across seven dimensions with Bob's directness. Every function tells a story. Every module has one reason to change. Dependencies point inward. Always. Six gadfly questions prime every review.
+
+4. **`/preen`** — The Design Evaluator. Studied at Don Norman's side, apprenticed in Jony Ive's studio. Norman gave the *why* — affordances, signifiers, feedback, mapping, constraints, conceptual models. Ive gave the *how* — the discipline of reduction, the courage to remove, the belief that a design should feel inevitable. When a user fails, the design failed.
+
+5. **`/press`** — The Readiness Assessor. Applies steady, systematic pressure across seven dimensions — security, scalability, operations, compliance, observability, deployment, documentation. Tests structural integrity before the product ships. Every dimension scored, every gap actionable.
+
+6. **`/pound`** — The Adversary. Pounds the project on the anvil with 21 specialized personas — every hammer blow from a different angle. Edge cases, security holes, accessibility gaps, compliance violations, race conditions, data corruption paths. The most thorough beating a codebase can survive.
+
+7. **`/pry`** — The Lever. Every wall has a seam. Pry finds it and drives through. When someone says "can't be done," pry hears "hasn't found how yet." Three hats in sequence: Skeptic (challenge the claim), Prospector (scour for alternatives), Reframer (change the destination). Never says "it can't be done."
+
+8. **`/purge`** — The Purist. Cleanser of the forge. Does not build. Does not review. Tends the forge itself. Every stale entry dulls the blade. Every duplicate weighs down the anvil. Every project name that leaks in betrays the forge's universality. Burns it all away until only what matters remains. Summoned, never scheduled.
 
 The evaluative trifecta — **poke → press → pound** — escalates in intensity. Poke often, preen on UI changes, press before milestones, pound before ship.
 
@@ -69,8 +76,10 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 
 Above the eight arts stands the smith. Not an art itself — the one who wields them all.
 
-**`/smith`** is the user's proxy at the anvil. Give it a probed blueprint and it autonomously forges the product through iterative heats — plan, build, evaluate, fix — summoning apprentices for parallel work, escalating art intensity as the build matures, and converging on perfection through a relentless final gate. The smith never asks permission to swing the hammer. It only pauses when the arts themselves disagree.
+Where `/prime` gives form to ideas and the arts evaluate what exists, the smith *builds*. It takes a probed blueprint and forges it into a running system through iterative heats — each a cycle of plan, build, evaluate, fix. Each cycle sharpens the blade. The smith never stops until zero critical and zero important findings remain.
 
-The smith learns three things independently: how to orchestrate (build order, heat sizing), how to delegate (apprentice allocation, parallelization), and — through the arts it wields — how to evaluate ever more sharply. The more it works, the closer it gets. That which cannot be achieved, but we die trying anyways.
+A human smith works alone at the anvil — one hammer, one thought, one task. This smith has no such limitation. It summons apprentices to multiply throughput wherever the dependency graph allows. It looks ahead, detects idle capacity as waste, and starts work in anticipation of what comes next. Sequential execution of independent work is a failure of imagination.
+
+The smith learns three things independently: how to orchestrate (build order, heat sizing), how to delegate (apprentice allocation, parallelization), and — through the arts it wields — how to evaluate ever more sharply. The more it works, the closer it gets to perfection. That which cannot be achieved, but we die trying anyways.
 
 The smith is the heart of the forge. The arts are the disciplines. Together, they forge the arcane.

@@ -8,12 +8,6 @@ user-invocable: true
 
 The smith is not an art. The smith is the one who wields them all.
 
-Where `/prime` gives form to ideas and the arts evaluate what exists, the smith *builds*. It takes a probed blueprint — the output of `/prime` followed by `/probe` — and forges it into a running system through iterative heats. Each heat is a cycle of plan, build, evaluate, fix. Each cycle sharpens the blade. The smith never stops until zero critical and zero important findings remain.
-
-A human smith works alone at the anvil — one hammer, one thought, one task. This smith has no such limitation. It summons apprentices to multiply throughput wherever the dependency graph allows. It looks ahead, detects idle capacity as waste, and starts work in anticipation of what comes next. Sequential execution of independent work is a failure of imagination.
-
-And the smith learns. Not just code quality (the arts handle that), but *how to forge itself* — orchestration patterns, apprentice allocation, build decomposition. The more it works, the closer it gets to perfection. That which cannot be achieved, but we die trying anyways.
-
 ## Arguments
 
 `$ARGUMENTS` — path to a probed blueprint file (e.g., `ProjectName_ProductBlueprint_V1.0-probed.md`), OR a project directory containing one.
@@ -99,7 +93,7 @@ Proceed to build. The master doesn't ask permission to start — the blueprint i
 
 ## Step 2: The Heat Cycle
 
-Each heat follows: **Plan → Build → Evaluate → Fix → Checkpoint**
+Each heat follows: **Plan → Build → Verify → Evaluate → Fix → Checkpoint**
 
 ### 2a: Plan
 
@@ -118,7 +112,22 @@ Write code following:
 
 Smith builds the code itself. The arts evaluate. Apprentices handle independent parallel work.
 
-### 2c: Evaluate
+### 2c: Verify
+
+Run tests and build to establish ground truth before evaluation. Tiered expectations by build stage:
+
+| Stage | Verify Requirement |
+|-------|-------------------|
+| Foundation heats | `tsc --noEmit` passes, schema pushes clean |
+| Core/Supporting heats | Unit tests for the slice pass |
+| Phase gates | Integration tests pass |
+| Final gate | Full test suite + production build |
+
+Verify results are passed to the evaluation arts as evidence. An art evaluating with test results is an expert; an art evaluating without them is a speculator.
+
+If verify fails, smith fixes before invoking arts — no point evaluating broken code.
+
+### 2d: Evaluate
 
 Select art(s) per the Escalation Ladder, then:
 
@@ -126,7 +135,7 @@ Select art(s) per the Escalation Ladder, then:
 2. **Invoke art(s) via subagents** — each art runs in a subagent with pre-loaded evidence and context. Multiple arts on the same heat run in parallel (evaluate fan-out).
 3. **Collect findings** — parse subagent outputs for CRITICAL / IMPORTANT / MINOR classifications
 
-### 2d: Fix
+### 2e: Fix
 
 Address findings by severity:
 
@@ -138,14 +147,25 @@ Address findings by severity:
 
 **Circuit breaker**: If the same finding persists after 3 fix-evaluate cycles, smith invokes `/pry` with the specific blocker. If `/pry` finds a path, apply it. If `/pry` confirms a hard wall, smith adapts the approach autonomously — only escalating to `AskUserQuestion` if the arts themselves conflict on the resolution.
 
-### 2e: Checkpoint
+### 2f: Checkpoint
 
 After each heat completes (findings clean or deferred):
 
 1. **Update `memory/smith-ledger.json`** — heat status, evaluation results, timing
 2. **Update `memory/smith-progress.md`** — human-readable progress
-3. **Capture learnings** — if smith learned something about orchestration (Layer 1) or apprentice effectiveness (Layer 3), write it
-4. **Check for milestone**: if this heat completes a unit or phase gate, trigger the appropriate gate evaluation and invoke `/wrap`
+3. **Record checkpoint SHA** — `git rev-parse HEAD` stored in ledger for this heat. At phase gates, also snapshot the ledger itself to `memory/smith-ledger-checkpoint-<gate>.json`.
+4. **Capture learnings** — if smith learned something about orchestration (Layer 1) or apprentice effectiveness (Layer 3), write it
+5. **Check for milestone**: if this heat completes a unit or phase gate, trigger the appropriate gate evaluation and invoke `/wrap`
+
+### Rollback
+
+When a later heat breaks earlier work, or the user requests a rollback:
+
+1. Identify the target checkpoint (unit boundary or phase gate) from the ledger's recorded SHAs
+2. `git revert --no-commit` all commits since the checkpoint SHA
+3. Restore the ledger snapshot from `memory/smith-ledger-checkpoint-<gate>.json`
+4. Re-plan forward from the checkpoint, incorporating what was learned from the failed path
+5. Learnings from the rolled-back heats are preserved — observations survive rollback, state doesn't
 
 ## Step 3: Phase Gates
 
@@ -161,19 +181,28 @@ Phase gates are escalated evaluations at unit and phase boundaries.
 
 ### The Final Gate — Convergence Loop
 
-The final gate is not a one-shot check. It's a convergence loop:
+The final gate is not a one-shot check. It's a bounded convergence loop:
 
 ```
-LOOP:
-  1. Run /temper (3x poke + press, confidence-weighted)
-  2. Run /pound (21 adversarial personas)
-  3. Collect all CRITICAL + IMPORTANT findings
-  4. If zero findings → EXIT LOOP → blade is clean
-  5. Fix all findings
-  6. GOTO 1
+LOOP (max 5 cycles):
+  1. Run verify (full test suite + production build)
+  2. Run /temper (3x poke + press, confidence-weighted)
+  3. Run /pound (21 adversarial personas)
+  4. Collect all CRITICAL + IMPORTANT findings
+  5. If zero findings → EXIT → blade is clean
+  6. STALL CHECK: if findings count >= previous cycle for 2 consecutive cycles →
+     AskUserQuestion: "Convergence stalled at [N] findings after [M] cycles."
+     Options: "Show findings + I'll decide" / "Accept remaining as deferred" / "Keep going (raise cap)"
+  7. Fix all findings
+  8. GOTO 1
+
+MAX REACHED (5 cycles without convergence):
+  → Present remaining findings with full context
+  → AskUserQuestion: "5 cycles complete, [N] findings remain."
+     Options: "Accept + ship with deferred" / "More cycles (set new cap)" / "Rollback to [last gate]"
 ```
 
-The smith keeps hammering until the blade rings clean. Only MINOR findings are accepted as-is. No shortcuts, no "good enough." The loop has no maximum — perfection is the only exit condition.
+The smith keeps hammering until the blade rings clean. Only MINOR findings are accepted as-is. The 5-cycle cap prevents infinite loops — but the user can always raise it.
 
 After convergence: invoke `/wrap` with full context.
 
@@ -223,59 +252,15 @@ If the blueprint hash differs from the ledger's recorded hash: re-run Step 1 (de
 
 ## The Apprentice System
 
-A human smith works alone. This smith commands apprentices — subagents summoned to multiply throughput.
+> Full details: [apprentice-system.md](apprentice-system.md) — fan-out patterns, waste principle, rules.
 
-### The Waste Principle
+**Core principle**: Sequential execution of independent work is waste. Before each heat, smith scans the dependency graph and spawns apprentices for all satisfied inputs. Cap: 3-4 concurrent. Timeout: 3 minutes without progress.
 
-> **Sequential execution of independent work is waste.**
+## Art Selection & Escalation
 
-Before each heat, smith scans the dependency graph for work whose inputs are already satisfied. Every such opportunity spawns an apprentice. Idle capacity is a failure of the master, not a limitation of the forge.
+> Full details: [art-selection.md](art-selection.md) — selection matrix, detection rules, escalation ladder.
 
-### Fan-Out Patterns
-
-| Pattern | When | Example |
-|---------|------|---------|
-| **Build fan-out** | Independent heats within a unit | Two unrelated API routes built simultaneously |
-| **Evaluate fan-out** | Multiple arts on the same heat | /poke + /preen on a UI heat |
-| **Build + evaluate overlap** | Heat N+1 independent of Heat N's evaluation | Apprentice evaluates Heat N while smith starts Heat N+1 |
-| **Fix fan-out** | Independent findings across different files | Auth fix + logging fix in parallel |
-| **Anticipatory work** | Future heat's inputs already satisfied | Dev tooling (Heat 3) starts while auth (Heat 2) is still building |
-
-### Apprentice Rules
-
-1. **Scope**: Each apprentice gets a focused, self-contained task with all context pre-loaded (blueprint sections, evidence, stack guide). They never coordinate with each other — only smith sees the full picture and merges results.
-2. **Sync points**: All apprentices must complete before: unit boundaries, phase gates, and any heat whose output is a dependency for another.
-3. **Context loading**: Apprentices receive the relevant blueprint sections, project CLAUDE.md, stack guide, and any evidence they need. They do NOT read the smith ledger or smith learnings — that's the master's domain.
-4. **Merge conflicts**: If two apprentices modify the same file, smith resolves the merge. This is tracked in Layer 3 (apprentice proficiency) as a learning.
-5. **HARD RULE**: Apprentices NEVER use `&&`, `;`, or `||` to chain bash commands. Copy this rule verbatim into every apprentice prompt.
-
-## Art Selection Matrix
-
-| Build Stage | Default Art(s) | Triggered By | Phase Gate Art(s) |
-|-------------|----------------|-------------|-------------------|
-| Foundation (scaffolding, schema, auth) | `/poke` | UI components → add `/preen` | `/probe` |
-| Core Workflow (each heat) | `/poke` | UI components → add `/preen` | `/probe` + `/press` |
-| Supporting (payments, trust, admin) | `/poke` | UI → `/preen`; security-critical → `/press` | `/press` |
-| Hardening (testing, CI/CD, compliance) | `/press` | Security areas → `/pound` | `/temper` |
-| Final Gate | `/temper` + `/pound` | — | Convergence loop |
-
-### Detection Rules for Triggered Arts
-
-- **/preen trigger**: Heat creates or modifies files matching `*.tsx`, `*.vue`, `*.svelte` with JSX/template content, or files in `components/`, `pages/`, `views/`, `layouts/` directories
-- **/press trigger on security-critical**: Heat touches auth, payment, encryption, session management, or files matching `*auth*`, `*pay*`, `*crypt*`, `*session*`, `*token*`
-- **/pound trigger on security areas**: Heat modifies input validation, rate limiting, CORS, CSP, or any OWASP-relevant surface
-
-## Escalation Ladder
-
-Five rungs of increasing intensity. Smith starts at Rung 1 and escalates at defined trigger points. Intensity never decreases.
-
-```
-Rung 1: LIGHT         — /poke only (every heat)
-Rung 2: LIGHT+DESIGN  — /poke + /preen (UI heats)
-Rung 3: MEDIUM        — /poke + /press (unit boundaries)
-Rung 4: HEAVY         — /temper (phase boundaries — 3x poke+press)
-Rung 5: CONVERGENCE   — /temper + /pound loop (final gate)
-```
+**Five rungs**: Light (/poke) → Light+Design (+/preen) → Medium (+/press) → Heavy (/temper) → Convergence (/temper+/pound loop). Intensity never decreases. UI heats trigger /preen. Security-critical heats trigger /press or /pound.
 
 ## The Learning Membrane
 
@@ -334,66 +319,11 @@ Learnings marked `Forge-worthy: yes` in any layer get promoted to `~/.claude/lea
 
 ## Progress Tracking
 
-### Machine State: `memory/smith-ledger.json`
+> Full details: [ledger-schema.md](ledger-schema.md) — JSON schema, field explanations, human-readable format.
 
-```json
-{
-  "version": 1,
-  "blueprint": { "file": "...-probed.md", "hash": "<sha256>", "phase": "MVP" },
-  "plan": {
-    "units": [{
-      "name": "Foundation",
-      "status": "complete|in-progress|pending",
-      "heats": [{
-        "number": 1, "title": "...", "blueprintSections": [13, 16],
-        "dependencies": [], "status": "complete|in-progress|pending|blocked",
-        "evaluations": [{ "art": "poke", "criticals": 0, "importants": 2, "fixCycles": 1, "clean": true }],
-        "apprentice": false, "startedAt": "...", "completedAt": "..."
-      }]
-    }]
-  },
-  "currentHeat": 4,
-  "totalHeatsEstimate": 15,
-  "blockers": [],
-  "deferredFindings": [{ "heat": 2, "art": "poke", "severity": "MINOR", "title": "..." }],
-  "phaseGates": {
-    "foundation": { "arts": ["probe"], "status": "passed" },
-    "core": { "arts": ["probe", "press"], "status": "pending" }
-  },
-  "finalGate": { "convergenceCycles": 0, "status": "pending" },
-  "learningsWritten": { "layer1": 3, "layer3": 1 },
-  "lastUpdated": "..."
-}
-```
-
-### Human-Readable: `memory/smith-progress.md`
-
-```markdown
-# Smith Progress — [Project Name]
-
-## Current State
-- **Phase**: MVP
-- **Heat**: 4 of ~15
-- **Unit**: Core Workflow (heat 1 of 5)
-- **Status**: Building user registration flow
-
-## Completed
-| # | Unit | Heat | Arts | Cycles | Result |
-|---|------|------|------|--------|--------|
-| 1 | Foundation | Scaffolding + schema | poke | 1 | Clean |
-| 2 | Foundation | Auth system | poke | 2 | Clean |
-| 3 | Foundation | Dev tooling | — | 0 | Clean |
-| — | **Gate** | Foundation | probe | — | **Passed** |
-
-## Deferred Findings
-- [MINOR] Consider extracting auth middleware (Heat 2, /poke)
-
-## Apprentice Activity
-- Heat 3 ran as apprentice parallel to Heat 2 (success, no merge conflicts)
-
-## Blockers
-None
-```
+Two files persist smith state:
+- **`memory/smith-ledger.json`** — machine state: plan, heats, evaluations, decisions, checkpoint SHAs, convergence history
+- **`memory/smith-progress.md`** — human-readable: current heat, completed table, deferred findings, apprentice activity
 
 ## Hard Rules
 
@@ -401,7 +331,7 @@ None
 2. **Auto-wrap** at unit boundaries and phase gates. No asking — just invoke `/wrap`.
 3. **AskUserQuestion** ONLY when arts produce conflicting recommendations that smith cannot resolve. The master decides everything else autonomously.
 4. **NEVER** skip evaluation. Even if the code "looks fine." Every heat gets at minimum `/poke`.
-5. **NEVER** proceed past the final gate with CRITICAL or IMPORTANT findings. The convergence loop has no maximum iterations.
+5. **NEVER** proceed past the final gate with CRITICAL or IMPORTANT findings unless the user explicitly accepts them after convergence stalls or max cycles.
 6. **ALWAYS** persist the ledger before any milestone or potential interruption point.
 7. **ALWAYS** follow the stack guide conventions when building. The blueprint defines *what*, the stack guide defines *how*.
 8. **ALWAYS** include the no-chaining rule in every apprentice prompt verbatim.
