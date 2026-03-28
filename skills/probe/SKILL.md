@@ -40,6 +40,40 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
      - Are there integration mismatches? (ML-heavy project without Python; mobile app without TypeScript)
      - Would a multi-language architecture serve better? (e.g., TypeScript API + Python ML service)
      - Does the blueprint justify the language choice, or did it just default without evaluation?
+   - **Testing architecture evaluation** (for Section 18 specifically):
+
+     **Blueprint mode** — challenge the written test strategy against these 6 criteria. A substantive strategy names specifics; a vague one uses declarative placeholders:
+
+     | Criterion | Substantive | Vague (flag it) |
+     |-----------|-------------|-----------------|
+     | Tool selection | Names frameworks + rationale tied to the stack (e.g., "Vitest for unit tests because collocated with Vite build") | "We will write tests" or tool names with no justification |
+     | Layer boundaries | Defines what gets unit vs integration vs E2E and why | "We will have unit and E2E tests" with no delineation |
+     | Critical path identification | Lists specific flows requiring E2E coverage (auth, payments, primary user workflow from Section 5, data mutations) | "Critical paths will be tested" without naming them |
+     | Test data strategy | Specifies factories, fixtures, seed data approach, test DB provisioning | No mention of how test state is managed |
+     | CI integration | Which tests run at which pipeline stage (PR checks vs nightly vs deploy gate) | "Tests will run in CI" |
+     | Coverage approach | Explicit targets per layer OR deliberate rationale for no numeric targets | Silent on coverage |
+
+     If Section 18 is under 100 words or matches zero substantive criteria → flag as **IMPORTANT**: "Testing strategy is declarative, not architectural. A build agent cannot implement tests from this section — it needs layer boundaries, critical paths, and data strategy."
+
+     **Codebase mode** — when probing a live codebase, verify actual test infrastructure:
+
+     | Check | What to look for | Severity if absent |
+     |-------|-----------------|-------------------|
+     | Test files exist | `.test.ts`, `.spec.ts`, `__tests__/` directories | CRITICAL if zero in project; IMPORTANT if major packages lack them |
+     | E2E tests for UI packages | Playwright test files, `playwright.config.ts` | CRITICAL if any UI package has zero E2E |
+     | Test runner configured | `vitest.config.ts`, `playwright.config.ts` in relevant packages | IMPORTANT |
+     | Critical path coverage | Auth, payment, and data mutation flows have corresponding test files | CRITICAL for auth/payments; IMPORTANT for other mutations |
+     | Test infrastructure | Shared fixtures, factories, helpers, test utilities | MINOR |
+     | CI runs tests | GitHub Actions or CI config includes test commands | IMPORTANT |
+     | Test isolation | `beforeEach`/`afterEach` patterns, DB reset between tests, no sequential dependencies | IMPORTANT |
+
+     Produce a **Test Coverage Map** — one line per package/directory summarizing test presence:
+     ```
+     packages/server/   — 12 test files, vitest ✓, auth ✓, payments MISSING
+     packages/web/      — 3 test files, no E2E (CRITICAL)
+     packages/shared/   — 0 test files (IMPORTANT — validation logic untested)
+     ```
+
 4. **Enhance or confirm** the section with:
    - Updated recommendations with justification
    - Specific configuration guidance
@@ -52,6 +86,7 @@ Additionally, verify the blueprint includes:
 - **Logging strategy** aligned with `<forge>/skills/forge/stack-guide.md` Logging Convention (structured logging, dev vs prod verbosity, browser console forwarding). If absent, flag it.
 - **Dev setup plan** that includes `restart.sh` and `kill-zombies.sh` (see `<forge>/skills/forge/forge-conventions.md` items 6-7). If absent, flag it.
 - **Language justification**: Section 13 must include explicit reasoning for the backend language choice — not just "we're using TypeScript" but WHY it fits this project's signals. If the justification is missing or generic ("it's popular"), flag as IMPORTANT.
+- **Testing strategy**: Section 18 must go beyond tool names — it must specify (1) which layers get which test types and why, (2) the critical user flows requiring E2E coverage, and (3) how test data is provisioned. If purely declarative (just naming tools without architectural decisions), flag as IMPORTANT.
 
 ## Output
 

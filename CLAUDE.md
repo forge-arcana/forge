@@ -126,5 +126,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.fold-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Fixed cast SKILL.md — shorthand commands (wawa/wrap/qt) now treated like hard rules: global-only, never duplicated in project CLAUDE.md. Cast divergence report flags duplication for removal.
+- **Recent**: Extended /probe with test architecture evaluation (Section 18). Blueprint mode: 6 substantive-vs-vague criteria. Codebase mode: 7 mechanically verifiable checks + per-package Test Coverage Map. Smith gets test awareness via probe for free.
 - **Pending**: None — membrane is current after cast
