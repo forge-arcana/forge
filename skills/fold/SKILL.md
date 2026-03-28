@@ -89,7 +89,7 @@ Launch Parts 3 and 4 in parallel (independent absorptions):
 ### Step 0: Promote Forge-worthy Learnings from Project Memories
 
 Scan `~/.claude/projects/*/memory/*-learnings.md` for entries tagged `Forge-worthy: yes`. For each:
-1. Skip if title already in `<forge>/learnings/.reforge-tracker.json` `promotedEntries` or in `~/.claude/learnings/general.md`
+1. Skip if title already in `<forge>/learnings/.fold-tracker.json` `promotedEntries` or in `~/.claude/learnings/general.md`
 2. Genericize (strip project names, paths, domains — see forge CLAUDE.md "No Project Names" rule)
 3. Append to `~/.claude/learnings/general.md` with `<!-- promoted from project memory, YYYY-MM-DD -->` comment
 4. Add title to tracker `promotedEntries`
@@ -159,7 +159,7 @@ Source entries in `~/.claude/learnings/` are NEVER deleted.
 
 ### Processing Tracker
 
-Maintain `<forge>/learnings/.reforge-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked. If Part 2 review fires, reset tracker.
+Maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked. If Part 2 review fires, reset tracker.
 
 ---
 
