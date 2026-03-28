@@ -8,7 +8,7 @@
 - [ ] Exists
 - [ ] Hard rules live in global `~/.claude/CLAUDE.md` — do NOT duplicate in project CLAUDE.md
 - [ ] Has Stack section (frameworks, DB, hosting)
-- [ ] Has Shorthand Commands section (wawa → /wawa, wrap → /wrap)
+- [ ] Shorthand commands live in global `~/.claude/CLAUDE.md` — do NOT duplicate in project CLAUDE.md
 - [ ] Has Current Context section (updated by /wrap)
 - [ ] Under 20k chars (compacted by /wrap)
 
