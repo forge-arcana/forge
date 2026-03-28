@@ -161,6 +161,8 @@ Source entries in `~/.claude/learnings/` are NEVER deleted.
 
 Maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked. If Part 2 review fires, reset tracker.
 
+> **One-time migration**: If `<forge>/learnings/.reforge-tracker.json` exists, copy its `processedEntries` and `promotedEntries` into `.fold-tracker.json` before proceeding, then delete `.reforge-tracker.json`. The old name is dead — any entries tracked there must be preserved or every fold run will re-triage the entire history.
+
 ---
 
 ## Part 4: Memory Absorption
