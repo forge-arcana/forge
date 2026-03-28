@@ -104,7 +104,14 @@ Use fold-evidence.sh output for membrane learnings (Section 3) and forge learnin
 
 Classify each candidate: **NEW** (absorb), **DUPLICATE** (skip), **INCORPORATED** (already in SKILL.md — skip), **SUPERSEDED** (flag), **CROSS-CUTTING** (route to global-patterns + relevant skill files).
 
-Build a unified PLAN table from ALL parts (config sync, skills, learnings, memories) — one table, one decision point. Use contributor names from `git blame` on forge files and first-sentence summaries from the Learning Details in `forge-status.sh` output.
+Build a unified PLAN table from ALL parts (config sync, skills, learnings, memories) — one table, one decision point. Use contributor names from `git blame` on forge files and full learning bodies from the Learning Details in `forge-status.sh` output.
+
+**Every row that represents a change must include a sub-row showing the essence of the change** — not the filename or commit title, but the rule, principle, or knowledge that will land in forge. The user must be able to judge each item before approving.
+
+- **Skill row** → the specific rule, step, or behaviour being absorbed (not the commit message)
+- **Learning row** → the full `**Learning**:` body + `**Apply when**:` line
+- **Config row** → the specific rule or setting being merged
+- **Memory row** → the key principle or convention the file encodes
 
 ```markdown
 ## Forge Transfer — /fold | YYYY-MM-DD | PLAN
@@ -112,12 +119,16 @@ Build a unified PLAN table from ALL parts (config sync, skills, learnings, memor
 | What | Action | Contributor |
 |------|--------|-------------|
 | `/probe` skill | absorb (deployed-differs) | — |
+|   → Added: check for circular dependency risks when evaluating service boundaries. Flag any design where service A calls B and B calls A synchronously. | | |
 | claude-code-rules.md (config) | merge | — |
+|   → Adding WebFetch domain: `better-auth.com`. Adding `tsx` to auto-allowed commands. | | |
 | Integer Money Pattern | absorb → global-patterns.md | cygnum |
-|   → Store all currency as smallest-unit integers (cents/centavos) in the database | | |
+|   → Learning: Store all currency as smallest-unit integers (cents/centavos) in the database. Convert at boundaries: input → `toSmallest()`, payment provider → `fromSmallest()`, display → `format()`. Eliminates floating-point drift. `numeric`/`decimal` DB types map to strings in most ORMs, causing scattered cast bugs. | | |
+|   → Apply when: any feature that stores, calculates, or displays monetary values | | |
 | Mobile Testing Progression | skip (duplicate) | cygnum |
 |   → Already in global-patterns.md | | |
 | deploy-practices.md (memory) | absorb | — |
+|   → Convention: gate all deploy scripts behind environment checks; never run destructive ops without explicit env confirmation | | |
 
 3 skills identical, 2 learnings in forge — omitted.
 ```
@@ -209,16 +220,28 @@ Never delete — archival is a move.
 
 Present the receipt of what was actually executed. Only include rows for items that changed — no "in sync" rows.
 
+**Every changed row must include a sub-row showing the essence of the change** — not the filename or commit title, but the rule, principle, or knowledge that now lives in forge. A reader who never saw the PLAN table must understand *what shifted* from this report alone.
+
+- **Skill row** → the specific rule, step, or behaviour that was absorbed (not the commit message)
+- **Learning row** → the full `**Learning**:` body + `**Apply when**:` line
+- **Config row** → the specific rule or setting that was merged
+- **Memory row** → the key principle or convention the file encodes
+
 ```markdown
 ## Forge Transfer — /fold | YYYY-MM-DD | DONE
 
 | What | Result | Contributor |
 |------|--------|-------------|
 | `/probe` skill | absorbed | — |
+|   → Added: check for circular dependency risks when evaluating service boundaries. Flag any design where service A calls B and B calls A synchronously. | | |
 | claude-code-rules.md (config) | merged | — |
+|   → Added WebFetch domain: `better-auth.com`. Added `tsx` to auto-allowed commands. | | |
 | Integer Money Pattern | absorbed → global-patterns.md | cygnum |
+|   → Learning: Store all currency as smallest-unit integers (cents/centavos) in the database. Convert at boundaries: input → `toSmallest()`, payment provider → `fromSmallest()`, display → `format()`. Eliminates floating-point drift. `numeric`/`decimal` DB types map to strings in most ORMs, causing scattered cast bugs. | | |
+|   → Apply when: any feature that stores, calculates, or displays monetary values | | |
 | Mobile Testing Progression | skipped (duplicate) | cygnum |
 | deploy-practices.md (memory) | absorbed | — |
+|   → Convention: gate all deploy scripts behind environment checks; never run destructive ops without explicit env confirmation | | |
 
 Commit: `abc1234` — pushed to origin/main
 ```

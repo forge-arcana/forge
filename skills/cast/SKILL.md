@@ -25,16 +25,24 @@ This resolves the forge path, pulls the latest forge (aborting if diverged), and
 
 Build a unified table from the preflight output showing everything that will change across all three pillars (skills, learnings, memory). Use the Learning Details section from `forge-status.sh` for contributor names and summaries.
 
+**Every row that represents a change must include a sub-row showing the essence of the change** — not the filename or commit title, but the rule, principle, or knowledge that will land in the membrane. The user must be able to judge each item before approving.
+
+- **Skill row** → the specific rule, step, or behaviour that changed (not the commit message)
+- **Learning row** → the full `**Learning**:` body + `**Apply when**:` line
+- **Memory row** → the key principle or convention the file encodes
+
 ```markdown
 ## Forge Transfer — /cast | YYYY-MM-DD | PLAN
 
 | What | Action | Contributor |
 |------|--------|-------------|
 | `/fold` skill | update | Pauee OSB |
-| `/temper` skill | update | cygnum |
-| Android 15 Edge-to-Edge Status Bar Overlap | sync | cygnum |
-|   → Android 15 enforces edge-to-edge rendering — only fix is adjustMarginsForEdgeToEdge | | |
+|   → HARD RULE added: write absorbed learnings to `<forge>/learnings/`, never `~/.claude/learnings/`. Writing to membrane silently skips forge, creating a permanent gap no future fold run can fix. | | |
+| Android 15 Edge-to-Edge Status Bar Overlap | sync → global-patterns.md | cygnum |
+|   → Learning: Android 15 enforces edge-to-edge by default. `StatusBar.setOverlaysWebView` is silently ignored. CSS `env(safe-area-inset-top)` returns 0 on Android WebView. Only working fix in Capacitor 7: `adjustMarginsForEdgeToEdge: "force"` in `capacitor.config.ts`. Do not stack multiple fixes — they add padding independently. | | |
+|   → Apply when: Capacitor 7 + Android 15 target, status bar overlap reported | | |
 | deploy-practices.md (memory) | sync | — |
+|   → Convention: gate all deploy scripts behind environment checks; never run destructive ops without explicit env confirmation | | |
 
 17 skills identical, 5 learnings in sync, memory in sync — omitted.
 ```
@@ -155,15 +163,24 @@ Docs are in the `docs/` directory.
 
 Present the receipt of what was actually executed. Only include rows for items that changed — no "in sync" rows.
 
+**Every changed row must include a sub-row showing the essence of the change** — not the filename or commit title, but the rule, principle, or knowledge that now lives in the membrane. A reader who never saw the PLAN table must understand *what shifted* from this report alone.
+
+- **Skill row** → the specific rule, step, or behaviour that changed (not the commit message)
+- **Learning row** → the full `**Learning**:` body + `**Apply when**:` line
+- **Memory row** → the key principle or convention the file encodes
+
 ```markdown
 ## Forge Transfer — /cast | YYYY-MM-DD | DONE
 
 | What | Result | Contributor |
 |------|--------|-------------|
 | `/fold` skill | updated | Pauee OSB |
-| `/temper` skill | updated | cygnum |
-| Android 15 Edge-to-Edge Status Bar Overlap | synced | cygnum |
+|   → HARD RULE added: write absorbed learnings to `<forge>/learnings/`, never `~/.claude/learnings/`. Writing to membrane silently skips forge, creating a permanent gap no future fold run can fix. | | |
+| Android 15 Edge-to-Edge Status Bar Overlap | synced → global-patterns.md | cygnum |
+|   → Learning: Android 15 enforces edge-to-edge by default. `StatusBar.setOverlaysWebView` is silently ignored. CSS `env(safe-area-inset-top)` returns 0 on Android WebView. Only working fix in Capacitor 7: `adjustMarginsForEdgeToEdge: "force"` in `capacitor.config.ts`. Do not stack multiple fixes — they add padding independently. | | |
+|   → Apply when: Capacitor 7 + Android 15 target, status bar overlap reported | | |
 | deploy-practices.md (memory) | synced | — |
+|   → Convention: gate all deploy scripts behind environment checks; never run destructive ops without explicit env confirmation | | |
 
 Baseline recorded: `abc1234`
 ```
