@@ -287,11 +287,32 @@ else
   echo ""
 fi
 
-# Skill-specific learnings
+# Skill-specific learnings — title-based comparison across ALL forge files + tracker
 echo "### Skill-Specific Learnings"
 echo ""
 echo "| File | User Copy | Forge Copy | Status |"
 echo "|------|-----------|------------|--------|"
+
+# Build global title index: all titles across all forge learning files + tracker processedEntries
+ALL_FORGE_TITLES_FILE=$(mktemp)
+"$NODE_BIN" -e "
+const fs = require('fs'), path = require('path');
+const dir = '$W_FORGE/learnings';
+const titles = new Set();
+// Collect titles from all forge .md files
+for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.md'))) {
+  for (const l of fs.readFileSync(path.join(dir, f),'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) titles.add(m[1].trim());
+  }
+}
+// Also add tracker processedEntries
+try {
+  const t = JSON.parse(fs.readFileSync(path.join(dir, '.fold-tracker.json'),'utf8'));
+  for (const e of (t.processedEntries || [])) titles.add(e);
+} catch(e) {}
+for (const t of [...titles].sort()) console.log(t);
+" 2>/dev/null > "$ALL_FORGE_TITLES_FILE" || true
 
 LEARNING_DETAILS_LINES=()
 for forge_file in "$FORGE_PATH"/learnings/*.md; do
@@ -308,20 +329,50 @@ for forge_file in "$FORGE_PATH"/learnings/*.md; do
   if [[ -f "$user_file" ]]; then
     user_count=$(grep -c '^## ' "$user_file" 2>/dev/null || true)
     user_count=${user_count:-0}
-    if [[ "$user_count" -eq "$forge_count" ]]; then
+
+    # Title-based comparison: find titles truly new (not in ANY forge file or tracker)
+    comparison=$("$NODE_BIN" -e "
+const fs = require('fs');
+function getTitles(p) {
+  const t = new Set();
+  try { for (const l of fs.readFileSync(p,'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) t.add(m[1].trim());
+  }} catch(e) {}
+  return t;
+}
+const userT = getTitles('$w_user_file');
+const forgeFileT = getTitles('$w_forge_file');
+const allForgeT = new Set(fs.readFileSync('$(winpath "$ALL_FORGE_TITLES_FILE")','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
+// Truly new in user = in user file, not in ANY forge file or tracker
+const newInUser = [...userT].filter(t => !allForgeT.has(t)).sort();
+// New in this forge file = in forge file, not in user file
+const newInForge = [...forgeFileT].filter(t => !userT.has(t)).sort();
+console.log(JSON.stringify({newInUser, newInForge}));
+" 2>/dev/null || echo '{"newInUser":[],"newInForge":[]}')
+
+    new_in_user=$("$NODE_BIN" -e "console.log(JSON.parse('$comparison').newInUser.length)" 2>/dev/null || echo "0")
+    new_in_forge=$("$NODE_BIN" -e "console.log(JSON.parse('$comparison').newInForge.length)" 2>/dev/null || echo "0")
+
+    if [[ "$new_in_user" -eq 0 && "$new_in_forge" -eq 0 ]]; then
       content_diff=$(diff --strip-trailing-cr "$user_file" "$forge_file" 2>/dev/null || true)
       if [[ -z "$content_diff" ]]; then
         echo "| $fname | $user_count | $forge_count | In sync |"
       else
-        echo "| $fname | $user_count | $forge_count | Same count but content differs -- fold needed |"
+        echo "| $fname | $user_count | $forge_count | Content differs but all titles accounted for |"
       fi
-    elif [[ "$user_count" -gt "$forge_count" ]]; then
-      diff=$((user_count - forge_count))
-      echo "| $fname | $user_count | $forge_count | $diff new in user -- fold needed |"
-      # Collect detail: titles + summaries for entries in user but not in forge
+    elif [[ "$new_in_user" -gt 0 && "$new_in_forge" -eq 0 ]]; then
+      echo "| $fname | $user_count | $forge_count | $new_in_user new in user -- fold needed |"
+    elif [[ "$new_in_user" -eq 0 && "$new_in_forge" -gt 0 ]]; then
+      echo "| $fname | $user_count | $forge_count | $new_in_forge new in forge -- cast needed |"
+    else
+      echo "| $fname | $user_count | $forge_count | $new_in_user new in user, $new_in_forge new in forge |"
+    fi
+
+    # Collect detail lines for truly new entries
+    if [[ "$new_in_user" -gt 0 ]]; then
       detail_lines=$("$NODE_BIN" -e "
 const fs = require('fs');
-const {execSync} = require('child_process');
 function getEntries(p) {
   const e = {}; let cur = null;
   try { for (const l of fs.readFileSync(p,'utf8').split('\n')) {
@@ -336,8 +387,8 @@ function getEntries(p) {
   return e;
 }
 const userE = getEntries('$w_user_file');
-const forgeE = getEntries('$w_forge_file');
-const newTitles = Object.keys(userE).filter(t => !(t in forgeE)).sort();
+const allForgeT = new Set(fs.readFileSync('$(winpath "$ALL_FORGE_TITLES_FILE")','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
+const newTitles = Object.keys(userE).filter(t => !allForgeT.has(t)).sort();
 for (const t of newTitles) {
   console.log(t);
   if (userE[t]) console.log('  -> ' + userE[t]);
@@ -353,10 +404,9 @@ for (const t of newTitles) {
           fi
         done <<< "$detail_lines"
       fi
-    else
-      diff=$((forge_count - user_count))
-      echo "| $fname | $user_count | $forge_count | $diff new in forge -- cast needed |"
-      # Collect detail: titles + summaries for entries in forge but not in user
+    fi
+
+    if [[ "$new_in_forge" -gt 0 ]]; then
       detail_lines=$("$NODE_BIN" -e "
 const fs = require('fs');
 const {execSync} = require('child_process');
@@ -388,10 +438,18 @@ function getBlame(p, forgePath) {
   } catch(e) {}
   return authors;
 }
+function getTitles(p) {
+  const t = new Set();
+  try { for (const l of fs.readFileSync(p,'utf8').split('\n')) {
+    const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
+    if (m) t.add(m[1].trim());
+  }} catch(e) {}
+  return t;
+}
 const forgeE = getEntries('$w_forge_file');
-const userE = getEntries('$w_user_file');
+const userT = getTitles('$w_user_file');
 const blame = getBlame('$w_forge_file', '$W_FORGE');
-const newTitles = Object.keys(forgeE).filter(t => !(t in userE)).sort();
+const newTitles = Object.keys(forgeE).filter(t => !userT.has(t)).sort();
 for (const t of newTitles) {
   const a = blame[t] || '';
   console.log(t + (a ? ' (' + a + ')' : ''));
@@ -463,6 +521,7 @@ for (const t of Object.keys(forgeE).sort()) {
     fi
   fi
 done
+rm -f "$ALL_FORGE_TITLES_FILE"
 echo ""
 
 if [[ ${#LEARNING_DETAILS_LINES[@]} -gt 0 ]]; then
@@ -511,8 +570,21 @@ if [[ -d "$HOME/.claude/memory" ]]; then
         echo "| $fname | yes | yes | In sync |"
         MEM_SYNC=$((MEM_SYNC + 1))
       else
-        echo "| $fname | yes | yes (differs) | Updated -- fold candidate |"
-        MEM_FOLD=$((MEM_FOLD + 1))
+        # Determine direction using baseline
+        if [[ -n "$LAST_CAST_SHA" ]]; then
+          forge_mem_changed="no"
+          git -C "$FORGE_PATH" diff --quiet "$LAST_CAST_SHA" HEAD -- "memory/$fname" 2>/dev/null || forge_mem_changed="yes"
+          if [[ "$forge_mem_changed" == "yes" ]]; then
+            echo "| $fname | yes | yes (differs) | Forge updated -- cast needed |"
+            MEM_CAST=$((MEM_CAST + 1))
+          else
+            echo "| $fname | yes | yes (differs) | Membrane updated -- fold candidate |"
+            MEM_FOLD=$((MEM_FOLD + 1))
+          fi
+        else
+          echo "| $fname | yes | yes (differs) | Updated (no baseline) -- run /cast first |"
+          MEM_FOLD=$((MEM_FOLD + 1))
+        fi
       fi
     else
       # Check if skipped
