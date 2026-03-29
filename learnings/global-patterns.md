@@ -143,10 +143,6 @@
 **Learning**: When source-of-truth files are edited directly, deployed copies in the sync target become stale instantly. If the absorption command runs from another session before the deployment command updates the target, it sees DIFFERS and absorbs the stale deployed version — silently reverting the source edit. This is a race condition in bidirectional sync: concurrent sessions can undo each other's work via the absorption path. Prevention: always run the deployment command immediately after direct source edits.
 **Apply when**: Operating any bidirectional sync system (deploy + absorb) where source files are edited directly.
 
-## Test Factories Must Mirror Production DI Container (2026-03-29)
-**Learning**: When adding a new service to the production DI container, always update test helper factories (e.g., `createTestApp`) to create and inject the same service. CI tests use the test factory, not the production startup — a missing service causes `undefined` errors that only surface in CI, not local dev where the production startup path is used.
-**Apply when**: Adding services to a DI container that has a separate test factory for CI/E2E tests.
-
 ## Firebase API Key Restriction for Public Repos (2026-03-29)
 **Learning**: Firebase API keys are project identifiers (not secrets), but in public repos, ALWAYS restrict the key to the deployment domain via Google Cloud API Keys API. Add HTTP referrer restrictions (deployment domain + `localhost/*` + `127.0.0.1/*`). Security rules protect data integrity, but unrestricted keys let unauthorized apps consume quota or abuse Firebase resources from other origins.
 **Apply when**: Setting up Firebase in any project, especially public repos or GitHub Pages sites.
@@ -168,18 +164,6 @@
 
 **Platform specifics**: GCP Cloud Run `--no-allow-unauthenticated` blocks all traffic at the infrastructure level. Vercel Password Protection, AWS WAF IP restrictions, Netlify Identity for other platforms.
 **Apply when**: Deploying any application to any environment. Non-production: check whether real end users need unauthenticated access — internal staging gets IAM gating, customer-facing staging gets app-level headers only. Production = allow crawling only on public-facing pages, block on private services.
-
-## SKILL.md Frontmatter Attributes (2026-03-15)
-**Learning**: `allowed-tools` and `context` are NOT valid SKILL.md frontmatter attributes. Valid attributes: `argument-hint`, `compatibility`, `description`, `disable-model-invocation`, `license`, `metadata`, `name`, `user-invocable`. Use `user-invocable: true` for skills the user can invoke directly.
-**Apply when**: Writing or editing any SKILL.md file.
-
-## Fold/Cast Race Condition on Direct Source Edits (2026-03-22)
-**Learning**: When skill files are edited directly in the source repo, deployed copies become stale instantly. If a reverse-sync runs from another session before forward-sync updates the deployed copies, the stale deployed version gets absorbed — silently reverting the source edit. Prevention: always run forward-sync immediately after direct source edits to keep deployed copies current, OR detect "source is ahead of deployed baseline" and skip absorption for those files.
-**Apply when**: Editing skill files directly in the source repo, or investigating unexpected reverts after a reverse-sync run.
-
-## All Transfers Are Guarded by User Wisdom (2026-03-22)
-**Learning**: ALL pillars (skills, config, learnings, memory) require user review in BOTH directions. Forward-sync and reverse-sync both present a PLAN table where the user approves/rejects individual items. Nothing transfers without user judgment — no pillar gets a mechanical bypass. A skill can have a bad update. A config can have stale rules. A learning can be wrong. The source repo is the source of truth for structure, but the user is the source of truth for judgment. Treating any pillar as "just mechanical" or "always correct" leads to silent propagation of errors.
-**Apply when**: Designing or reviewing any transfer mechanism between source and deployed copies. Any time you're tempted to say a transfer is "automatic" — the user reviews every item.
 
 ## Reverse-Sync Must Write to Source, Not Deployed Copies (2026-03-28)
 **Learning**: A reverse-sync process that classifies entries from a staging file into category-specific files must write to the **source repo copies**, NOT the **deployed copies**. Writing only to deployed copies creates a permanent gap: deployed has more entries than source, and every status check reports "new entries — sync needed." Re-running doesn't fix it because the staging file entries are already marked as processed in the tracker.
