@@ -172,9 +172,9 @@ Source entries in `~/.claude/learnings/` are NEVER deleted.
 
 Maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked.
 
-> **HARD RULE — Tracker is APPEND-ONLY (with one exception).**
-> Never remove entries from `processedEntries` — removing an entry causes fold to re-absorb the learning from the membrane, creating duplicates. Residue entries (tracked but no matching forge file) are harmless — fold just skips them.
-> **The only safe removal**: Part 5 Tracker Compaction — after an entry is archived out of `general.md`, its tracker entry can be removed because fold can no longer find it in the membrane to re-absorb.
+> **HARD RULE — Tracker is APPEND-ONLY. No exceptions.**
+> Never remove entries from `processedEntries`. The tracker lives in the forge repo (shared across all users). Each user has their own membrane. Removing a tracker entry based on one user's membrane state causes every OTHER user's fold to re-absorb that entry — creating duplicates across the team. No single user can see all membranes, so no single user can safely compact the tracker.
+> Residue entries (tracked but no matching forge file) are harmless — fold just skips them. A tracker with 1000 entries is ~10KB. Let it grow.
 
 > **One-time migration**: If `<forge>/learnings/.reforge-tracker.json` exists, copy its `processedEntries` and `promotedEntries` into `.fold-tracker.json` before proceeding, then delete `.reforge-tracker.json`. The old name is dead — any entries tracked there must be preserved or every fold run will re-triage the entire history.
 
@@ -220,19 +220,7 @@ For **memory archival**: files identical in both membrane and forge → offer to
 
 Never delete — archival is a move.
 
-### Tracker Compaction (paired with archival)
-
-**Trigger**: `processedEntries` exceeds 100, OR learning archival fires above.
-
-After archiving entries from `general.md`, compact the tracker:
-1. For each title in `processedEntries`, check if it still exists in `~/.claude/learnings/general.md`
-2. **Still in membrane** → KEEP (removing would cause re-absorption)
-3. **Not in membrane** (archived or manually removed) → safe to remove from tracker
-4. Present the compaction list to the user before applying
-
-**Why this is safe**: The tracker protects against the membrane, not against forge. An entry can only be removed from the tracker when the corresponding membrane entry is gone — fold can't re-absorb what isn't in the membrane.
-
-**Why purge can't do this**: Purge only touches forge files. It has no authority over the membrane. Only fold (which manages both sides) can safely compact the tracker.
+**Note**: Archiving entries from `general.md` does NOT allow tracker compaction. The tracker is shared across all forge users. Archiving from ONE user's membrane doesn't mean other users have archived too — their fold would re-absorb the entry if the tracker entry was removed. The tracker is truly append-only.
 
 ---
 
