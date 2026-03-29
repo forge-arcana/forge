@@ -34,7 +34,7 @@ For each dimension, scan the codebase AND search the web for current best practi
 - Rate limiting on sensitive endpoints (login, registration, password reset)
 - CORS configuration
 - Content Security Policy headers
-- Bot/crawler protection: public-facing pages may allow crawling (SEO), but authenticated services, admin panels, and internal APIs must block bots (`robots.txt Disallow`, `X-Robots-Tag: noindex`, IAM gating). Never expose private services to crawlers.
+- Bot/crawler protection: public-facing pages may allow crawling (SEO), but authenticated services, admin panels, and internal APIs must block bots (`robots.txt Disallow`, `X-Robots-Tag: noindex`, IAM gating). Never expose private services to crawlers. For non-production: internal staging uses IAM gating (`--no-allow-unauthenticated`); customer-facing staging (where real users need access) keeps `--allow-unauthenticated` and relies on app-level bot protection only.
 
 ### 2. Scalability
 - N+1 query detection (Drizzle relations, eager/lazy loading)
@@ -74,7 +74,7 @@ For each dimension, scan the codebase AND search the web for current best practi
 - Database migration strategy (up and down migrations)
 - Zero-downtime deployment capability
 - SSL/TLS configuration
-- Non-production bot protection: staging/preview must block all crawlers (`--no-allow-unauthenticated` on Cloud Run, `robots.txt Disallow: /`, `X-Robots-Tag: noindex`). Verify this is wired into the deploy pipeline, not applied manually.
+- Non-production bot protection: staging/preview must block crawlers. Internal staging: `--no-allow-unauthenticated` on Cloud Run + `robots.txt Disallow: /` + `X-Robots-Tag: noindex`. Customer-facing staging: app-level headers only (`robots.txt` + `X-Robots-Tag`), keep `--allow-unauthenticated`. Verify bot protection is wired into the deploy pipeline, not applied manually.
 
 ### 7. Documentation
 - API documentation (OpenAPI/Swagger or equivalent)

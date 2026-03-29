@@ -158,9 +158,33 @@
 ## Bot and Crawler Protection Strategy (2026-03-29)
 **Learning**: Bot/crawler access must be controlled at every deployment tier — not just staging.
 
-**Non-production (staging, preview, dev) — block everything.** No exceptions. Layer defenses: (1) `robots.txt` with `Disallow: /` and `X-Robots-Tag: noindex, nofollow` response header, (2) IAM-gated access on Cloud Run (`--no-allow-unauthenticated`), (3) basic auth or IP allowlisting as fallback, (4) `noindex` meta tag in HTML `<head>`. This must be wired into the deploy pipeline — every `deploy.yml` targeting non-production must include bot protection as a required step.
+**Non-production (staging, preview, dev) — block crawlers, but distinguish internal vs customer-facing.**
+
+*Internal staging* (only developers/QA access): layer all defenses — (1) `robots.txt` with `Disallow: /` and `X-Robots-Tag: noindex, nofollow` response header, (2) IAM-gated access on Cloud Run (`--no-allow-unauthenticated`), (3) basic auth or IP allowlisting as fallback, (4) `noindex` meta tag in HTML `<head>`. Wire into the deploy pipeline — every `deploy.yml` targeting internal non-production must include bot protection as a required step.
+
+*Customer-facing staging* (beta testers, drivers, passengers use it): IAM gating (`--no-allow-unauthenticated`) locks out real users. Keep `--allow-unauthenticated` and rely on app-level bot protection only: `robots.txt Disallow: /` + `X-Robots-Tag: noindex, nofollow` header + `noindex` meta tag. Well-behaved crawlers respect these; malicious scrapers bypass them, but IAM gating isn't viable when real unauthenticated users need access.
 
 **Production — public pages only.** Only public-facing, unauthenticated pages (marketing, landing, docs, blog) should allow crawling for SEO. Everything behind authentication — dashboards, admin panels, internal tools, private APIs — must block bots. Serve `robots.txt` with targeted `Disallow` rules for authenticated paths. Set `X-Robots-Tag: noindex` on all responses that require auth. Never expose private services to crawlers — a bot that reaches an admin panel or internal API is a security incident waiting to happen.
 
 **Platform specifics**: GCP Cloud Run `--no-allow-unauthenticated` blocks all traffic at the infrastructure level. Vercel Password Protection, AWS WAF IP restrictions, Netlify Identity for other platforms.
-**Apply when**: Deploying any application to any environment. Non-production = block all. Production = allow only on public-facing pages, block on private services.
+**Apply when**: Deploying any application to any environment. Non-production: check whether real end users need unauthenticated access — internal staging gets IAM gating, customer-facing staging gets app-level headers only. Production = allow crawling only on public-facing pages, block on private services.
+
+## SKILL.md Frontmatter Attributes (2026-03-15)
+**Learning**: `allowed-tools` and `context` are NOT valid SKILL.md frontmatter attributes. Valid attributes: `argument-hint`, `compatibility`, `description`, `disable-model-invocation`, `license`, `metadata`, `name`, `user-invocable`. Use `user-invocable: true` for skills the user can invoke directly.
+**Apply when**: Writing or editing any SKILL.md file.
+
+## Fold/Cast Race Condition on Direct Source Edits (2026-03-22)
+**Learning**: When skill files are edited directly in the source repo, deployed copies become stale instantly. If a reverse-sync runs from another session before forward-sync updates the deployed copies, the stale deployed version gets absorbed — silently reverting the source edit. Prevention: always run forward-sync immediately after direct source edits to keep deployed copies current, OR detect "source is ahead of deployed baseline" and skip absorption for those files.
+**Apply when**: Editing skill files directly in the source repo, or investigating unexpected reverts after a reverse-sync run.
+
+## All Transfers Are Guarded by User Wisdom (2026-03-22)
+**Learning**: ALL pillars (skills, config, learnings, memory) require user review in BOTH directions. Forward-sync and reverse-sync both present a PLAN table where the user approves/rejects individual items. Nothing transfers without user judgment — no pillar gets a mechanical bypass. A skill can have a bad update. A config can have stale rules. A learning can be wrong. The source repo is the source of truth for structure, but the user is the source of truth for judgment. Treating any pillar as "just mechanical" or "always correct" leads to silent propagation of errors.
+**Apply when**: Designing or reviewing any transfer mechanism between source and deployed copies. Any time you're tempted to say a transfer is "automatic" — the user reviews every item.
+
+## Reverse-Sync Must Write to Source, Not Deployed Copies (2026-03-28)
+**Learning**: A reverse-sync process that classifies entries from a staging file into category-specific files must write to the **source repo copies**, NOT the **deployed copies**. Writing only to deployed copies creates a permanent gap: deployed has more entries than source, and every status check reports "new entries — sync needed." Re-running doesn't fix it because the staging file entries are already marked as processed in the tracker.
+**Apply when**: Building or debugging any bidirectional sync system where a staging area feeds into categorized files. The write target must always be the source of truth.
+
+## Forward-Sync Must Not Duplicate Global Config Content (2026-03-28)
+**Learning**: A forward-sync that deploys conventions into a project workspace must check whether the global config layer already covers a convention before adding it to the project-level config. Duplicating rules (shorthand commands, hard rules, style guides) across global and project config creates maintenance drift. The user has corrected this pattern multiple times.
+**Apply when**: Running forward-sync on any project. Skip adding sections that already exist in the global config layer.
