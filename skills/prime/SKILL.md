@@ -112,6 +112,11 @@ Depending on how far the conversation goes, Prime produces one or more of:
 
 Offer PDF generation for any document: `npx md-to-pdf [filename]`
 
+After delivering any artifact, suggest next steps based on content:
+- **Always**: `/probe` to challenge the architecture
+- **If blueprint has UI-facing features** (screens, flows, components, user interactions): suggest `/preen` for UI/UX evaluation
+- **If blueprint has a business model** (pricing, revenue, GTM): suggest `/pitch` for business model critique
+
 ## Post-Flight
 
 Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/prime-learnings.md`.
