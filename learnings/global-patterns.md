@@ -176,3 +176,19 @@
 ## Next.js 16 Process Renaming Breaks Zombie Kill Scripts (2026-03-29)
 **Learning**: Next.js 16 renames its dev server process to `next-server (v16.x.x)` — a custom process title with no `node`, `next dev`, or project name in the command string. Standard pgrep patterns (`node.*next.*dev`, `node.*(next|playwright).*<project>`) miss it entirely. The process also auto-selects non-standard ports when the configured port is busy, so port-based `fuser -k` also misses it. Kill/restart scripts must match the literal string `next-server` and scope to the project by checking `/proc/$PID/cwd`.
 **Apply when**: Writing or updating restart/kill-zombie scripts for any Next.js 16+ project. The `/srs` skill templates need this pattern.
+
+## Persist TTS Audio on First Generate, Not Every Play (2026-03-29)
+**Learning**: Voice TTS APIs charge per generation. Every "Listen" tap that hits the API is wasted money if the text hasn't changed. Persist audio on first generation: store base64 in a DB column (voice samples on the user record, message audio in a jsonb map keyed by message index). Serve the stored file on subsequent plays — zero API cost. For voice clone samples, generate and persist at clone time so the preview is instant.
+**Apply when**: Any app with TTS playback — never regenerate audio for the same text twice.
+
+## WebSocket Streaming TTS for Low-Latency Voice Dialogue (2026-03-29)
+**Learning**: Full TTS generation (send text → wait for complete WAV → play) adds 3-5s latency for long messages. WebSocket streaming TTS sends PCM audio chunks as they're generated — first audio plays in ~200-500ms. On the client, use AudioContext to schedule and play raw PCM chunks as they arrive. Fall back to non-streaming if WebSocket fails. Essential for voice dialogue loops where latency kills the conversational feel.
+**Apply when**: Any real-time voice dialogue feature — always use streaming TTS, never wait for the full audio file.
+
+## Voice Clone Consent Flow Is a Legal Requirement (2026-03-29)
+**Learning**: Voice biometrics are sensitive data under GDPR, UK DPA, and emerging US state laws. Before cloning a user's voice, present a dedicated consent screen with: what you collect (audio sample), how it's used (private TTS only), user rights (delete anytime), and third-party processing disclosure (name the provider). Use a checkbox-based explicit consent mechanism — implied consent from "tapping record" is insufficient.
+**Apply when**: Any feature that processes voice biometrics — clone, voiceprint, speaker ID. Not needed for plain speech-to-text.
+
+## Fire-and-Forget Background Processing Keeps Capture Instant (2026-03-29)
+**Learning**: When a user captures input, the response must feel instant (<200ms). Heavy processing (LLM classification, theme assignment, TTS pre-generation) should fire-and-forget after the capture response is sent. Use `promise.catch(() => {})` pattern — don't await. The user sees results on next view. This is the "three-layer cost architecture" in practice: capture is free/instant, processing is async/cheap, generation is on-demand/expensive.
+**Apply when**: Any capture-first app where input frequency is high and processing is heavy.
