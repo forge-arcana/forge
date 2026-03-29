@@ -188,3 +188,7 @@
 ## Forward-Sync Must Not Duplicate Global Config Content (2026-03-28)
 **Learning**: A forward-sync that deploys conventions into a project workspace must check whether the global config layer already covers a convention before adding it to the project-level config. Duplicating rules (shorthand commands, hard rules, style guides) across global and project config creates maintenance drift. The user has corrected this pattern multiple times.
 **Apply when**: Running forward-sync on any project. Skip adding sections that already exist in the global config layer.
+
+## Next.js 16 Process Renaming Breaks Zombie Kill Scripts (2026-03-29)
+**Learning**: Next.js 16 renames its dev server process to `next-server (v16.x.x)` — a custom process title with no `node`, `next dev`, or project name in the command string. Standard pgrep patterns (`node.*next.*dev`, `node.*(next|playwright).*<project>`) miss it entirely. The process also auto-selects non-standard ports when the configured port is busy, so port-based `fuser -k` also misses it. Kill/restart scripts must match the literal string `next-server` and scope to the project by checking `/proc/$PID/cwd`.
+**Apply when**: Writing or updating restart/kill-zombie scripts for any Next.js 16+ project. The `/srs` skill templates need this pattern.
