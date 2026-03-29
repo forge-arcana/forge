@@ -27,3 +27,19 @@
 ## LibreOffice in Docker Needs a Persistent Daemon (2026-03-28)
 **Learning**: LibreOffice headless Docker images are 400MB-1.2GB. Each conversion spawns a fresh `soffice` process (1-3 second cold start, 200-500MB memory spike). For production: use Gotenberg (Go microservice wrapping LibreOffice with queuing) or unoserver (keeps LibreOffice as a persistent daemon). Never convert documents synchronously in an API request — always queue conversions. Budget $7-10/month for a dedicated conversion container, not $5 free tier.
 **Apply when**: Adding document conversion to any project. Never put LibreOffice on a free-tier container.
+
+## Free Tier Limits Change Without Notice (2026-03-29)
+**Learning**: Cloud API providers silently change free tier limits without announcements. Always verify current limits against the actual API pricing page at architecture review time, never trust cached or remembered values. Secondary models or tiers may become the practical workhorse when primary tier limits drop.
+**Apply when**: evaluating any cloud API free tier during architecture review or probe — verify limits are current, not assumed.
+
+## ML Library Language Ecosystem Compatibility (2026-03-29)
+**Learning**: Python ML libraries (speech processing, embeddings, computer vision) often have no JavaScript/WebView implementation path. When a blueprint specifies an ML model for on-device mobile use in a hybrid app, verify the language ecosystem compatibility first. ONNX export + native runtime is the bridge, but adds significant complexity vs. a server-side approach.
+**Apply when**: any blueprint or architecture that specifies ML inference on a mobile/hybrid client — verify the model has a JS-compatible runtime or plan for server-side inference.
+
+## Unlimited Neural TTS via Edge TTS Package (2026-03-29)
+**Learning**: The `edge-tts-universal` npm package provides unlimited access to Microsoft neural TTS voices (same quality as paid Azure TTS) with no API key and no monthly limit. Superior to cloud TTS free tiers for any project where the monthly character ceiling is a concern.
+**Apply when**: selecting a TTS provider for any voice-enabled project — evaluate this zero-cost option before committing to a paid TTS API.
+
+## Serverless DB + Container Cold Start Warming Strategy (2026-03-29)
+**Learning**: Scale-to-zero serverless databases (300-500ms cold start) combined with scale-to-zero compute containers (2-5s cold start at min-instances=0) produce first-request latencies of 4-9 seconds. A health-check cron every 4 minutes during business hours is the free-tier warming strategy.
+**Apply when**: deploying any app on serverless DB + serverless compute free tiers where scale-to-zero is enabled.

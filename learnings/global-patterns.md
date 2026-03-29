@@ -192,3 +192,7 @@
 ## Fire-and-Forget Background Processing Keeps Capture Instant (2026-03-29)
 **Learning**: When a user captures input, the response must feel instant (<200ms). Heavy processing (LLM classification, theme assignment, TTS pre-generation) should fire-and-forget after the capture response is sent. Use `promise.catch(() => {})` pattern — don't await. The user sees results on next view. This is the "three-layer cost architecture" in practice: capture is free/instant, processing is async/cheap, generation is on-demand/expensive.
 **Apply when**: Any capture-first app where input frequency is high and processing is heavy.
+
+## Auth Library User Table — No Duplicate User-Like Tables (2026-03-29)
+**Learning**: Auth libraries that manage their own user/session/account tables must be the single source of truth for user identity. Projects that define a separate "user-like" table with overlapping fields (email, name, provider ID) create dual sources of truth. The correct pattern: FK directly to the auth library's `user.id`, extend with `additionalFields` if supported, or use a thin profile table with only app-specific fields.
+**Apply when**: designing database schemas for any project using an auth library with its own user table — never create a parallel identity table.
