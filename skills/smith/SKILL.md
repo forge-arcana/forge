@@ -157,7 +157,7 @@ After each heat completes (findings clean or deferred):
 2. **Update `memory/smith-progress.md`** — human-readable progress
 3. **Record checkpoint SHA** — `git rev-parse HEAD` stored in ledger for this heat. At phase gates, also snapshot the ledger itself to `memory/smith-ledger-checkpoint-<gate>.json`.
 4. **Capture learnings** — if smith learned something about orchestration (Layer 1) or apprentice effectiveness (Layer 3), write it
-5. **Check for milestone**: if this heat completes a unit or phase gate, trigger the appropriate gate evaluation and invoke `/wrap`
+5. **Check for milestone**: if this heat completes a unit or phase gate, trigger the appropriate gate evaluation, then commit (see Phase Gate Commits below)
 
 ### Rollback
 
@@ -173,13 +173,27 @@ When a later heat breaks earlier work, or the user requests a rollback:
 
 Phase gates are escalated evaluations at unit and phase boundaries.
 
-| Boundary | Gate Art(s) | Action After |
-|----------|-------------|-------------|
-| Foundation complete | `/probe` | Re-evaluate architecture against blueprint. Fix divergences. `/wrap`. |
-| Core Workflow complete | `/probe` + `/press` | Architecture + readiness check. `/wrap`. |
-| Each Supporting unit complete | `/press` | Readiness on that domain. `/wrap`. |
-| Hardening complete | `/temper` | Confidence-weighted poke + press (3x). `/wrap`. |
-| **Final Gate** | `/temper` + `/pound` + `/pitch`* | **Convergence loop** (see below). *`/pitch` only if product has monetization — re-validates the business model against what was actually built. |
+| Boundary | Gate Art(s) | Commit |
+|----------|-------------|--------|
+| Foundation complete | `/probe` | Yes — `/wrap` |
+| Core Workflow complete | `/probe` + `/press` | Yes — `/wrap` |
+| Each Supporting unit complete | `/press` | Yes — `/wrap` |
+| Hardening complete | `/temper` | Yes — `/wrap` |
+| **Final Gate** | `/temper` + `/pound` + `/pitch`* | Yes — `/wrap` |
+
+*`/pitch` only if product has monetization — re-validates the business model against what was actually built.
+
+### Phase Gate Commits
+
+Smith commits at every phase gate via `/wrap`. This is a **smith-specific override of the No Auto-Commit rule** — the user delegates commit authority to smith when invoking it. The rationale:
+
+- **Safety**: Long builds (10+ heats) accumulate risk. A session crash without commits loses everything since the last gate.
+- **Clean history**: Each commit maps to a logical phase — foundation, core workflow, supporting unit. Reviewable, revertable.
+- **Rollback granularity**: `git revert` targets a specific phase, not the entire build.
+
+Smith does NOT ask "ready to commit?" at each gate — that would break flow on a 20-heat build. The user gave smith authority to build; committing at phase gates is part of building.
+
+Individual heats within a phase are NOT committed separately — too granular. The phase gate is the natural commit boundary.
 
 ### The Final Gate — Convergence Loop
 
