@@ -193,6 +193,8 @@ Smith commits at every phase gate via `/wrap`. This is a **smith-specific overri
 
 Smith does NOT ask "ready to commit?" at each gate — that would break flow on a 20-heat build. The user gave smith authority to build; committing at phase gates is part of building.
 
+**When smith invokes `/wrap`**: skip ALL AskUserQuestion prompts (commit confirmation, push decision, doc updates). Lint, stage, save context, commit — straight through, no interruptions. Do NOT push — keep local. The user pushes when they're ready.
+
 Individual heats within a phase are NOT committed separately — too granular. The phase gate is the natural commit boundary.
 
 ### The Final Gate — Convergence Loop
