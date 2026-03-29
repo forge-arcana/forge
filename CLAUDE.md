@@ -58,6 +58,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/vsix` | Publish a VS Code extension |
 | `/dig` | Think deeper — reframe agent as staff engineer for current discussion |
 | `/temper` | Hardened evaluation — runs poke + press N times, consolidates with confidence scoring |
+| `/cicd` | Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures, escalates to /pry |
 | `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
 
 ## Three Pillars (all bidirectional via forge)
@@ -119,7 +120,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 23 deployed skills (8 arts + 1 master + 14 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine, art auto-invocation with TRIGGER conditions, `/forge` session toggle, SKILL.md-based deploy detection
+- **Completed**: Three-pillar architecture, git-based drift detection, 24 deployed skills (8 arts + 1 master + 15 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine, art auto-invocation with TRIGGER conditions, `/forge` session toggle, SKILL.md-based deploy detection
 - **Master**: `/smith` — the user's proxy, wields all arts. Lives in `skills/smith/SKILL.md`. Three-layer learning membrane (orchestration, delegation, art proficiency).
 - **Arts**: prime, probe, poke, preen, press, pound, pitch, pry — shared protocol in `skills/forge/protocol.md`. Purge is the cleanser, forge-internal (`.claude/skills/purge/`).
 - **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
