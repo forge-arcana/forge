@@ -189,4 +189,8 @@ Baseline recorded: `abc1234`
 
 If nothing changed: just say "Everything in sync." and skip both PLAN and DONE reports.
 
-After the DONE report: include the baseline commit SHA. Do NOT commit project changes — use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
+After the DONE report: include the baseline commit SHA, then output:
+
+> **FORGE ENABLED** — all forge skills and art auto-invocation are active for this session.
+
+Do NOT commit project changes — use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".

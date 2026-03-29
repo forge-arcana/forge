@@ -142,3 +142,15 @@
 ## Fold/Cast Race Condition on Direct Source Edits (2026-03-26)
 **Learning**: When source-of-truth files are edited directly, deployed copies in the sync target become stale instantly. If the absorption command runs from another session before the deployment command updates the target, it sees DIFFERS and absorbs the stale deployed version — silently reverting the source edit. This is a race condition in bidirectional sync: concurrent sessions can undo each other's work via the absorption path. Prevention: always run the deployment command immediately after direct source edits.
 **Apply when**: Operating any bidirectional sync system (deploy + absorb) where source files are edited directly.
+
+## Test Factories Must Mirror Production DI Container (2026-03-29)
+**Learning**: When adding a new service to the production DI container, always update test helper factories (e.g., `createTestApp`) to create and inject the same service. CI tests use the test factory, not the production startup — a missing service causes `undefined` errors that only surface in CI, not local dev where the production startup path is used.
+**Apply when**: Adding services to a DI container that has a separate test factory for CI/E2E tests.
+
+## Firebase API Key Restriction for Public Repos (2026-03-29)
+**Learning**: Firebase API keys are project identifiers (not secrets), but in public repos, ALWAYS restrict the key to the deployment domain via Google Cloud API Keys API. Add HTTP referrer restrictions (deployment domain + `localhost/*` + `127.0.0.1/*`). Security rules protect data integrity, but unrestricted keys let unauthorized apps consume quota or abuse Firebase resources from other origins.
+**Apply when**: Setting up Firebase in any project, especially public repos or GitHub Pages sites.
+
+## Silent Browser API Failures — Check Security Headers FIRST (2026-03-29)
+**Learning**: When a browser API (`getUserMedia`, `Notification.requestPermission`, `navigator.geolocation`) fails silently — no prompt, no error UI, just a quiet `NotAllowedError` — the root cause is almost always a `Permissions-Policy` response header blocking it. `curl -sI <url> | grep -i permissions-policy` is step 0 before reading any client code. The HTML `capture` attribute on `<input type="file">` is also silently ignored when the policy blocks camera.
+**Apply when**: Any browser API behaves as if the user denied permission but no prompt was ever shown.
