@@ -43,3 +43,11 @@
 ## Serverless DB + Container Cold Start Warming Strategy (2026-03-29)
 **Learning**: Scale-to-zero serverless databases (300-500ms cold start) combined with scale-to-zero compute containers (2-5s cold start at min-instances=0) produce first-request latencies of 4-9 seconds. A health-check cron every 4 minutes during business hours is the free-tier warming strategy.
 **Apply when**: deploying any app on serverless DB + serverless compute free tiers where scale-to-zero is enabled.
+
+## iframe Sandbox Defense-in-Depth for AI-Generated Content (2026-03-29)
+**Learning**: `sandbox="allow-scripts"` without `allow-same-origin` prevents the classic sandbox escape, but is insufficient alone for AI-generated HTML. LLM output injection (OWASP LLM05:2025) means the generated content itself is the attack surface. Required layers: (1) serve from separate origin, (2) CSP headers `connect-src 'none'` to block exfiltration, (3) server-side DOMPurify sanitization before storage, (4) content safety scan before first render (not async post-publish).
+**Apply when**: Any platform serving AI-generated content in sandboxed iframes.
+
+## Auth Libraries With Flat User Models Need Custom Sub-Profile Tables (2026-03-29)
+**Learning**: Auth libraries with flat data models (User → Account, e.g., Better Auth) have no native support for hierarchical relationships like parent-child accounts. Organization plugins are for SaaS tenancy, not family structures. The correct pattern: auth library handles primary user auth only; subordinate profiles (children, sub-accounts) use a first-party table with scoped session tokens managed entirely by application code. This is what Netflix, Disney+, and Roblox do.
+**Apply when**: Any project using an auth library that needs hierarchical user relationships (parent-child, manager-employee, guardian-ward).

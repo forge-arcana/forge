@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-03-29T16:40:00Z",
+  "lastRun": "2026-03-29T00:00:00Z",
   "processedEntries": [
     "WSL Path Compatibility",
     "Disable Rate Limiting in E2E Test Mode",
@@ -59,7 +59,18 @@
     "Persist TTS Audio on First Generate, Not Every Play",
     "WebSocket Streaming TTS for Low-Latency Voice Dialogue",
     "Voice Clone Consent Flow Is a Legal Requirement",
-    "Fire-and-Forget Background Processing Keeps Capture Instant"
+    "Fire-and-Forget Background Processing Keeps Capture Instant",
+    "SKILL.md Frontmatter",
+    "Fold/Cast Race Condition on Direct Forge Edits",
+    "/fold Skill-Specific Learning Write-Back Bug",
+    "Silent Browser API Failures → Check Security Headers FIRST",
+    "/cast Must Not Duplicate Global Membrane Content",
+    "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
+    "Cloud Services Must Have Local Dev Fallbacks",
+    "IAM Gating vs App-Level Bot Protection for Staging",
+    "Read-Only Auth Routes Must Be Excluded from Auth Mutation Rate Limits",
+    "Generated Documents Must Reside in docs/",
+    "/prime Must Auto-Invoke /probe Then /preen After Blueprint"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

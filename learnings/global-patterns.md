@@ -196,3 +196,15 @@
 ## Auth Library User Table — No Duplicate User-Like Tables (2026-03-29)
 **Learning**: Auth libraries that manage their own user/session/account tables must be the single source of truth for user identity. Projects that define a separate "user-like" table with overlapping fields (email, name, provider ID) create dual sources of truth. The correct pattern: FK directly to the auth library's `user.id`, extend with `additionalFields` if supported, or use a thin profile table with only app-specific fields.
 **Apply when**: designing database schemas for any project using an auth library with its own user table — never create a parallel identity table.
+
+## Mock Auth in Staging Must Use Real Auth Library (2026-03-29)
+**Learning**: Mock login for staging/dev must use the real auth library's `signIn.email()` method, not manual session/cookie creation. Unsigned cookies crafted by hand won't verify when the auth middleware checks them. Seed credential accounts via the auth library's own `hashPassword()`. Pattern: (1) Seed with library-hashed passwords, (2) Client calls `authClient.signIn.email({ email, password })`, (3) No custom session code needed.
+**Apply when**: Building any staging/dev mock login flow. If you're writing `response.cookies.set("session_token", ...)` in a mock auth route, STOP.
+
+## Cloud Services Must Have Local Dev Fallbacks (2026-03-29)
+**Learning**: Every cloud service call (GCS, S3, email, push notifications) needs an env-gated local fallback. Write the local branch FIRST. Three tiers: local dev = filesystem/mock/console.log, staging = real cloud service, prod = real cloud service. Module-scope cloud client instantiation without an env check (`new Storage()`) crashes local dev immediately.
+**Apply when**: File uploads, email sending, push notifications, or any external service integration. The local fallback is step 1, not step last.
+
+## Read-Only Auth Routes Must Be Excluded from Mutation Rate Limits (2026-03-29)
+**Learning**: Rate limiting `/api/auth/*` by URL prefix catches read-only GET endpoints (session checks, user lists, config) alongside mutations (login, signup, verify). After a normal login+logout cycle exhausts the auth budget, GET endpoints return 429, breaking UI features. Better pattern: rate limit by HTTP method — only POST/PUT/DELETE on auth paths get the strict limit; GET gets the default limit.
+**Apply when**: Adding rate limiting middleware that matches URL prefixes, or adding new routes under a rate-limited prefix. Always check if the new route is read-only.

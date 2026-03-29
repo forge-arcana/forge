@@ -35,3 +35,11 @@
 ## Blueprint Versioning Keeps the Process Clean (2026-03-28)
 **Learning**: Publishing V1.0 first, then running reviews against it, then producing V2.0 with fixes is cleaner than trying to get it perfect in one pass. V1.0 establishes the baseline. The gap analysis and compliance review become standalone reference documents. V2.0 incorporates everything with a clear audit trail of what changed and why. The founder can also compare versions to understand what was improved.
 **Apply when**: Any blueprint that will undergo review cycles. Publish V1.0 early, run reviews, produce V2.0. Don't try to make V1.0 perfect.
+
+## Generated Documents Must Reside in docs/ (2026-03-29)
+**Learning**: Art-generated documents (PitchForge, ProductBlueprint, ProbeReport, PreenReport, Opus) must be written to the project's `docs/` directory, not the project root. Root-level documents create clutter and mix specs with code. Create `docs/` if it doesn't exist.
+**Apply when**: Any art produces a document output — pitch, blueprint, opus, probe report, preen report.
+
+## /prime Must Auto-Invoke /probe Then /preen After Blueprint (2026-03-29)
+**Learning**: After blueprint generation completes, `/prime` should automatically invoke `/probe` (architecture review) then `/preen` (UI/UX review) without user intervention. This catches structural and design issues before `/smith` begins building. Reports go to `docs/[PROJECT]_ProductBlueprint_V1.0_ProbeReport.md` and `docs/[PROJECT]_ProductBlueprint_V1.0_PreenReport.md`.
+**Apply when**: Running `/prime` to blueprint completion. Both quality gates run automatically as part of the prime flow.
