@@ -1,6 +1,6 @@
 ---
 name: smith
-description: "Master of the forge — consumes a probed blueprint and autonomously builds the product through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection through relentless iteration. The magnum opus."
+description: "Master of the forge — consumes a probed blueprint and autonomously builds the product through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection through relentless iteration. The magnum opus. TRIGGER when: user describes phase/heat work or wants to build/implement from a blueprint, AND a ledger.json or *blueprint*.md file exists in the project."
 user-invocable: true
 ---
 

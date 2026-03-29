@@ -185,7 +185,7 @@ echo "|-------|---------|-------|-----------|"
 for f in "$FORGE_PATH"/skills/*/SKILL.md; do
   [[ ! -f "$f" ]] && continue
   skill_name=$(basename "$(dirname "$f")")
-  [[ "$skill_name" == "forge" ]] && continue
+  # no skip needed — loop already filters by SKILL.md presence
   total=$(wc -l < "$f")
   python3 -c "
 import re
@@ -208,7 +208,7 @@ echo '```'
 for f in "$FORGE_PATH"/skills/*/SKILL.md; do
   [[ ! -f "$f" ]] && continue
   skill_name=$(basename "$(dirname "$f")")
-  [[ "$skill_name" == "forge" ]] && continue
+  # no skip needed — loop already filters by SKILL.md presence
   # Check for inline grep patterns (should be in scan script instead)
   grep_count=$(grep -c "^rg \|^grep " "$f" 2>/dev/null | head -1 || true)
   grep_count="${grep_count:-0}"
@@ -269,10 +269,11 @@ echo ""
 
 # Skill count verification
 echo "### Skill count verification"
-TOTAL_SKILLS=$(find "$FORGE_PATH/skills" -maxdepth 1 -mindepth 1 -type d ! -name forge | wc -l)
-ARTS=$(echo "prime probe poke preen press pound pry purge" | wc -w)
-TASK_SKILLS=$((TOTAL_SKILLS - ARTS))
-echo "**Total skills**: $TOTAL_SKILLS ($ARTS arts + $TASK_SKILLS task skills)"
+TOTAL_SKILLS=$(find "$FORGE_PATH/skills" -maxdepth 2 -name "SKILL.md" | wc -l)
+ARTS=$(echo "prime probe poke preen press pound pitch pry" | wc -w)
+MASTER=1
+TASK_SKILLS=$((TOTAL_SKILLS - ARTS - MASTER))
+echo "**Total skills**: $TOTAL_SKILLS ($ARTS arts + $MASTER master + $TASK_SKILLS task skills)"
 echo ""
 
 # Check if CLAUDE.md counts match

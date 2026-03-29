@@ -1,6 +1,6 @@
 ---
 name: pitch
-description: VC-style business model critique at any lifecycle stage — market, value proposition, revenue model, moat, GTM, and kill conditions. Self-improving.
+description: "VC-style business model critique at any lifecycle stage — market, value proposition, revenue model, moat, GTM, and kill conditions. Self-improving. TRIGGER when: user asks for business model feedback, market viability, revenue model critique, or 'is this worth building?'"
 user-invocable: true
 ---
 

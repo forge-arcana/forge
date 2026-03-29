@@ -1,6 +1,6 @@
 ---
 name: preen
-description: UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. Evaluates affordances, feedback, mapping, conceptual models, and the discipline of simplicity. Self-improving.
+description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. Evaluates affordances, feedback, mapping, conceptual models, and the discipline of simplicity. Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review of an interface."
 user-invocable: true
 ---
 

@@ -39,8 +39,8 @@ if [[ "${1:-}" == "--verify" ]]; then
   errors=0
   for skill_dir in "$FORGE_SKILLS"/*/; do
     skill=$(basename "$skill_dir")
-    # Skip non-skill directories (forge/ is reference docs, not a skill)
-    [[ "$skill" == "forge" ]] && continue
+    # Skip directories without a SKILL.md (not a deployable skill)
+    [[ ! -f "$skill_dir/SKILL.md" ]] && continue
     dest="$MEMBRANE_SKILLS/$skill"
     if [[ ! -d "$dest" ]]; then
       echo "| $skill | MISSING | Not deployed |"
@@ -76,7 +76,7 @@ skills=()
 if [[ "${1:-}" == "--all" ]]; then
   for skill_dir in "$FORGE_SKILLS"/*/; do
     skill=$(basename "$skill_dir")
-    [[ "$skill" == "forge" ]] && continue
+    [[ ! -f "$skill_dir/SKILL.md" ]] && continue
     skills+=("$skill")
   done
 else

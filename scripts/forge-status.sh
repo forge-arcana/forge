@@ -116,7 +116,7 @@ ADDED_SKILLS=()
 # Scan forge skills
 for skill_dir in "$FORGE_PATH"/skills/*/; do
   skill=$(basename "$skill_dir")
-  [[ "$skill" == "forge" ]] && continue
+  [[ ! -f "$skill_dir/SKILL.md" ]] && continue
 
   deployed="$HOME/.claude/skills/$skill"
 
@@ -194,7 +194,7 @@ if [[ -d "$HOME/.claude/skills" ]]; then
   for deployed_dir in "$HOME/.claude/skills"/*/; do
     [[ ! -d "$deployed_dir" ]] && continue
     skill=$(basename "$deployed_dir")
-    [[ "$skill" == "forge" ]] && continue
+    [[ ! -f "$FORGE_PATH/skills/$skill/SKILL.md" ]] && continue
     if [[ ! -d "$FORGE_PATH/skills/$skill" ]]; then
       echo "| $skill | REMOVED | deployed only, not in forge |"
       REMOVED=$((REMOVED + 1))

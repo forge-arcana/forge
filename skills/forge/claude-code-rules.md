@@ -238,6 +238,24 @@ Auto-allowed domains: `github.com`, `raw.githubusercontent.com`, `npmjs.com`, `p
 
 ---
 
+## Art Auto-Invocation
+
+When the user's intent clearly matches a single art's TRIGGER condition:
+1. Inform the user which art you're invoking and why
+2. Proceed with the invocation
+
+When the user's intent matches multiple arts:
+- Use `AskUserQuestion` to let the user choose which art to invoke
+
+When the user's intent doesn't match any art:
+- Proceed normally without invoking any art
+
+Explicit invocation (e.g., "/poke") always overrides auto-routing.
+
+If forge is disabled (via `/forge off`), ALL forge skills are suspended except `/cast`, `/mark`, `/fold`, `/forge`. No auto-invocation, no explicit skill invocation. Respond with "Forge is disabled. Run `/forge on` to re-enable."
+
+---
+
 ## Core Principles
 
 | Principle | Description |

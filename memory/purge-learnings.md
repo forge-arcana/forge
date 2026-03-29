@@ -51,3 +51,8 @@
 ## All Transfers Are Guarded by User Wisdom (2026-03-22)
 **Learning**: ALL pillars (skills, config, learnings, memory) require user review in BOTH directions. Deploy and absorb operations both present a PLAN table where the user approves/rejects individual items. Nothing transfers without user judgment — no pillar gets a mechanical bypass. A skill can have a bad update, a config can have stale rules, a learning can be wrong. The source of truth for structure is the repo; the source of truth for judgment is the user.
 **Apply when**: Designing or reviewing any transfer mechanism between a source repo and deployed copies. Any time you're tempted to say a transfer is "mechanical" or "automatic" — the user reviews every item.
+
+## Magic String Skips Become Band-Aids (2026-03-29)
+**Learning**: Hardcoded directory name skips (`[[ "$skill" == "forge" ]] && continue`) spread across multiple scripts because each script copies the pattern from the first one that introduced it. When the assumption changes (e.g., the directory gains a SKILL.md), every script needs updating — but finding them all requires grepping. Fix: use structural detection (`[[ ! -f "SKILL.md" ]] && continue`) instead of name-based exclusion. Structural checks are self-healing — they adapt when the directory contents change.
+**Apply when**: Writing any script that iterates over directories and needs to skip some. Never hardcode names to skip; check for the presence/absence of a marker file instead.
+**Forge-worthy**: yes — universal pattern for any system with directory-based discovery

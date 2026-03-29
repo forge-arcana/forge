@@ -1,6 +1,6 @@
 ---
 name: probe
-description: Challenge architecture decisions against current best practices. Probes blueprints, plans, or conversation topics — auto-detects target from context or asks. Self-improving.
+description: "Challenge architecture decisions against current best practices. Probes blueprints, plans, or conversation topics — auto-detects target from context or asks. Self-improving. TRIGGER when: user asks for architecture review, design validation, or 'is this the right approach?' on a technical decision."
 user-invocable: true
 ---
 

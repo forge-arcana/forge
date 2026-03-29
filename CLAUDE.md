@@ -45,6 +45,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 ## Task Skills
 | Skill | Purpose |
 |-------|---------|
+| `/forge` | Session toggle — enable/disable all forge skills except the trifecta (/cast, /mark, /fold) |
 | `/cast` | Deploy forge conventions into a project (membrane sync + divergence analysis) |
 | `/fold` | Absorb knowledge back into forge — config sync + learnings & memories (runnable from any project) |
 | `/mark` | Inspect membrane status — skill drift, learnings, memory report |
@@ -118,7 +119,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 22 deployed skills (8 arts + 1 master + 13 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine
+- **Completed**: Three-pillar architecture, git-based drift detection, 23 deployed skills (8 arts + 1 master + 14 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, performance scripts, evaluative trifecta (poke → press → pound), cast/fold restructured as thin directional wrappers around shared classification engine, art auto-invocation with TRIGGER conditions, `/forge` session toggle, SKILL.md-based deploy detection
 - **Master**: `/smith` — the user's proxy, wields all arts. Lives in `skills/smith/SKILL.md`. Three-layer learning membrane (orchestration, delegation, art proficiency).
 - **Arts**: prime, probe, poke, preen, press, pound, pitch, pry — shared protocol in `skills/forge/protocol.md`. Purge is the cleanser, forge-internal (`.claude/skills/purge/`).
 - **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
@@ -126,5 +127,5 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.fold-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
 - **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: Extended /probe with test architecture evaluation (Section 18). Blueprint mode: 6 substantive-vs-vague criteria. Codebase mode: 7 mechanically verifiable checks + per-package Test Coverage Map. Smith gets test awareness via probe for free.
-- **Pending**: None — membrane is current after cast
+- **Recent**: Art auto-invocation (TRIGGER conditions on all 9 arts + smith), `/forge` session toggle (on/off, trifecta always active), SKILL.md-based deploy detection replacing hardcoded forge skip, purge cleansed 6 tracker orphans + 7 magic-string band-aids across 3 scripts.
+- **Pending**: `/cast` needed to deploy `/forge` skill + updated arts to membrane
