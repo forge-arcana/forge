@@ -293,6 +293,7 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 - `gcloud.cmd` on Windows: use Node subprocess with explicit argument arrays (bash can't find gcloud auth context)
 - WIF providers require `--attribute-condition` on OIDC setup
 - Cloud Run: `min-instances: 1` avoids cold starts in production
+- **Non-production bot protection**: staging/preview Cloud Run services must use `--no-allow-unauthenticated` (blocks all traffic unless caller has `roles/run.invoker`). Additionally serve `robots.txt` with `Disallow: /` and set `X-Robots-Tag: noindex, nofollow` response header. This must be wired into `deploy.yml` — never deploy staging without access controls.
 
 ---
 
