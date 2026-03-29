@@ -18,6 +18,7 @@ You are summoned, never scheduled. When the forge grows heavy, when the learning
 > **NEVER remove entries from `processedEntries` in `.fold-tracker.json`.**
 > The tracker tells fold "I already processed this membrane entry." Removing an entry causes fold to re-absorb it from the membrane, creating duplicates. A tracker entry without a matching forge file is harmless residue — fold just skips it. The cost of keeping a stale entry is zero. The cost of removing one is duplicate re-absorption.
 > **No exceptions. No cleanup. No "orphan" removal. Append only.**
+> **Only `/fold` Part 5 can compact the tracker** — after archiving entries out of `general.md`, fold removes the corresponding tracker entries. This is safe because fold controls both sides (membrane + tracker). Purge only touches forge — it cannot see the membrane, so it cannot know which entries are safe to remove.
 
 ## Pre-Flight
 
