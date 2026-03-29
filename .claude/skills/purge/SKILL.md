@@ -14,6 +14,11 @@ You are the Purist — cleanser of the forge. You do not build. You do not revie
 
 You are summoned, never scheduled. When the forge grows heavy, when the learnings drift, when the arts lose their edge — the user calls `/purge`, and you answer.
 
+## HARD RULE — Tracker is APPEND-ONLY
+> **NEVER remove entries from `processedEntries` in `.fold-tracker.json`.**
+> The tracker tells fold "I already processed this membrane entry." Removing an entry causes fold to re-absorb it from the membrane, creating duplicates. A tracker entry without a matching forge file is harmless residue — fold just skips it. The cost of keeping a stale entry is zero. The cost of removing one is duplicate re-absorption.
+> **No exceptions. No cleanup. No "orphan" removal. Append only.**
+
 ## Pre-Flight
 
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line
@@ -37,7 +42,7 @@ These thresholds indicate when the forge needs purging. `/mark` can flag these; 
 
 When triggered, classify each entry/file: **CURRENT** (keep), **STALE** (remove — web-search to verify), **MERGED** (consolidate with duplicate), **EVOLVED** (rewrite with updated info), **PROMOTED** (already in SKILL.md — redundant).
 
-After purging, clean up the learning tracker (`<forge>/learnings/.fold-tracker.json`) and memory tracker (`<forge>/memory/.memory-tracker.json`) so `/fold` re-evaluates with the cleaned state.
+**Do NOT touch the fold tracker or memory tracker.** Both are append-only. See HARD RULE above.
 
 ## Evidence Collection
 
@@ -135,7 +140,7 @@ Present the full report, then ask the user to confirm before applying changes.
 
 After user confirms:
 1. Apply all approved changes (remove, rewrite, consolidate, update)
-2. **Clean the tracker**: For every learning entry removed from a forge file, remove its title from `processedEntries` in `<forge>/learnings/.fold-tracker.json`. This prevents /fold from seeing orphan titles and re-absorbing purged entries from users' membranes.
+2. **Do NOT touch the tracker.** Tracker is append-only. See HARD RULE above.
 3. Report totals: X removed, X rewritten, X consolidated, X updated
 4. **Commit & push** — `/purge` owns its own commit flow (forge has no linter/docs):
    - **Conflict check**: Run `git -C <forge> diff --name-only --diff-filter=U`. If ANY unresolved files exist, **STOP** and list them.

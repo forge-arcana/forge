@@ -700,7 +700,7 @@ for (const t of membraneTitles) {
   const inTracker = processed.has(t);
   if (inForge && inTracker) console.log('ABSORBED: \"'+t+'\" -> '+inForge+' (in tracker)');
   else if (inForge) console.log('IN-FORGE: \"'+t+'\" -> '+inForge+' (NOT in tracker -- tracker stale?)');
-  else if (inTracker) console.log('TRACKED-ONLY: \"'+t+'\" (in tracker but NOT in forge -- orphan?)');
+  else if (inTracker) console.log('TRACKED-ONLY: \"'+t+'\" (in tracker, not in forge -- residue, safe)');
   else console.log('NEW: \"'+t+'\" (not in forge, not in tracker)');
 }
 " 2>/dev/null || echo "(pre-triage check failed)"
@@ -726,9 +726,11 @@ try {
   const d = JSON.parse(fs.readFileSync(path.join(dir, '.fold-tracker.json'),'utf8'));
   processed = new Set(d.processedEntries || []);
 } catch(e) { console.log('(tracker not found)'); }
-const orphans = [...processed].filter(t => !forgeTitles.has(t)).sort();
-if (orphans.length) orphans.forEach(o => console.log('ORPHAN: \"'+o+'\" in tracker but not in any forge learning file'));
-else console.log('Tracker consistent -- all processed entries found in forge.');
+// Tracker entries without forge matches are harmless residue (purged or renamed).
+// Tracker is append-only — these are NOT orphans to remove.
+const residue = [...processed].filter(t => !forgeTitles.has(t)).sort();
+if (residue.length === 0) console.log('Tracker consistent -- all processed entries found in forge.');
+else console.log('Tracker has ' + residue.length + ' residue entries (purged/renamed -- safe, no action needed).');
 " 2>/dev/null || echo "(consistency check failed)"
 echo ""
 

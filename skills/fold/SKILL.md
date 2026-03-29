@@ -170,7 +170,9 @@ Source entries in `~/.claude/learnings/` are NEVER deleted.
 
 ### Processing Tracker
 
-Maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked. If Part 2 review fires, reset tracker.
+Maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntries` (triaged titles from general.md), `promotedEntries` (promoted Forge-worthy titles). Skip entries whose title is already tracked.
+
+> **HARD RULE — Tracker is APPEND-ONLY.** Never remove entries from `processedEntries`. Removing an entry causes fold to re-absorb the learning from the membrane, creating duplicates. Residue entries (tracked but no matching forge file) are harmless — fold just skips them.
 
 > **One-time migration**: If `<forge>/learnings/.reforge-tracker.json` exists, copy its `processedEntries` and `promotedEntries` into `.fold-tracker.json` before proceeding, then delete `.reforge-tracker.json`. The old name is dead — any entries tracked there must be preserved or every fold run will re-triage the entire history.
 
@@ -180,7 +182,7 @@ Maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntrie
 
 ### Memory Tracker
 
-Maintain `<forge>/memory/.memory-tracker.json` with `lastRun` and `skippedFiles` (PERSONAL memories intentionally not absorbed). A file needs triage only if it's in membrane but NOT in forge AND NOT in `skippedFiles`. If Part 2 fires, reset tracker.
+Maintain `<forge>/memory/.memory-tracker.json` with `lastRun` and `skippedFiles` (PERSONAL memories intentionally not absorbed). A file needs triage only if it's in membrane but NOT in forge AND NOT in `skippedFiles`. Tracker is append-only — never remove skippedFiles entries.
 
 ### Triage (unprocessed files only)
 
