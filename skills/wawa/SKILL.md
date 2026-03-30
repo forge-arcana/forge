@@ -3,6 +3,7 @@ name: wawa
 description: "Where Are We At?" — concise status snapshot. Use when user types "wawa" or asks about project status.
 user-invocable: true
 ---
+<!-- model: haiku -->
 
 # /wawa — Where Are We At?
 

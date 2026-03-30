@@ -3,6 +3,7 @@ name: cast
 description: Deploy forge conventions into a project workspace. Pulls latest forge, syncs the membrane, analyzes divergence, applies CLAUDE.md, settings, and structure. Use when setting up a new project or syncing conventions.
 user-invocable: true
 ---
+<!-- model: sonnet -->
 
 # /cast — Deploy Forge Into Project
 

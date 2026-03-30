@@ -3,6 +3,7 @@ name: monci
 description: Monitor CI — watches GitHub Actions runs on the current branch until complete. Use when user says "monci" or wants to watch CI without pushing.
 user-invocable: true
 ---
+<!-- model: haiku -->
 
 # /monci — Monitor CI
 

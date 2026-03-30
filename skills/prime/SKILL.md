@@ -3,6 +3,7 @@ name: prime
 description: "The first summoning. Takes raw ideas and gives them form — from spark to pitch, opus, or full product blueprint. One conversation, one continuous flow. TRIGGER when: user has a raw idea, product concept, or wants to create a blueprint, pitch, or product spec from scratch."
 user-invocable: true
 ---
+<!-- model: opus -->
 
 # /prime — The Originator
 

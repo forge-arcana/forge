@@ -3,6 +3,7 @@ name: forge
 description: "Toggle all forge skills on/off for the current session. /forge on enables, /forge off disables. The trifecta (/cast, /mark, /fold) and /forge itself are always active."
 user-invocable: true
 ---
+<!-- model: haiku -->
 
 # /forge — Session Toggle
 

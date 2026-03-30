@@ -3,6 +3,7 @@ name: wrap
 description: Pre-commit ritual. Lints, stages, saves context, updates docs, compacts, commits. Use when the user types "wrap" or wants to commit with full context.
 user-invocable: true
 ---
+<!-- model: haiku -->
 
 # /wrap — Pre-Commit Ritual
 

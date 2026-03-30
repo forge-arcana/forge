@@ -3,6 +3,7 @@ name: purge
 description: Cleanser of the forge — burns away stale knowledge, deduplication, and drift across all learnings, memory, skills, and reference docs. Restores the forge to its purest form. Self-improving.
 user-invocable: true
 ---
+<!-- model: opus -->
 
 # /purge — Cleanse the Forge
 

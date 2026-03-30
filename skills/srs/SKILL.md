@@ -3,6 +3,7 @@ name: srs
 description: Setup or update restart.sh to bring up the entire local dev stack. Proposes ports, kills zombies, checks DB, verifies port health. Use when user needs a local dev startup script.
 user-invocable: true
 ---
+<!-- model: haiku -->
 
 # /srs — Setup Restart Script
 

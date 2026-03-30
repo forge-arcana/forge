@@ -3,6 +3,7 @@ name: fold
 description: Absorb knowledge back into forge from any project. Syncs global config drift AND absorbs learnings and memories from the user's global Claude space into the forge repo.
 user-invocable: true
 ---
+<!-- model: sonnet | escalation: Part 3 learning triage → spawn opus subagent -->
 
 # /fold — Absorb Knowledge Into Forge
 

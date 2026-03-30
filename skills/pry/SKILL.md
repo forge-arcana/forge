@@ -3,6 +3,7 @@ name: pry
 description: "Relentless solution-finder — challenges 'can't be done' claims by decomposing blockers, scouring for alternatives, and reframing problems until a path forward emerges. Self-improving. TRIGGER when: user is stuck, blocked, or says something can't be done and needs alternative approaches."
 user-invocable: true
 ---
+<!-- model: opus -->
 
 # /pry — The Lever
 

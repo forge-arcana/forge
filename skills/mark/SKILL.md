@@ -3,6 +3,7 @@ name: mark
 description: Inspect membrane status — reports skill drift, accumulated learnings, and memory state between forge and the deployed membrane. Read-only, no changes made.
 user-invocable: true
 ---
+<!-- model: haiku -->
 
 # /mark — Membrane Inspection
 

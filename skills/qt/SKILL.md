@@ -3,6 +3,7 @@ name: qt
 description: Quick Test — verify a fix actually works before the user manually tests. Replaces the old "dd" debug dev command. Use when user says "qt" or wants to verify a fix.
 user-invocable: true
 ---
+<!-- model: haiku -->
 
 # /qt — Quick Test
 
