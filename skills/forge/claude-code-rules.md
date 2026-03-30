@@ -254,6 +254,16 @@ Explicit invocation (e.g., "/poke") always overrides auto-routing.
 
 If forge is disabled (via `/forge off`), ALL forge skills are suspended except `/cast`, `/mark`, `/fold`, `/forge`. No auto-invocation, no explicit skill invocation. Respond with "Forge is disabled. Run `/forge on` to re-enable."
 
+### Skill Model Recommendations
+
+Skills have `<!-- model: opus/sonnet/haiku -->` comments indicating their recommended model tier. These are **ceilings, not overrides**. The user's session model is the authority:
+
+- Session is **Opus** → skill runs at its recommended tier (opus/sonnet/haiku)
+- Session is **Sonnet** → opus-recommended skills run on Sonnet, not Opus
+- Session is **Haiku** → everything runs on Haiku
+
+Escalation subagents (e.g., fold spawning opus for triage) follow the same rule — never exceed the session model. A skill recommendation never supersedes what the user selected.
+
 ---
 
 ## Core Principles
