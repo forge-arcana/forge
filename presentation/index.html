@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forge — A Simple Guide</title>
+<style>
+  :root {
+    --fire: #f97316;
+    --fire-dark: #c2410c;
+    --ember: #fbbf24;
+    --coal: #1c1917;
+    --iron: #292524;
+    --steel: #44403c;
+    --ash: #78716c;
+    --smoke: #a8a29e;
+    --parchment: #fef9f0;
+    --white: #ffffff;
+    --blue: #3b82f6;
+    --green: #22c55e;
+    --purple: #a855f7;
+    --pink: #ec4899;
+    --teal: #14b8a6;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --indigo: #6366f1;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--coal);
+    color: var(--parchment);
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* SLIDE CONTAINER */
+  .slideshow {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    overflow-y: auto;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--fire), var(--ember));
+    transition: width 0.4s ease;
+    z-index: 100;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* NAVIGATION */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    background: rgba(28, 25, 23, 0.8);
+    backdrop-filter: blur(12px);
+    padding: 12px 20px;
+    border-radius: 50px;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+  }
+
+  .nav-btn {
+    background: var(--steel);
+    border: none;
+    color: var(--parchment);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover { background: var(--fire); transform: scale(1.1); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  .slide-counter {
+    color: var(--smoke);
+    font-size: 14px;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* SLIDE MENU */
+  .menu-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--steel);
+    border: none;
+    color: var(--parchment);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 200;
+    transition: all 0.2s;
+  }
+
+  .menu-btn:hover { background: var(--fire); }
+
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 150;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .menu-overlay.open { display: flex; }
+
+  .menu-panel {
+    background: var(--iron);
+    border: 1px solid var(--steel);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 480px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .menu-panel h3 {
+    color: var(--ember);
+    margin-bottom: 16px;
+    font-size: 18px;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 14px;
+  }
+
+  .menu-item:hover { background: var(--steel); }
+
+  .menu-item .num {
+    color: var(--ash);
+    width: 28px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  .slide-title {
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .slide-subtitle {
+    font-size: clamp(16px, 2vw, 22px);
+    color: var(--smoke);
+    text-align: center;
+    max-width: 700px;
+    line-height: 1.6;
+  }
+
+  .fire-text { color: var(--fire); }
+  .ember-text { color: var(--ember); }
+  .blue-text { color: var(--blue); }
+  .green-text { color: var(--green); }
+  .purple-text { color: var(--purple); }
+
+  /* ─── CARDS ─── */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 24px;
+  }
+
+  .card {
+    background: var(--iron);
+    border: 1px solid var(--steel);
+    border-radius: 16px;
+    padding: 24px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .card:hover { transform: translateY(-2px); }
+
+  .card-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    font-size: 14px;
+    color: var(--smoke);
+    line-height: 1.6;
+  }
+
+  .card-analogy {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ─── CODE BADGE ─── */
+  .cmd {
+    display: inline-block;
+    background: var(--coal);
+    border: 1px solid var(--fire);
+    color: var(--fire);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .cmd-large {
+    font-size: 20px;
+    padding: 6px 16px;
+    border-radius: 10px;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 24px 0;
+  }
+
+  .flow-box {
+    background: var(--iron);
+    border: 2px solid var(--steel);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .flow-box .label {
+    font-size: 12px;
+    color: var(--ash);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .flow-box .name {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .flow-arrow {
+    font-size: 24px;
+    color: var(--fire);
+  }
+
+  /* ─── TABLE ─── */
+  .fancy-table {
+    width: 100%;
+    max-width: 900px;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+
+  .fancy-table th {
+    background: var(--steel);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--smoke);
+  }
+
+  .fancy-table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--steel);
+    vertical-align: top;
+  }
+
+  .fancy-table tr:last-child td { border-bottom: none; }
+  .fancy-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+  /* ─── PILL BADGE ─── */
+  .pill {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* ─── ANALOGY BLOCK ─── */
+  .analogy-block {
+    background: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    border-left: 4px solid var(--fire);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+    max-width: 800px;
+    width: 100%;
+  }
+
+  .analogy-block .label {
+    font-size: 11px;
+    color: var(--fire);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .analogy-block p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--parchment);
+  }
+
+  /* ─── PERSONA CARD ─── */
+  .persona-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 20px;
+  }
+
+  .persona-card {
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid transparent;
+    transition: transform 0.2s;
+  }
+
+  .persona-card:hover { transform: translateY(-3px); }
+
+  .persona-card .art-name {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .persona-card .art-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .persona-card .art-desc {
+    font-size: 12px;
+    line-height: 1.5;
+    opacity: 0.8;
+  }
+
+  /* ─── PILLAR VISUAL ─── */
+  .pillars {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .pillar {
+    width: 200px;
+    background: var(--iron);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--steel);
+  }
+
+  .pillar-top {
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .pillar-icon { font-size: 40px; margin-bottom: 8px; }
+  .pillar-name { font-weight: 700; font-size: 16px; }
+  .pillar-path { font-size: 11px; color: var(--ash); margin-top: 4px; font-family: monospace; }
+
+  .pillar-arrows {
+    background: var(--coal);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pillar-arrow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--smoke);
+  }
+
+  /* ─── BIG NUMBER ─── */
+  .big-stat {
+    font-size: 80px;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--fire), var(--ember));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── LOOP VISUAL ─── */
+  .loop-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: var(--iron);
+    border-radius: 12px;
+    border: 1px solid var(--steel);
+    margin-bottom: 12px;
+    max-width: 700px;
+    width: 100%;
+  }
+
+  .loop-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--fire);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+
+  .loop-content { flex: 1; }
+  .loop-content strong { display: block; margin-bottom: 4px; font-size: 15px; }
+  .loop-content span { font-size: 13px; color: var(--smoke); line-height: 1.5; }
+
+  /* ─── SLIDE BACKGROUNDS ─── */
+  .bg-title { background: radial-gradient(ellipse at 50% 0%, rgba(249,115,22,0.2) 0%, transparent 60%); }
+  .bg-fire { background: radial-gradient(ellipse at 100% 0%, rgba(249,115,22,0.1) 0%, transparent 50%); }
+  .bg-blue { background: radial-gradient(ellipse at 0% 100%, rgba(59,130,246,0.1) 0%, transparent 50%); }
+  .bg-purple { background: radial-gradient(ellipse at 100% 100%, rgba(168,85,247,0.1) 0%, transparent 50%); }
+  .bg-green { background: radial-gradient(ellipse at 50% 100%, rgba(34,197,94,0.1) 0%, transparent 50%); }
+
+  /* ─── SCROLLABLE SLIDE CONTENT ─── */
+  .scroll-content {
+    width: 100%;
+    max-width: 1000px;
+    overflow-y: auto;
+    max-height: calc(100vh - 160px);
+    padding-right: 8px;
+  }
+
+  .scroll-content::-webkit-scrollbar { width: 4px; }
+  .scroll-content::-webkit-scrollbar-track { background: transparent; }
+  .scroll-content::-webkit-scrollbar-thumb { background: var(--steel); border-radius: 2px; }
+
+  /* ─── KEYBOARD HINT ─── */
+  .kbd-hint {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 11px;
+    color: var(--ash);
+    z-index: 100;
+  }
+
+  .kbd {
+    display: inline-block;
+    background: var(--steel);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .slide { padding: 24px 16px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .persona-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="kbd-hint">
+  <kbd class="kbd">←</kbd> <kbd class="kbd">→</kbd> to navigate
+</div>
+
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu(event)">
+  <div class="menu-panel">
+    <h3>🗺️ Jump to Slide</h3>
+    <div id="menuList"></div>
+  </div>
+</div>
+
+<div class="slideshow" id="slideshow">
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 1 — TITLE
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-title active" data-title="Welcome to Forge">
+    <div style="text-align:center">
+      <div style="font-size:80px;margin-bottom:16px;">⚒️</div>
+      <div class="slide-title" style="font-size:clamp(40px,6vw,80px);">
+        <span class="fire-text">Forge</span>
+      </div>
+      <div style="font-size:clamp(18px,2.5vw,28px); color:var(--smoke); margin:16px 0 32px;">
+        A simple guide for everyone
+      </div>
+      <div style="background:var(--iron); border:1px solid var(--steel); border-radius:16px; padding:24px 32px; display:inline-block; max-width:580px;">
+        <p style="font-size:15px; color:var(--smoke); line-height:1.7;">
+          Forge is like a <strong style="color:var(--ember)">magical training school</strong> for your AI assistant.<br>
+          It gives Claude new skills, helps Claude remember lessons, and keeps everything organised — so your AI gets smarter every single day.
+        </p>
+      </div>
+      <div style="margin-top:32px; color:var(--ash); font-size:14px;">
+        Use <span class="kbd">→</span> or click the arrow below to begin
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 2 — THE BIG PICTURE ANALOGY
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-fire" data-title="The Big Picture">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:8px;">🏫</div>
+      <div class="slide-title">Think of it like a <span class="fire-text">Wizard School</span></div>
+      <div class="slide-subtitle">Forge is like Hogwarts — but for your AI assistant (Claude)</div>
+
+      <div class="flow" style="margin:32px 0;">
+        <div class="flow-box" style="border-color:var(--fire);">
+          <div class="label">The School</div>
+          <div class="name" style="color:var(--fire);">🏫 Forge</div>
+          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Where skills are created<br>and stored</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="border-color:var(--blue);">
+          <div class="label">The Backpack</div>
+          <div class="name" style="color:var(--blue);">🎒 ~/.claude/</div>
+          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Claude carries skills<br>here at all times</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="border-color:var(--green);">
+          <div class="label">The Battlefield</div>
+          <div class="name" style="color:var(--green);">💻 Your Project</div>
+          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Where Claude actually<br>does the work</div>
+        </div>
+      </div>
+
+      <div class="analogy-block">
+        <div class="label">🧒 Kid-friendly version</div>
+        <p>Imagine you go to a school where you learn spells (skills). When you finish school each day, you put those spells in your backpack (<strong>~/.claude/</strong>). When you go on an adventure (your project), you open your backpack and use the spells you learned!</p>
+      </div>
+
+      <div style="background:var(--iron); border-radius:12px; padding:20px; margin-top:16px; border:1px solid var(--steel);">
+        <p style="font-size:14px; color:var(--smoke); line-height:1.7;">
+          <strong style="color:var(--parchment);">Forge</strong> = the school building + all the textbooks<br>
+          <strong style="color:var(--parchment);">~/.claude/</strong> = your personal backpack (called "the membrane")<br>
+          <strong style="color:var(--parchment);">Your project</strong> = the adventure / quest you are on
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 3 — THREE PILLARS
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-blue" data-title="The Three Pillars">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:8px;">🏛️</div>
+      <div class="slide-title">Three Things Forge Manages</div>
+      <div class="slide-subtitle">Think of these as the three subjects you study at wizard school</div>
+
+      <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-top" style="background:rgba(249,115,22,0.15);">
+            <div class="pillar-icon">⚡</div>
+            <div class="pillar-name" style="color:var(--fire);">Skills</div>
+            <div class="pillar-path">skills/</div>
+          </div>
+          <div style="padding:14px;font-size:13px;color:var(--smoke);line-height:1.5;">
+            <strong style="color:var(--parchment); display:block; margin-bottom:4px;">What Claude can DO</strong>
+            Each skill is a special power — like "review my code" or "create a commit". Stored in <code style="color:var(--fire); font-size:11px;">~/.claude/skills/</code>
+          </div>
+          <div class="pillar-arrows">
+            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/cast</span></span></div>
+            <div class="pillar-arrow-row">🔼 <span>You edit forge → commit</span></div>
+          </div>
+        </div>
+
+        <div class="pillar">
+          <div class="pillar-top" style="background:rgba(59,130,246,0.15);">
+            <div class="pillar-icon">📚</div>
+            <div class="pillar-name" style="color:var(--blue);">Learnings</div>
+            <div class="pillar-path">learnings/</div>
+          </div>
+          <div style="padding:14px;font-size:13px;color:var(--smoke);line-height:1.5;">
+            <strong style="color:var(--parchment); display:block; margin-bottom:4px;">What Claude has LEARNED</strong>
+            Lessons from past projects. "Don't do X because Y broke last time." Stored in <code style="color:var(--blue); font-size:11px;">~/.claude/learnings/</code>
+          </div>
+          <div class="pillar-arrows">
+            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/cast</span></span></div>
+            <div class="pillar-arrow-row">🔼 <span>You → Forge via <span class="cmd" style="font-size:11px;">/fold</span></span></div>
+          </div>
+        </div>
+
+        <div class="pillar">
+          <div class="pillar-top" style="background:rgba(168,85,247,0.15);">
+            <div class="pillar-icon">🧠</div>
+            <div class="pillar-name" style="color:var(--purple);">Memory</div>
+            <div class="pillar-path">memory/</div>
+          </div>
+          <div style="padding:14px;font-size:13px;color:var(--smoke);line-height:1.5;">
+            <strong style="color:var(--parchment); display:block; margin-bottom:4px;">Who Claude IS</strong>
+            Team identity, values, conventions. "We always write tests. We prefer TypeScript." Stored in <code style="color:var(--purple); font-size:11px;">~/.claude/memory/</code>
+          </div>
+          <div class="pillar-arrows">
+            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/cast</span></span></div>
+            <div class="pillar-arrow-row">🔼 <span>You → Forge via <span class="cmd" style="font-size:11px;">/fold</span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analogy-block" style="margin-top:20px;">
+        <div class="label">🧒 Kid-friendly version</div>
+        <p><strong>Skills</strong> = Your spell book 📖 &nbsp;|&nbsp; <strong>Learnings</strong> = Your diary of what went wrong 📓 &nbsp;|&nbsp; <strong>Memory</strong> = Your personality and values 💬</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 4 — CORE LOOP OVERVIEW
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="The Core Loop">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:8px;">🔄</div>
+      <div class="slide-title">The <span class="fire-text">Core Loop</span></div>
+      <div class="slide-subtitle">Three commands that run the whole system. Think of them as morning, afternoon, and evening routines.</div>
+
+      <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin:32px 0;">
+        <div style="background:var(--iron); border:2px solid var(--ember); border-radius:16px; padding:24px; max-width:260px; text-align:center;">
+          <div style="font-size:40px; margin-bottom:8px;">🔍</div>
+          <div class="cmd cmd-large" style="color:var(--ember); border-color:var(--ember);">/mark</div>
+          <div style="margin-top:12px; font-size:14px; color:var(--smoke); line-height:1.6;">
+            <strong style="color:var(--parchment); display:block;">Just Look</strong>
+            Check what's in sync, what's drifted. Read-only. Never changes anything.
+          </div>
+          <div style="margin-top:12px; background:rgba(251,191,36,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--ember);">
+            🧒 Like reading the school noticeboard to see what's changed
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border:2px solid var(--fire); border-radius:16px; padding:24px; max-width:260px; text-align:center;">
+          <div style="font-size:40px; margin-bottom:8px;">⬇️</div>
+          <div class="cmd cmd-large">/cast</div>
+          <div style="margin-top:12px; font-size:14px; color:var(--smoke); line-height:1.6;">
+            <strong style="color:var(--parchment); display:block;">Pour Skills In</strong>
+            Deploy everything from forge into your Claude backpack. Updates skills, learnings, memory.
+          </div>
+          <div style="margin-top:12px; background:rgba(249,115,22,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--fire);">
+            🧒 Like refilling your school bag with the latest textbooks
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border:2px solid var(--blue); border-radius:16px; padding:24px; max-width:260px; text-align:center;">
+          <div style="font-size:40px; margin-bottom:8px;">⬆️</div>
+          <div class="cmd cmd-large" style="color:var(--blue); border-color:var(--blue);">/fold</div>
+          <div style="margin-top:12px; font-size:14px; color:var(--smoke); line-height:1.6;">
+            <strong style="color:var(--parchment); display:block;">Absorb Back</strong>
+            Take lessons learned during work and fold them back into the forge. The system grows smarter.
+          </div>
+          <div style="margin-top:12px; background:rgba(59,130,246,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--blue);">
+            🧒 Like writing today's lessons into the school's permanent record
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); font-size:14px; color:var(--smoke); max-width:700px;">
+        <strong style="color:var(--parchment);">Important:</strong> Every transfer shows you a table first and asks for your approval. Nothing happens behind your back. <span style="color:var(--fire);">You are always in control.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 5 — /mark DEEP DIVE
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-fire" data-title="/mark — Just Look">
+    <div class="scroll-content" style="text-align:center;">
+      <div class="cmd cmd-large" style="font-size:36px; margin-bottom:16px;">/mark</div>
+      <div class="slide-title">The <span class="ember-text">Inspector</span></div>
+      <div class="slide-subtitle">Like a hallmark stamp on jewellery — it inspects quality without changing anything</div>
+
+      <div class="analogy-block" style="margin:24px auto;">
+        <div class="label">🧒 Analogy</div>
+        <p>Imagine a teacher who walks into the classroom, looks at the whiteboard, checks all the books, and then writes a report saying "Chapter 3 is missing from 5 students' books, Chapter 7 is outdated." The teacher doesn't do anything — they just <strong>report what they see</strong>.</p>
+      </div>
+
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
+        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:280px; text-align:left;">
+          <div style="font-size:24px; margin-bottom:8px;">🔎</div>
+          <div style="font-weight:700; margin-bottom:6px;">What it checks</div>
+          <ul style="font-size:13px; color:var(--smoke); line-height:1.8; padding-left:16px;">
+            <li>Are all skills up to date?</li>
+            <li>Are any skills missing?</li>
+            <li>Have learnings drifted?</li>
+            <li>Is memory in sync?</li>
+            <li>When was the last /cast?</li>
+          </ul>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:280px; text-align:left;">
+          <div style="font-size:24px; margin-bottom:8px;">📋</div>
+          <div style="font-weight:700; margin-bottom:6px;">What it produces</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.8;">
+            A clean table showing every skill:<br>
+            <span style="color:var(--green);">✅ IDENTICAL</span> — in sync<br>
+            <span style="color:var(--ember);">⚠️ DIFFERS</span> — needs update<br>
+            <span style="color:var(--blue);">➕ ADDED</span> — new skill<br>
+            <span style="color:var(--red);">➖ REMOVED</span> — deleted<br>
+          </div>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:280px; text-align:left;">
+          <div style="font-size:24px; margin-bottom:8px;">⚠️</div>
+          <div style="font-weight:700; margin-bottom:6px;">When to use it</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.8;">
+            Before /cast, to see what will change.<br><br>
+            When you're curious about the state of things but don't want to do anything yet.<br><br>
+            Think of it as a <strong style="color:var(--ember);">dry run</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 6 — /cast DEEP DIVE
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-blue" data-title="/cast — Deploy Skills">
+    <div class="scroll-content" style="text-align:center;">
+      <div class="cmd cmd-large" style="font-size:36px; margin-bottom:16px;">/cast</div>
+      <div class="slide-title">The <span class="fire-text">Deployer</span></div>
+      <div class="slide-subtitle">Pours molten metal from the forge into the mold — skills flow from forge into your Claude</div>
+
+      <div class="analogy-block" style="margin:20px auto;">
+        <div class="label">🧒 Analogy</div>
+        <p>It's the beginning of a new school year. The school (Forge) has updated all its textbooks. <strong>/cast</strong> is the process of handing out the new books to every student (your Claude). Old, outdated books get swapped for the fresh ones.</p>
+      </div>
+
+      <div style="background:var(--iron); border-radius:12px; border:1px solid var(--steel); overflow:hidden; max-width:700px; margin:0 auto;">
+        <div style="padding:16px 20px; background:var(--steel); font-size:13px; font-weight:700; text-align:left;">📋 What /cast does — step by step</div>
+        <div style="padding:0;">
+          <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
+            <div class="loop-num">1</div>
+            <div class="loop-content">
+              <strong>Pull latest forge</strong>
+              <span>Gets the newest version from GitHub. Like downloading today's newspaper.</span>
+            </div>
+          </div>
+          <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
+            <div class="loop-num">2</div>
+            <div class="loop-content">
+              <strong>Compare skills, learnings, memory</strong>
+              <span>Figures out what's new, what's changed, what's been removed.</span>
+            </div>
+          </div>
+          <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
+            <div class="loop-num">3</div>
+            <div class="loop-content">
+              <strong>Show you a table — ask for approval</strong>
+              <span>Presents every change and waits. <strong style="color:var(--fire);">Nothing happens until you say yes.</strong></span>
+            </div>
+          </div>
+          <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
+            <div class="loop-num">4</div>
+            <div class="loop-content">
+              <strong>Deploy approved items</strong>
+              <span>Copies skills to ~/.claude/skills/, learnings to ~/.claude/learnings/, etc.</span>
+            </div>
+          </div>
+          <div class="loop-step" style="border-radius:0; border:none; margin:0;">
+            <div class="loop-num">5</div>
+            <div class="loop-content">
+              <strong>Record the baseline</strong>
+              <span>Saves a timestamp/commit SHA so future /mark and /fold can detect drift accurately.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; font-size:13px; color:var(--ash);">
+        💡 Run <span class="cmd" style="font-size:12px;">/cast</span> whenever you update the forge repo, or on a fresh machine.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 7 — /fold DEEP DIVE
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-purple" data-title="/fold — Absorb Learnings">
+    <div class="scroll-content" style="text-align:center;">
+      <div class="cmd cmd-large" style="font-size:36px; margin-bottom:16px; color:var(--purple); border-color:var(--purple);">/fold</div>
+      <div class="slide-title">The <span class="purple-text">Absorber</span></div>
+      <div class="slide-subtitle">Layer experience back into the steel — what you learned today makes the forge smarter tomorrow</div>
+
+      <div class="analogy-block" style="margin:20px auto; border-color:rgba(168,85,247,0.3); background:rgba(168,85,247,0.1);">
+        <div class="label" style="color:var(--purple);">🧒 Analogy</div>
+        <p>A scientist runs experiments all day (your project work). At the end of the day, they write up their findings in the lab's permanent log (forge). The next scientist who uses the lab sees those notes and avoids the same mistakes. <strong>/fold</strong> is writing up those findings.</p>
+      </div>
+
+      <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin:16px 0;">
+        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:300px; text-align:left;">
+          <div style="font-weight:700; margin-bottom:8px; color:var(--purple);">What gets absorbed?</div>
+          <ul style="font-size:13px; color:var(--smoke); line-height:1.8; padding-left:16px;">
+            <li>Lessons marked <span style="color:var(--fire);">"Forge-worthy: yes"</span></li>
+            <li>Team memories and conventions</li>
+            <li>Config settings that proved useful</li>
+          </ul>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:300px; text-align:left;">
+          <div style="font-weight:700; margin-bottom:8px; color:var(--purple);">How the quality gate works</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">
+            1. /fold scans project memory files<br>
+            2. Finds entries marked Forge-worthy<br>
+            3. Strips all project-specific names<br>
+            4. Shows you a table to approve<br>
+            5. Only approved items get absorbed
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:12px; padding:16px; max-width:600px; font-size:14px; line-height:1.6;">
+        <strong style="color:var(--purple);">The Self-Improving Loop:</strong><br>
+        <span style="color:var(--smoke);">Arts write learnings → /fold absorbs them → next time arts run, they READ those learnings → they get smarter. Every run makes the whole system better.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 8 — WHAT ARE ARTS?
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-fire" data-title="What Are Arts?">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">🎭</div>
+      <div class="slide-title">What Are <span class="fire-text">Arts</span>?</div>
+      <div class="slide-subtitle">Special skills where Claude wears a different costume and thinks like a different expert</div>
+
+      <div class="analogy-block" style="margin:24px auto;">
+        <div class="label">🧒 Analogy</div>
+        <p>Imagine you could put on different masks and instantly become an expert. 👨‍⚕️ <strong>Doctor mask</strong> → diagnose health problems. 👩‍⚖️ <strong>Judge mask</strong> → evaluate fairness. 🕵️ <strong>Detective mask</strong> → investigate mysteries. Arts are Claude's collection of expert masks, each with deep knowledge in a specific domain.</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:700px; margin:0 auto;">
+        <div style="background:var(--iron); border-radius:12px; padding:18px; border:1px solid var(--steel); text-align:left;">
+          <div style="font-size:22px; margin-bottom:8px;">⚡</div>
+          <div style="font-weight:700; margin-bottom:6px; color:var(--ember);">Regular Skills</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Just do a task.<br>"Commit this code."<br>"Show me the status."<br><br>Simple. Direct. No persona.</div>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:18px; border:1px solid var(--fire); text-align:left;">
+          <div style="font-size:22px; margin-bottom:8px;">🎭</div>
+          <div style="font-weight:700; margin-bottom:6px; color:var(--fire);">Arts (Special Skills)</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Adopt an expert persona.<br>Think differently.<br>Write lessons after each run.<br><br>Get <strong style="color:var(--fire);">smarter over time</strong>.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); max-width:600px; font-size:14px; color:var(--smoke); line-height:1.7;">
+        Every art follows the same routine:<br>
+        <strong style="color:var(--parchment);">Pre-flight</strong> (read past lessons) → <strong style="color:var(--parchment);">Do the work</strong> (as the expert) → <strong style="color:var(--parchment);">Post-flight</strong> (write new lessons)
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 9 — NINE ARTS OVERVIEW
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="The Nine Arts — Overview">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">🗡️</div>
+      <div class="slide-title">The <span class="fire-text">Nine Arts</span></div>
+      <div class="slide-subtitle">Nine expert masks, each solving a different type of problem</div>
+
+      <div class="persona-grid" style="margin-top:20px;">
+        <div class="persona-card" style="background:rgba(168,85,247,0.15); border-color:rgba(168,85,247,0.4);">
+          <div class="art-name" style="color:#a855f7;">/prime</div>
+          <div class="art-title" style="color:#a855f7;">The Originator</div>
+          <div class="art-desc">Turns your blurry idea into a crisp blueprint. Asks smart questions until the idea crystallises.</div>
+        </div>
+        <div class="persona-card" style="background:rgba(59,130,246,0.15); border-color:rgba(59,130,246,0.4);">
+          <div class="art-name" style="color:#3b82f6;">/probe</div>
+          <div class="art-title" style="color:#3b82f6;">The Architect</div>
+          <div class="art-desc">Reviews your plan like a senior architect. Finds structural cracks before you build.</div>
+        </div>
+        <div class="persona-card" style="background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4);">
+          <div class="art-name" style="color:#eab308;">/poke</div>
+          <div class="art-title" style="color:#eab308;">Staff Engineer (Light)</div>
+          <div class="art-desc">Light code review. Checks quality, finds bad patterns, warns about tech debt. Run often.</div>
+        </div>
+        <div class="persona-card" style="background:rgba(236,72,153,0.15); border-color:rgba(236,72,153,0.4);">
+          <div class="art-name" style="color:#ec4899;">/preen</div>
+          <div class="art-title" style="color:#ec4899;">Design Evaluator</div>
+          <div class="art-desc">Reviews UI/UX through Don Norman's eyes. Is it usable? Intuitive? Accessible?</div>
+        </div>
+        <div class="persona-card" style="background:rgba(249,115,22,0.15); border-color:rgba(249,115,22,0.4);">
+          <div class="art-name" style="color:#f97316;">/press</div>
+          <div class="art-title" style="color:#f97316;">Readiness Assessor</div>
+          <div class="art-desc">Pre-launch pressure test. Security, scalability, operations. Run before milestones.</div>
+        </div>
+        <div class="persona-card" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4);">
+          <div class="art-name" style="color:#ef4444;">/pound</div>
+          <div class="art-title" style="color:#ef4444;">21 Adversaries</div>
+          <div class="art-desc">21 different personas attack your code from every angle. The hardest test. Run before ship.</div>
+        </div>
+        <div class="persona-card" style="background:rgba(34,197,94,0.15); border-color:rgba(34,197,94,0.4);">
+          <div class="art-name" style="color:#22c55e;">/pitch</div>
+          <div class="art-title" style="color:#22c55e;">The Investor</div>
+          <div class="art-desc">Evaluates your business model like a VC. Is the problem real? Can it make money?</div>
+        </div>
+        <div class="persona-card" style="background:rgba(20,184,166,0.15); border-color:rgba(20,184,166,0.4);">
+          <div class="art-name" style="color:#14b8a6;">/pry</div>
+          <div class="art-title" style="color:#14b8a6;">The Lever</div>
+          <div class="art-desc">When you're stuck. Refuses to accept "can't be done." Finds a way through every wall.</div>
+        </div>
+        <div class="persona-card" style="background:rgba(120,113,108,0.15); border-color:rgba(120,113,108,0.4);">
+          <div class="art-name" style="color:#78716c;">/purge</div>
+          <div class="art-title" style="color:#78716c;">The Purist</div>
+          <div class="art-desc">Cleans the forge itself. Removes stale rules, duplicates, outdated knowledge. Keeps things sharp.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 10 — ARTS DEEP DIVE 1 (prime, probe)
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-purple" data-title="Arts: Prime & Probe">
+    <div class="scroll-content" style="text-align:center;">
+      <div class="slide-title">Arts: <span class="purple-text">Creating & Planning</span></div>
+      <div class="slide-subtitle">Use these before you write a single line of code</div>
+
+      <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:24px;">
+        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(168,85,247,0.5); max-width:380px; text-align:left;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <span style="font-size:40px;">💡</span>
+            <div>
+              <div class="cmd cmd-large" style="color:#a855f7; border-color:#a855f7;">/prime</div>
+              <div style="font-size:13px; color:var(--ash); margin-top:4px;">The Originator</div>
+            </div>
+          </div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            You come with a fuzzy idea: "I want to build an app for cricket coaches." /prime asks smart questions, challenges your thinking, and helps you produce a <strong style="color:var(--parchment);">detailed blueprint</strong>.
+          </div>
+          <div style="background:rgba(168,85,247,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
+            🧒 Like a teacher who says "Tell me more... what exactly do you mean? Who is it for? What's the goal?" — until your messy idea becomes a clear plan.
+          </div>
+          <div style="margin-top:12px; font-size:12px; color:var(--ash);">
+            <strong>Guided by:</strong> Gates (system thinking), Jobs (taste), Musk (first principles), Bezos (work backwards from customer)
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(59,130,246,0.5); max-width:380px; text-align:left;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <span style="font-size:40px;">🏛️</span>
+            <div>
+              <div class="cmd cmd-large" style="color:#3b82f6; border-color:#3b82f6;">/probe</div>
+              <div style="font-size:13px; color:var(--ash); margin-top:4px;">The Architect</div>
+            </div>
+          </div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            You have the blueprint from /prime. Now /probe acts as a <strong style="color:var(--parchment);">senior solutions architect</strong> who reviews every decision. "Why did you choose X? Have you considered Y?"
+          </div>
+          <div style="background:rgba(59,130,246,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
+            🧒 Like a senior engineer who reads your plan and says "This will break when you have 10,000 users — here's what to do differently."
+          </div>
+          <div style="margin-top:12px; font-size:12px; color:var(--ash);">
+            <strong>Use after:</strong> /prime — give it the blueprint, get structural feedback before building
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 11 — EVALUATIVE TRIFECTA
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-fire" data-title="The Evaluative Trifecta">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">⚔️</div>
+      <div class="slide-title">The <span class="fire-text">Evaluative Trifecta</span></div>
+      <div class="slide-subtitle">Three arts that test your code — light → medium → heavy. Like medical check-ups.</div>
+
+      <div class="analogy-block" style="margin:20px auto;">
+        <div class="label">🧒 Analogy</div>
+        <p>Think of <strong>/poke</strong> as a daily health check (quick, light), <strong>/press</strong> as a doctor's appointment before a big event (thorough), and <strong>/pound</strong> as a full hospital examination before surgery (extremely detailed, nothing missed).</p>
+      </div>
+
+      <div style="display:flex; gap:0; justify-content:center; max-width:800px; margin:20px auto; flex-wrap:wrap;">
+        <div style="background:rgba(234,179,8,0.15); border:2px solid rgba(234,179,8,0.5); border-radius:16px 0 0 16px; padding:24px 20px; flex:1; min-width:200px; text-align:center;">
+          <div style="font-size:32px; margin-bottom:8px;">🔍</div>
+          <div class="cmd" style="color:#eab308; border-color:#eab308; font-size:18px; padding:6px 14px;">/poke</div>
+          <div style="margin-top:12px; font-size:13px; color:var(--smoke); line-height:1.6;">
+            <strong style="color:var(--parchment); display:block;">Light Check</strong>
+            Code quality, bad patterns, tech debt. Quick scan. Run <strong style="color:#eab308;">often</strong> — every sprint.
+          </div>
+          <div style="margin-top:12px; font-size:12px; background:rgba(234,179,8,0.1); padding:8px; border-radius:6px; color:#eab308;">🧒 Daily vitamin check</div>
+        </div>
+        <div style="background:rgba(249,115,22,0.15); border:2px solid rgba(249,115,22,0.5); border-top:2px solid; border-bottom:2px solid; padding:24px 20px; flex:1; min-width:200px; text-align:center;">
+          <div style="font-size:32px; margin-bottom:8px;">⚙️</div>
+          <div class="cmd" style="font-size:18px; padding:6px 14px;">/press</div>
+          <div style="margin-top:12px; font-size:13px; color:var(--smoke); line-height:1.6;">
+            <strong style="color:var(--parchment); display:block;">Medium Check</strong>
+            Security, scalability, operations, compliance. Run <strong style="color:var(--fire);">before milestones</strong>.
+          </div>
+          <div style="margin-top:12px; font-size:12px; background:rgba(249,115,22,0.1); padding:8px; border-radius:6px; color:var(--fire);">🧒 Doctor before sports match</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.15); border:2px solid rgba(239,68,68,0.5); border-radius:0 16px 16px 0; padding:24px 20px; flex:1; min-width:200px; text-align:center;">
+          <div style="font-size:32px; margin-bottom:8px;">💥</div>
+          <div class="cmd" style="color:#ef4444; border-color:#ef4444; font-size:18px; padding:6px 14px;">/pound</div>
+          <div style="margin-top:12px; font-size:13px; color:var(--smoke); line-height:1.6;">
+            <strong style="color:var(--parchment); display:block;">Heavy Attack</strong>
+            21 adversary personas. Finds every possible problem. Run <strong style="color:#ef4444;">before ship</strong>.
+          </div>
+          <div style="margin-top:12px; font-size:12px; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; color:#ef4444;">🧒 Full hospital exam</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
+        <div style="background:rgba(236,72,153,0.1); border:1px solid rgba(236,72,153,0.3); border-radius:10px; padding:12px 20px; text-align:center;">
+          <div class="cmd" style="color:#ec4899; border-color:#ec4899;">/preen</div>
+          <div style="font-size:12px; color:var(--smoke); margin-top:6px;">UI/UX check — run when<br>you change the interface</div>
+        </div>
+        <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:10px; padding:12px 20px; text-align:center;">
+          <div class="cmd" style="color:#22c55e; border-color:#22c55e;">/pitch</div>
+          <div style="font-size:12px; color:var(--smoke); margin-top:6px;">Business check — run<br>before building & before ship</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 12 — PYR & PURGE
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-blue" data-title="Arts: Pry & Purge">
+    <div class="scroll-content" style="text-align:center;">
+      <div class="slide-title">Arts: <span class="blue-text">Unstuck & Clean</span></div>
+      <div class="slide-subtitle">Two special arts that don't fit the normal pattern</div>
+
+      <div style="display:flex; gap:24px; justify-content:center; flex-wrap:wrap; margin-top:28px;">
+        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(20,184,166,0.5); max-width:380px; text-align:left;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <span style="font-size:40px;">🔧</span>
+            <div>
+              <div class="cmd cmd-large" style="color:#14b8a6; border-color:#14b8a6;">/pry</div>
+              <div style="font-size:13px; color:var(--ash); margin-top:4px;">The Lever — Relentless Problem Solver</div>
+            </div>
+          </div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            Use when you're <strong style="color:var(--parchment);">completely stuck</strong>. Someone said "this can't be done." /pry refuses to accept that.
+          </div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            It wears <strong>3 hats</strong> in sequence:<br>
+            🎩 <strong style="color:var(--parchment);">Skeptic</strong> — challenges the claim<br>
+            ⛏️ <strong style="color:var(--parchment);">Prospector</strong> — digs for alternatives<br>
+            🔄 <strong style="color:var(--parchment);">Reframer</strong> — changes the question
+          </div>
+          <div style="background:rgba(20,184,166,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
+            🧒 Like that one friend who always says "there HAS to be a way" — and keeps trying until they find it.
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(120,113,108,0.5); max-width:380px; text-align:left;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <span style="font-size:40px;">🧹</span>
+            <div>
+              <div class="cmd cmd-large" style="color:#78716c; border-color:#78716c;">/purge</div>
+              <div style="font-size:13px; color:var(--ash); margin-top:4px;">The Purist — Forge Cleaner</div>
+            </div>
+          </div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            /purge doesn't work on your project. It works on <strong style="color:var(--parchment);">the forge itself</strong>. Removes stale rules, duplicates, outdated knowledge.
+          </div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            <strong style="color:var(--parchment);">Does NOT build. Does NOT review.</strong><br>
+            Only tends the forge — keeping it sharp and clean.
+          </div>
+          <div style="background:rgba(120,113,108,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
+            🧒 Like the school janitor — doesn't teach, but without them the school becomes dusty and broken. Summoned occasionally, never scheduled.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 13 — THE SMITH
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-fire" data-title="The Smith — Master Builder">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:64px; margin-bottom:8px;">⚒️</div>
+      <div class="slide-title">The <span class="fire-text">Smith</span></div>
+      <div class="slide-subtitle">The master of the forge. The user's proxy. Uses ALL the arts to build entire products.</div>
+
+      <div class="analogy-block" style="margin:20px auto;">
+        <div class="label">🧒 Analogy</div>
+        <p>Imagine a master craftsman who knows every tool in the workshop. You describe what you want to build, and they organise the entire team, use every specialist, work in parallel, test everything — and don't stop until it's perfect. <strong>You just describe the goal. The smith handles the rest.</strong></p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; max-width:800px; margin:0 auto;">
+        <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); text-align:center;">
+          <div style="font-size:28px; margin-bottom:8px;">🔥</div>
+          <div style="font-weight:700; font-size:14px; margin-bottom:6px; color:var(--fire);">Iterative Heats</div>
+          <div style="font-size:12px; color:var(--smoke); line-height:1.5;">Works in cycles: plan → build → evaluate → fix. Repeats until perfect.</div>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); text-align:center;">
+          <div style="font-size:28px; margin-bottom:8px;">👥</div>
+          <div style="font-weight:700; font-size:14px; margin-bottom:6px; color:var(--fire);">Summons Apprentices</div>
+          <div style="font-size:12px; color:var(--smoke); line-height:1.5;">Creates sub-agents to work in parallel. Never does things one-by-one when they can run at the same time.</div>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); text-align:center;">
+          <div style="font-size:28px; margin-bottom:8px;">🎯</div>
+          <div style="font-weight:700; font-size:14px; margin-bottom:6px; color:var(--fire);">Zero Tolerance Gate</div>
+          <div style="font-size:12px; color:var(--smoke); line-height:1.5;">Won't stop until zero critical issues remain. Runs /pound at the end. True quality gate.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3); border-radius:12px; padding:16px; max-width:600px; font-size:14px; line-height:1.7;">
+        <strong style="color:var(--fire);">How to use:</strong> Give /smith a probed blueprint (from /prime + /probe). It handles everything else — autonomously — from first commit to shipped product.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 14 — TASK SKILLS
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-blue" data-title="Task Skills — Daily Tools">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">🛠️</div>
+      <div class="slide-title">Task Skills — <span class="blue-text">Daily Tools</span></div>
+      <div class="slide-subtitle">Regular skills for everyday work. No special persona — just get the job done.</div>
+
+      <table class="fancy-table" style="margin:20px auto;">
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>What it does</th>
+            <th>Kid Analogy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="cmd">/wawa</span></td>
+            <td>"Where Are We At?" — shows a status table of all outstanding work</td>
+            <td>📋 Morning meeting: "what did we do, what's next?"</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/wrap</span></td>
+            <td>Pre-commit ritual: lint → stage → write context → commit. Does it properly.</td>
+            <td>📦 Packing your bag carefully before leaving school</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/qt</span></td>
+            <td>Quick test — verifies your fix works before you hand it back to the user</td>
+            <td>✅ Double-checking your homework before handing it in</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/ponci</span></td>
+            <td>Push to GitHub and watch CI (automated tests) pass or fail</td>
+            <td>🚀 "Submit homework + watch teacher grade it live"</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/monci</span></td>
+            <td>Just monitor CI — don't push, just watch tests run</td>
+            <td>👀 Watching the scoreboard during a match</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/dig</span></td>
+            <td>Think deeper — reframes Claude as a staff engineer for the current problem</td>
+            <td>🔍 Asking a senior to "take a second look" at something tricky</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/eli5</span></td>
+            <td>Explain Like I'm 5 — distills any topic into the simplest possible terms</td>
+            <td>🧒 "Explain this to me like I'm a 5-year-old"</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/cicd</span></td>
+            <td>Full local CI/CD pipeline: lint, types, test, build, deploy. Auto-fixes failures.</td>
+            <td>🏭 Running the full factory inspection before shipping</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/temper</span></td>
+            <td>Runs /poke + /press multiple times and consolidates results with confidence scores</td>
+            <td>🔄 Asking 5 doctors and averaging their opinions</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 15 — HOW FILES ARE ORGANIZED
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-purple" data-title="File Structure Explained">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">📁</div>
+      <div class="slide-title">How Files Are <span class="purple-text">Organised</span></div>
+      <div class="slide-subtitle">Where things live and why they live there</div>
+
+      <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:24px; text-align:left;">
+        <div style="background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel); width:280px;">
+          <div style="background:rgba(249,115,22,0.2); padding:12px 16px; font-weight:700; color:var(--fire);">🏫 forge/ (the school)</div>
+          <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
+            <div>📂 <strong style="color:var(--parchment);">skills/</strong> — all skill definitions</div>
+            <div style="padding-left:16px; font-size:12px;">⚡ each skill has its own folder</div>
+            <div>📂 <strong style="color:var(--parchment);">learnings/</strong> — absorbed lessons</div>
+            <div style="padding-left:16px; font-size:12px;">📄 global-patterns.md</div>
+            <div style="padding-left:16px; font-size:12px;">📄 poke-learnings.md etc.</div>
+            <div>📂 <strong style="color:var(--parchment);">memory/</strong> — team identity</div>
+            <div style="padding-left:16px; font-size:12px;">📄 identity.md</div>
+            <div>📂 <strong style="color:var(--parchment);">scripts/</strong> — automation scripts</div>
+            <div>📄 <strong style="color:var(--parchment);">CLAUDE.md</strong> — forge rules</div>
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel); width:280px;">
+          <div style="background:rgba(59,130,246,0.2); padding:12px 16px; font-weight:700; color:var(--blue);">🎒 ~/.claude/ (the backpack)</div>
+          <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
+            <div>📂 <strong style="color:var(--parchment);">skills/</strong> — deployed skills</div>
+            <div style="padding-left:16px; font-size:12px;">✅ ready for Claude to use</div>
+            <div>📂 <strong style="color:var(--parchment);">learnings/</strong> — active lessons</div>
+            <div style="padding-left:16px; font-size:12px;">📄 general.md (main file)</div>
+            <div>📂 <strong style="color:var(--parchment);">memory/</strong> — active identity</div>
+            <div style="padding-left:16px; font-size:12px;">📄 team identity files</div>
+            <div>📄 <strong style="color:var(--parchment);">CLAUDE.md</strong> — forge-path config</div>
+            <div>📄 <strong style="color:var(--parchment);">.last-cast.json</strong> — last sync point</div>
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel); width:280px;">
+          <div style="background:rgba(34,197,94,0.2); padding:12px 16px; font-weight:700; color:var(--green);">💻 your-project/ (the field)</div>
+          <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
+            <div>📄 <strong style="color:var(--parchment);">CLAUDE.md</strong> — project rules</div>
+            <div style="padding-left:16px; font-size:12px;">created/updated by /cast</div>
+            <div>📂 <strong style="color:var(--parchment);">.claude/</strong></div>
+            <div style="padding-left:16px; font-size:12px;">📄 settings.json (overrides)</div>
+            <div>📂 <strong style="color:var(--parchment);">memory/</strong> — project learnings</div>
+            <div style="padding-left:16px; font-size:12px;">📄 *-learnings.md (arts write here)</div>
+            <div style="padding-left:16px; font-size:12px;">📄 .web-cache.json</div>
+            <div>📂 <strong style="color:var(--parchment);">logs/</strong> — dev server output</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 16 — SELF IMPROVING LOOP
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-fire" data-title="The Self-Improving Loop">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">🔁</div>
+      <div class="slide-title">The <span class="fire-text">Self-Improving Loop</span></div>
+      <div class="slide-subtitle">How Forge gets smarter every single time you use it</div>
+
+      <div class="analogy-block" style="margin:20px auto;">
+        <div class="label">🧒 Analogy</div>
+        <p>Imagine a school where every teacher writes notes after each class: "This example confused students" or "This explanation worked perfectly." Those notes go into the school's permanent teacher guide. Next year, every teacher reads that guide and teaches better than the year before. <strong>The school never stops improving.</strong></p>
+      </div>
+
+      <div style="max-width:700px; margin:0 auto;">
+        <div class="loop-step">
+          <div class="loop-num">1</div>
+          <div class="loop-content">
+            <strong>Art runs on your project</strong>
+            <span>e.g., /poke reviews your code. It notices patterns, good and bad.</span>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="loop-num">2</div>
+          <div class="loop-content">
+            <strong>Art writes to memory/poke-learnings.md</strong>
+            <span>Records lessons like "Forge-worthy: yes — always validate at API boundary, not just frontend."</span>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="loop-num">3</div>
+          <div class="loop-content">
+            <strong>/fold scans and promotes</strong>
+            <span>Finds Forge-worthy entries, strips project-specific details, promotes to ~/.claude/learnings/general.md.</span>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="loop-num">4</div>
+          <div class="loop-content">
+            <strong>/fold absorbs into forge</strong>
+            <span>The universal lesson enters forge/learnings/ permanently. Now every project benefits from it.</span>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="loop-num" style="background:var(--green);">5</div>
+          <div class="loop-content">
+            <strong>Next art run reads learnings (pre-flight)</strong>
+            <span style="color:var(--green);">The art is now smarter than before. Every run feeds the next. Compounding improvement.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 17 — DAILY WORKFLOW
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-blue" data-title="Daily Workflow">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">📅</div>
+      <div class="slide-title">Your <span class="blue-text">Daily Workflow</span></div>
+      <div class="slide-subtitle">How all these pieces fit together in real life</div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:800px; margin:24px auto; text-align:left;">
+        <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:12px; padding:20px;">
+          <div style="color:var(--green); font-weight:700; margin-bottom:12px; font-size:15px;">🌅 Starting a new project</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:2;">
+            1. <span class="cmd" style="font-size:11px;">/prime</span> — Turn idea into blueprint<br>
+            2. <span class="cmd" style="font-size:11px;">/probe</span> — Validate the blueprint<br>
+            3. <span class="cmd" style="font-size:11px;">/cast</span> — Set up the project conventions<br>
+            4. Start building! 🔨
+          </div>
+        </div>
+        <div style="background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3); border-radius:12px; padding:20px;">
+          <div style="color:var(--fire); font-weight:700; margin-bottom:12px; font-size:15px;">☀️ Regular coding day</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:2;">
+            1. <span class="cmd" style="font-size:11px;">/wawa</span> — What's the status?<br>
+            2. Code code code…<br>
+            3. <span class="cmd" style="font-size:11px;">/poke</span> — Quick quality check<br>
+            4. <span class="cmd" style="font-size:11px;">/qt</span> — Quick test<br>
+            5. <span class="cmd" style="font-size:11px;">/wrap</span> — Commit properly
+          </div>
+        </div>
+        <div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:12px; padding:20px;">
+          <div style="color:var(--purple); font-weight:700; margin-bottom:12px; font-size:15px;">🚀 Before a release</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:2;">
+            1. <span class="cmd" style="font-size:11px;">/press</span> — Full readiness check<br>
+            2. Fix all issues found<br>
+            3. <span class="cmd" style="font-size:11px;">/pound</span> — Adversarial attack<br>
+            4. Fix critical issues<br>
+            5. <span class="cmd" style="font-size:11px;">/ponci</span> — Push and watch CI
+          </div>
+        </div>
+        <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:20px;">
+          <div style="color:var(--blue); font-weight:700; margin-bottom:12px; font-size:15px;">🔄 Updating forge</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:2;">
+            1. Pull latest forge (git pull)<br>
+            2. <span class="cmd" style="font-size:11px;">/cast</span> — Deploy new skills<br>
+            3. <span class="cmd" style="font-size:11px;">/fold</span> — Absorb learnings back<br>
+            4. <span class="cmd" style="font-size:11px;">/mark</span> — Verify everything in sync
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--iron); border-radius:10px; padding:14px 20px; border:1px solid var(--steel); font-size:13px; color:var(--smoke); max-width:600px;">
+        💡 When stuck: <span class="cmd" style="font-size:11px;">/pry</span> &nbsp;|&nbsp; Need simpler explanation: <span class="cmd" style="font-size:11px;">/eli5</span> &nbsp;|&nbsp; UI looks off: <span class="cmd" style="font-size:11px;">/preen</span> &nbsp;|&nbsp; Business questions: <span class="cmd" style="font-size:11px;">/pitch</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 18 — THE HARD RULES
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-fire" data-title="The Hard Rules">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">⚠️</div>
+      <div class="slide-title">The <span class="fire-text">Hard Rules</span></div>
+      <div class="slide-subtitle">Rules that are never broken. These keep the system safe and trustworthy.</div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:800px; margin:24px auto; text-align:left;">
+        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:20px;">
+          <div style="font-size:20px; margin-bottom:8px;">🚫</div>
+          <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">No Auto-Commit</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Claude never commits code automatically. Always asks first. You are in charge of what gets saved.</div>
+          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🧒 Like asking permission before writing in someone's diary</div>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:20px;">
+          <div style="font-size:20px; margin-bottom:8px;">🔗</div>
+          <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">No Command Chaining</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Never runs multiple bash commands together with && or ; — each command runs alone. Prevents accidental disasters.</div>
+          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🧒 Like doing one thing at a time so nothing accidentally breaks</div>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:20px;">
+          <div style="font-size:20px; margin-bottom:8px;">🔒</div>
+          <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">Only /fold Writes to Forge</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">No direct edits to forge's learnings or memory from a project. /fold is the only gateway — with your review.</div>
+          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🧒 Like only the librarian can update the library catalogue</div>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:20px;">
+          <div style="font-size:20px; margin-bottom:8px;">🏷️</div>
+          <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">No Project Names in Forge</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Forge is shared across all projects. Learnings must be universal. "MidWicket had a bug" → "Marketplaces need rate limiting."</div>
+          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🧒 Like keeping a recipe book — write the method, not "this worked at Grandma's"</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3); border-radius:10px; padding:14px 20px; max-width:600px; font-size:14px; color:var(--parchment);">
+        ✨ <strong>The Golden Rule:</strong> <em style="color:var(--smoke);">Forge brings intelligence. <strong style="color:var(--parchment);">You</strong> bring wisdom. Nothing changes without your approval.</em>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 19 — QUICK REFERENCE CHEATSHEET
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-blue" data-title="Quick Reference Cheatsheet">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">📌</div>
+      <div class="slide-title"><span class="blue-text">Quick Reference</span></div>
+      <div class="slide-subtitle">Your one-page cheatsheet for everything in forge</div>
+
+      <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:20px; text-align:left;">
+        <div style="background:var(--iron); border-radius:12px; border:1px solid rgba(249,115,22,0.4); overflow:hidden; min-width:200px;">
+          <div style="background:rgba(249,115,22,0.2); padding:10px 14px; font-weight:700; color:var(--fire); font-size:13px;">🔄 CORE LOOP</div>
+          <div style="padding:12px 14px; font-size:13px; line-height:2.2; color:var(--smoke);">
+            <div><span class="cmd" style="font-size:11px;">/mark</span> Just look</div>
+            <div><span class="cmd" style="font-size:11px;">/cast</span> Deploy forge → you</div>
+            <div><span class="cmd" style="font-size:11px;">/fold</span> Absorb you → forge</div>
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:12px; border:1px solid rgba(168,85,247,0.4); overflow:hidden; min-width:200px;">
+          <div style="background:rgba(168,85,247,0.2); padding:10px 14px; font-weight:700; color:var(--purple); font-size:13px;">🎭 BUILD ARTS</div>
+          <div style="padding:12px 14px; font-size:13px; line-height:2.2; color:var(--smoke);">
+            <div><span class="cmd" style="font-size:11px; color:#a855f7; border-color:#a855f7;">/prime</span> Idea → Blueprint</div>
+            <div><span class="cmd" style="font-size:11px; color:#3b82f6; border-color:#3b82f6;">/probe</span> Review Blueprint</div>
+            <div><span class="cmd" style="font-size:11px; color:var(--fire);">/smith</span> Build it all</div>
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:12px; border:1px solid rgba(234,179,8,0.4); overflow:hidden; min-width:200px;">
+          <div style="background:rgba(234,179,8,0.2); padding:10px 14px; font-weight:700; color:#eab308; font-size:13px;">⚔️ TRIFECTA</div>
+          <div style="padding:12px 14px; font-size:13px; line-height:2.2; color:var(--smoke);">
+            <div><span class="cmd" style="font-size:11px; color:#eab308; border-color:#eab308;">/poke</span> Light check (often)</div>
+            <div><span class="cmd" style="font-size:11px;">/press</span> Medium (milestones)</div>
+            <div><span class="cmd" style="font-size:11px; color:#ef4444; border-color:#ef4444;">/pound</span> Heavy (before ship)</div>
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:12px; border:1px solid rgba(236,72,153,0.4); overflow:hidden; min-width:200px;">
+          <div style="background:rgba(236,72,153,0.2); padding:10px 14px; font-weight:700; color:#ec4899; font-size:13px;">🎨 SPECIALIST</div>
+          <div style="padding:12px 14px; font-size:13px; line-height:2.2; color:var(--smoke);">
+            <div><span class="cmd" style="font-size:11px; color:#ec4899; border-color:#ec4899;">/preen</span> UI/UX design</div>
+            <div><span class="cmd" style="font-size:11px; color:#22c55e; border-color:#22c55e;">/pitch</span> Business model</div>
+            <div><span class="cmd" style="font-size:11px; color:#14b8a6; border-color:#14b8a6;">/pry</span> When stuck</div>
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:12px; border:1px solid rgba(59,130,246,0.4); overflow:hidden; min-width:200px;">
+          <div style="background:rgba(59,130,246,0.2); padding:10px 14px; font-weight:700; color:var(--blue); font-size:13px;">🛠️ DAILY TASKS</div>
+          <div style="padding:12px 14px; font-size:13px; line-height:2.2; color:var(--smoke);">
+            <div><span class="cmd" style="font-size:11px;">/wawa</span> Status update</div>
+            <div><span class="cmd" style="font-size:11px;">/wrap</span> Commit properly</div>
+            <div><span class="cmd" style="font-size:11px;">/qt</span> Quick test</div>
+            <div><span class="cmd" style="font-size:11px;">/ponci</span> Push + watch CI</div>
+            <div><span class="cmd" style="font-size:11px;">/eli5</span> Explain simply</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 20 — ONE-TIME vs ITERATIVE
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-purple" data-title="One-Time vs Iterative Commands">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">🔁</div>
+      <div class="slide-title">One-Time vs <span class="purple-text">Iterative</span></div>
+      <div class="slide-subtitle">Some commands you run once and never think about again. Others you run constantly.</div>
+
+      <div class="analogy-block" style="margin:16px auto;">
+        <div class="label">🧒 Analogy</div>
+        <p><strong>One-time</strong> = Setting up your bedroom (you do it once when you move in). <strong>Iterative</strong> = Making your bed every morning — you keep doing it as part of your daily routine.</p>
+      </div>
+
+      <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:16px; text-align:left;">
+
+        <div style="background:rgba(34,197,94,0.1); border:2px solid rgba(34,197,94,0.4); border-radius:16px; padding:24px; max-width:360px;">
+          <div style="font-size:28px; margin-bottom:10px;">1️⃣</div>
+          <div style="font-weight:800; font-size:18px; color:#22c55e; margin-bottom:4px;">One-Time (or Rare)</div>
+          <div style="font-size:13px; color:var(--ash); margin-bottom:16px;">Run once when setting up, or very occasionally</div>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px;">/cast</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Fresh machine setup OR after forge updates</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px; color:#a855f7; border-color:#a855f7;">/prime</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Once per project idea — to create the blueprint</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px; color:#3b82f6; border-color:#3b82f6;">/probe</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Once per blueprint — validate before you build</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px; color:#78716c; border-color:#78716c;">/purge</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Occasional — clean forge when it feels cluttered</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px;">/srs</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Once per project — sets up restart scripts</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px;">/vsix</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Per release — publish VS Code extension</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:rgba(249,115,22,0.1); border:2px solid rgba(249,115,22,0.4); border-radius:16px; padding:24px; max-width:360px;">
+          <div style="font-size:28px; margin-bottom:10px;">🔄</div>
+          <div style="font-weight:800; font-size:18px; color:var(--fire); margin-bottom:4px;">Iterative (Run Often)</div>
+          <div style="font-size:13px; color:var(--ash); margin-bottom:16px;">Part of your daily or per-feature rhythm</div>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px;">/wawa</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Daily — start of day status check</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px; color:#eab308; border-color:#eab308;">/poke</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Every sprint or major PR — light code check</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px;">/qt</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">After every fix — verify before handing back</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px;">/wrap</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Every commit — proper commit ritual</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px;">/ponci</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Every push — push + watch CI</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px;">/fold</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">End of each project milestone — absorb learnings</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px; color:#ec4899; border-color:#ec4899;">/preen</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Each time UI changes — design check</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 21 — PROJECT LIFECYCLE MAP
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-fire" data-title="Full Project Lifecycle Map">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">🗺️</div>
+      <div class="slide-title">Full Project <span class="fire-text">Lifecycle Map</span></div>
+      <div class="slide-subtitle">Every stage of building something — and exactly which commands belong there</div>
+
+      <div style="display:flex; flex-direction:column; gap:12px; max-width:860px; margin:20px auto; text-align:left;">
+
+        <!-- Stage 1 -->
+        <div style="background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.4); border-radius:14px; overflow:hidden;">
+          <div style="background:rgba(168,85,247,0.25); padding:10px 18px; display:flex; align-items:center; gap:12px;">
+            <span style="font-size:22px;">💡</span>
+            <div>
+              <strong style="color:#a855f7; font-size:15px;">STAGE 1 — Idea</strong>
+              <span style="font-size:12px; color:var(--ash); margin-left:10px;">You have a vague idea. Nothing is built yet.</span>
+            </div>
+          </div>
+          <div style="padding:12px 18px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span class="cmd" style="color:#a855f7; border-color:#a855f7;">/prime</span>
+            <span style="font-size:13px; color:var(--smoke);">→ Turns your fuzzy idea into a clear blueprint through guided questions</span>
+            <span class="pill" style="background:rgba(34,197,94,0.2); color:#22c55e;">one-time</span>
+          </div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.4); border-radius:14px; overflow:hidden;">
+          <div style="background:rgba(59,130,246,0.25); padding:10px 18px; display:flex; align-items:center; gap:12px;">
+            <span style="font-size:22px;">🏛️</span>
+            <div>
+              <strong style="color:#3b82f6; font-size:15px;">STAGE 2 — Blueprint Review</strong>
+              <span style="font-size:12px; color:var(--ash); margin-left:10px;">You have a plan. Is it a good plan?</span>
+            </div>
+          </div>
+          <div style="padding:12px 18px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span class="cmd" style="color:#3b82f6; border-color:#3b82f6;">/probe</span>
+            <span style="font-size:13px; color:var(--smoke);">→ Senior architect tears apart the plan, finds gaps before you write code</span>
+            <span class="pill" style="background:rgba(34,197,94,0.2); color:#22c55e;">one-time per plan</span>
+          </div>
+          <div style="padding:4px 18px 12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span class="cmd" style="color:#22c55e; border-color:#22c55e;">/pitch</span>
+            <span style="font-size:13px; color:var(--smoke);">→ Business model check — is this worth building?</span>
+            <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">before build + before ship</span>
+          </div>
+        </div>
+
+        <!-- Stage 3 -->
+        <div style="background:rgba(249,115,22,0.12); border:1px solid rgba(249,115,22,0.4); border-radius:14px; overflow:hidden;">
+          <div style="background:rgba(249,115,22,0.25); padding:10px 18px; display:flex; align-items:center; gap:12px;">
+            <span style="font-size:22px;">⚙️</span>
+            <div>
+              <strong style="color:var(--fire); font-size:15px;">STAGE 3 — Project Setup</strong>
+              <span style="font-size:12px; color:var(--ash); margin-left:10px;">First time on a new codebase or fresh machine.</span>
+            </div>
+          </div>
+          <div style="padding:12px 18px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span class="cmd">/cast</span>
+            <span style="font-size:13px; color:var(--smoke);">→ Deploys all forge skills + sets up CLAUDE.md conventions for the project</span>
+            <span class="pill" style="background:rgba(34,197,94,0.2); color:#22c55e;">one-time per machine/project</span>
+          </div>
+          <div style="padding:4px 18px 12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span class="cmd">/srs</span>
+            <span style="font-size:13px; color:var(--smoke);">→ Creates restart.sh and kill-zombies.sh scripts for local dev</span>
+            <span class="pill" style="background:rgba(34,197,94,0.2); color:#22c55e;">one-time per project</span>
+          </div>
+        </div>
+
+        <!-- Stage 4 -->
+        <div style="background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.4); border-radius:14px; overflow:hidden;">
+          <div style="background:rgba(234,179,8,0.25); padding:10px 18px; display:flex; align-items:center; gap:12px;">
+            <span style="font-size:22px;">🔨</span>
+            <div>
+              <strong style="color:#eab308; font-size:15px;">STAGE 4 — Active Development</strong>
+              <span style="font-size:12px; color:var(--ash); margin-left:10px;">You're coding every day. This is the main loop.</span>
+            </div>
+          </div>
+          <div style="padding:12px 18px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd">/wawa</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Morning status: what's done, what's next, any blockers</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">daily</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#eab308; border-color:#eab308;">/poke</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Light code quality check — catches bad patterns early</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">every sprint / PR</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#ec4899; border-color:#ec4899;">/preen</span>
+              <span style="font-size:13px; color:var(--smoke);">→ UI/UX design check — run whenever the interface changes</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">per UI change</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd">/qt</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Quick test after every fix — did it actually work?</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">after every fix</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd">/wrap</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Commit properly: lint → test → stage → commit with context</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">every commit</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd">/ponci</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Push to GitHub and watch CI pass live</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">every push</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#14b8a6; border-color:#14b8a6;">/pry</span>
+              <span style="font-size:13px; color:var(--smoke);">→ When completely stuck — use this to find any path forward</span>
+              <span class="pill" style="background:rgba(20,184,166,0.2); color:#14b8a6;">when stuck</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 5 -->
+        <div style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.4); border-radius:14px; overflow:hidden;">
+          <div style="background:rgba(239,68,68,0.25); padding:10px 18px; display:flex; align-items:center; gap:12px;">
+            <span style="font-size:22px;">🚀</span>
+            <div>
+              <strong style="color:#ef4444; font-size:15px;">STAGE 5 — Pre-Launch / Release</strong>
+              <span style="font-size:12px; color:var(--ash); margin-left:10px;">Before any milestone or shipping to users.</span>
+            </div>
+          </div>
+          <div style="padding:12px 18px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd">/press</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Security, scalability, operations check. Fix everything it finds.</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">before every milestone</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#ef4444; border-color:#ef4444;">/pound</span>
+              <span style="font-size:13px; color:var(--smoke);">→ 21 adversaries attack your code. The hardest test. Fix critical issues.</span>
+              <span class="pill" style="background:rgba(239,68,68,0.2); color:#ef4444;">before ship only</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#22c55e; border-color:#22c55e;">/pitch</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Final business model sanity check before users see it</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">before ship</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd">/cicd</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Full local pipeline: lint + typecheck + test + build + deploy. Auto-fixes.</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">before deploy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 6 -->
+        <div style="background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.4); border-radius:14px; overflow:hidden;">
+          <div style="background:rgba(59,130,246,0.25); padding:10px 18px; display:flex; align-items:center; gap:12px;">
+            <span style="font-size:22px;">🔁</span>
+            <div>
+              <strong style="color:#3b82f6; font-size:15px;">STAGE 6 — After Milestones / Ongoing</strong>
+              <span style="font-size:12px; color:var(--ash); margin-left:10px;">Keep forge healthy and growing smarter.</span>
+            </div>
+          </div>
+          <div style="padding:12px 18px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#3b82f6; border-color:#3b82f6;">/fold</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Absorb lessons from this work back into forge. Makes future projects smarter.</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">end of each milestone</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd">/mark</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Check if forge and your Claude are in sync. Safe read-only inspection.</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">anytime you're curious</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd">/cast</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Re-run when forge is updated by you or the team. Redeploy latest skills.</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">after forge updates</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 22 — COMMAND FREQUENCY CHEATSHEET
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-blue" data-title="Command Frequency at a Glance">
+    <div class="scroll-content" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">⏱️</div>
+      <div class="slide-title">When to Run <span class="blue-text">What</span></div>
+      <div class="slide-subtitle">A simple visual — from "run once ever" to "run every single day"</div>
+
+      <div style="max-width:780px; margin:24px auto; display:flex; flex-direction:column; gap:10px; text-align:left;">
+
+        <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
+          <div style="background:rgba(34,197,94,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:#22c55e; line-height:1.4;">🌱 ONCE EVER<br>(setup)</div>
+          <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
+            <span class="cmd" style="font-size:11px;">/cast</span> on fresh machine &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/srs</span> new project &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/prime</span> new idea &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/probe</span> new blueprint
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
+          <div style="background:rgba(59,130,246,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:#3b82f6; line-height:1.4;">🚀 PER RELEASE<br>(ship time)</div>
+          <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
+            <span class="cmd" style="font-size:11px; color:#ef4444; border-color:#ef4444;">/pound</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px; color:#22c55e; border-color:#22c55e;">/pitch</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/cicd</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px; color:#78716c; border-color:#78716c;">/purge</span> (forge hygiene)
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
+          <div style="background:rgba(249,115,22,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:var(--fire); line-height:1.4;">🏁 PER MILESTONE<br>(before launch)</div>
+          <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
+            <span class="cmd" style="font-size:11px;">/press</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px; color:#3b82f6; border-color:#3b82f6;">/fold</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/cast</span> (if forge updated)
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
+          <div style="background:rgba(168,85,247,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:#a855f7; line-height:1.4;">🔁 PER SPRINT<br>(every few days)</div>
+          <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
+            <span class="cmd" style="font-size:11px; color:#eab308; border-color:#eab308;">/poke</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px; color:#ec4899; border-color:#ec4899;">/preen</span> (if UI changed) &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/temper</span> (confidence scoring)
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
+          <div style="background:rgba(234,179,8,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:#eab308; line-height:1.4;">📦 PER COMMIT<br>(every time)</div>
+          <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
+            <span class="cmd" style="font-size:11px;">/qt</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/wrap</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/ponci</span>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
+          <div style="background:rgba(249,115,22,0.35); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:var(--ember); line-height:1.4;">☀️ DAILY<br>(morning)</div>
+          <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
+            <span class="cmd" style="font-size:11px;">/wawa</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/mark</span> (if curious)
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
+          <div style="background:rgba(20,184,166,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:#14b8a6; line-height:1.4;">🆘 AS NEEDED<br>(situational)</div>
+          <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
+            <span class="cmd" style="font-size:11px; color:#14b8a6; border-color:#14b8a6;">/pry</span> when stuck &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/dig</span> think deeper &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/eli5</span> need simpler explanation &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/monci</span> watch CI only
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 23 — CLOSING
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide bg-title" data-title="That's Forge — Summary">
+    <div style="text-align:center; max-width:700px;">
+      <div style="font-size:80px; margin-bottom:16px;">⚒️</div>
+      <div class="slide-title" style="font-size:clamp(36px,5vw,64px);">
+        That's <span class="fire-text">Forge</span>
+      </div>
+      <div style="margin:24px 0; color:var(--smoke); font-size:18px; line-height:1.7;">
+        A school that teaches your AI.<br>
+        A system that never stops improving.<br>
+        A set of expert tools always ready when you need them.
+      </div>
+
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin:28px 0;">
+        <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
+          <div class="big-stat" style="font-size:40px;">9</div>
+          <div style="font-size:13px; color:var(--smoke);">Expert Arts</div>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
+          <div class="big-stat" style="font-size:40px;">3</div>
+          <div style="font-size:13px; color:var(--smoke);">Core Commands</div>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
+          <div class="big-stat" style="font-size:40px;">24</div>
+          <div style="font-size:13px; color:var(--smoke);">Total Skills</div>
+        </div>
+        <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
+          <div class="big-stat" style="font-size:40px;">∞</div>
+          <div style="font-size:13px; color:var(--smoke);">Self-Improving</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3); border-radius:14px; padding:20px 28px; font-size:15px; color:var(--parchment); line-height:1.8; font-style:italic;">
+        "Forge the arcane — what others say can't be built,<br>by those they say can't build it."
+        <div style="margin-top:8px; font-size:13px; color:var(--ash); font-style:normal;">— Forge Arcana Identity</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end slideshow -->
+
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>←</button>
+  <div class="slide-counter" id="counter">1 / 20</div>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
+</div>
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const progressBar = document.getElementById('progressBar');
+
+  function updateUI() {
+    counter.textContent = `${current + 1} / ${total}`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+    progressBar.style.width = `${((current + 1) / total) * 100}%`;
+  }
+
+  function changeSlide(dir) {
+    const prev = current;
+    current = Math.max(0, Math.min(total - 1, current + dir));
+    if (prev === current) return;
+
+    slides[prev].classList.remove('active');
+    if (dir > 0) slides[prev].classList.add('exit');
+
+    setTimeout(() => {
+      slides[prev].classList.remove('exit');
+      slides[current].style.transform = dir > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+      slides[current].style.opacity = '0';
+      slides[current].classList.add('active');
+      requestAnimationFrame(() => {
+        slides[current].style.transform = '';
+        slides[current].style.opacity = '';
+      });
+    }, dir > 0 ? 200 : 0);
+
+    updateUI();
+  }
+
+  function goToSlide(n) {
+    const dir = n > current ? 1 : -1;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    updateUI();
+    closeMenu();
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  // Touch
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) changeSlide(dx < 0 ? 1 : -1);
+  });
+
+  // Menu
+  function buildMenu() {
+    const list = document.getElementById('menuList');
+    slides.forEach((s, i) => {
+      const item = document.createElement('div');
+      item.className = 'menu-item';
+      item.innerHTML = `<span class="num">${i + 1}</span><span>${s.dataset.title || 'Slide ' + (i+1)}</span>`;
+      item.onclick = () => goToSlide(i);
+      list.appendChild(item);
+    });
+  }
+
+  function toggleMenu() {
+    document.getElementById('menuOverlay').classList.toggle('open');
+  }
+
+  function closeMenu(e) {
+    if (!e || e.target === document.getElementById('menuOverlay')) {
+      document.getElementById('menuOverlay').classList.remove('open');
+    }
+  }
+
+  buildMenu();
+  updateUI();
+</script>
+
+</body>
+</html>
