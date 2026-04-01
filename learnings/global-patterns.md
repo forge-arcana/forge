@@ -208,3 +208,7 @@
 ## Read-Only Auth Routes Must Be Excluded from Mutation Rate Limits (2026-03-29)
 **Learning**: Rate limiting `/api/auth/*` by URL prefix catches read-only GET endpoints (session checks, user lists, config) alongside mutations (login, signup, verify). After a normal login+logout cycle exhausts the auth budget, GET endpoints return 429, breaking UI features. Better pattern: rate limit by HTTP method — only POST/PUT/DELETE on auth paths get the strict limit; GET gets the default limit.
 **Apply when**: Adding rate limiting middleware that matches URL prefixes, or adding new routes under a rate-limited prefix. Always check if the new route is read-only.
+
+## Long-Running Agents Must Write Incrementally, Never Buffer-Then-Flush (2026-04-01)
+**Learning**: When spawning a subagent to generate large outputs (training data, reports, migration files, test fixtures), the agent MUST write to disk incrementally — every 20-50 items — not buffer everything in memory and write at the end. If the agent hits a rate limit, OOMs, times out, or crashes for any reason, all buffered work is permanently lost. Agent prompts must explicitly instruct: "Write incrementally — append every 20 items. Do NOT buffer everything and write at the end." The correct pattern is generate batch → write to file → generate next batch → append → repeat.
+**Apply when**: Spawning any agent for data generation, bulk file creation, large report generation, or any task expected to run >5 minutes. The longer the expected runtime, the more critical incremental writes become.
