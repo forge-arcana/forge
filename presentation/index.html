@@ -125,88 +125,112 @@
     text-align: center;
   }
 
-  /* SLIDE MENU */
-  .menu-btn {
+  /* SLIDE NAV PANEL (left sidebar) */
+  .slide-nav-panel {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--steel);
-    border: none;
-    color: var(--parchment);
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 20px;
-    z-index: 200;
-    transition: all 0.2s;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 100vh;
+    background: rgba(20, 17, 16, 0.97);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(249, 115, 22, 0.2);
+    z-index: 150;
+    transform: translateX(-220px);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  .menu-btn:hover { background: var(--fire); }
+  .slide-nav-panel.open { transform: translateX(0); }
 
-  .menu-overlay {
+  .slide-nav-header {
+    padding: 20px 16px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ember);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+  }
+
+  .slide-nav-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px 0;
+  }
+
+  .slide-nav-list::-webkit-scrollbar { width: 3px; }
+  .slide-nav-list::-webkit-scrollbar-track { background: transparent; }
+  .slide-nav-list::-webkit-scrollbar-thumb { background: var(--steel); border-radius: 2px; }
+
+  .slide-nav-toggle {
     position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 150;
-    display: none;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 56px;
+    background: rgba(28, 25, 23, 0.85);
+    border: 1px solid rgba(249, 115, 22, 0.25);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    z-index: 160;
+    display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--ash);
+    font-size: 11px;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, color 0.2s;
+    user-select: none;
   }
 
-  .menu-overlay.open { display: flex; }
-
-  .menu-panel {
-    background: var(--iron);
-    border: 1px solid var(--steel);
-    border-radius: 16px;
-    padding: 24px;
-    max-width: 480px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-
-  .menu-panel h3 {
-    color: var(--ember);
-    margin-bottom: 16px;
-    font-size: 18px;
-  }
+  .slide-nav-toggle:hover { background: rgba(249, 115, 22, 0.15); color: var(--fire); }
+  .slide-nav-toggle.panel-open { left: 220px; }
 
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
+    gap: 10px;
+    padding: 8px 14px;
     cursor: pointer;
     transition: background 0.2s;
-    font-size: 14px;
+    font-size: 13px;
+    color: var(--smoke);
   }
 
-  .menu-item:hover { background: var(--steel); }
+  .menu-item:hover { background: rgba(255,255,255,0.05); color: var(--parchment); }
+  .menu-item.active-slide { background: rgba(249, 115, 22, 0.1); color: var(--fire); }
 
   .menu-item .num {
-    color: var(--ash);
-    width: 28px;
-    font-size: 12px;
+    color: var(--steel);
+    width: 24px;
+    font-size: 11px;
     flex-shrink: 0;
+    text-align: right;
+    font-family: monospace;
   }
+
+  .menu-item.active-slide .num { color: var(--fire); }
 
   /* ─── TYPOGRAPHY ─── */
   .slide-title {
-    font-size: clamp(28px, 4vw, 52px);
+    font-size: clamp(24px, 3vw, 44px);
     font-weight: 800;
     line-height: 1.1;
     text-align: center;
-    margin-bottom: 16px;
+    margin: 0 auto 12px;
+    width: 100%;
   }
 
   .slide-subtitle {
-    font-size: clamp(16px, 2vw, 22px);
+    font-size: clamp(14px, 1.4vw, 18px);
     color: var(--smoke);
     text-align: center;
     max-width: 700px;
+    margin: 0 auto 8px;
     line-height: 1.6;
   }
 
@@ -323,7 +347,7 @@
     width: 100%;
     max-width: 900px;
     border-collapse: collapse;
-    margin-top: 16px;
+    margin: 16px auto 0;
   }
 
   .fancy-table th {
@@ -362,7 +386,7 @@
     border-left: 4px solid var(--fire);
     border-radius: 0 12px 12px 0;
     padding: 16px 20px;
-    margin: 16px 0;
+    margin: 16px auto;
     max-width: 800px;
     width: 100%;
   }
@@ -482,7 +506,7 @@
     background: var(--iron);
     border-radius: 12px;
     border: 1px solid var(--steel);
-    margin-bottom: 12px;
+    margin: 0 auto 12px;
     max-width: 700px;
     width: 100%;
   }
@@ -529,7 +553,7 @@
   .kbd-hint {
     position: fixed;
     top: 20px;
-    left: 20px;
+    right: 20px;
     font-size: 11px;
     color: var(--ash);
     z-index: 100;
@@ -559,14 +583,11 @@
   <kbd class="kbd">←</kbd> <kbd class="kbd">→</kbd> to navigate
 </div>
 
-<button class="menu-btn" onclick="toggleMenu()">☰</button>
-
-<div class="menu-overlay" id="menuOverlay" onclick="closeMenu(event)">
-  <div class="menu-panel">
-    <h3>🗺️ Jump to Slide</h3>
-    <div id="menuList"></div>
-  </div>
+<div class="slide-nav-panel" id="slideNavPanel">
+  <div class="slide-nav-header">🗺️ Jump to Slide</div>
+  <div class="slide-nav-list" id="menuList"></div>
 </div>
+<div class="slide-nav-toggle" id="slideNavToggle" onclick="toggleMenu()">›</div>
 
 <div class="slideshow" id="slideshow">
 
@@ -584,8 +605,8 @@
       </div>
       <div style="background:var(--iron); border:1px solid var(--steel); border-radius:16px; padding:24px 32px; display:inline-block; max-width:580px;">
         <p style="font-size:15px; color:var(--smoke); line-height:1.7;">
-          Forge is like a <strong style="color:var(--ember)">magical training school</strong> for your AI assistant.<br>
-          It gives Claude new skills, helps Claude remember lessons, and keeps everything organised — so your AI gets smarter every single day.
+          Forge is like a <strong style="color:var(--ember)">master recipe book</strong> for your AI assistant.<br>
+          It gives Claude new recipes (skills), helps Claude remember what worked and what didn't, and keeps everything organised — so your AI gets better every single day.
         </p>
       </div>
       <div style="margin-top:32px; color:var(--ash); font-size:14px;">
@@ -599,40 +620,40 @@
   ═══════════════════════════════════════════════════ -->
   <div class="slide bg-fire" data-title="The Big Picture">
     <div class="scroll-content" style="text-align:center;">
-      <div style="font-size:48px;margin-bottom:8px;">🏫</div>
-      <div class="slide-title">Think of it like a <span class="fire-text">Wizard School</span></div>
-      <div class="slide-subtitle">Forge is like Hogwarts — but for your AI assistant (Claude)</div>
+      <div style="font-size:48px;margin-bottom:8px;">👨‍🍳</div>
+      <div class="slide-title">Think of it like a <span class="fire-text">Master Kitchen</span></div>
+      <div class="slide-subtitle">Forge is the master recipe book — shared by every chef, always improving</div>
 
       <div class="flow" style="margin:32px 0;">
         <div class="flow-box" style="border-color:var(--fire);">
-          <div class="label">The School</div>
-          <div class="name" style="color:var(--fire);">🏫 Forge</div>
-          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Where skills are created<br>and stored</div>
+          <div class="label">The Recipe Book</div>
+          <div class="name" style="color:var(--fire);">📖 Forge</div>
+          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Where recipes are created<br>and stored for everyone</div>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-box" style="border-color:var(--blue);">
-          <div class="label">The Backpack</div>
-          <div class="name" style="color:var(--blue);">🎒 ~/.claude/</div>
-          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Claude carries skills<br>here at all times</div>
+          <div class="label">Your Kitchen</div>
+          <div class="name" style="color:var(--blue);">🍳 ~/.claude/</div>
+          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Claude's personal kitchen<br>— tools and recipes ready</div>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-box" style="border-color:var(--green);">
-          <div class="label">The Battlefield</div>
-          <div class="name" style="color:var(--green);">💻 Your Project</div>
-          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Where Claude actually<br>does the work</div>
+          <div class="label">The Meal</div>
+          <div class="name" style="color:var(--green);">🍽️ Your Project</div>
+          <div style="font-size:12px;color:var(--ash);margin-top:4px;">Where Claude actually<br>cooks something for you</div>
         </div>
       </div>
 
       <div class="analogy-block">
-        <div class="label">🧒 Kid-friendly version</div>
-        <p>Imagine you go to a school where you learn spells (skills). When you finish school each day, you put those spells in your backpack (<strong>~/.claude/</strong>). When you go on an adventure (your project), you open your backpack and use the spells you learned!</p>
+        <div class="label">🍳 The kitchen analogy</div>
+        <p>Imagine a master recipe book that all chefs share. Your kitchen (<strong>~/.claude/</strong>) holds your personal copy of the recipes. When you want something cooked (your project), Claude opens the kitchen, picks the right recipes, and gets to work. When you discover a better way to cook something, you write it back into the master book so every chef benefits.</p>
       </div>
 
       <div style="background:var(--iron); border-radius:12px; padding:20px; margin-top:16px; border:1px solid var(--steel);">
         <p style="font-size:14px; color:var(--smoke); line-height:1.7;">
-          <strong style="color:var(--parchment);">Forge</strong> = the school building + all the textbooks<br>
-          <strong style="color:var(--parchment);">~/.claude/</strong> = your personal backpack (called "the membrane")<br>
-          <strong style="color:var(--parchment);">Your project</strong> = the adventure / quest you are on
+          <strong style="color:var(--parchment);">Forge</strong> = the master recipe book (shared, always improving)<br>
+          <strong style="color:var(--parchment);">~/.claude/</strong> = your personal kitchen — your tools and recipes (called "the membrane")<br>
+          <strong style="color:var(--parchment);">Your project</strong> = the meal you're currently cooking
         </p>
       </div>
     </div>
@@ -645,7 +666,7 @@
     <div class="scroll-content" style="text-align:center;">
       <div style="font-size:48px;margin-bottom:8px;">🏛️</div>
       <div class="slide-title">Three Things Forge Manages</div>
-      <div class="slide-subtitle">Think of these as the three subjects you study at wizard school</div>
+      <div class="slide-subtitle">Think of these as the three things every great kitchen keeps track of</div>
 
       <div class="pillars">
         <div class="pillar">
@@ -698,8 +719,8 @@
       </div>
 
       <div class="analogy-block" style="margin-top:20px;">
-        <div class="label">🧒 Kid-friendly version</div>
-        <p><strong>Skills</strong> = Your spell book 📖 &nbsp;|&nbsp; <strong>Learnings</strong> = Your diary of what went wrong 📓 &nbsp;|&nbsp; <strong>Memory</strong> = Your personality and values 💬</p>
+        <div class="label">🍳 Kitchen analogy</div>
+        <p><strong>Skills</strong> = Your recipe cards 🥘 &nbsp;|&nbsp; <strong>Learnings</strong> = Margin notes: "less salt next time" 📝 &nbsp;|&nbsp; <strong>Memory</strong> = Your cooking style and values 💬</p>
       </div>
     </div>
   </div>
@@ -722,7 +743,7 @@
             Check what's in sync, what's drifted. Read-only. Never changes anything.
           </div>
           <div style="margin-top:12px; background:rgba(251,191,36,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--ember);">
-            🧒 Like reading the school noticeboard to see what's changed
+            🍳 Like checking which recipes in your kitchen are newer than the master book
           </div>
         </div>
 
@@ -731,10 +752,10 @@
           <div class="cmd cmd-large">/cast</div>
           <div style="margin-top:12px; font-size:14px; color:var(--smoke); line-height:1.6;">
             <strong style="color:var(--parchment); display:block;">Pour Skills In</strong>
-            Deploy everything from forge into your Claude backpack. Updates skills, learnings, memory.
+            Stocks your kitchen with everything from the master recipe book. Updates skills, learnings, memory.
           </div>
           <div style="margin-top:12px; background:rgba(249,115,22,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--fire);">
-            🧒 Like refilling your school bag with the latest textbooks
+            🍳 Like stocking your kitchen with the latest updated recipes from the master book
           </div>
         </div>
 
@@ -746,12 +767,12 @@
             Take lessons learned during work and fold them back into the forge. The system grows smarter.
           </div>
           <div style="margin-top:12px; background:rgba(59,130,246,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--blue);">
-            🧒 Like writing today's lessons into the school's permanent record
+            🍳 Like writing your best discoveries back into the master recipe book
           </div>
         </div>
       </div>
 
-      <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); font-size:14px; color:var(--smoke); max-width:700px;">
+      <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); font-size:14px; color:var(--smoke); max-width:700px; margin:0 auto;">
         <strong style="color:var(--parchment);">Important:</strong> Every transfer shows you a table first and asks for your approval. Nothing happens behind your back. <span style="color:var(--fire);">You are always in control.</span>
       </div>
     </div>
@@ -767,8 +788,8 @@
       <div class="slide-subtitle">Like a hallmark stamp on jewellery — it inspects quality without changing anything</div>
 
       <div class="analogy-block" style="margin:24px auto;">
-        <div class="label">🧒 Analogy</div>
-        <p>Imagine a teacher who walks into the classroom, looks at the whiteboard, checks all the books, and then writes a report saying "Chapter 3 is missing from 5 students' books, Chapter 7 is outdated." The teacher doesn't do anything — they just <strong>report what they see</strong>.</p>
+        <div class="label">🍳 Kitchen analogy</div>
+        <p>Imagine opening your kitchen cupboard and comparing every recipe card to the master book — "this one is outdated, this one is missing, this one has been updated." You don't cook anything. You don't change anything. You just <strong>see exactly what's different</strong> and get a clear report.</p>
       </div>
 
       <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
@@ -817,8 +838,8 @@
       <div class="slide-subtitle">Pours molten metal from the forge into the mold — skills flow from forge into your Claude</div>
 
       <div class="analogy-block" style="margin:20px auto;">
-        <div class="label">🧒 Analogy</div>
-        <p>It's the beginning of a new school year. The school (Forge) has updated all its textbooks. <strong>/cast</strong> is the process of handing out the new books to every student (your Claude). Old, outdated books get swapped for the fresh ones.</p>
+        <div class="label">🍳 Kitchen analogy</div>
+        <p>The master recipe book has been updated with better techniques and new recipes. <strong>/cast</strong> is the process of copying all those updates into your kitchen — swapping out old recipe cards for the fresh versions, adding any new ones that are missing. Your kitchen is now fully up to date.</p>
       </div>
 
       <div style="background:var(--iron); border-radius:12px; border:1px solid var(--steel); overflow:hidden; max-width:700px; margin:0 auto;">
@@ -878,8 +899,8 @@
       <div class="slide-subtitle">Layer experience back into the steel — what you learned today makes the forge smarter tomorrow</div>
 
       <div class="analogy-block" style="margin:20px auto; border-color:rgba(168,85,247,0.3); background:rgba(168,85,247,0.1);">
-        <div class="label" style="color:var(--purple);">🧒 Analogy</div>
-        <p>A scientist runs experiments all day (your project work). At the end of the day, they write up their findings in the lab's permanent log (forge). The next scientist who uses the lab sees those notes and avoids the same mistakes. <strong>/fold</strong> is writing up those findings.</p>
+        <div class="label" style="color:var(--purple);">🍳 Kitchen analogy</div>
+        <p>You spent the day cooking (your project work). You discovered that adding lemon at the end makes the sauce far better. <strong>/fold</strong> is writing that discovery — as a margin note — back into the master recipe book, so every chef who uses it from now on automatically gets that improvement.</p>
       </div>
 
       <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin:16px 0;">
@@ -903,7 +924,7 @@
         </div>
       </div>
 
-      <div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:12px; padding:16px; max-width:600px; font-size:14px; line-height:1.6;">
+      <div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:12px; padding:16px; max-width:600px; margin:16px auto 0; font-size:14px; line-height:1.6;">
         <strong style="color:var(--purple);">The Self-Improving Loop:</strong><br>
         <span style="color:var(--smoke);">Arts write learnings → /fold absorbs them → next time arts run, they READ those learnings → they get smarter. Every run makes the whole system better.</span>
       </div>
@@ -917,11 +938,11 @@
     <div class="scroll-content" style="text-align:center;">
       <div style="font-size:48px; margin-bottom:8px;">🎭</div>
       <div class="slide-title">What Are <span class="fire-text">Arts</span>?</div>
-      <div class="slide-subtitle">Special skills where Claude wears a different costume and thinks like a different expert</div>
+      <div class="slide-subtitle">Special skills where Claude puts on a different chef's hat and thinks like a specialist</div>
 
       <div class="analogy-block" style="margin:24px auto;">
-        <div class="label">🧒 Analogy</div>
-        <p>Imagine you could put on different masks and instantly become an expert. 👨‍⚕️ <strong>Doctor mask</strong> → diagnose health problems. 👩‍⚖️ <strong>Judge mask</strong> → evaluate fairness. 🕵️ <strong>Detective mask</strong> → investigate mysteries. Arts are Claude's collection of expert masks, each with deep knowledge in a specific domain.</p>
+        <div class="label">🍳 Kitchen analogy</div>
+        <p>Imagine a kitchen with specialist chefs you can call in. 🍣 <strong>Sushi chef</strong> → evaluates your dish's presentation. 🥐 <strong>Pastry chef</strong> → checks precision and structure. 🍷 <strong>Food critic</strong> → attacks it from every angle. Arts are Claude's collection of specialist chef hats — each bringing deep expertise and a completely different way of thinking.</p>
       </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:700px; margin:0 auto;">
@@ -937,7 +958,7 @@
         </div>
       </div>
 
-      <div style="margin-top:20px; background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); max-width:600px; font-size:14px; color:var(--smoke); line-height:1.7;">
+      <div style="margin:20px auto 0; background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); max-width:600px; font-size:14px; color:var(--smoke); line-height:1.7;">
         Every art follows the same routine:<br>
         <strong style="color:var(--parchment);">Pre-flight</strong> (read past lessons) → <strong style="color:var(--parchment);">Do the work</strong> (as the expert) → <strong style="color:var(--parchment);">Post-flight</strong> (write new lessons)
       </div>
@@ -951,7 +972,7 @@
     <div class="scroll-content" style="text-align:center;">
       <div style="font-size:48px; margin-bottom:8px;">🗡️</div>
       <div class="slide-title">The <span class="fire-text">Nine Arts</span></div>
-      <div class="slide-subtitle">Nine expert masks, each solving a different type of problem</div>
+      <div class="slide-subtitle">Nine specialist chef hats — each bringing a completely different type of expertise</div>
 
       <div class="persona-grid" style="margin-top:20px;">
         <div class="persona-card" style="background:rgba(168,85,247,0.15); border-color:rgba(168,85,247,0.4);">
@@ -1024,7 +1045,7 @@
             You come with a fuzzy idea: "I want to build an app for cricket coaches." /prime asks smart questions, challenges your thinking, and helps you produce a <strong style="color:var(--parchment);">detailed blueprint</strong>.
           </div>
           <div style="background:rgba(168,85,247,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
-            🧒 Like a teacher who says "Tell me more... what exactly do you mean? Who is it for? What's the goal?" — until your messy idea becomes a clear plan.
+            🍳 Like a head chef who says "Tell me more — who's eating? What occasion? What flavours?" — asking smart questions until your vague craving becomes a clear, detailed recipe.
           </div>
           <div style="margin-top:12px; font-size:12px; color:var(--ash);">
             <strong>Guided by:</strong> Gates (system thinking), Jobs (taste), Musk (first principles), Bezos (work backwards from customer)
@@ -1043,7 +1064,7 @@
             You have the blueprint from /prime. Now /probe acts as a <strong style="color:var(--parchment);">senior solutions architect</strong> who reviews every decision. "Why did you choose X? Have you considered Y?"
           </div>
           <div style="background:rgba(59,130,246,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
-            🧒 Like a senior engineer who reads your plan and says "This will break when you have 10,000 users — here's what to do differently."
+            🍳 Like a senior chef who reviews your recipe and says "This sauce will split if the heat is too high — here's how to make it bulletproof before you cook for 200 guests."
           </div>
           <div style="margin-top:12px; font-size:12px; color:var(--ash);">
             <strong>Use after:</strong> /prime — give it the blueprint, get structural feedback before building
@@ -1063,8 +1084,8 @@
       <div class="slide-subtitle">Three arts that test your code — light → medium → heavy. Like medical check-ups.</div>
 
       <div class="analogy-block" style="margin:20px auto;">
-        <div class="label">🧒 Analogy</div>
-        <p>Think of <strong>/poke</strong> as a daily health check (quick, light), <strong>/press</strong> as a doctor's appointment before a big event (thorough), and <strong>/pound</strong> as a full hospital examination before surgery (extremely detailed, nothing missed).</p>
+        <div class="label">🍳 Kitchen analogy</div>
+        <p>Think of <strong>/poke</strong> as a daily taste-test (quick, light — "does this need more seasoning?"), <strong>/press</strong> as a chef's full review before a dinner party (thorough), and <strong>/pound</strong> as bringing in 21 professional food critics to attack every aspect of your dish before you open the restaurant.</p>
       </div>
 
       <div style="display:flex; gap:0; justify-content:center; max-width:800px; margin:20px auto; flex-wrap:wrap;">
@@ -1075,7 +1096,7 @@
             <strong style="color:var(--parchment); display:block;">Light Check</strong>
             Code quality, bad patterns, tech debt. Quick scan. Run <strong style="color:#eab308;">often</strong> — every sprint.
           </div>
-          <div style="margin-top:12px; font-size:12px; background:rgba(234,179,8,0.1); padding:8px; border-radius:6px; color:#eab308;">🧒 Daily vitamin check</div>
+          <div style="margin-top:12px; font-size:12px; background:rgba(234,179,8,0.1); padding:8px; border-radius:6px; color:#eab308;">🍳 Daily taste-test</div>
         </div>
         <div style="background:rgba(249,115,22,0.15); border:2px solid rgba(249,115,22,0.5); border-top:2px solid; border-bottom:2px solid; padding:24px 20px; flex:1; min-width:200px; text-align:center;">
           <div style="font-size:32px; margin-bottom:8px;">⚙️</div>
@@ -1084,7 +1105,7 @@
             <strong style="color:var(--parchment); display:block;">Medium Check</strong>
             Security, scalability, operations, compliance. Run <strong style="color:var(--fire);">before milestones</strong>.
           </div>
-          <div style="margin-top:12px; font-size:12px; background:rgba(249,115,22,0.1); padding:8px; border-radius:6px; color:var(--fire);">🧒 Doctor before sports match</div>
+          <div style="margin-top:12px; font-size:12px; background:rgba(249,115,22,0.1); padding:8px; border-radius:6px; color:var(--fire);">🍳 Chef review before dinner party</div>
         </div>
         <div style="background:rgba(239,68,68,0.15); border:2px solid rgba(239,68,68,0.5); border-radius:0 16px 16px 0; padding:24px 20px; flex:1; min-width:200px; text-align:center;">
           <div style="font-size:32px; margin-bottom:8px;">💥</div>
@@ -1093,7 +1114,7 @@
             <strong style="color:var(--parchment); display:block;">Heavy Attack</strong>
             21 adversary personas. Finds every possible problem. Run <strong style="color:#ef4444;">before ship</strong>.
           </div>
-          <div style="margin-top:12px; font-size:12px; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; color:#ef4444;">🧒 Full hospital exam</div>
+          <div style="margin-top:12px; font-size:12px; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; color:#ef4444;">🍳 21 critics before opening night</div>
         </div>
       </div>
 
@@ -1137,7 +1158,7 @@
             🔄 <strong style="color:var(--parchment);">Reframer</strong> — changes the question
           </div>
           <div style="background:rgba(20,184,166,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
-            🧒 Like that one friend who always says "there HAS to be a way" — and keeps trying until they find it.
+            🍳 Like the chef who refuses to say "we can't make that" — keeps trying substitutions and techniques until they find a way to get the dish on the table.
           </div>
         </div>
 
@@ -1157,7 +1178,7 @@
             Only tends the forge — keeping it sharp and clean.
           </div>
           <div style="background:rgba(120,113,108,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
-            🧒 Like the school janitor — doesn't teach, but without them the school becomes dusty and broken. Summoned occasionally, never scheduled.
+            🍳 Like deep-cleaning the kitchen itself — doesn't cook, but without it the kitchen fills up with stale ingredients, cluttered shelves, and outdated recipes nobody uses. Done occasionally, not daily.
           </div>
         </div>
       </div>
@@ -1174,8 +1195,8 @@
       <div class="slide-subtitle">The master of the forge. The user's proxy. Uses ALL the arts to build entire products.</div>
 
       <div class="analogy-block" style="margin:20px auto;">
-        <div class="label">🧒 Analogy</div>
-        <p>Imagine a master craftsman who knows every tool in the workshop. You describe what you want to build, and they organise the entire team, use every specialist, work in parallel, test everything — and don't stop until it's perfect. <strong>You just describe the goal. The smith handles the rest.</strong></p>
+        <div class="label">🍳 Kitchen analogy</div>
+        <p>Imagine a head chef who knows every technique, manages every specialist in the kitchen, coordinates all the courses running in parallel, won't let a dish leave until it's perfect — and calls in the food critics to test it before serving. <strong>You just describe what you want to eat. The head chef handles the entire kitchen.</strong></p>
       </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; max-width:800px; margin:0 auto;">
@@ -1196,7 +1217,7 @@
         </div>
       </div>
 
-      <div style="margin-top:20px; background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3); border-radius:12px; padding:16px; max-width:600px; font-size:14px; line-height:1.7;">
+      <div style="margin:20px auto 0; background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3); border-radius:12px; padding:16px; max-width:600px; font-size:14px; line-height:1.7;">
         <strong style="color:var(--fire);">How to use:</strong> Give /smith a probed blueprint (from /prime + /probe). It handles everything else — autonomously — from first commit to shipped product.
       </div>
     </div>
@@ -1216,7 +1237,7 @@
           <tr>
             <th>Command</th>
             <th>What it does</th>
-            <th>Kid Analogy</th>
+            <th>Kitchen Analogy</th>
           </tr>
         </thead>
         <tbody>
@@ -1228,17 +1249,17 @@
           <tr>
             <td><span class="cmd">/wrap</span></td>
             <td>Pre-commit ritual: lint → stage → write context → commit. Does it properly.</td>
-            <td>📦 Packing your bag carefully before leaving school</td>
+            <td>📦 Cleaning the kitchen and filing every recipe card before closing up</td>
           </tr>
           <tr>
             <td><span class="cmd">/qt</span></td>
             <td>Quick test — verifies your fix works before you hand it back to the user</td>
-            <td>✅ Double-checking your homework before handing it in</td>
+            <td>✅ Tasting the dish yourself before serving it to the guest</td>
           </tr>
           <tr>
             <td><span class="cmd">/ponci</span></td>
             <td>Push to GitHub and watch CI (automated tests) pass or fail</td>
-            <td>🚀 "Submit homework + watch teacher grade it live"</td>
+            <td>🚀 Sending the dish to the table and watching the guest's reaction in real time</td>
           </tr>
           <tr>
             <td><span class="cmd">/monci</span></td>
@@ -1253,7 +1274,7 @@
           <tr>
             <td><span class="cmd">/eli5</span></td>
             <td>Explain Like I'm 5 — distills any topic into the simplest possible terms</td>
-            <td>🧒 "Explain this to me like I'm a 5-year-old"</td>
+            <td>🍳 "Describe this recipe as if I've never cooked before"</td>
           </tr>
           <tr>
             <td><span class="cmd">/cicd</span></td>
@@ -1263,7 +1284,7 @@
           <tr>
             <td><span class="cmd">/temper</span></td>
             <td>Runs /poke + /press multiple times and consolidates results with confidence scores</td>
-            <td>🔄 Asking 5 doctors and averaging their opinions</td>
+            <td>🔄 Asking 5 chefs to taste independently, then comparing all their notes</td>
           </tr>
         </tbody>
       </table>
@@ -1281,7 +1302,7 @@
 
       <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:24px; text-align:left;">
         <div style="background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel); width:280px;">
-          <div style="background:rgba(249,115,22,0.2); padding:12px 16px; font-weight:700; color:var(--fire);">🏫 forge/ (the school)</div>
+          <div style="background:rgba(249,115,22,0.2); padding:12px 16px; font-weight:700; color:var(--fire);">📖 forge/ (the recipe book)</div>
           <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
             <div>📂 <strong style="color:var(--parchment);">skills/</strong> — all skill definitions</div>
             <div style="padding-left:16px; font-size:12px;">⚡ each skill has its own folder</div>
@@ -1296,7 +1317,7 @@
         </div>
 
         <div style="background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel); width:280px;">
-          <div style="background:rgba(59,130,246,0.2); padding:12px 16px; font-weight:700; color:var(--blue);">🎒 ~/.claude/ (the backpack)</div>
+          <div style="background:rgba(59,130,246,0.2); padding:12px 16px; font-weight:700; color:var(--blue);">🍳 ~/.claude/ (your kitchen)</div>
           <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
             <div>📂 <strong style="color:var(--parchment);">skills/</strong> — deployed skills</div>
             <div style="padding-left:16px; font-size:12px;">✅ ready for Claude to use</div>
@@ -1336,8 +1357,8 @@
       <div class="slide-subtitle">How Forge gets smarter every single time you use it</div>
 
       <div class="analogy-block" style="margin:20px auto;">
-        <div class="label">🧒 Analogy</div>
-        <p>Imagine a school where every teacher writes notes after each class: "This example confused students" or "This explanation worked perfectly." Those notes go into the school's permanent teacher guide. Next year, every teacher reads that guide and teaches better than the year before. <strong>The school never stops improving.</strong></p>
+        <div class="label">🍳 Kitchen analogy</div>
+        <p>Every chef writes margin notes after each service: "The sauce needed more acid" or "This timing worked perfectly." Those notes get written into the master recipe book. Every chef who cooks from it next time is starting from a better foundation than the chef before. <strong>The kitchen never stops improving.</strong></p>
       </div>
 
       <div style="max-width:700px; margin:0 auto;">
@@ -1430,7 +1451,7 @@
         </div>
       </div>
 
-      <div style="background:var(--iron); border-radius:10px; padding:14px 20px; border:1px solid var(--steel); font-size:13px; color:var(--smoke); max-width:600px;">
+      <div style="background:var(--iron); border-radius:10px; padding:14px 20px; border:1px solid var(--steel); font-size:13px; color:var(--smoke); max-width:600px; margin:0 auto;">
         💡 When stuck: <span class="cmd" style="font-size:11px;">/pry</span> &nbsp;|&nbsp; Need simpler explanation: <span class="cmd" style="font-size:11px;">/eli5</span> &nbsp;|&nbsp; UI looks off: <span class="cmd" style="font-size:11px;">/preen</span> &nbsp;|&nbsp; Business questions: <span class="cmd" style="font-size:11px;">/pitch</span>
       </div>
     </div>
@@ -1450,32 +1471,32 @@
           <div style="font-size:20px; margin-bottom:8px;">🚫</div>
           <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">No Auto-Commit</div>
           <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Claude never commits code automatically. Always asks first. You are in charge of what gets saved.</div>
-          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🧒 Like asking permission before writing in someone's diary</div>
+          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🍳 Like asking the head chef before adding anything permanent to the master recipe book</div>
         </div>
 
         <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:20px;">
           <div style="font-size:20px; margin-bottom:8px;">🔗</div>
           <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">No Command Chaining</div>
           <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Never runs multiple bash commands together with && or ; — each command runs alone. Prevents accidental disasters.</div>
-          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🧒 Like doing one thing at a time so nothing accidentally breaks</div>
+          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🍳 Like finishing one dish completely before starting the next — no chaos in the kitchen</div>
         </div>
 
         <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:20px;">
           <div style="font-size:20px; margin-bottom:8px;">🔒</div>
           <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">Only /fold Writes to Forge</div>
           <div style="font-size:13px; color:var(--smoke); line-height:1.6;">No direct edits to forge's learnings or memory from a project. /fold is the only gateway — with your review.</div>
-          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🧒 Like only the librarian can update the library catalogue</div>
+          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🍳 Like only the head chef can update the master recipe book — no one else writes in it directly</div>
         </div>
 
         <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:20px;">
           <div style="font-size:20px; margin-bottom:8px;">🏷️</div>
           <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">No Project Names in Forge</div>
           <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Forge is shared across all projects. Learnings must be universal. "MidWicket had a bug" → "Marketplaces need rate limiting."</div>
-          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🧒 Like keeping a recipe book — write the method, not "this worked at Grandma's"</div>
+          <div style="margin-top:10px; font-size:12px; color:var(--ash);">🍳 Write "reduce heat after adding cream" — not "this worked at the Milan restaurant"</div>
         </div>
       </div>
 
-      <div style="background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3); border-radius:10px; padding:14px 20px; max-width:600px; font-size:14px; color:var(--parchment);">
+      <div style="background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.3); border-radius:10px; padding:14px 20px; max-width:600px; margin:0 auto; font-size:14px; color:var(--parchment);">
         ✨ <strong>The Golden Rule:</strong> <em style="color:var(--smoke);">Forge brings intelligence. <strong style="color:var(--parchment);">You</strong> bring wisdom. Nothing changes without your approval.</em>
       </div>
     </div>
@@ -1551,8 +1572,8 @@
       <div class="slide-subtitle">Some commands you run once and never think about again. Others you run constantly.</div>
 
       <div class="analogy-block" style="margin:16px auto;">
-        <div class="label">🧒 Analogy</div>
-        <p><strong>One-time</strong> = Setting up your bedroom (you do it once when you move in). <strong>Iterative</strong> = Making your bed every morning — you keep doing it as part of your daily routine.</p>
+        <div class="label">🍳 Kitchen analogy</div>
+        <p><strong>One-time</strong> = Stocking your kitchen when you first move in (you do it once, then top up occasionally). <strong>Iterative</strong> = Tasting and adjusting seasoning every time you cook — it's part of every single meal.</p>
       </div>
 
       <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:16px; text-align:left;">
@@ -1902,9 +1923,9 @@
         That's <span class="fire-text">Forge</span>
       </div>
       <div style="margin:24px 0; color:var(--smoke); font-size:18px; line-height:1.7;">
-        A school that teaches your AI.<br>
+        A master recipe book that makes your AI better every day.<br>
         A system that never stops improving.<br>
-        A set of expert tools always ready when you need them.
+        A kitchen full of specialist chefs, always ready when you need them.
       </div>
 
       <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin:28px 0;">
@@ -1955,6 +1976,7 @@
     prevBtn.disabled = current === 0;
     nextBtn.disabled = current === total - 1;
     progressBar.style.width = `${((current + 1) / total) * 100}%`;
+    updateMenuActiveItem();
   }
 
   function changeSlide(dir) {
@@ -1990,10 +2012,30 @@
 
   // Keyboard
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+    if (e.key === 'ArrowRight') changeSlide(1);
+    if (e.key === 'ArrowLeft') changeSlide(-1);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const scrollEl = slides[current].querySelector('.scroll-content') || slides[current];
+      e.preventDefault();
+      scrollEl.scrollBy({ top: e.key === 'ArrowDown' ? 100 : -100, behavior: 'smooth' });
+    }
     if (e.key === 'Escape') closeMenu();
   });
+
+  // Scroll wheel — navigate slides, but allow content scroll when slide has overflow
+  let wheelCooldown = false;
+  document.addEventListener('wheel', (e) => {
+    const scrollEl = slides[current].querySelector('.scroll-content');
+    if (scrollEl) {
+      const atTop = scrollEl.scrollTop === 0;
+      const atBottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 2;
+      if ((e.deltaY > 0 && !atBottom) || (e.deltaY < 0 && !atTop)) return;
+    }
+    if (wheelCooldown) return;
+    wheelCooldown = true;
+    setTimeout(() => { wheelCooldown = false; }, 600);
+    changeSlide(e.deltaY > 0 ? 1 : -1);
+  }, { passive: true });
 
   // Touch
   let touchStartX = 0;
@@ -2004,25 +2046,40 @@
   });
 
   // Menu
+  let menuItems = [];
+
   function buildMenu() {
     const list = document.getElementById('menuList');
     slides.forEach((s, i) => {
       const item = document.createElement('div');
-      item.className = 'menu-item';
+      item.className = 'menu-item' + (i === 0 ? ' active-slide' : '');
       item.innerHTML = `<span class="num">${i + 1}</span><span>${s.dataset.title || 'Slide ' + (i+1)}</span>`;
       item.onclick = () => goToSlide(i);
       list.appendChild(item);
+      menuItems.push(item);
+    });
+  }
+
+  function updateMenuActiveItem() {
+    menuItems.forEach((item, i) => {
+      item.classList.toggle('active-slide', i === current);
     });
   }
 
   function toggleMenu() {
-    document.getElementById('menuOverlay').classList.toggle('open');
+    const panel = document.getElementById('slideNavPanel');
+    const toggle = document.getElementById('slideNavToggle');
+    const isOpen = panel.classList.toggle('open');
+    toggle.classList.toggle('panel-open', isOpen);
+    toggle.textContent = isOpen ? '‹' : '›';
   }
 
-  function closeMenu(e) {
-    if (!e || e.target === document.getElementById('menuOverlay')) {
-      document.getElementById('menuOverlay').classList.remove('open');
-    }
+  function closeMenu() {
+    const panel = document.getElementById('slideNavPanel');
+    const toggle = document.getElementById('slideNavToggle');
+    panel.classList.remove('open');
+    toggle.classList.remove('panel-open');
+    toggle.textContent = '›';
   }
 
   buildMenu();
