@@ -51,3 +51,7 @@
 ## Auth Libraries With Flat User Models Need Custom Sub-Profile Tables (2026-03-29)
 **Learning**: Auth libraries with flat data models (User → Account, e.g., Better Auth) have no native support for hierarchical relationships like parent-child accounts. Organization plugins are for SaaS tenancy, not family structures. The correct pattern: auth library handles primary user auth only; subordinate profiles (children, sub-accounts) use a first-party table with scoped session tokens managed entirely by application code. This is what Netflix, Disney+, and Roblox do.
 **Apply when**: Any project using an auth library that needs hierarchical user relationships (parent-child, manager-employee, guardian-ward).
+
+## Scalability Analysis Belongs in /probe, Not /press or /pound (2026-04-02)
+**Learning**: Scalability is an architecture concern ("does this design scale?"), not an ops concern ("are we ready to deploy?"). It belongs in `/probe` as a "Scaling Runway" evaluation section that assesses: (1) stateless request handling, (2) database scaling path (pooling → replicas → partitioning → sharding), (3) external dependency scaling (AI provider, CDN, queue), (4) what user count triggers each scaling tier. Present as a table: user range → required change → effort level. `/press` evaluates current state (go-live readiness); `/probe` evaluates future state (design validity). A scaling ceiling is a design flaw, not a deployment gap.
+**Apply when**: Running `/probe` on any blueprint or architecture. The scaling runway should be part of every probe report.
