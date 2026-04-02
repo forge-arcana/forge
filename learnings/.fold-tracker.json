@@ -72,7 +72,6 @@
     "Generated Documents Must Reside in docs/",
     "/prime Must Auto-Invoke /probe Then /preen After Blueprint",
     "Long-Running Agents Must Write Incrementally, Never Buffer-Then-Flush",
-    "Gemini MCP for Asset Generation",
     "Scalability Analysis Belongs in /probe, Not /press or /pound"
   ],
   "promotedEntries": [
