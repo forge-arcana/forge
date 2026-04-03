@@ -1,6 +1,6 @@
 ---
 name: smith
-description: "Master of the forge — consumes a probed blueprint and autonomously builds the product through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection through relentless iteration. The magnum opus. TRIGGER when: user describes phase/heat work or wants to build/implement from a blueprint, AND a ledger.json or *blueprint*.md file exists in the project."
+description: "Master of the forge — consumes a probed blueprint, plan file, or conversation context and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The magnum opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a blueprint, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 user-invocable: true
 ---
 <!-- model: opus -->
@@ -11,21 +11,41 @@ The smith is not an art. The smith is the one who wields them all.
 
 ## Arguments
 
-`$ARGUMENTS` — path to a probed blueprint file (e.g., `ProjectName_ProductBlueprint_V1.0-probed.md`), OR a project directory containing one.
+`$ARGUMENTS` — one of:
+- A path to a probed blueprint file (e.g., `ProjectName_ProductBlueprint_V1.0-probed.md`)
+- A path to a plan/spec `.md` file (any non-blueprint markdown with implementation steps)
+- A project directory containing a blueprint
+- `--force` flag (can combine with any above) — bypasses the scope gate
+- Empty — smith auto-detects the work source
 
-If not provided:
-1. Scan cwd for `*-probed.md` — prefer the probed version
-2. Fall back to `*Blueprint*.md` — warn that it's unprobed and offer to invoke `/probe` first
-3. If no blueprint found — error: "No blueprint found. Run `/prime` to create one."
+### Input Resolution (in priority order)
+
+1. **Explicit path provided** → use it (blueprint or plan file, detected by content)
+2. **No path** → scan cwd for `*-probed.md` → prefer the probed blueprint
+3. **No probed blueprint** → fall back to `*Blueprint*.md` → warn unprobed, offer `/probe`
+4. **No blueprint** → check for plan files in `~/.claude/plans/` or conversation context
+5. **Conversation context** → if the current conversation contains a discussed spec, architecture, or implementation steps, smith extracts a work spec from it
+6. **Nothing found** → error: "No blueprint, plan, or work context found. Run `/prime` to create a blueprint, or discuss the work first."
+
+### Input Modes
+
+| Mode | Source | Blueprint Sections? | Phase Gates? |
+|------|--------|--------------------:|:------------:|
+| **Blueprint** | `*-probed.md` or `*Blueprint*.md` | Yes — numbered sections | Full ceremony |
+| **Plan file** | Any `.md` with implementation steps | No — free-form descriptions | Adapted |
+| **Conversation** | Work discussed in current session | No — free-form descriptions | Adapted |
+
+In **plan file** and **conversation** modes, smith synthesizes a work spec (see Step 0.5) and maps it to heats using free-form descriptions instead of blueprint section numbers.
 
 ## Step 0: Preflight
 
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line
 2. **Launch all reads in parallel** (all independent):
-   - Read the blueprint file
+   - Read the blueprint file, plan file, or extract work spec from conversation context (per Input Resolution)
    - Read project `CLAUDE.md` for stack, conventions, current state
    - Read `<forge>/skills/forge/stack-guide.md` for tech reference
    - Read `memory/smith-ledger.json` if it exists (resume mode — skip to Session Resume)
+   - Read `memory/smith-workspec.md` if it exists (plan/conversation mode resume)
    - Read `memory/smith-learnings.md` if it exists (Layer 1 — orchestration wisdom)
    - Read `memory/smith-apprentice-log.md` if it exists (Layer 3 — delegation wisdom)
 
@@ -33,13 +53,63 @@ If the blueprint is unprobed (no `-probed` suffix, no `<!-- PROBED: -->` markers
 
 If the blueprint has no `<!-- PITCHED: -->` marker AND contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Use `AskUserQuestion` with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste.
 
+## Step 0.5: Scope Gate
+
+Before committing to the full smith ceremony, assess whether the work warrants it.
+
+### Work Spec Extraction
+
+Depending on input mode:
+- **Blueprint mode** → the blueprint IS the work spec (no extraction needed)
+- **Plan file mode** → read the plan file, identify implementation steps, estimate complexity
+- **Conversation mode** → scan conversation context for: architecture decisions, implementation steps, file lists, API designs, data models. Synthesize into a structured work spec.
+
+For plan/conversation modes, persist the extracted spec to `memory/smith-workspec.md`:
+
+```markdown
+# Smith Work Spec — [Short Title]
+
+## Source
+[Plan file path or "conversation context"]
+
+## Scope
+[1-2 sentence summary of what's being built]
+
+## Implementation Steps
+1. [Step from plan/conversation]
+2. ...
+
+## Key Files
+- [file] — [action: new/modify/delete]
+
+## Hash
+[sha256 of this content — for session resume change detection]
+```
+
+### Heat Estimation
+
+Estimate the number of heats from the work spec:
+- Each vertical slice (DB → logic → API → UI) = 1 heat
+- Each independent module/file group = 1 heat
+- Scaffolding/setup = 1 heat if non-trivial
+- Testing/hardening = 1 heat if scope warrants it
+
+### Threshold Decision
+
+| Estimated Heats | Decision |
+|-----------------|----------|
+| **1–2 heats** | **Advise against smith.** Output: "This work is ~N heats — small enough to build directly without the full smith workflow. Just implement it." Exit unless `--force` flag was passed. |
+| **3+ heats** | **Proceed.** The work benefits from smith's orchestration, evaluation, and checkpointing. Continue to Step 1. |
+
+The `--force` flag bypasses this gate — the user knows it's small but wants the ceremony (e.g., for learning, or because the work is deceptively complex).
+
 ## Step 1: Blueprint Decomposition
 
-Parse the blueprint to create a build plan. The blueprint's **Consumption Guide** (Section 22 footer) defines priority, and **Section 21** (Build Phases) defines MVP scope.
+Parse the work source to create a build plan.
 
-### Decomposition Rules
+### Blueprint Mode
 
-Split the selected phase (default: MVP) into **units**, each containing **heats**:
+When working from a blueprint: the **Consumption Guide** (Section 22 footer) defines priority, and **Section 21** (Build Phases) defines MVP scope. Split the selected phase (default: MVP) into **units**, each containing **heats**:
 
 **Foundation Unit** (always first):
 - Heat 1: Project scaffolding + data model (Sections 13, 16)
@@ -64,6 +134,22 @@ Split the selected phase (default: MVP) into **units**, each containing **heats*
 - Compliance checks (Sections 9, 20)
 - Documentation
 
+### Plan/Conversation Mode
+
+When working from a plan file or conversation context, use the work spec from Step 0.5:
+
+1. **Group implementation steps into units** by functional area (analogous to blueprint units)
+2. **Split each unit into heats** — one heat per vertical slice or independent module
+3. **Infer a Foundation unit** if the work requires scaffolding, config changes, or setup
+4. **Infer a Hardening unit** if the work has 5+ heats (testing, verification)
+5. **Reference steps by description** instead of blueprint section numbers (e.g., "Provider abstraction" instead of "Section 13")
+
+Phase gates are **adapted** for plan/conversation mode:
+- Foundation gate → still applies if there's a foundation unit
+- Unit completion gates → still apply (evaluate each completed unit)
+- Final gate → still applies (convergence loop)
+- `/probe` gates are skipped (no blueprint architecture to validate) — replaced by `/poke` + `/press`
+
 ### Dependency Graph
 
 Before presenting the plan, smith maps dependencies between heats:
@@ -81,18 +167,20 @@ Output the full build plan as a table:
 ```markdown
 ## Build Plan — [Project Name]
 
-| # | Unit | Heat | Blueprint Sections | Dependencies | Parallel? |
-|---|------|------|--------------------|--------------|-----------|
-| 1 | Foundation | Scaffolding + schema | 13, 16 | — | — |
-| 2 | Foundation | Auth system | 3, 15 | Heat 1 | — |
+| # | Unit | Heat | Source | Dependencies | Parallel? |
+|---|------|------|--------|--------------|-----------|
+| 1 | Foundation | Scaffolding + schema | §13, §16 | — | — |
+| 2 | Foundation | Auth system | §3, §15 | Heat 1 | — |
 | 3 | Foundation | Dev tooling | — | Heat 1 | Yes (with Heat 2) |
-| 4 | Core | User registration | 5.1 | Foundation | — |
+| 4 | Core | User registration | §5.1 | Foundation | — |
 | ...| ... | ... | ... | ... | ... |
 
 Estimated heats: N | Parallelizable: M
 ```
 
-Proceed to build. The master doesn't ask permission to start — the blueprint is the permission.
+The **Source** column references blueprint section numbers (§N) in blueprint mode, or free-form step descriptions in plan/conversation mode.
+
+Proceed to build. The master doesn't ask permission to start — the work spec is the permission.
 
 ## Step 2: The Heat Cycle
 
@@ -101,14 +189,14 @@ Each heat follows: **Plan → Build → Verify → Evaluate → Fix → Checkpoi
 ### 2a: Plan
 
 - Read the current heat's target from the ledger
-- Identify blueprint sections to implement
+- Identify relevant source (blueprint sections or workspec steps) to implement
 - List files to create/modify
 - Check dependency graph — if independent heats exist, spawn apprentices (see Apprentice System)
 
 ### 2b: Build
 
 Write code following:
-- The blueprint spec for functionality
+- The work source (blueprint spec or workspec steps) for functionality
 - The stack guide for technology choices and conventions
 - The forge conventions checklist for logging, structure, and dev tooling
 - Vertical slices — DB schema → service/business logic → API route → UI component (where applicable)
@@ -240,8 +328,12 @@ When smith encounters a wall — a dependency that doesn't exist, an API that do
 When the final gate converges (zero CRITICAL + IMPORTANT):
 
 1. Present the final status: heats completed, findings addressed, deferred minors, total cycles
-2. Invoke `/wrap` for the final commit
-3. Output the forge mark:
+2. **Update source documents**:
+   - **Blueprint mode** → update relevant blueprint sections with implementation status markers
+   - **Plan file mode** → update the source plan file (mark steps complete, add implementation notes)
+   - **Conversation mode** → no source to update (workspec in `memory/smith-workspec.md` serves as the record)
+3. Invoke `/wrap` for the final commit
+4. Output the forge mark:
 
 ```
 The blade is forged.
@@ -268,6 +360,8 @@ Next: Heat [Y] — [title]
 4. Continue from where it left off. No re-planning unless the blueprint has changed (compare hash).
 
 If the blueprint hash differs from the ledger's recorded hash: re-run Step 1 (decomposition) with the updated blueprint, preserving completed heats where possible.
+
+For plan/conversation mode: compare the workspec hash from `memory/smith-workspec.md` against the ledger's recorded hash. If the source plan file changed or the workspec was updated, re-run decomposition.
 
 ## The Apprentice System
 

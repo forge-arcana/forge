@@ -7,7 +7,9 @@
 ```json
 {
   "version": 1,
+  "inputMode": "blueprint|plan|conversation",
   "blueprint": { "file": "...-probed.md", "hash": "<sha256>", "phase": "MVP" },
+  "workspec": { "file": "memory/smith-workspec.md", "hash": "<sha256>", "source": "plan-file-path or conversation" },
   "plan": {
     "units": [{
       "name": "Foundation",
@@ -41,6 +43,8 @@
 
 ### Key Fields
 
+- **`inputMode`** — how smith received the work: `blueprint` (formal probed/unprobed blueprint), `plan` (plan file with implementation steps), or `conversation` (extracted from discussion context).
+- **`workspec`** — only present in plan/conversation modes. Points to `memory/smith-workspec.md` with hash for change detection on resume. `null` in blueprint mode.
 - **`decisions`** — per-heat decision rationale. Survives context compaction. "Heat 5: chose WebSocket over SSE because blueprint Section 14 specifies bidirectional."
 - **`checkpointSha`** — git commit SHA at each heat completion. Phase gates also snapshot the full ledger to `memory/smith-ledger-checkpoint-<gate>.json`.
 - **`cycleHistory`** — final gate convergence tracking. Used for stall detection: if findings don't decrease for 2 consecutive cycles, smith triggers user review.
