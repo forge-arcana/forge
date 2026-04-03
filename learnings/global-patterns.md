@@ -212,3 +212,7 @@
 ## Long-Running Agents Must Write Incrementally, Never Buffer-Then-Flush (2026-04-01)
 **Learning**: When spawning a subagent to generate large outputs (training data, reports, migration files, test fixtures), the agent MUST write to disk incrementally — every 20-50 items — not buffer everything in memory and write at the end. If the agent hits a rate limit, OOMs, times out, or crashes for any reason, all buffered work is permanently lost. Agent prompts must explicitly instruct: "Write incrementally — append every 20 items. Do NOT buffer everything and write at the end." The correct pattern is generate batch → write to file → generate next batch → append → repeat.
 **Apply when**: Spawning any agent for data generation, bulk file creation, large report generation, or any task expected to run >5 minutes. The longer the expected runtime, the more critical incremental writes become.
+
+## No Auto-CI for Solo Dev Projects (2026-04-03)
+**Learning**: Solo dev projects should use `workflow_dispatch` (manual trigger) for CI, not auto-trigger on push/PR. Run CI explicitly via `/cicd` or `/ponci` when ready. Auto-CI wastes Actions minutes and creates noise during rapid iteration where every push is WIP.
+**Apply when**: Setting up CI for any solo dev project. Default to manual trigger unless the user explicitly wants auto-CI on every push.

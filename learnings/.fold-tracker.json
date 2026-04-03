@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-04-02T00:00:00Z",
+  "lastRun": "2026-04-03T00:00:00Z",
   "processedEntries": [
     "WSL Path Compatibility",
     "Disable Rate Limiting in E2E Test Mode",
@@ -72,7 +72,8 @@
     "Generated Documents Must Reside in docs/",
     "/prime Must Auto-Invoke /probe Then /preen After Blueprint",
     "Long-Running Agents Must Write Incrementally, Never Buffer-Then-Flush",
-    "Scalability Analysis Belongs in /probe, Not /press or /pound"
+    "Scalability Analysis Belongs in /probe, Not /press or /pound",
+    "Forge Projects: No Auto-CI by Default"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
