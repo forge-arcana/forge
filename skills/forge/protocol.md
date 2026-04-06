@@ -110,7 +110,7 @@ Smith consumes a probed blueprint (from `/prime` + `/probe`) and autonomously fo
 
 Smith has its own learning membrane (three layers: orchestration, delegation, art proficiency) and invokes `/wrap` at milestones autonomously. See `skills/smith/SKILL.md` for the full architecture.
 
-## The Nine Arts
+## The Ten Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
@@ -123,6 +123,7 @@ Smith has its own learning membrane (three layers: orchestration, delegation, ar
 | `/pitch` | VC partner / business strategist | Evaluative | Business |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
 | `/purge` | The Purist (cleanser of the forge) | Cleansing | — |
+| `/praise` | The feedback router (closes the build-ship-learn loop) | Orchestrative | — |
 
 ### The Evaluative Trifecta — poke → press → pound
 
@@ -136,7 +137,9 @@ The trifecta escalates in intensity and broadens in scope:
 
 **`/pitch`** runs orthogonal to the trifecta — business model viability, invocable at any lifecycle stage. Validate the business model before committing build resources (pre-build gate), and re-validate before ship (final gate) when the product has monetization. The investor's eye.
 
-**Cadence**: poke often, preen on UI changes, pitch before building and before shipping, press before milestones, pound before ship. `/purge` stands apart — it tends the forge itself, not projects.
+**`/praise`** closes the loop — takes real-world feedback (users, QA, testing) and routes it through the right arts. Routes UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a blueprint delta and a change brief for `/smith`. Run after every feedback cycle.
+
+**Cadence**: poke often, preen on UI changes, pitch before building and before shipping, press before milestones, pound before ship, praise after every feedback cycle. `/purge` stands apart — it tends the forge itself, not projects.
 
 ## Learning Cycle
 
