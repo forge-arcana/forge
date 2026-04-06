@@ -24,7 +24,7 @@ This resolves the forge path, pulls the latest forge (aborting if diverged), and
 
 ## Step 1: PLAN Report — Decision Gate
 
-Build a unified table from the preflight output showing everything that will change across all three pillars (skills, learnings, memory). Use the Learning Details section from `forge-status.sh` for contributor names and summaries.
+Build a unified table from the preflight output showing everything that will change across all three pillars (skills, learnings, memory). Use the Learning Details section from `forge-status.sh` for learning contributor names and summaries. For skill rows, use the author names from the Change Details section (format: `hash message (Author Name)`) — never assume a default author.
 
 **Every row that represents a change must include a sub-row showing the essence of the change** — not the filename or commit title, but the rule, principle, or knowledge that will land in the membrane. The user must be able to judge each item before approving.
 

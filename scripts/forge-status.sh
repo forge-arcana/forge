@@ -218,12 +218,10 @@ if [[ ${#CHANGED_SKILLS[@]} -gt 0 && -n "$LAST_CAST_SHA" ]]; then
     deployed="$HOME/.claude/skills/$skill"
 
     # Show git log of what changed in this skill since baseline
-    changes=$(git -C "$FORGE_PATH" log --oneline "$LAST_CAST_SHA"..HEAD -- "skills/$skill/" 2>/dev/null || true)
+    changes=$(git -C "$FORGE_PATH" log --format="  - %h %s (%an)" "$LAST_CAST_SHA"..HEAD -- "skills/$skill/" 2>/dev/null || true)
     if [[ -n "$changes" ]]; then
       echo "**$skill**:"
-      echo "$changes" | while IFS= read -r line; do
-        echo "  - $line"
-      done
+      echo "$changes"
     else
       # Deployed differs but no forge commits — membrane was edited
       diff_stat=$(diff --strip-trailing-cr "$FORGE_PATH/skills/$skill/SKILL.md" "$deployed/SKILL.md" 2>/dev/null | grep -c '^[<>]' || echo "0")
