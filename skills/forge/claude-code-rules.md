@@ -270,12 +270,24 @@ Escalation subagents (e.g., fold spawning opus for triage) follow the same rule 
 
 > **Whenever a new skill or art is added to `skills/`, OR an existing skill/art changes its name, description, or core purpose — `presentation/index.html` MUST be updated in the same commit.**
 
-This applies to:
-- New skills → add a card to the "Ten Arts" overview slide and update the count
-- Description changes → update the matching card's `art-desc` text
-- Skill renames → update all references in the presentation
+For a **new art**, ALL of the following slides must be updated:
 
-The presentation is the canonical human-readable overview of what forge does. Letting it drift from the actual skill set makes it misleading. "Ten Arts" is the current count — update the number whenever it changes.
+| Slide | What to update |
+|-------|---------------|
+| Ten Arts Overview | Add a persona card with art-name, art-title, and art-desc |
+| Evaluative Trifecta (or equivalent cadence slide) | Add supplementary art chip with cadence label |
+| Arts deep-dive slide (Pry/Purge/Praise or equivalent) | Add a full card with description, routing behaviour, and kitchen analogy |
+| Daily Workflow | Add or extend a scenario that shows when to invoke the new art |
+| Quick Reference Cheatsheet | Add to the appropriate section (SPECIALIST, BUILD ARTS, etc.) |
+| One-Time vs Iterative | Add to the correct frequency bucket |
+| Full Project Lifecycle Map | Add an entry to the stage it belongs in |
+| Command Frequency table | Add a row for its run cadence |
+| Closing stats | Increment the arts count and total skills count |
+
+For a **description change**: update the matching persona card's `art-desc` text.
+For a **skill rename**: grep for all occurrences in the file and update every one.
+
+The presentation is the canonical human-readable overview of what forge does. Letting it drift from the actual skill set makes it misleading. A new art that only appears in one slide is as misleading as no mention at all.
 
 ---
 

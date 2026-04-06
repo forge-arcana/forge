@@ -1132,17 +1132,21 @@
           <div class="cmd" style="color:#22c55e; border-color:#22c55e;">/pitch</div>
           <div style="font-size:12px; color:var(--smoke); margin-top:6px;">Business check — run<br>before building & before ship</div>
         </div>
+        <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px 20px; text-align:center;">
+          <div class="cmd" style="color:#f59e0b; border-color:#f59e0b;">/praise</div>
+          <div style="font-size:12px; color:var(--smoke); margin-top:6px;">Feedback loop — run after<br>every user feedback cycle</div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════
-       SLIDE 12 — PYR & PURGE
+       SLIDE 12 — PYR, PURGE & PRAISE
   ═══════════════════════════════════════════════════ -->
-  <div class="slide bg-blue" data-title="Arts: Pry & Purge">
+  <div class="slide bg-blue" data-title="Arts: Pry, Purge &amp; Praise">
     <div class="scroll-content" style="text-align:center;">
-      <div class="slide-title">Arts: <span class="blue-text">Unstuck & Clean</span></div>
-      <div class="slide-subtitle">Two special arts that don't fit the normal pattern</div>
+      <div class="slide-title">Arts: <span class="blue-text">Unstuck, Clean & Feedback</span></div>
+      <div class="slide-subtitle">Three arts that stand apart from the normal build-review pattern</div>
 
       <div style="display:flex; gap:24px; justify-content:center; flex-wrap:wrap; margin-top:28px;">
         <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(20,184,166,0.5); max-width:380px; text-align:left;">
@@ -1184,6 +1188,30 @@
           </div>
           <div style="background:rgba(120,113,108,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
             🍳 Like deep-cleaning the kitchen itself — doesn't cook, but without it the kitchen fills up with stale ingredients, cluttered shelves, and outdated recipes nobody uses. Done occasionally, not daily.
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(245,158,11,0.5); max-width:380px; text-align:left;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <span style="font-size:40px;">🔁</span>
+            <div>
+              <div class="cmd cmd-large" style="color:#f59e0b; border-color:#f59e0b;">/praise</div>
+              <div style="font-size:13px; color:var(--ash); margin-top:4px;">The Feedback Router — Close the Loop</div>
+            </div>
+          </div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            Use when you have <strong style="color:var(--parchment);">real-world feedback</strong> — from users, QA, or testing. /praise routes each issue to the right art automatically.
+          </div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            <strong style="color:var(--parchment);">Routes intelligently:</strong><br>
+            🎨 UX issues → <strong style="color:#ec4899;">/preen</strong><br>
+            🏛️ Architecture concerns → <strong style="color:#3b82f6;">/probe</strong><br>
+            🔍 Code bugs → <strong style="color:#eab308;">/poke</strong><br>
+            🚀 Ops concerns → <strong style="color:var(--fire);">/press</strong><br>
+            Then produces a change brief for <strong style="color:var(--fire);">/smith</strong>
+          </div>
+          <div style="background:rgba(245,158,11,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
+            🍳 Like a head chef who reads every review card from diners, figures out which chef in the kitchen needs to fix what, and writes up a prioritised improvement brief.
           </div>
         </div>
       </div>
@@ -1445,12 +1473,21 @@
             5. <span class="cmd" style="font-size:11px;">/ponci</span> — Push and watch CI
           </div>
         </div>
-        <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:20px;">
+        <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:20px;">
+          <div style="color:#f59e0b; font-weight:700; margin-bottom:12px; font-size:15px;">📬 After receiving feedback</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:2;">
+            1. <span class="cmd" style="font-size:11px; color:#f59e0b; border-color:#f59e0b;">/praise</span> — Route feedback to right arts<br>
+            2. Arts run automatically<br>
+            3. Review the change brief<br>
+            4. <span class="cmd" style="font-size:11px;">/smith</span> — Build the fixes
+          </div>
+        </div>
+        <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:20px; grid-column:span 2;">
           <div style="color:var(--blue); font-weight:700; margin-bottom:12px; font-size:15px;">🔄 Updating forge</div>
           <div style="font-size:13px; color:var(--smoke); line-height:2;">
-            1. Pull latest forge (git pull)<br>
-            2. <span class="cmd" style="font-size:11px;">/cast</span> — Deploy new skills<br>
-            3. <span class="cmd" style="font-size:11px;">/fold</span> — Absorb learnings back<br>
+            1. Pull latest forge (git pull) &nbsp;&nbsp;
+            2. <span class="cmd" style="font-size:11px;">/cast</span> — Deploy new skills &nbsp;&nbsp;
+            3. <span class="cmd" style="font-size:11px;">/fold</span> — Absorb learnings back &nbsp;&nbsp;
             4. <span class="cmd" style="font-size:11px;">/mark</span> — Verify everything in sync
           </div>
         </div>
@@ -1550,6 +1587,7 @@
             <div><span class="cmd" style="font-size:11px; color:#ec4899; border-color:#ec4899;">/preen</span> UI/UX design</div>
             <div><span class="cmd" style="font-size:11px; color:#22c55e; border-color:#22c55e;">/pitch</span> Business model</div>
             <div><span class="cmd" style="font-size:11px; color:#14b8a6; border-color:#14b8a6;">/pry</span> When stuck</div>
+            <div><span class="cmd" style="font-size:11px; color:#f59e0b; border-color:#f59e0b;">/praise</span> Feedback loop</div>
           </div>
         </div>
 
@@ -1649,6 +1687,10 @@
             <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
               <span class="cmd" style="font-size:12px; color:#ec4899; border-color:#ec4899;">/preen</span>
               <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Each time UI changes — design check</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px; color:#f59e0b; border-color:#f59e0b;">/praise</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">After every feedback cycle — route to the right arts</span>
             </div>
           </div>
         </div>
@@ -1751,6 +1793,11 @@
               <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">per UI change</span>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#f59e0b; border-color:#f59e0b;">/praise</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Route user feedback/bug reports to the right arts, get a fix brief</span>
+              <span class="pill" style="background:rgba(245,158,11,0.2); color:#f59e0b;">after feedback cycle</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <span class="cmd">/qt</span>
               <span style="font-size:13px; color:var(--smoke);">→ Quick test after every fix — did it actually work?</span>
               <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">after every fix</span>
@@ -1831,6 +1878,11 @@
               <span style="font-size:13px; color:var(--smoke);">→ Re-run when forge is updated by you or the team. Redeploy latest skills.</span>
               <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">after forge updates</span>
             </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#f59e0b; border-color:#f59e0b;">/praise</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Take feedback from users or QA, route to the right arts, get a prioritised change brief.</span>
+              <span class="pill" style="background:rgba(245,158,11,0.2); color:#f59e0b;">after each feedback cycle</span>
+            </div>
           </div>
         </div>
 
@@ -1888,6 +1940,13 @@
         </div>
 
         <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
+          <div style="background:rgba(245,158,11,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:#f59e0b; line-height:1.4;">📬 PER FEEDBACK<br>(after users / QA)</div>
+          <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
+            <span class="cmd" style="font-size:11px; color:#f59e0b; border-color:#f59e0b;">/praise</span> — routes feedback to the right arts, produces a prioritised change brief for /smith
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
           <div style="background:rgba(234,179,8,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:#eab308; line-height:1.4;">📦 PER COMMIT<br>(every time)</div>
           <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
             <span class="cmd" style="font-size:11px;">/qt</span> &nbsp;·&nbsp;
@@ -1935,7 +1994,7 @@
 
       <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin:28px 0;">
         <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
-          <div class="big-stat" style="font-size:40px;">9</div>
+          <div class="big-stat" style="font-size:40px;">10</div>
           <div style="font-size:13px; color:var(--smoke);">Expert Arts</div>
         </div>
         <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
@@ -1943,7 +2002,7 @@
           <div style="font-size:13px; color:var(--smoke);">Core Commands</div>
         </div>
         <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
-          <div class="big-stat" style="font-size:40px;">24</div>
+          <div class="big-stat" style="font-size:40px;">25</div>
           <div style="font-size:13px; color:var(--smoke);">Total Skills</div>
         </div>
         <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
