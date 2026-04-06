@@ -266,6 +266,19 @@ Escalation subagents (e.g., fold spawning opus for triage) follow the same rule 
 
 ---
 
+## HARD RULE — Update Presentation When Skills Change
+
+> **Whenever a new skill or art is added to `skills/`, OR an existing skill/art changes its name, description, or core purpose — `presentation/index.html` MUST be updated in the same commit.**
+
+This applies to:
+- New skills → add a card to the "Ten Arts" overview slide and update the count
+- Description changes → update the matching card's `art-desc` text
+- Skill renames → update all references in the presentation
+
+The presentation is the canonical human-readable overview of what forge does. Letting it drift from the actual skill set makes it misleading. "Ten Arts" is the current count — update the number whenever it changes.
+
+---
+
 ## Core Principles
 
 | Principle | Description |
