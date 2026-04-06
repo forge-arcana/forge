@@ -16,7 +16,7 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `/cast` | Deploy forge → membrane | Pour molten metal into the mold |
 | `/fold` | Absorb membrane → forge | Layer experience into the steel |
 
-## Arts (Nine P's)
+## Arts (Ten P's)
 Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
 
 | Art | Persona | Mode |
@@ -29,11 +29,13 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/pound` | 21 adversarial QA personas | Evaluative — heavy |
 | `/pitch` | VC partner / business strategist | Evaluative — business |
 | `/pry` | The Lever (relentless solution-finder) | Investigative |
+| `/praise` | The Listener (user feedback → routed art) | Investigative — feedback |
 
 **Evaluative trifecta** — poke often, press before milestones, pound before ship.
 **When blocked** — `/pry` to crack the wall.
 **For UI/UX** — `/preen` to evaluate interfaces through Don Norman's lens.
 **For business model** — `/pitch` before committing build resources and before ship.
+**After user feedback** — `/praise` to route feedback to the right arts and close the build-ship-learn loop.
 
 *`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift.*
 
@@ -110,10 +112,6 @@ Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry
 ## HARD RULE — No Command Chaining in Bash — EVER
 > **NEVER use `&&`, `;`, or `||` to chain commands in a single Bash tool call.**
 > This applies to the main agent AND all subagents. Zero exceptions. Zero tolerance.
-
-## Shorthand Commands
-- **wawa** — Runs the `/wawa` skill
-- **wrap** — Runs the `/wrap` skill
 
 ## Documentation
 No docs/ directory — forge is a tooling repo. Skill documentation lives inside each skill's directory (`skills/<name>/SKILL.md`).
