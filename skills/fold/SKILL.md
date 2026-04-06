@@ -14,15 +14,16 @@ user-invocable: true
 
 ---
 
-Single command to fold all knowledge back into the forge repo. Runnable from **any project**. One flow, seven parts:
+Single command to fold all knowledge back into the forge repo. Runnable from **any project**. One flow, eight parts:
 
 1. **Config & skill sync** — push current global config into forge reference + detect deployed skill drift
 2. **Review & prune** — check existing forge knowledge for staleness (auto-triggers based on size)
 3. **Learning absorption** — merge global learnings into forge's learning store
-4. **Memory absorption** — merge global memories into forge's team memory store
-5. **Staging archival** — archive fully-absorbed entries from `~/.claude/` staging area
-6. **Commit & push** — conflict gate, stage, context update, commit, push with user confirmation
-7. **DONE Report** — receipt of what was executed
+4. **Skill presentation refresh** — update skill descriptions and trigger conditions to reflect new learnings
+5. **Memory absorption** — merge global memories into forge's team memory store
+6. **Staging archival** — archive fully-absorbed entries from `~/.claude/` staging area
+7. **Commit & push** — conflict gate, stage, context update, commit, push with user confirmation
+8. **DONE Report** — receipt of what was executed
 
 ---
 
@@ -163,7 +164,7 @@ If everything is in sync: skip the table, say "Everything in sync." and proceed 
 Target files in `<forge>/learnings/`:
 - `probe-learnings.md` — architecture | `press-learnings.md` — go-live readiness
 - `poke-learnings.md` — tech debt/logging | `prime-learnings.md` — ideation/blueprint
-- `global-patterns.md` — cross-cutting
+- `praise-learnings.md` — feedback routing/classification | `global-patterns.md` — cross-cutting
 
 Format: `## [Title] (YYYY-MM-DD)` + `**Learning**:` + `**Apply when**:`
 
@@ -178,6 +179,74 @@ Maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntrie
 > Residue entries (tracked but no matching forge file) are harmless — fold just skips them. A tracker with 1000 entries is ~10KB. Let it grow.
 
 > **One-time migration**: If `<forge>/learnings/.reforge-tracker.json` exists, copy its `processedEntries` and `promotedEntries` into `.fold-tracker.json` before proceeding, then delete `.reforge-tracker.json`. The old name is dead — any entries tracked there must be preserved or every fold run will re-triage the entire history.
+
+---
+
+## Part 3b: Skill Presentation Refresh
+
+> Runs **after Part 3 Step 4** (learning absorption complete), **in parallel with Part 4** (independent).
+> Only fires if at least one skill learning file was modified in Step 4.
+
+Skills describe themselves in two places: the `description:` frontmatter (shown in Claude's skill list and system-reminder) and the `TRIGGER when:` line in the skill body. As learnings accumulate, these descriptions can drift — a skill that has learned to handle edge cases it didn't originally anticipate, or that now covers more triggers than it originally declared.
+
+This step keeps presentation in sync with capability.
+
+### Which skills to refresh
+
+Refresh only skills whose learning file was updated in Part 3 Step 4. Read the list of modified files from Step 4's output. Map each modified `<forge>/learnings/<art>-learnings.md` → its corresponding `<forge>/skills/<art>/SKILL.md`.
+
+**Protected skills — skip unconditionally**: `fold`, `cast` (same rule as Part 1a).
+
+### For each skill to refresh (run in parallel)
+
+Launch one subagent per skill:
+
+```
+You are reviewing whether the skill description and trigger conditions for /<skill>
+still accurately reflect what the skill does, given its latest learnings.
+
+CURRENT SKILL DESCRIPTION (frontmatter):
+[paste description: field]
+
+CURRENT TRIGGER CONDITIONS (from skill body):
+[paste TRIGGER when: line or equivalent]
+
+NEWLY ABSORBED LEARNINGS (just added to <art>-learnings.md):
+[paste the new learning entries from Step 4]
+
+Answer ONLY:
+1. Does the description: field need updating? If yes, write the new value (one line, no quotes).
+2. Does the TRIGGER when: line need updating? If yes, write the new value.
+3. If no changes needed, say "NO CHANGE".
+
+Rules:
+- Do NOT expand descriptions to cover unrelated capabilities
+- Do NOT remove existing trigger conditions — only add or refine
+- Keep description under 200 characters
+- Keep TRIGGER when: under 150 characters
+- Only propose a change if the new learnings genuinely expand or clarify scope
+```
+
+### Add presentation changes to the PLAN table
+
+Presentation changes appear as rows in the unified PLAN table (Part 3 Step 3), alongside learning and config rows. Format:
+
+```markdown
+| `/poke` description | update | — |
+|   → Current: "Staff-engineer code review — code quality, tech debt, framework misuse, and logging hygiene." |
+|   → Proposed: "Staff-engineer code review — code quality, tech debt, framework misuse, logging hygiene, and band-aid detection." |
+```
+
+If no changes needed for any skill: omit the presentation rows from the PLAN table (no noise).
+
+### Apply after user confirms
+
+For each approved presentation change:
+1. Update `description:` in `<forge>/skills/<skill>/SKILL.md`
+2. Update the `TRIGGER when:` line in the skill body (if changed)
+3. **Also update the deployed copy** at `~/.claude/skills/<skill>/SKILL.md` — presentation changes take effect immediately, no cast needed
+
+> **HARD RULE**: Only update `description:` frontmatter and `TRIGGER when:` lines. Never rewrite skill logic, process steps, or examples. Presentation only.
 
 ---
 
@@ -266,7 +335,7 @@ Present the receipt of what was actually executed. Only include rows for items t
 Commit: `abc1234` — pushed to origin/main
 ```
 
-**Result vocabulary** (past tense of PLAN actions): `absorbed`, `merged`, `skipped (reason)`, `reconciled`
+**Result vocabulary** (past tense of PLAN actions): `absorbed`, `merged`, `skipped (reason)`, `reconciled`, `description updated`, `trigger updated`
 
 If nothing changed: "Everything in sync." — skip both PLAN and DONE reports.
 
