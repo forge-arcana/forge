@@ -28,6 +28,13 @@ This ensures the full pre-commit ritual (learnings, context, docs, lint, compact
 
 ---
 
+## HARD RULE — No Claude Attribution in Commits
+
+> **NEVER add `Co-Authored-By: Claude` or any AI attribution metadata to commit messages.**
+> Commits should look like normal human commits. No AI fingerprints.
+
+---
+
 ## HARD RULE — AskUserQuestion for ALL Decision Points
 
 > **NEVER ask the user a decision question as inline text.** Always use the `AskUserQuestion` tool.

@@ -216,3 +216,39 @@
 ## No Auto-CI for Solo Dev Projects (2026-04-03)
 **Learning**: Solo dev projects should use `workflow_dispatch` (manual trigger) for CI, not auto-trigger on push/PR. Run CI explicitly via `/cicd` or `/ponci` when ready. Auto-CI wastes Actions minutes and creates noise during rapid iteration where every push is WIP.
 **Apply when**: Setting up CI for any solo dev project. Default to manual trigger unless the user explicitly wants auto-CI on every push.
+
+## GCP Artifact Registry Cleanup Policy Must Be Set Per-Repo (2026-04-16)
+**Learning**: Artifact Registry cleanup policies are per-repository only — no project-level default. Every new Docker repo starts with NO cleanup policy. Old images accumulate silently and cost money. Standard policy: keep last 5 versions, delete rest (`{"action":{"type":"Keep"},"mostRecentVersions":{"keepCount":5}}` + `{"action":{"type":"Delete"},"condition":{"tagState":"ANY"}}`). Apply immediately on repo creation via `gcloud artifacts repositories set-cleanup-policies`.
+**Apply when**: Any blueprint or deploy script that creates Artifact Registry repos for Cloud Run. Should be a checklist item in GCP deploy setup.
+
+## Reframe Before Bypass on Anti-Bot Protected Sites (2026-04-16)
+**Learning**: When a content site is behind Cloudflare JS challenge or similar bot-detection, search for alternative unprotected sources BEFORE investing in bypass tooling. The reframe often ships faster and stays cheaper. Most "content is only on site X" claims are false — content usually exists on at least one unprotected mirror, aggregator, or secondary publisher.
+**Apply when**: Any scraping target returns Cloudflare challenge or equivalent. Spend 10 minutes searching for the same content on unprotected sites before installing bypass tools.
+
+## Diagnose Cloudflare Blocks by IP Before Investing in Bypass Tools (2026-04-16)
+**Learning**: Cloudflare's challenge tier is often IP-reputation-driven. Cloud provider IP ranges are heavily flagged. Before assuming you need a stealth browser, test the same URL from a different IP pool. If the non-cloud IP also gets challenged, the site is in full challenge mode — no IP swap will help. If only the cloud IP is blocked, a residential proxy solves it without touching the browser stack.
+**Apply when**: Diagnosing any Cloudflare 403. Verify the failure mode (IP-specific vs site-wide) before choosing a fix.
+
+## Parallel-Probe All WordPress Scraper Surfaces Before Concluding Blocked (2026-04-16)
+**Learning**: WordPress sites expose 7+ scraper-friendly surfaces: `/`, `/robots.txt`, `/sitemap.xml`, `/wp-sitemap.xml`, `/wp-json/wp/v2/posts`, `/feed/?paged=N`, and direct asset URLs. Test ALL in a single parallel batch before concluding a site is fully blocked. Protection rules often differ across surfaces — a site may block HTML but leave the RSS feed or REST API open.
+**Apply when**: Reconnaissance on any WordPress-based scraping target. Batch all surface probes as one parallel operation.
+
+## `cf-mitigated: challenge` Header Is a Diagnostic Signal (2026-04-16)
+**Learning**: When a 403 response includes `cf-mitigated: challenge`, Cloudflare is signaling a JavaScript challenge (not an IP block, WAF rule, or origin error). Absence of this header on a 403 means the block came from something else — different fix path. The exact value (`challenge`, `block`, `captcha`) tells you which tool to reach for.
+**Apply when**: Investigating any Cloudflare 403. Header inspection is free and eliminates guessing.
+
+## Flaresolverr Is Deprecating in 2026 — Do Not Start New Integrations (2026-04-16)
+**Learning**: Flaresolverr's success rate has collapsed below 30% after recent Cloudflare updates, maintainers signaling deprecation. Current recommendations: camoufox (Firefox-based, C++-level fingerprint spoofing) or nodriver (Python, successor to undetected-chromedriver). Re-evaluate every 6 months — the bypass landscape shifts fast.
+**Apply when**: Choosing a Cloudflare bypass strategy for a new scraper. Vendor status check must come before integration decision.
+
+## Pipeline Silent-Failure Alerts: "Last Produced Output" Metric (2026-04-16)
+**Learning**: A scraping/ingestion pipeline can run cleanly and log success for weeks while producing zero documents — if the listing-discovery layer is broken. "Last successful run" is necessary but insufficient. Add a per-source "days since last new document" alert. Silent discovery failure is a real failure mode that unit tests and HTTP status checks will never catch.
+**Apply when**: Designing observability for any source→sink pipeline. Add a "last produced output" metric alongside "last successful run."
+
+## Patchright Cannot Solve Cloudflare's Current JS Challenge Tier (2026-04-16)
+**Learning**: As of April 2026, patchright (stealth-patched Playwright) fails to solve Cloudflare's full JS challenge across every tested configuration: headless-shell, full chromium headless, full chromium + Xvfb, with realistic UA/viewport/locale. The challenge page persists with no `cf_clearance` cookie issued. Skip directly to camoufox or reframe to an unprotected source.
+**Apply when**: Cloudflare JS challenge is confirmed (`cf-mitigated: challenge`). Patchright is a verified dead end; move on.
+
+## Three Hats Before Conceding a Wall (2026-04-16)
+**Learning**: The investigative sequence for blockers is Skeptic (challenge the "can't" claim) → Prospector (scour for alternative tools) → Reframer (change the destination if the path is blocked). The failure mode is skipping the Reframer hat and defaulting to "keep banging on the wall." Many apparent dead-ends dissolve when the question changes from "how do I get through this wall?" to "does the actual goal require this wall to be cleared?"
+**Apply when**: Any blocker investigation, any time a direct fix has been exhausted. The Reframer question must be asked explicitly before reporting a hard wall.
