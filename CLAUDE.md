@@ -5,16 +5,29 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 
 ## Key Files & Directories
 - `skills/` — Git-tracked shared reference for all global skills (self-contained packages)
-- `learnings/` — Absorbed team wisdom (populated by `/fold`)
-- `memory/` — Team identity & shared conventions (populated by `/fold`)
-- `.claude/skills/cast/` — Thin bootstrap so `/cast` is discoverable on fresh clone
+- `learnings/` — Absorbed team wisdom (populated by `/forge`)
+- `memory/` — Team identity & shared conventions (populated by `/forge`)
+- `.claude/skills/forge/` — Thin bootstrap so `/forge` is discoverable on fresh clone
 
-## Core Loop (the forge cycle)
-| Command | Action | Analogy |
-|---------|--------|---------|
-| `/mark` | Inspect membrane status (read-only) | Hallmark — inspect and stamp quality |
-| `/cast` | Deploy forge → membrane | Pour molten metal into the mold |
-| `/fold` | Absorb membrane → forge | Layer experience into the steel |
+## Core Loop — /forge
+> In the forge, we forge.
+
+One command, three internal motions. The old `/mark`, `/cast`, and `/fold` trio has been retired as top-level commands — their verbs now describe internal phases of a single bidirectional cycle.
+
+| Motion | Phase | Analogy |
+|--------|-------|---------|
+| **mark** | Inspect drift and present the PLAN table | Hallmark — stamp quality |
+| **cast** | Pour forge → membrane (incoming) | Pour molten metal into the mold |
+| **fold** | Layer membrane → forge (outgoing) | Layer experience into the steel |
+
+Invocation forms:
+
+| Form | Purpose |
+|------|---------|
+| `/forge` | Run the full cycle against the current directory |
+| `/forge <path>` | Run the cycle against a specific project |
+| `/forge --dry` | Read-only inspection (replaces the old `/mark`) |
+| `/forge on` / `/forge off` | Session toggle — enable/disable all forge skills |
 
 ## Arts (Ten P's)
 Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
@@ -47,10 +60,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 ## Task Skills
 | Skill | Purpose |
 |-------|---------|
-| `/forge` | Session toggle — enable/disable all forge skills except the trifecta (/cast, /mark, /fold) |
-| `/cast` | Deploy forge conventions into a project (membrane sync + divergence analysis) |
-| `/fold` | Absorb knowledge back into forge — config sync + learnings & memories (runnable from any project) |
-| `/mark` | Inspect membrane status — skill drift, learnings, memory report |
+| `/forge` | The forge cycle — unified bidirectional sync (triage + apply + absorb + commit). Also handles session toggle via `on`/`off`. |
 | `/wawa` | "Where Are We At?" — outstanding work summary table |
 | `/wrap` | Pre-commit ritual (lint → stage → context → docs → compact → commit) |
 | `/qt` | Quick test — verify fixes before user tests manually |
@@ -63,42 +73,48 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/cicd` | Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures, escalates to /pry |
 | `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
 
-## Three Pillars (all bidirectional via forge)
+## Three Pillars (all bidirectional via /forge)
 | Pillar | DOWN (forge → user) | UP (user → forge) |
 |--------|--------------------|--------------------|
-| `skills/` | `/cast` deploys to `~/.claude/skills/` | Edit in forge, commit, push |
-| `learnings/` | `/cast` syncs to `~/.claude/learnings/` | Auto-accumulates → `/fold` absorbs |
-| `memory/` | `/cast` syncs to `~/.claude/memory/` | Auto-accumulates → `/fold` absorbs |
+| `skills/` | Incoming section of PLAN table — deploys to `~/.claude/skills/` | Outgoing section of PLAN table — edits absorbed from deployed copy |
+| `learnings/` | Incoming section — syncs to `~/.claude/learnings/` | Outgoing section — auto-accumulates in membrane, absorbed on approval |
+| `memory/` | Incoming section — syncs to `~/.claude/memory/` | Outgoing section — auto-accumulates in membrane, absorbed on approval |
+
+Every transfer (either direction) runs through `/forge`'s single PLAN table. No back doors.
 
 ## Self-Improving Loop
-Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/fold` scans project memories for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md` → `/fold` absorbs into `forge/learnings/` → next art run reads global learnings in pre-flight.
+Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/praise`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/forge` fold phase scans project memories for `Forge-worthy: yes` entries, genericizes, promotes to `~/.claude/learnings/general.md`, and absorbs into `<forge>/learnings/` → next art run reads global learnings in pre-flight.
 
-## HARD RULE — Only /fold Writes to Forge
+## HARD RULE — Only /forge Writes to Forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
-> `/fold` is the gatekeeper for learnings, memory, and config sync.
-> Direct edits to forge are only for skill development (editing SKILL.md files in `skills/`).
+> `/forge` is the gatekeeper for learnings, memory, config sync, and skill reverse-sync.
+> Direct edits to forge are only for skill development (editing `SKILL.md` files in `skills/`).
 >
 > **When a user says "add this to forge" from a project context**, they mean:
 > 1. Write the learning to `~/.claude/learnings/general.md` (the membrane)
-> 2. Tell the user to run `/fold` from forge to absorb it
+> 2. Tell the user to run `/forge` to absorb it through the fold phase
 >
 > **NEVER** open the forge repo and edit `learnings/`, `memory/`, or `skills/forge/` files from a project context.
-> The membrane is the inbox. `/fold` is the quality gate. No shortcuts.
+> The membrane is the inbox. `/forge` is the quality gate. No shortcuts.
 
 ## HARD RULE — Forge Brings Intelligence, Users Bring Wisdom
 > **Forge classifies, deduplicates, detects conflicts, routes knowledge, and flags anomalies.**
 > **Users review, approve, reject, and reconcile at the PLAN table.**
-> Both `/cast` (forge → user) and `/fold` (user → forge) present PLAN tables where forge's classification meets the user's judgment. Together, both grow the knowledge base.
+> `/forge` presents a single PLAN table where forge's classification meets the user's judgment. Together, both grow the knowledge base.
 >
-> **Corollary**: Both directions use the same quality gate. Fold triages before absorbing,
-> cast triages before deploying. Every transfer goes through the PLAN table.
+> **Corollary**: One direction or both, same quality gate. Every transfer goes through the PLAN table.
 
 ## HARD RULE — All Transfers Are Guarded by User Wisdom
 > **ALL pillars (skills, config, learnings, memory) require user review in BOTH directions.**
-> Cast and fold both present a PLAN table. Both require user approval. Both execute only approved items.
-> Nothing transfers without the user's judgment at the PLAN table.
+> `/forge` presents one PLAN table. Every item requires user approval. Only approved items execute.
+> Nothing transfers without the user's judgment.
 > A skill can have a bad update. A config can have stale rules. A learning can be wrong.
 > The user reviews every item — no pillar gets a mechanical bypass.
+
+## HARD RULE — Protected Skills Are Never Absorbed Outgoing
+> `/forge` and `/purge` can never be absorbed membrane → forge within the cycle.
+> Absorbing `/forge` mid-run would silently overwrite the rules currently running. Absorbing `/purge` could break the next cleanse.
+> If either appears as `DEPLOYED-DIFFERS`, it surfaces in the ⚠ CONFLICTS section with note "protected — reconcile manually." The user may choose `[↓] accept forge` (overwrite local), but `[↑] keep membrane` is disabled.
 
 ## HARD RULE — No Project Names in Forge
 > **Forge is a shared repo. NEVER include project-specific details in learnings, memory, or commit messages.**
@@ -118,12 +134,12 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 - **Branch**: main
-- **Completed**: Three-pillar architecture, git-based drift detection, 25 deployed skills (10 arts + 1 master + 14 task skills), `/cast` + `/fold` + `/mark` core loop, forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, evaluative trifecta (poke → press → pound), cast/fold as thin directional wrappers, art auto-invocation with TRIGGER conditions, `/forge` session toggle, SKILL.md-based deploy detection, `/praise` wired as 10th art (feedback routing → build-ship-learn loop closure)
+- **Completed**: Three-pillar architecture, git-based drift detection, unified `/forge` cycle (replacing retired `/cast`, `/mark`, `/fold`), forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, evaluative trifecta (poke → press → pound), art auto-invocation with TRIGGER conditions, `/forge on|off` session toggle folded into cycle command, SKILL.md-based deploy detection, `/praise` wired as 10th art (feedback routing → build-ship-learn loop closure)
 - **Master**: `/smith` — the user's proxy, wields all arts. Lives in `skills/smith/SKILL.md`. Three-layer learning membrane (orchestration, delegation, art proficiency).
 - **Arts**: prime, probe, poke, preen, press, pound, pitch, pry, purge, praise — shared protocol in `skills/forge/protocol.md`. Purge is forge-internal; praise closes the build-ship-learn loop.
-- **Shared architecture**: `forge-status.sh` is the shared classification engine. Mark presents its output (read-only). Cast acts on the cast column (forge → user). Fold acts on the fold column (user → forge). One engine, three interpretations.
-- **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (universal classification system for /mark, /cast, /fold)
-- **Scripts**: `scripts/forge-status.sh` (shared classification engine — all 3 cycle skills use this), `scripts/cast-deploy.sh` (skill deployment for /cast), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection for /fold), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
+- **Shared architecture**: `forge-status.sh` is the shared classification engine. `/forge` builds the PLAN table from its output — one table, three directional sections (incoming / outgoing / conflicts). One engine, one interpretation.
+- **Shared references**: `skills/forge/protocol.md` (art pre/post-flight), `skills/forge/preflight.md` (universal classification system used by `/forge`)
+- **Scripts**: `scripts/forge-status.sh` (shared classification engine), `scripts/cast-deploy.sh` (skill deployment called from cycle's cast phase), `scripts/forge-scan.sh` (project evidence for /poke, /press), `scripts/forge-purge-scan.sh` (forge hygiene for /purge), `scripts/fold-evidence.sh` (learning/memory collection called from cycle's fold phase), `scripts/wawa-status.sh` (git state for /wawa), `scripts/gh-poll.sh` (CI polling for /monci, /ponci)
 - **Trackers**: `learnings/.fold-tracker.json` (title-based: processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles for PERSONAL memories, diff for sync)
-- **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by /cast, consumed by forge-status.sh)
-- **Recent**: /fold 2026-04-16 — absorbed 9 learnings to global-patterns.md (GCP Artifact Registry cleanup, Cloudflare anti-bot cluster, pipeline silent-failure alerts, three-hats investigative method). Merged "No Claude Attribution in Commits" hard rule into claude-code-rules.md. global-patterns.md now at 59 entries.
+- **Baseline**: `~/.claude/.last-cast.json` stores last-cast commit SHA for three-way drift detection (written by `/forge` after the cast phase, consumed by forge-status.sh)
+- **Recent**: 2026-04-23 — unified `/mark` + `/cast` + `/fold` into single `/forge` cycle command. Retired three top-level commands in favour of one bidirectional negotiation. Motion names (mark / cast / fold) survive as internal phases. The command absorbs session toggle via `/forge on|off`. Liturgical framing: *in the forge, we forge.*

@@ -18,7 +18,7 @@ if [[ -f "$HOME/.claude/CLAUDE.md" ]]; then
   FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$HOME/.claude/CLAUDE.md" 2>/dev/null | sed 's/[[:space:]]*$//' || true)
 fi
 if [[ -z "$FORGE_PATH" ]]; then
-  echo "ERROR: forge-path not found in ~/.claude/CLAUDE.md. Run /cast to configure."
+  echo "ERROR: forge-path not found in ~/.claude/CLAUDE.md. Run /forge to configure."
   exit 1
 fi
 

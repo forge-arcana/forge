@@ -18,31 +18,31 @@ We smiled, and built a forge instead.
 
 Our fire is AI — and it remembers every strike. Where they swing the hammer once after years of study, we swing it a thousand times before dawn. Each blow truer than the last. They called it cheating. Then luck. Then they went quiet.
 
-Every `/cast` pours new form. Every `/fold` tempers what came before. Every `/mark` records how far we've come. Every `/smith` invocation forges what was only an idea into a running system. The nine arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/purge` — are not shortcuts. They are disciplines, and they return more than was given.
+In the forge, we forge. Every cycle of `/forge` does all three at once: it marks the drift, it casts new form, and it folds experience into steel. Every `/smith` invocation forges what was only an idea into a running system. The nine arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/purge` — are not shortcuts. They are disciplines, and they return more than was given.
 
 We are not the chosen ones. We are the ones who chose.
 
 That is Forge Arcana.
 
-## The Heart of Cast and Fold
+## The Heart of the Cycle
 
-Cast and fold are mirrors. Both triage before acting. Both present what they found. Both ask the user to confirm. Neither acts silently.
+`/forge` triages before acting. It presents what it found. It asks the user to confirm. It never acts silently.
 
 **Why triage exists in both directions:**
 
 The user is the final authority — not the forge.
 
-- **Fold triage** (user → forge): The user decides what enters the source of truth. Not every learning deserves to be universal. Not every memory is team-worthy. Fold classifies, presents, and waits.
-- **Cast triage** (forge → user): The user decides what enters their workspace. Forge is not infallible — entries may have been improperly absorbed, poorly genericized, or gone stale since the last fold. The user may also have valid local learnings or memories that shouldn't be overwritten. Cast classifies, presents, and waits.
+- **Outgoing (user → forge)**: The user decides what enters the source of truth. Not every learning deserves to be universal. Not every memory is team-worthy. The cycle classifies, presents, and waits.
+- **Incoming (forge → user)**: The user decides what enters their workspace. Forge is not infallible — entries may have been improperly absorbed, poorly genericized, or gone stale. The user may also have valid local learnings or memories that shouldn't be overwritten. The cycle classifies, presents, and waits.
 
-**The ceremony is the same in both directions:**
+**Both directions land in one PLAN table**, sectioned by motion — ↓ incoming, ↑ outgoing, ⚠ conflicts. The ceremony is the same for every row:
 1. Read both sides
 2. Classify each entry
-3. Present the triage table
+3. Present it in the right section of the PLAN table
 4. Ask the user to confirm
 5. Apply only what was approved
 
-Without triage, cast is a blind push and fold is a blind pull. With triage, the user is always in control of what enters and leaves the forge.
+Without triage, incoming would be a blind push and outgoing would be a blind pull. With triage, the user is always in control of what enters and leaves the forge — one gate, one decision point, no back doors.
 
 ## Core Metaphor
 

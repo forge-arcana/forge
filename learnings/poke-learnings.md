@@ -1,6 +1,6 @@
 # /poke Learnings
 
-> Populated by `/poke` runs across projects. Absorbed into forge by `/fold`.
+> Populated by `/poke` runs across projects. Absorbed into forge by the `/forge` cycle.
 
 <!-- Add learnings below this line -->
 

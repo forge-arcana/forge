@@ -1,11 +1,11 @@
 # /purge Learnings
 
-> Accumulated learnings from forge cleansing sessions. Absorbed by `/fold`.
+> Accumulated learnings from forge cleansing sessions. Absorbed by the `/forge` cycle.
 
 <!-- Add learnings below this line -->
 
 ## New Art Addition Triggers Cross-Reference Sweep (2026-03-28)
-- **Learning**: Adding a new art creates stale references in README.md, CLAUDE.md (learning cycle arts list), memory/identity.md (counts, ethos prose, arts list + persona), and memory/learnings.md (arts list + cadence note). The art-specific file (SKILL.md) and protocol.md get updated in the same session, but identity/learnings docs lag. Run /purge immediately after any new art addition to catch the stragglers. Specifically: identity.md has 5+ locations with hardcoded art counts; learnings.md has 2; CLAUDE.md learning cycle has 1; README.md has 1 header + 1 section + 1 cadence note.
+- **Learning**: Adding a new art creates stale references in README.md, CLAUDE.md (learning cycle arts list), memory/identity.md (counts, ethos prose, arts list + persona), and memory/learnings.md (arts list + cadence note). The art-specific file (SKILL.md) and protocol.md get updated in the same session, but identity/learnings docs lag. Run /purge immediately after any new art addition to catch the stragglers. Specifically: identity.md has 5+ locations with hardcoded art counts; learnings.md has 2; CLAUDE.md learning cycle has 1; README.md has 1 header + 1 section + 1 cadence note. (Same pattern applies to retiring or renaming a top-level skill — see 2026-04-23 /forge consolidation entry.)
 - **Forge-worthy**: yes — universal pattern: new art addition → immediate /purge to sweep stale cross-references
 
 ## Promoted-Duplicate Detection Is Underused (2026-03-28)
@@ -18,7 +18,7 @@
 
 ## Promoted Learnings Create Triple Duplication (2026-03-19)
 **Learning**: When a learning is absorbed into the stack guide's "Key Learnings" section, it becomes the canonical location. The same entry in `global-patterns.md` AND `~/.claude/CLAUDE.md` Code Quality Patterns creates triple maintenance burden. Rule: once a learning is in the stack guide, remove it from `global-patterns.md`. The CLAUDE.md copy is managed separately by the user.
-**Apply when**: Running /purge or /fold — check if any global-patterns entry already exists in stack-guide.md.
+**Apply when**: Running /purge or /forge — check if any global-patterns entry already exists in stack-guide.md.
 
 ## Entity Names Are Project Leaks (2026-03-19)
 **Learning**: Domain-specific entity variable names (`tripId`, `seatId`, `employerUserId`) in examples reveal the source project even without the project name. Use generic entity names (`orderId`, `itemId`, `targetUserId`) in all forge examples and learnings.
@@ -61,3 +61,8 @@
 **Learning**: The purge orphan scan detected entries in the fold tracker that weren't in any `learnings/*.md` file and classified them as "orphans" to remove. But some existed under different titles (title mismatch) and others existed in `memory/*.md` files (wrong search scope). Removing them from the tracker told the next `/fold` run they were unprocessed — causing re-absorption and duplicates in global-patterns.md. This is a data corruption bug: purge silently poisoned the tracker, and fold faithfully executed the poison.
 **Rules**: (1) Never remove a tracker entry unless you've verified the title doesn't exist in ANY forge file — learnings, memory, skills, CLAUDE.md. (2) Check for fuzzy title matches, not just exact. "Test Factories Must Mirror DI Container" and "Test Factories Must Mirror Production DI Container" are the same entry. (3) Before removing, show the user what will be removed and why — tracker cleanup is destructive.
 **Forge-worthy**: yes — universal pattern for any system with a processing tracker that gates idempotent operations
+
+## Command Retirement Sweep Is Wider Than It Looks (2026-04-23)
+**Learning**: When a top-level command is retired or merged into another (e.g., trio → unified), the surface references extend far beyond the SKILL.md being replaced. Expected hits: the command's own docs. Overlooked hits: (1) human-readable overviews (README.md, presentation slide decks with dedicated deep-dive slides), (2) error messages in supporting scripts that reference the old command by name in user-visible text, (3) learning file headers across every art that say "Absorbed by /old-command", (4) identity/memory docs with liturgical passages that name the command in poetic prose, (5) sibling skill SKILL.md lines that mention the old command in pre-flight or post-flight references, (6) settings files with stale allowlist paths pointing at the old bootstrap directory.
+**Rules**: (1) On any command retirement, grep the ENTIRE repo for the old command token — scripts, HTML, JSON, not just markdown. (2) Update error messages before commit — they reach users faster than docs do. (3) Learning file headers are a single-line pattern repeated across ~10 files — batch them. (4) For visual decks with dedicated slides (e.g., three slides for a trio becoming one), the restructure is a rewrite, not find-replace — collapse ceremoniously. (5) Keep a single explicit "replaces the old X" bridge line in the new command's docs; that's good migration ergonomics, not a stale ref.
+**Forge-worthy**: yes — universal pattern for any system where top-level commands consolidate, rename, or retire

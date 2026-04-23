@@ -35,7 +35,7 @@ Build a complete mental model of the forge's current state before proceeding.
 
 ## Auto-Trigger Thresholds
 
-These thresholds indicate when the forge needs purging. `/mark` can flag these; the user decides when to run `/purge`.
+These thresholds indicate when the forge needs purging. `/forge --dry` can flag these; the user decides when to run `/purge`.
 
 | Trigger | What it means |
 |---------|--------------|
@@ -157,6 +157,6 @@ After user confirms:
 Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/purge-learnings.md`.
 
 Learnings should capture:
-- New contamination patterns discovered (so future `/fold` runs catch them)
+- New contamination patterns discovered (so future `/forge` runs catch them)
 - Staleness indicators that were hard to detect
 - Consolidation patterns that improved clarity

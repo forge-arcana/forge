@@ -372,7 +372,7 @@ Write learnings to `memory/praise-learnings.md`:
 - Cases where a blueprint delta was found vs. implementation gaps
 - Effective change brief formats that smith consumed cleanly
 
-Learnings marked `Forge-worthy: yes` will be promoted by `/fold`.
+Learnings marked `Forge-worthy: yes` will be promoted by the `/forge` cycle's fold phase.
 
 ---
 

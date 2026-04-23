@@ -680,7 +680,7 @@
             Each skill is a special power — like "review my code" or "create a commit". Stored in <code style="color:var(--fire); font-size:11px;">~/.claude/skills/</code>
           </div>
           <div class="pillar-arrows">
-            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/cast</span></span></div>
+            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/forge</span></span></div>
             <div class="pillar-arrow-row">🔼 <span>You edit forge → commit</span></div>
           </div>
         </div>
@@ -696,8 +696,8 @@
             Lessons from past projects. "Don't do X because Y broke last time." Stored in <code style="color:var(--blue); font-size:11px;">~/.claude/learnings/</code>
           </div>
           <div class="pillar-arrows">
-            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/cast</span></span></div>
-            <div class="pillar-arrow-row">🔼 <span>You → Forge via <span class="cmd" style="font-size:11px;">/fold</span></span></div>
+            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/forge</span></span></div>
+            <div class="pillar-arrow-row">🔼 <span>You → Forge via <span class="cmd" style="font-size:11px;">/forge</span></span></div>
           </div>
         </div>
 
@@ -712,8 +712,8 @@
             Team identity, values, conventions. "We always write tests. We prefer TypeScript." Stored in <code style="color:var(--purple); font-size:11px;">~/.claude/memory/</code>
           </div>
           <div class="pillar-arrows">
-            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/cast</span></span></div>
-            <div class="pillar-arrow-row">🔼 <span>You → Forge via <span class="cmd" style="font-size:11px;">/fold</span></span></div>
+            <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/forge</span></span></div>
+            <div class="pillar-arrow-row">🔼 <span>You → Forge via <span class="cmd" style="font-size:11px;">/forge</span></span></div>
           </div>
         </div>
       </div>
@@ -726,207 +726,146 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════════
-       SLIDE 4 — CORE LOOP OVERVIEW
+       SLIDE 4 — THE FORGE CYCLE OVERVIEW
   ═══════════════════════════════════════════════════ -->
-  <div class="slide" data-title="The Core Loop">
+  <div class="slide" data-title="The Forge Cycle">
     <div class="scroll-content" style="text-align:center;">
       <div style="font-size:48px;margin-bottom:8px;">🔄</div>
-      <div class="slide-title">The <span class="fire-text">Core Loop</span></div>
-      <div class="slide-subtitle">Three commands that run the whole system. Think of them as morning, afternoon, and evening routines.</div>
+      <div class="slide-title">The <span class="fire-text">Forge Cycle</span></div>
+      <div class="slide-subtitle" style="font-style:italic; color:var(--ember);">In the forge, we forge.</div>
+      <div class="slide-subtitle">One command. Three motions. Every transfer goes through one table you approve.</div>
 
       <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin:32px 0;">
         <div style="background:var(--iron); border:2px solid var(--ember); border-radius:16px; padding:24px; max-width:260px; text-align:center;">
           <div style="font-size:40px; margin-bottom:8px;">🔍</div>
-          <div class="cmd cmd-large" style="color:var(--ember); border-color:var(--ember);">/mark</div>
-          <div style="margin-top:12px; font-size:14px; color:var(--smoke); line-height:1.6;">
+          <div style="font-weight:700; font-size:16px; color:var(--ember); margin-bottom:6px;">mark</div>
+          <div style="font-size:11px; color:var(--ash); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">inspect</div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.6;">
             <strong style="color:var(--parchment); display:block;">Just Look</strong>
-            Check what's in sync, what's drifted. Read-only. Never changes anything.
+            Check drift. Present one PLAN table sectioned by direction.
           </div>
           <div style="margin-top:12px; background:rgba(251,191,36,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--ember);">
-            🍳 Like checking which recipes in your kitchen are newer than the master book
+            🍳 Like the hallmark stamp — inspect quality, change nothing
           </div>
         </div>
 
         <div style="background:var(--iron); border:2px solid var(--fire); border-radius:16px; padding:24px; max-width:260px; text-align:center;">
           <div style="font-size:40px; margin-bottom:8px;">⬇️</div>
-          <div class="cmd cmd-large">/cast</div>
-          <div style="margin-top:12px; font-size:14px; color:var(--smoke); line-height:1.6;">
-            <strong style="color:var(--parchment); display:block;">Pour Skills In</strong>
-            Stocks your kitchen with everything from the master recipe book. Updates skills, learnings, memory.
+          <div style="font-weight:700; font-size:16px; color:var(--fire); margin-bottom:6px;">cast</div>
+          <div style="font-size:11px; color:var(--ash); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">apply incoming</div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.6;">
+            <strong style="color:var(--parchment); display:block;">Pour In</strong>
+            Approved forge → membrane updates: skills, learnings, memory.
           </div>
           <div style="margin-top:12px; background:rgba(249,115,22,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--fire);">
-            🍳 Like stocking your kitchen with the latest updated recipes from the master book
+            🍳 Like pouring molten metal into the mold
           </div>
         </div>
 
         <div style="background:var(--iron); border:2px solid var(--blue); border-radius:16px; padding:24px; max-width:260px; text-align:center;">
           <div style="font-size:40px; margin-bottom:8px;">⬆️</div>
-          <div class="cmd cmd-large" style="color:var(--blue); border-color:var(--blue);">/fold</div>
-          <div style="margin-top:12px; font-size:14px; color:var(--smoke); line-height:1.6;">
-            <strong style="color:var(--parchment); display:block;">Absorb Back</strong>
-            Take lessons learned during work and fold them back into the forge. The system grows smarter.
+          <div style="font-weight:700; font-size:16px; color:var(--blue); margin-bottom:6px;">fold</div>
+          <div style="font-size:11px; color:var(--ash); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">absorb outgoing</div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.6;">
+            <strong style="color:var(--parchment); display:block;">Layer Back</strong>
+            Approved membrane → forge absorptions: learnings, memory, config.
           </div>
           <div style="margin-top:12px; background:rgba(59,130,246,0.1); border-radius:8px; padding:10px; font-size:12px; color:var(--blue);">
-            🍳 Like writing your best discoveries back into the master recipe book
+            🍳 Like folding new discoveries into the master recipe book
           </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
+        <div style="background:var(--iron); border:1px solid var(--steel); border-radius:12px; padding:14px 22px; text-align:left;">
+          <div class="cmd cmd-large" style="font-size:18px;">/forge</div>
+          <div style="font-size:12px; color:var(--smoke); margin-top:6px;">Full cycle (all three motions)</div>
+        </div>
+        <div style="background:var(--iron); border:1px solid var(--steel); border-radius:12px; padding:14px 22px; text-align:left;">
+          <div class="cmd cmd-large" style="font-size:18px; color:var(--ember); border-color:var(--ember);">/forge --dry</div>
+          <div style="font-size:12px; color:var(--smoke); margin-top:6px;">Inspect only — mark phase alone</div>
+        </div>
+        <div style="background:var(--iron); border:1px solid var(--steel); border-radius:12px; padding:14px 22px; text-align:left;">
+          <div class="cmd cmd-large" style="font-size:18px;">/forge on|off</div>
+          <div style="font-size:12px; color:var(--smoke); margin-top:6px;">Session toggle</div>
         </div>
       </div>
 
       <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid var(--steel); font-size:14px; color:var(--smoke); max-width:700px; margin:0 auto;">
-        <strong style="color:var(--parchment);">Important:</strong> Every transfer shows you a table first and asks for your approval. Nothing happens behind your back. <span style="color:var(--fire);">You are always in control.</span>
+        <strong style="color:var(--parchment);">Important:</strong> Every transfer shows you one table first and asks for your approval. Nothing happens behind your back. <span style="color:var(--fire);">You are always in control.</span>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════
-       SLIDE 5 — /mark DEEP DIVE
+       SLIDE 5 — /forge DEEP DIVE
   ═══════════════════════════════════════════════════ -->
-  <div class="slide bg-fire" data-title="/mark — Just Look">
+  <div class="slide bg-fire" data-title="/forge — Deep Dive">
     <div class="scroll-content" style="text-align:center;">
-      <div class="cmd cmd-large" style="font-size:36px; margin-bottom:16px;">/mark</div>
-      <div class="slide-title">The <span class="ember-text">Inspector</span></div>
-      <div class="slide-subtitle">Like a hallmark stamp on jewellery — it inspects quality without changing anything</div>
-
-      <div class="analogy-block" style="margin:24px auto;">
-        <div class="label">🍳 Kitchen analogy</div>
-        <p>Imagine opening your kitchen cupboard and comparing every recipe card to the master book — "this one is outdated, this one is missing, this one has been updated." You don't cook anything. You don't change anything. You just <strong>see exactly what's different</strong> and get a clear report.</p>
-      </div>
-
-      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
-        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:280px; text-align:left;">
-          <div style="font-size:24px; margin-bottom:8px;">🔎</div>
-          <div style="font-weight:700; margin-bottom:6px;">What it checks</div>
-          <ul style="font-size:13px; color:var(--smoke); line-height:1.8; padding-left:16px;">
-            <li>Are all skills up to date?</li>
-            <li>Are any skills missing?</li>
-            <li>Have learnings drifted?</li>
-            <li>Is memory in sync?</li>
-            <li>When was the last /cast?</li>
-          </ul>
-        </div>
-        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:280px; text-align:left;">
-          <div style="font-size:24px; margin-bottom:8px;">📋</div>
-          <div style="font-weight:700; margin-bottom:6px;">What it produces</div>
-          <div style="font-size:13px; color:var(--smoke); line-height:1.8;">
-            A clean table showing every skill:<br>
-            <span style="color:var(--green);">✅ IDENTICAL</span> — in sync<br>
-            <span style="color:var(--ember);">⚠️ DIFFERS</span> — needs update<br>
-            <span style="color:var(--blue);">➕ ADDED</span> — new skill<br>
-            <span style="color:var(--red);">➖ REMOVED</span> — deleted<br>
-          </div>
-        </div>
-        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:280px; text-align:left;">
-          <div style="font-size:24px; margin-bottom:8px;">⚠️</div>
-          <div style="font-weight:700; margin-bottom:6px;">When to use it</div>
-          <div style="font-size:13px; color:var(--smoke); line-height:1.8;">
-            Before /cast, to see what will change.<br><br>
-            When you're curious about the state of things but don't want to do anything yet.<br><br>
-            Think of it as a <strong style="color:var(--ember);">dry run</strong>.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════
-       SLIDE 6 — /cast DEEP DIVE
-  ═══════════════════════════════════════════════════ -->
-  <div class="slide bg-blue" data-title="/cast — Deploy Skills">
-    <div class="scroll-content" style="text-align:center;">
-      <div class="cmd cmd-large" style="font-size:36px; margin-bottom:16px;">/cast</div>
-      <div class="slide-title">The <span class="fire-text">Deployer</span></div>
-      <div class="slide-subtitle">Pours molten metal from the forge into the mold — skills flow from forge into your Claude</div>
+      <div class="cmd cmd-large" style="font-size:36px; margin-bottom:16px;">/forge</div>
+      <div class="slide-title">The <span class="fire-text">Cycle</span></div>
+      <div class="slide-subtitle">One command that inspects, deploys, and absorbs — one PLAN table, one decision point</div>
 
       <div class="analogy-block" style="margin:20px auto;">
         <div class="label">🍳 Kitchen analogy</div>
-        <p>The master recipe book has been updated with better techniques and new recipes. <strong>/cast</strong> is the process of copying all those updates into your kitchen — swapping out old recipe cards for the fresh versions, adding any new ones that are missing. Your kitchen is now fully up to date.</p>
+        <p>You walk into the kitchen at dawn. You check which recipes in your cupboard differ from the master book AND which margin notes you've written today that should land in the master (<strong>mark</strong>). The cookbook shows you one list covering both directions. You approve what flows in and what flows out. The fresh updates get stocked in your kitchen (<strong>cast</strong>); your best discoveries get written back into the master (<strong>fold</strong>). One ritual, three motions, one table.</p>
       </div>
 
-      <div style="background:var(--iron); border-radius:12px; border:1px solid var(--steel); overflow:hidden; max-width:700px; margin:0 auto;">
-        <div style="padding:16px 20px; background:var(--steel); font-size:13px; font-weight:700; text-align:left;">📋 What /cast does — step by step</div>
+      <div style="background:var(--iron); border-radius:12px; border:1px solid var(--steel); overflow:hidden; max-width:720px; margin:0 auto;">
+        <div style="padding:16px 20px; background:var(--steel); font-size:13px; font-weight:700; text-align:left;">📋 What /forge does — phase by phase</div>
         <div style="padding:0;">
           <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
-            <div class="loop-num">1</div>
+            <div class="loop-num">0</div>
             <div class="loop-content">
-              <strong>Pull latest forge</strong>
-              <span>Gets the newest version from GitHub. Like downloading today's newspaper.</span>
+              <strong>Preflight</strong>
+              <span>Pull the latest forge from GitHub. Like downloading today's newspaper.</span>
             </div>
           </div>
           <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
-            <div class="loop-num">2</div>
+            <div class="loop-num" style="background:rgba(251,191,36,0.15); color:var(--ember);">1</div>
             <div class="loop-content">
-              <strong>Compare skills, learnings, memory</strong>
-              <span>Figures out what's new, what's changed, what's been removed.</span>
+              <strong>mark — build the PLAN table</strong>
+              <span>Compare skills, learnings, and memory. Sort every change into one of three sections: ↓ incoming, ↑ outgoing, ⚠ conflicts. You select row by row. <strong style="color:var(--fire);">Nothing happens until you hit Apply.</strong></span>
             </div>
           </div>
           <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
-            <div class="loop-num">3</div>
+            <div class="loop-num" style="background:rgba(249,115,22,0.15); color:var(--fire);">2</div>
             <div class="loop-content">
-              <strong>Show you a table — ask for approval</strong>
-              <span>Presents every change and waits. <strong style="color:var(--fire);">Nothing happens until you say yes.</strong></span>
+              <strong>cast — apply incoming</strong>
+              <span>Deploy approved forge updates to ~/.claude/skills/, ~/.claude/learnings/, ~/.claude/memory/. Record the baseline SHA so future drift detection stays accurate.</span>
             </div>
           </div>
           <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
-            <div class="loop-num">4</div>
+            <div class="loop-num" style="background:rgba(59,130,246,0.15); color:var(--blue);">3</div>
             <div class="loop-content">
-              <strong>Deploy approved items</strong>
-              <span>Copies skills to ~/.claude/skills/, learnings to ~/.claude/learnings/, etc.</span>
+              <strong>fold — absorb outgoing</strong>
+              <span>Approved learnings and memory flow back into the forge. Strip project names, dedupe against existing knowledge, route to the right file (probe-learnings, global-patterns, etc.). Commit and push.</span>
             </div>
           </div>
           <div class="loop-step" style="border-radius:0; border:none; margin:0;">
-            <div class="loop-num">5</div>
+            <div class="loop-num">4</div>
             <div class="loop-content">
-              <strong>Record the baseline</strong>
-              <span>Saves a timestamp/commit SHA so future /mark and /fold can detect drift accurately.</span>
+              <strong>Project scan + DONE report</strong>
+              <span>Check the project for divergence from forge conventions (CLAUDE.md, memory/, settings). Report what shifted. Ready for `/wrap`.</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div style="margin-top:16px; font-size:13px; color:var(--ash);">
-        💡 Run <span class="cmd" style="font-size:12px;">/cast</span> whenever you update the forge repo, or on a fresh machine.
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════
-       SLIDE 7 — /fold DEEP DIVE
-  ═══════════════════════════════════════════════════ -->
-  <div class="slide bg-purple" data-title="/fold — Absorb Learnings">
-    <div class="scroll-content" style="text-align:center;">
-      <div class="cmd cmd-large" style="font-size:36px; margin-bottom:16px; color:var(--purple); border-color:var(--purple);">/fold</div>
-      <div class="slide-title">The <span class="purple-text">Absorber</span></div>
-      <div class="slide-subtitle">Layer experience back into the steel — what you learned today makes the forge smarter tomorrow</div>
-
-      <div class="analogy-block" style="margin:20px auto; border-color:rgba(168,85,247,0.3); background:rgba(168,85,247,0.1);">
-        <div class="label" style="color:var(--purple);">🍳 Kitchen analogy</div>
-        <p>You spent the day cooking (your project work). You discovered that adding lemon at the end makes the sauce far better. <strong>/fold</strong> is writing that discovery — as a margin note — back into the master recipe book, so every chef who uses it from now on automatically gets that improvement.</p>
-      </div>
-
-      <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin:16px 0;">
-        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:300px; text-align:left;">
-          <div style="font-weight:700; margin-bottom:8px; color:var(--purple);">What gets absorbed?</div>
-          <ul style="font-size:13px; color:var(--smoke); line-height:1.8; padding-left:16px;">
-            <li>Lessons marked <span style="color:var(--fire);">"Forge-worthy: yes"</span></li>
-            <li>Team memories and conventions</li>
-            <li>Config settings that proved useful</li>
-          </ul>
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
+        <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); max-width:320px; text-align:left;">
+          <div style="font-weight:700; margin-bottom:6px; color:var(--ember);">When to use /forge --dry</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">Before committing to a full cycle. Shows the PLAN table read-only. Equivalent to the old /mark.</div>
         </div>
-        <div style="background:var(--iron); border-radius:12px; padding:20px; border:1px solid var(--steel); max-width:300px; text-align:left;">
-          <div style="font-weight:700; margin-bottom:8px; color:var(--purple);">How the quality gate works</div>
-          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">
-            1. /fold scans project memory files<br>
-            2. Finds entries marked Forge-worthy<br>
-            3. Strips all project-specific names<br>
-            4. Shows you a table to approve<br>
-            5. Only approved items get absorbed
-          </div>
+        <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); max-width:320px; text-align:left;">
+          <div style="font-weight:700; margin-bottom:6px; color:var(--fire);">When to use /forge</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">On a fresh machine, after forge updates, after a work session with accumulated learnings, or whenever you want to sync in either direction.</div>
         </div>
       </div>
 
-      <div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:12px; padding:16px; max-width:600px; margin:16px auto 0; font-size:14px; line-height:1.6;">
+      <div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:12px; padding:16px; max-width:600px; margin:20px auto 0; font-size:14px; line-height:1.6;">
         <strong style="color:var(--purple);">The Self-Improving Loop:</strong><br>
-        <span style="color:var(--smoke);">Arts write learnings → /fold absorbs them → next time arts run, they READ those learnings → they get smarter. Every run makes the whole system better.</span>
+        <span style="color:var(--smoke);">Arts write learnings → /forge absorbs them (fold phase) → next time arts run, they READ those learnings → they get smarter. Every cycle makes the whole system better.</span>
       </div>
     </div>
   </div>
@@ -1367,7 +1306,7 @@
           <div style="background:rgba(34,197,94,0.2); padding:12px 16px; font-weight:700; color:var(--green);">💻 your-project/ (the field)</div>
           <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
             <div>📄 <strong style="color:var(--parchment);">CLAUDE.md</strong> — project rules</div>
-            <div style="padding-left:16px; font-size:12px;">created/updated by /cast</div>
+            <div style="padding-left:16px; font-size:12px;">created/updated by /forge</div>
             <div>📂 <strong style="color:var(--parchment);">.claude/</strong></div>
             <div style="padding-left:16px; font-size:12px;">📄 settings.json (overrides)</div>
             <div>📂 <strong style="color:var(--parchment);">memory/</strong> — project learnings</div>
@@ -1412,14 +1351,14 @@
         <div class="loop-step">
           <div class="loop-num">3</div>
           <div class="loop-content">
-            <strong>/fold scans and promotes</strong>
+            <strong>/forge scans and promotes (fold phase)</strong>
             <span>Finds Forge-worthy entries, strips project-specific details, promotes to ~/.claude/learnings/general.md.</span>
           </div>
         </div>
         <div class="loop-step">
           <div class="loop-num">4</div>
           <div class="loop-content">
-            <strong>/fold absorbs into forge</strong>
+            <strong>/forge absorbs into forge (fold phase)</strong>
             <span>The universal lesson enters forge/learnings/ permanently. Now every project benefits from it.</span>
           </div>
         </div>
@@ -1449,7 +1388,7 @@
           <div style="font-size:13px; color:var(--smoke); line-height:2;">
             1. <span class="cmd" style="font-size:11px;">/prime</span> — Turn idea into blueprint<br>
             2. <span class="cmd" style="font-size:11px;">/probe</span> — Validate the blueprint<br>
-            3. <span class="cmd" style="font-size:11px;">/cast</span> — Set up the project conventions<br>
+            3. <span class="cmd" style="font-size:11px;">/forge</span> — Set up project conventions<br>
             4. Start building! 🔨
           </div>
         </div>
@@ -1483,12 +1422,12 @@
           </div>
         </div>
         <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:20px; grid-column:span 2;">
-          <div style="color:var(--blue); font-weight:700; margin-bottom:12px; font-size:15px;">🔄 Updating forge</div>
+          <div style="color:var(--blue); font-weight:700; margin-bottom:12px; font-size:15px;">🔄 Syncing forge</div>
           <div style="font-size:13px; color:var(--smoke); line-height:2;">
-            1. Pull latest forge (git pull) &nbsp;&nbsp;
-            2. <span class="cmd" style="font-size:11px;">/cast</span> — Deploy new skills &nbsp;&nbsp;
-            3. <span class="cmd" style="font-size:11px;">/fold</span> — Absorb learnings back &nbsp;&nbsp;
-            4. <span class="cmd" style="font-size:11px;">/mark</span> — Verify everything in sync
+            1. <span class="cmd" style="font-size:11px;">/forge --dry</span> — Preview what will change &nbsp;&nbsp;
+            2. <span class="cmd" style="font-size:11px;">/forge</span> — Run the cycle (incoming + outgoing in one pass) &nbsp;&nbsp;
+            3. Approve per-row at the PLAN table &nbsp;&nbsp;
+            4. Done — baseline recorded, commits pushed
           </div>
         </div>
       </div>
@@ -1525,8 +1464,8 @@
 
         <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:20px;">
           <div style="font-size:20px; margin-bottom:8px;">🔒</div>
-          <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">Only /fold Writes to Forge</div>
-          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">No direct edits to forge's learnings or memory from a project. /fold is the only gateway — with your review.</div>
+          <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">Only /forge Writes to Forge</div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.6;">No direct edits to forge's learnings or memory from a project. /forge (fold phase) is the only gateway — with your review.</div>
           <div style="margin-top:10px; font-size:12px; color:var(--ash);">🍳 Like only the head chef can update the master recipe book — no one else writes in it directly</div>
         </div>
 
@@ -1555,11 +1494,11 @@
 
       <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:20px; text-align:left;">
         <div style="background:var(--iron); border-radius:12px; border:1px solid rgba(249,115,22,0.4); overflow:hidden; min-width:200px;">
-          <div style="background:rgba(249,115,22,0.2); padding:10px 14px; font-weight:700; color:var(--fire); font-size:13px;">🔄 CORE LOOP</div>
+          <div style="background:rgba(249,115,22,0.2); padding:10px 14px; font-weight:700; color:var(--fire); font-size:13px;">🔄 FORGE CYCLE</div>
           <div style="padding:12px 14px; font-size:13px; line-height:2.2; color:var(--smoke);">
-            <div><span class="cmd" style="font-size:11px;">/mark</span> Just look</div>
-            <div><span class="cmd" style="font-size:11px;">/cast</span> Deploy forge → you</div>
-            <div><span class="cmd" style="font-size:11px;">/fold</span> Absorb you → forge</div>
+            <div><span class="cmd" style="font-size:11px;">/forge</span> Full cycle</div>
+            <div><span class="cmd" style="font-size:11px;">/forge --dry</span> Just look</div>
+            <div><span class="cmd" style="font-size:11px;">/forge on|off</span> Toggle</div>
           </div>
         </div>
 
@@ -1628,7 +1567,7 @@
 
           <div style="display:flex; flex-direction:column; gap:10px;">
             <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
-              <span class="cmd" style="font-size:12px;">/cast</span>
+              <span class="cmd" style="font-size:12px;">/forge</span>
               <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Fresh machine setup OR after forge updates</span>
             </div>
             <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
@@ -1681,8 +1620,8 @@
               <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Every push — push + watch CI</span>
             </div>
             <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
-              <span class="cmd" style="font-size:12px;">/fold</span>
-              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">End of each project milestone — absorb learnings</span>
+              <span class="cmd" style="font-size:12px;">/forge</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">End of each milestone — absorb learnings (fold phase)</span>
             </div>
             <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
               <span class="cmd" style="font-size:12px; color:#ec4899; border-color:#ec4899;">/preen</span>
@@ -1756,7 +1695,7 @@
             </div>
           </div>
           <div style="padding:12px 18px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-            <span class="cmd">/cast</span>
+            <span class="cmd">/forge</span>
             <span style="font-size:13px; color:var(--smoke);">→ Deploys all forge skills + sets up CLAUDE.md conventions for the project</span>
             <span class="pill" style="background:rgba(34,197,94,0.2); color:#22c55e;">one-time per machine/project</span>
           </div>
@@ -1864,19 +1803,14 @@
           </div>
           <div style="padding:12px 18px; display:flex; flex-direction:column; gap:8px;">
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <span class="cmd" style="color:#3b82f6; border-color:#3b82f6;">/fold</span>
-              <span style="font-size:13px; color:var(--smoke);">→ Absorb lessons from this work back into forge. Makes future projects smarter.</span>
-              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">end of each milestone</span>
+              <span class="cmd">/forge</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Run the cycle — absorbs outgoing lessons into forge AND deploys incoming forge updates in one pass.</span>
+              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">end of each milestone / after forge updates</span>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <span class="cmd">/mark</span>
+              <span class="cmd" style="color:var(--ember); border-color:var(--ember);">/forge --dry</span>
               <span style="font-size:13px; color:var(--smoke);">→ Check if forge and your Claude are in sync. Safe read-only inspection.</span>
               <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">anytime you're curious</span>
-            </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <span class="cmd">/cast</span>
-              <span style="font-size:13px; color:var(--smoke);">→ Re-run when forge is updated by you or the team. Redeploy latest skills.</span>
-              <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">after forge updates</span>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <span class="cmd" style="color:#f59e0b; border-color:#f59e0b;">/praise</span>
@@ -1904,7 +1838,7 @@
         <div style="display:flex; align-items:center; gap:0; background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel);">
           <div style="background:rgba(34,197,94,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:#22c55e; line-height:1.4;">🌱 ONCE EVER<br>(setup)</div>
           <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
-            <span class="cmd" style="font-size:11px;">/cast</span> on fresh machine &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/forge</span> on fresh machine &nbsp;·&nbsp;
             <span class="cmd" style="font-size:11px;">/srs</span> new project &nbsp;·&nbsp;
             <span class="cmd" style="font-size:11px;">/prime</span> new idea &nbsp;·&nbsp;
             <span class="cmd" style="font-size:11px;">/probe</span> new blueprint
@@ -1925,8 +1859,7 @@
           <div style="background:rgba(249,115,22,0.25); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:var(--fire); line-height:1.4;">🏁 PER MILESTONE<br>(before launch)</div>
           <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
             <span class="cmd" style="font-size:11px;">/press</span> &nbsp;·&nbsp;
-            <span class="cmd" style="font-size:11px; color:#3b82f6; border-color:#3b82f6;">/fold</span> &nbsp;·&nbsp;
-            <span class="cmd" style="font-size:11px;">/cast</span> (if forge updated)
+            <span class="cmd" style="font-size:11px;">/forge</span> (absorb + sync in one pass)
           </div>
         </div>
 
@@ -1959,7 +1892,7 @@
           <div style="background:rgba(249,115,22,0.35); width:130px; flex-shrink:0; padding:14px 12px; text-align:center; font-size:12px; font-weight:700; color:var(--ember); line-height:1.4;">☀️ DAILY<br>(morning)</div>
           <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
             <span class="cmd" style="font-size:11px;">/wawa</span> &nbsp;·&nbsp;
-            <span class="cmd" style="font-size:11px;">/mark</span> (if curious)
+            <span class="cmd" style="font-size:11px; color:var(--ember); border-color:var(--ember);">/forge --dry</span> (if curious)
           </div>
         </div>
 

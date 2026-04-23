@@ -9,7 +9,7 @@ An art is a skill with a specialist persona. It differs from a task skill in two
 1. **Persona** — the agent adopts a specialist identity (originator, architect, staff engineer, QA adversary) that changes *how* it thinks, not just *what* it does
 2. **Self-improving loop** — it captures learnings after each run, which feed back into future runs via the forge learning cycle
 
-Arts live in `skills/` alongside task skills. They deploy via the same cast/fold/mark pipeline — no separate infrastructure.
+Arts live in `skills/` alongside task skills. They deploy via the same `/forge` cycle — no separate infrastructure.
 
 ## Convention
 
@@ -23,7 +23,7 @@ The learnings filename tells the protocol which file to read during pre-flight a
 
 ## Pre-Flight (every art runs these before starting)
 
-1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/cast`)
+1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/forge`)
 2. **Launch steps 2-6 in parallel** (all independent after forge path is resolved):
    - **Read accumulated learnings**: `<forge>/learnings/<learnings-file>` — skip if file doesn't exist yet (first run)
    - **Read project context**: the project's `CLAUDE.md` for stack, conventions, and current state
@@ -98,9 +98,9 @@ This ensures the same topic maps to one cache key regardless of when the search 
    - **Learning**: [context and evidence — universal principle, no project names/paths]
    - **Forge-worthy**: [yes/no] — [reason: "universal pattern" or "project-specific"]
    ```
-2. Learnings marked `Forge-worthy: yes` will be promoted by `/fold` Part 3 Step 0 — scans project memories, genericizes, and promotes to `~/.claude/learnings/general.md`
+2. Learnings marked `Forge-worthy: yes` will be promoted by `/forge`'s fold phase (3d) — scans project memories, genericizes, and promotes to `~/.claude/learnings/general.md`
 3. **Present results** to the user
-4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/fold` to absorb learnings into forge
+4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/forge` to absorb learnings
 
 ## The Smith — Master of the Forge
 
@@ -109,6 +109,8 @@ Above the arts stands `/smith` — the master builder, the user's proxy. Smith i
 Smith consumes a probed blueprint (from `/prime` + `/probe`) and autonomously forges the product through iterative **heats** — cycles of plan, build, evaluate, fix. It summons **apprentices** (subagents) for parallel work, selects arts by escalation ladder, and converges on perfection through a relentless final gate. The arts sharpen themselves through smith's repeated use. The more the smith works, the sharper everything gets.
 
 Smith has its own learning membrane (three layers: orchestration, delegation, art proficiency) and invokes `/wrap` at milestones autonomously. See `skills/smith/SKILL.md` for the full architecture.
+
+The forge cycle itself (`/forge`) is not an art but a task skill — it has no persona and no learning loop. It is the gate through which arts and all other knowledge flow between forge and membrane.
 
 ## The Ten Arts
 
@@ -145,7 +147,7 @@ The trifecta escalates in intensity and broadens in scope:
 
 ```
 Art runs → writes to project's memory/<learnings-file>
-→ /fold Step 0 promotes Forge-worthy items to ~/.claude/learnings/general.md
-→ /fold Steps 1-4 triage, genericize, and absorb into <forge>/learnings/
+→ /forge fold phase (3d) promotes Forge-worthy items to ~/.claude/learnings/general.md
+→ /forge fold phases (3e, 3g) triage, genericize, and absorb into <forge>/learnings/ and <forge>/memory/
 → next art run reads global learnings in pre-flight
 ```

@@ -1,6 +1,6 @@
 # Preen Learnings
 
-Accumulated UI/UX design evaluation learnings. Absorbed from project runs via `/fold`.
+Accumulated UI/UX design evaluation learnings. Absorbed from project runs via the `/forge` cycle.
 
 <!-- Add learnings below this line -->
 

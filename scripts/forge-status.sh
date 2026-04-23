@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # forge-status.sh — Mechanical membrane inspection
 # Usage: forge-status.sh [--fetch|--pull]
-# Outputs structured markdown for /mark, /cast, /fold preflight
+# Outputs structured markdown for the /forge cycle preflight
+#   --fetch: read-only inspection (used by /forge --dry)
+#   --pull:  syncs forge before a writing cycle (used by /forge)
 set -euo pipefail
 
 MODE="${1:---fetch}"
@@ -35,7 +37,7 @@ if [[ -f "$HOME/.claude/CLAUDE.md" ]]; then
   FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$HOME/.claude/CLAUDE.md" 2>/dev/null | sed 's/[[:space:]]*$//' || true)
 fi
 if [[ -z "$FORGE_PATH" ]]; then
-  echo "ERROR: forge-path not found in ~/.claude/CLAUDE.md. Run /cast to configure."
+  echo "ERROR: forge-path not found in ~/.claude/CLAUDE.md. Run /forge to configure."
   exit 1
 fi
 
@@ -43,7 +45,7 @@ fi
 W_HOME=$(winpath "$HOME")
 W_FORGE=$(winpath "$FORGE_PATH")
 
-# --- Load last-cast baseline SHA (written by /cast after successful deploy) ---
+# --- Load last-cast baseline SHA (written by /forge after a successful cast phase) ---
 LAST_CAST_SHA=""
 LAST_CAST_FILE="$HOME/.claude/.last-cast.json"
 W_LAST_CAST_FILE="$W_HOME/.claude/.last-cast.json"
@@ -70,7 +72,7 @@ echo "**Mode**: $MODE"
 if [[ -n "$LAST_CAST_SHA" ]]; then
   echo "**Baseline**: \`${LAST_CAST_SHA:0:7}\` (last cast commit)"
 else
-  echo "**Baseline**: none (all diffs will be CONFLICT — run /cast to establish baseline)"
+  echo "**Baseline**: none (all diffs will be CONFLICT — run /forge to establish baseline)"
 fi
 echo ""
 
@@ -91,7 +93,7 @@ else
   git -C "$FORGE_PATH" fetch 2>/dev/null
   BEHIND=$(git -C "$FORGE_PATH" rev-list HEAD..origin/main --count 2>/dev/null || echo "0")
   if [[ "$BEHIND" -gt 0 ]]; then
-    echo "**STATUS**: $BEHIND commits behind remote. Run \`/cast\` to pull and sync."
+    echo "**STATUS**: $BEHIND commits behind remote. Run \`/forge\` to pull and sync."
   else
     echo "**STATUS**: Up to date"
   fi
@@ -135,7 +137,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
   else
     if [[ -z "$LAST_CAST_SHA" ]]; then
       # No baseline — cannot safely determine direction; emit CONFLICT
-      echo "| $skill | CONFLICT (no-baseline) | run /cast first to establish baseline |"
+      echo "| $skill | CONFLICT (no-baseline) | run /forge first to establish baseline |"
       CONFLICT=$((CONFLICT + 1))
       CHANGED_SKILLS+=("$skill")
     else
@@ -146,10 +148,10 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
 
       if [[ "$forge_changed" == "no" ]]; then
         # Forge didn't move — membrane was edited
-        if [[ "$skill" == "fold" || "$skill" == "cast" || "$skill" == "purge" ]]; then
-          echo "| $skill | DEPLOYED-DIFFERS (protected) | cast needed — /fold must NOT absorb |"
+        if [[ "$skill" == "forge" || "$skill" == "purge" ]]; then
+          echo "| $skill | DEPLOYED-DIFFERS (protected) | cast only — fold phase must NOT absorb |"
         else
-          echo "| $skill | DEPLOYED-DIFFERS | fold needed |"
+          echo "| $skill | DEPLOYED-DIFFERS | outgoing |"
         fi
         NEED_FOLD=$((NEED_FOLD + 1))
         CHANGED_SKILLS+=("$skill")
@@ -159,8 +161,8 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
         baseline_skill_exists=$(git -C "$FORGE_PATH" ls-tree "$LAST_CAST_SHA" "skills/$skill/" 2>/dev/null | head -1)
 
         if [[ -z "$baseline_skill_exists" ]]; then
-          # Skill didn't exist at baseline — forge added it, needs cast
-          echo "| $skill | FORGE-UPDATED | cast needed |"
+          # Skill didn't exist at baseline — forge added it, incoming
+          echo "| $skill | FORGE-UPDATED | incoming |"
           NEED_CAST=$((NEED_CAST + 1))
           CHANGED_SKILLS+=("$skill")
         else
@@ -174,7 +176,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
 
           if [[ -z "$deployed_vs_baseline" ]]; then
             # Deployed matches baseline exactly — membrane is just stale
-            echo "| $skill | FORGE-UPDATED | cast needed |"
+            echo "| $skill | FORGE-UPDATED | incoming |"
             NEED_CAST=$((NEED_CAST + 1))
             CHANGED_SKILLS+=("$skill")
           else
@@ -196,7 +198,7 @@ if [[ -d "$HOME/.claude/skills" ]]; then
     skill=$(basename "$deployed_dir")
     [[ ! -f "$FORGE_PATH/skills/$skill/SKILL.md" ]] && continue
     if [[ ! -d "$FORGE_PATH/skills/$skill" ]]; then
-      echo "| $skill | REMOVED | deployed only, not in forge |"
+      echo "| $skill | REMOVED | outgoing (deployed only) |"
       REMOVED=$((REMOVED + 1))
     fi
   done
@@ -207,7 +209,7 @@ CONFLICT_MSG=""
 if [[ "$CONFLICT" -gt 0 ]]; then
   CONFLICT_MSG=", $CONFLICT conflict"
 fi
-echo "**Summary**: $IDENTICAL identical, $((NEED_CAST + ADDED)) need cast, $NEED_FOLD need fold${CONFLICT_MSG}, $REMOVED removed"
+echo "**Summary**: $IDENTICAL identical, $((NEED_CAST + ADDED)) incoming, $NEED_FOLD outgoing${CONFLICT_MSG}, $REMOVED removed"
 echo ""
 
 # --- Step 3b: Change details for non-IDENTICAL skills ---
@@ -224,7 +226,8 @@ if [[ ${#CHANGED_SKILLS[@]} -gt 0 && -n "$LAST_CAST_SHA" ]]; then
       echo "$changes"
     else
       # Deployed differs but no forge commits — membrane was edited
-      diff_stat=$(diff --strip-trailing-cr "$FORGE_PATH/skills/$skill/SKILL.md" "$deployed/SKILL.md" 2>/dev/null | grep -c '^[<>]' || echo "0")
+      # Wrap diff in || true so pipefail doesn't append "0" after grep's count
+      diff_stat=$( (diff --strip-trailing-cr "$FORGE_PATH/skills/$skill/SKILL.md" "$deployed/SKILL.md" 2>/dev/null || true) | grep -c '^[<>]' || echo "0")
       if [[ "$diff_stat" -gt 0 ]]; then
         echo "**$skill** (deployed copy modified):"
         echo "  - $diff_stat lines changed in deployed copy"
@@ -279,7 +282,7 @@ console.log('UNPROCESSED=' + unprocessed.length);
   echo ""
 
   if [[ $UNPROCESSED -gt 0 ]]; then
-    echo "**Unprocessed entries** (ready for /fold):"
+    echo "**Unprocessed entries** (outgoing — ready for /forge):"
     # Title-based: show membrane entries NOT in tracker AND NOT in any forge file
     "$NODE_BIN" -e "
 const fs = require('fs'), path = require('path');
@@ -603,7 +606,7 @@ if [[ -d "$HOME/.claude/memory" ]]; then
             MEM_FOLD=$((MEM_FOLD + 1))
           fi
         else
-          echo "| $fname | yes | yes (differs) | Updated (no baseline) -- run /cast first |"
+          echo "| $fname | yes | yes (differs) | Updated (no baseline) -- run /forge first |"
           MEM_FOLD=$((MEM_FOLD + 1))
         fi
       fi
@@ -643,7 +646,7 @@ if [[ ${#FORGE_ONLY_FILES[@]} -gt 0 ]]; then
   echo ""
 fi
 
-echo "**Summary**: $MEM_SYNC in sync, $MEM_FOLD need fold, $MEM_CAST need cast, $MEM_SKIPPED skipped"
+echo "**Summary**: $MEM_SYNC in sync, $MEM_FOLD outgoing, $MEM_CAST incoming, $MEM_SKIPPED skipped"
 echo ""
 
 # --- Step 6: Classification Checks (dedup, pre-triage, tracker consistency) ---
@@ -740,7 +743,7 @@ echo "|------|--------|--------|"
 
 if [[ "$MODE" == "--fetch" ]]; then
   if [[ "${BEHIND:-0}" -gt 0 ]]; then
-    echo "| Forge Remote | $BEHIND commits behind | Run /cast to pull |"
+    echo "| Forge Remote | $BEHIND commits behind | Run /forge to pull |"
   else
     echo "| Forge Remote | Up to date | -- |"
   fi
@@ -751,22 +754,22 @@ fi
 if [[ $((NEED_CAST + ADDED + NEED_FOLD + CONFLICT + REMOVED)) -eq 0 ]]; then
   echo "| Skills | $IDENTICAL identical | -- |"
 else
-  SKILL_STATUS="$((NEED_CAST + ADDED)) need cast, $NEED_FOLD need fold"
+  SKILL_STATUS="$((NEED_CAST + ADDED)) incoming, $NEED_FOLD outgoing"
   if [[ "$CONFLICT" -gt 0 ]]; then
     SKILL_STATUS="$SKILL_STATUS, $CONFLICT conflict"
   fi
-  echo "| Skills | $SKILL_STATUS | Run /cast or /fold |"
+  echo "| Skills | $SKILL_STATUS | Run /forge |"
 fi
 
 UNPROCESSED=${UNPROCESSED:-0}
 if [[ "$UNPROCESSED" -gt 0 ]]; then
-  echo "| Learnings | $UNPROCESSED unprocessed | Run /fold |"
+  echo "| Learnings | $UNPROCESSED unprocessed | Run /forge |"
 else
   echo "| Learnings | 0 unprocessed | -- |"
 fi
 
 if [[ "$MEM_FOLD" -gt 0 || "$MEM_CAST" -gt 0 ]]; then
-  echo "| Memory | $MEM_FOLD need fold, $MEM_CAST need cast | Run /fold |"
+  echo "| Memory | $MEM_FOLD outgoing, $MEM_CAST incoming | Run /forge |"
 else
   echo "| Memory | All synced | -- |"
 fi
@@ -774,13 +777,13 @@ echo ""
 
 # Recommended next step
 if [[ "$CONFLICT" -gt 0 ]]; then
-  echo "**Recommended**: Resolve $CONFLICT skill conflict(s) before running \`/cast\` or \`/fold\`"
+  echo "**Recommended**: Resolve $CONFLICT skill conflict(s) before running \`/forge\`"
 elif [[ "${BEHIND:-0}" -gt 0 ]]; then
-  echo "**Recommended**: \`/cast\` (forge is behind remote)"
+  echo "**Recommended**: \`/forge\` (forge is behind remote)"
 elif [[ $((NEED_CAST + ADDED)) -gt 0 ]]; then
-  echo "**Recommended**: \`/cast\` (skills need deployment)"
+  echo "**Recommended**: \`/forge\` (incoming skills ready)"
 elif [[ $NEED_FOLD -gt 0 || ${UNPROCESSED:-0} -gt 0 || $MEM_FOLD -gt 0 ]]; then
-  echo "**Recommended**: \`/fold\` (knowledge ready for absorption)"
+  echo "**Recommended**: \`/forge\` (outgoing knowledge ready for absorption)"
 else
   echo "**Recommended**: All in sync -- nothing to do"
 fi

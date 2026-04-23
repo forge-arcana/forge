@@ -31,13 +31,24 @@ The more the smith works, the sharper everything gets. Never-ending mastery of i
 
 ## The Forge Cycle
 
-Three one-syllable commands drive the forge loop:
+> In the forge, we forge.
 
-| Command | Action | Analogy |
-|---------|--------|---------|
-| `/mark` | Inspect membrane status (read-only) | Hallmark — inspect and stamp quality |
-| `/cast` | Deploy forge → membrane → project | Pour molten metal into the mold |
-| `/fold` | Absorb knowledge back into forge | Layer experience into the steel |
+One command, three internal motions. `/forge` unifies what used to be three separate commands (`/mark`, `/cast`, `/fold`) into a single bidirectional cycle.
+
+| Motion | Phase | Analogy |
+|--------|-------|---------|
+| **mark** | Inspect drift and present the PLAN table | Hallmark — stamp quality |
+| **cast** | Pour forge → membrane (incoming) | Pour molten metal into the mold |
+| **fold** | Layer membrane → forge (outgoing) | Layer experience into the steel |
+
+Invocation forms:
+
+| Form | Purpose |
+|------|---------|
+| `/forge` | Run the full cycle against the current directory |
+| `/forge <path>` | Run the cycle against a specific project |
+| `/forge --dry` | Read-only inspection (replaces the old `/mark`) |
+| `/forge on` / `/forge off` | Session toggle — enable/disable all forge skills |
 
 ---
 
@@ -81,10 +92,9 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 
 ## Task Skills
 
-### Development
 | Skill | What it does |
 |-------|-------------|
-| `/cast` | Deploy forge conventions into a project (membrane sync + divergence analysis) |
+| `/forge` | The forge cycle — bidirectional sync (triage + apply + absorb + commit). Also handles session toggle via `on`/`off`. |
 | `/qt` | Quick test — verify a fix works before manual testing |
 | `/srs` | Setup `restart.sh` for local dev stack (ports, zombie cleanup, DB checks) |
 | `/wawa` | Outstanding work summary table |
@@ -94,34 +104,32 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 | `/vsix` | Publish a VS Code extension |
 | `/dig` | Think deeper — reframe agent as staff engineer for current discussion |
 | `/temper` | Hardened evaluation — runs poke + press N times, consolidates with confidence scoring |
+| `/cicd` | Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures |
 | `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
-
-### Knowledge Management
-| Skill | What it does |
-|-------|-------------|
-| `/mark` | Inspect membrane — skill drift, learnings, memory status report |
-| `/fold` | Absorb knowledge back into forge — config sync, absorb learnings + memories, membrane compaction (runnable from any project) |
 
 ---
 
 ## Knowledge Flow
 
-Learnings accumulate automatically during work sessions, then flow through three levels: project → global Claude space → forge.
+Learnings accumulate automatically during work sessions, then flow through three levels: project → global Claude space → forge. Everything moves through the `/forge` cycle.
 
 ```
 During any work session (automatic):
   → Claude auto-memory writes to ~/.claude/projects/<project>/memory/
   → Learnings accumulate in ~/.claude/learnings/ + ~/.claude/memory/
 
-/fold from any project (consumes global staging):
-  → reads ~/.claude/learnings/ + ~/.claude/memory/
-  → triages, genericizes, deduplicates
-  → writes to forge/learnings/{probe,press,poke,preen,prime,pry,global-patterns}.md
-  → never deletes from user's global space
+/forge from any project (one bidirectional cycle):
+  ↓ incoming: forge/skills + forge/learnings + forge/memory → user's ~/.claude/
+  ↑ outgoing: user's ~/.claude/ accumulations → forge/learnings + forge/memory
+  ⚠ conflicts: user picks a side per row
 
-Arts (/prime, /probe, /poke, /preen, /press, /pound, /pry):
+  Fold phase triages, genericizes, deduplicates before writing to forge.
+  Cast phase deploys forge updates before the fold phase runs.
+  Never deletes from user's global space.
+
+Arts (/prime, /probe, /poke, /preen, /press, /pound, /pitch, /pry, /praise):
   → read forge/learnings/ first → smarter decisions
-  → write back to project memory/ → auto-accumulates → cycle continues
+  → write back to project memory/ → auto-accumulates → next /forge absorbs
 ```
 
 ---
@@ -133,35 +141,37 @@ forge/
 ├── skills/                # Git-tracked source of truth for all global skills
 │   ├── prime/             # The originator — ideation to blueprint (art)
 │   ├── probe/             # Architecture challenger (art, self-improving)
-│   ├── cast/              # Deploy forge conventions into projects
-│   ├── fold/              # Knowledge absorption loop (runnable from any project)
-│   ├── forge/             # Reference docs (no SKILL.md — not a skill)
+│   ├── poke/              # Tech debt code review (art, self-improving)
+│   ├── preen/             # UI/UX design evaluation (art, self-improving)
+│   ├── press/             # Go-live readiness assessment (art, self-improving)
+│   ├── pound/             # Deep QA with 21 adversarial personas (art)
+│   ├── pitch/             # VC-style business model critique (art)
+│   ├── pry/               # The Lever — relentless solution-finder (art)
+│   ├── praise/            # Feedback router — closes the build-ship-learn loop (art)
+│   ├── smith/             # The Master Builder — autonomous product forging
+│   ├── forge/             # The forge cycle SKILL.md + reference docs
+│   │   ├── SKILL.md               # /forge command
 │   │   ├── claude-code-rules.md   # Workflow rules
 │   │   ├── claude-code-settings.json  # Universal settings reference
 │   │   ├── stack-guide.md         # Tech stack decisions
 │   │   ├── forge-conventions.md   # Conventions checklist
+│   │   ├── preflight.md           # Shared drift classification
 │   │   └── protocol.md            # Shared art pre-flight/post-flight protocol
-│   ├── mark/              # Membrane inspection (read-only status report)
 │   ├── monci/             # Monitor CI
-│   ├── poke/              # Tech debt code review (art, self-improving)
 │   ├── ponci/             # Push and monitor CI
-│   ├── preen/             # UI/UX design evaluation (art, self-improving)
-│   ├── pound/             # Deep QA with 21 adversarial personas (art)
-│   ├── press/             # Go-live readiness assessment (art, self-improving)
 │   ├── qt/                # Quick test
 │   ├── srs/               # Restart script setup
 │   ├── vsix/              # VS Code extension publishing
 │   ├── dig/               # Think deeper — staff engineer stance
 │   ├── eli5/              # Explain Like I'm 5
-│   ├── pry/               # The Lever — relentless solution-finder (art)
-│   ├── smith/             # The Master Builder — autonomous product forging
+│   ├── cicd/              # Local CI/CD pipeline
 │   ├── temper/            # Hardened evaluation — repeated poke + press
 │   ├── wawa/              # Outstanding work summary
 │   └── wrap/              # Pre-commit ritual
 ├── learnings/             # Absorbed team wisdom (art-specific + global patterns)
 ├── memory/                # Team identity & shared conventions
 ├── .claude/skills/
-│   ├── cast/              # Thin bootstrap (so /cast is discoverable on fresh clone)
+│   ├── forge/             # Bootstrap (so /forge is discoverable on fresh clone)
 │   └── purge/             # Forge-internal hygiene art (maintainers only)
 └── CLAUDE.md
 ```
@@ -181,26 +191,25 @@ forge/
 ```
 git clone <forge-repo>
 cd forge
-/cast               → deploys all skills globally, sets up ~/.claude/
+/forge              → deploys all skills globally, sets up ~/.claude/
 ```
 
 **New project?**
 ```
-/cast               → apply forge conventions
+/forge              → apply forge conventions + sync membrane
 /srs                → setup restart.sh
 ```
 
 **During development?**
 ```
-/cast               → sync latest conventions
+/forge              → run the cycle (incoming + outgoing in one pass)
+/forge --dry        → inspect without applying
 /qt                 → verify your fix
 /dig                → think deeper about this
 /poke               → tech debt scan
 /preen              → UI/UX design review
 /wawa               → where am I?
 /wrap               → commit with full context
-/mark               → check membrane status
-/fold               → feed learnings back to forge
 ```
 
 **Stuck on something "impossible"?**

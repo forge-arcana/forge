@@ -428,7 +428,7 @@ Three independent streams, one forge.
 
 ### Forge-Worthy Promotion
 
-Learnings marked `Forge-worthy: yes` in any layer get promoted to `~/.claude/learnings/general.md` by `/fold`, same as art learnings. Universal orchestration patterns flow back into the forge for all future smith runs across all projects.
+Learnings marked `Forge-worthy: yes` in any layer get promoted to `~/.claude/learnings/general.md` by the `/forge` cycle's fold phase, same as art learnings. Universal orchestration patterns flow back into the forge for all future smith runs across all projects.
 
 ## Progress Tracking
 

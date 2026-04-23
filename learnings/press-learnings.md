@@ -1,6 +1,6 @@
 # /press Learnings
 
-> Populated by `/press` runs across projects. Absorbed into forge by `/fold`.
+> Populated by `/press` runs across projects. Absorbed into forge by the `/forge` cycle.
 
 <!-- Add learnings below this line -->
 

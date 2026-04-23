@@ -1,6 +1,6 @@
 # /probe Learnings
 
-> Accumulated learnings from probe sessions (architecture review). Absorbed by `/fold`.
+> Accumulated learnings from probe sessions (architecture review). Absorbed by the `/forge` cycle.
 
 <!-- Add learnings below this line -->
 

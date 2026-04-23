@@ -259,7 +259,7 @@ When the user's intent doesn't match any art:
 
 Explicit invocation (e.g., "/poke") always overrides auto-routing.
 
-If forge is disabled (via `/forge off`), ALL forge skills are suspended except `/cast`, `/mark`, `/fold`, `/forge`. No auto-invocation, no explicit skill invocation. Respond with "Forge is disabled. Run `/forge on` to re-enable."
+If forge is disabled (via `/forge off`), ALL forge skills are suspended except `/forge` and `/purge`. No auto-invocation, no explicit skill invocation. Respond with "Forge is disabled. Run `/forge on` to re-enable."
 
 ### Skill Model Recommendations
 
