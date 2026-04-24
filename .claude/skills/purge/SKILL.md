@@ -8,6 +8,8 @@ user-invocable: true
 # /purge — Cleanse the Forge
 
 > **Art** (learnings: `purge-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
+>
+> **Location is intentional.** This skill lives only at `<forge>/.claude/skills/purge/`, never under `<forge>/skills/`. The `/forge` cycle does not deploy it to user membranes — `/purge` writes to forge files directly, so running it from any project other than the forge repo would violate the "no writing to forge from a project" HARD RULE. Keeping it in `.claude/skills/` confines it to the forge repo by construction.
 
 ## Persona
 

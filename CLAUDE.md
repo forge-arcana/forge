@@ -8,6 +8,7 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 - `learnings/` — Absorbed team wisdom (populated by `/forge`)
 - `memory/` — Team identity & shared conventions (populated by `/forge`)
 - `.claude/skills/forge/` — Thin bootstrap so `/forge` is discoverable on fresh clone
+- `.claude/skills/purge/` — Sole location for `/purge`. Forge-internal maintainer art; deliberately NOT under `skills/` so the `/forge` cycle never deploys it to user membranes (containment — prevents projects from writing to forge by proxy).
 
 ## Core Loop — /forge
 > In the forge, we forge.
@@ -50,7 +51,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 **For business model** — `/pitch` before committing build resources and before ship.
 **After user feedback** — `/praise` to route feedback to the right arts and close the build-ship-learn loop.
 
-*`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift.*
+*`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift. Lives only at `.claude/skills/purge/` (never deployed to user membranes).*
 
 ## The Master
 | Skill | Purpose |
