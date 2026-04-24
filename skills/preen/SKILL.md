@@ -1,6 +1,6 @@
 ---
 name: preen
-description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. Evaluates affordances, feedback, mapping, conceptual models, and the discipline of simplicity. Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review of an interface."
+description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. When a Pattern file exists, appends findings as the UX section of [PROJECT]_Pattern_V1.0.md (paired with /probe's Architecture section). Otherwise returns an inline report. Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review of an interface."
 user-invocable: true
 ---
 <!-- model: opus -->
@@ -28,6 +28,7 @@ Launch all in parallel (independent scans):
 2. **Read component structure**: scan for UI components, layouts, navigation patterns
 3. **Check for design system**: look for theme files, design tokens, component libraries
 4. **Identify user flows**: read route definitions, navigation config, form handlers
+5. **Check for Pattern file**: glob for `*Pattern*.md` in cwd. If a Pattern exists (likely written by /probe), this run **appends** the UX section to it. If none exists, the report is returned inline and the user is told Pattern requires `/probe` on a Blueprint first.
 
 ## Arguments
 
@@ -129,12 +130,24 @@ Don Norman's three levels, refined through Ive's lens:
 
 Flag interfaces that nail behavioral but neglect visceral (ugly but functional), vice versa (beautiful but confusing), or that achieve both but through accumulation rather than reduction (feature-complete but cluttered).
 
-## Output Format
+## Output
 
-Structure findings by severity and dimension:
+Adapt output to whether a Pattern file exists (from /probe).
+
+### Pattern mode — Pattern file exists in cwd
+
+Append findings as the `## UX` section of `[PROJECT]_Pattern_V1.0.md`. The Pattern is the shared design artifact; /probe writes Architecture, /preen writes UX, and both contribute to Risks.
+
+- **Preserve** the existing Architecture section verbatim — never rewrite /probe's work.
+- **Replace or insert** the UX section with the findings below.
+- **Merge into Risks** — add any CRITICAL/IMPORTANT UX issues to the shared `## Risks` section under their severity bucket.
+- Update the `Last updated` date at the top of the Pattern file.
+
+UX section structure:
 
 ```markdown
-## /preen Report — [Target]
+## UX
+*Written by /preen — Don Norman usability + Jony Ive reduction.*
 
 ### Critical (blocks users)
 - [Finding with evidence and Norman principle violated]
@@ -146,11 +159,17 @@ Structure findings by severity and dimension:
 - [Elements that don't earn their place — applying Ive's Razor]
 
 ### Polish (delight opportunities)
-- [Finding — what's good and how to make it great]
+- [What's good, how to make it great]
 
 ### Strengths (what's working)
-- [Celebrate good design decisions with why they work]
+- [Celebrate good design decisions and why they work — what NOT to change]
 ```
+
+After writing, present a summary to the user: "UX section appended to `[PROJECT]_Pattern_V1.0.md`. N critical, M improvements. The Pattern is now complete (Architecture + UX) — ready for /smith."
+
+### Inline mode — no Pattern file
+
+Return the findings as a standalone markdown report using the same structure as the UX section above, wrapped in `## /preen Report — [Target]`. Tell the user: "No Pattern file found — this is an inline review. To produce a durable Pattern artifact /smith can consume, run `/probe` on a Blueprint first, then re-run `/preen` to append the UX section."
 
 Always include Strengths. Good design deserves recognition — and the team needs to know what NOT to change.
 

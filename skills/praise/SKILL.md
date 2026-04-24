@@ -26,7 +26,7 @@ user-invocable: true
 2. **Launch all reads in parallel** (all independent after forge path resolves):
    - Read project `CLAUDE.md` for stack, conventions, current state
    - Read `<forge>/skills/forge/stack-guide.md` for tech reference
-   - Scan cwd for blueprint files (`*-probed.md` preferred, else `*Blueprint*.md`)
+   - Scan cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions)
    - Read `<forge>/learnings/praise-learnings.md` if it exists (routing wisdom from prior runs)
    - Read `memory/.web-cache.json` if it exists
 

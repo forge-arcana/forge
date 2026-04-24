@@ -37,9 +37,9 @@
 **Apply when**: Any blueprint that will undergo review cycles. Publish V1.0 early, run reviews, produce V2.0. Don't try to make V1.0 perfect.
 
 ## Generated Documents Must Reside in docs/ (2026-03-29)
-**Learning**: Art-generated documents (PitchForge, ProductBlueprint, ProbeReport, PreenReport, Opus) must be written to the project's `docs/` directory, not the project root. Root-level documents create clutter and mix specs with code. Create `docs/` if it doesn't exist.
-**Apply when**: Any art produces a document output — pitch, blueprint, opus, probe report, preen report.
+**Learning**: Art-generated documents (Opus, Vow, Pitch, Blueprint, Pattern, and any art reports) must be written to the project's `docs/` directory, not the project root. Root-level documents create clutter and mix specs with code. Create `docs/` if it doesn't exist.
+**Apply when**: Any art produces a document output — Opus, Vow, Pitch, Blueprint, Pattern, or any standalone art report.
 
 ## /prime Must Auto-Invoke /probe Then /preen After Blueprint (2026-03-29)
-**Learning**: After blueprint generation completes, `/prime` should automatically invoke `/probe` (architecture review) then `/preen` (UI/UX review) without user intervention. This catches structural and design issues before `/smith` begins building. Reports go to `docs/[PROJECT]_ProductBlueprint_V1.0_ProbeReport.md` and `docs/[PROJECT]_ProductBlueprint_V1.0_PreenReport.md`.
-**Apply when**: Running `/prime` to blueprint completion. Both quality gates run automatically as part of the prime flow.
+**Learning**: After Blueprint generation completes, `/prime` should automatically invoke `/probe` (architecture review), then `/preen` (UI/UX review) if the product has UI-facing features — without user intervention. This catches structural and design issues before `/smith` begins building. Both probe and preen write into a single consolidated artifact: `docs/[PROJECT]_Pattern_V1.0.md`. /probe writes the Architecture section; /preen appends the UX section.
+**Apply when**: Running `/prime` to Blueprint completion. Both quality gates run automatically as part of Phase 3, producing the Pattern that /smith consumes.

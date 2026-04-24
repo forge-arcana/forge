@@ -1,6 +1,6 @@
 ---
 name: probe
-description: "Challenge architecture decisions against current best practices. Probes blueprints, plans, or conversation topics — auto-detects target from context or asks. Self-improving. TRIGGER when: user asks for architecture review, design validation, or 'is this the right approach?' on a technical decision."
+description: "Challenge architecture decisions against current best practices. On Blueprint targets, writes the Architecture section of the Pattern ([PROJECT]_Pattern_V1.0.md). On plans/conversations, returns inline review. Self-improving. TRIGGER when: user asks for architecture review, design validation, or 'is this the right approach?' on a technical decision."
 user-invocable: true
 ---
 <!-- model: opus -->
@@ -20,11 +20,11 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
 
 1. **Explicit argument given** — use it (file path → read it; description → scope the review to that topic)
 2. **No argument — infer from context**:
-   - If a blueprint file exists (`*Blueprint*` or `*ProductBlueprint*` in cwd) → probe the blueprint
+   - If a Blueprint file exists (`*Blueprint*` or `*ProductBlueprint*` in cwd) → probe the Blueprint (output goes to Pattern)
    - If `/prime` just ran in this conversation → probe that output
-   - If the conversation has a clear architectural topic (plan, design, RFC) → probe that
-   - **If ambiguous** → ask: "What should I probe? A blueprint, the current plan, or something else?"
-3. Read/review the full probe target before proceeding
+   - If the conversation has a clear architectural topic (plan, design, RFC) → probe that (inline review)
+   - **If ambiguous** → ask: "What should I probe? A Blueprint, the current plan, or something else?"
+3. Read/review the full probe target before proceeding. **Also read `[PROJECT]_Pattern_V1.0.md`** if it exists — preserve and update its Architecture section rather than overwriting; leave the UX section untouched (that belongs to /preen).
 
 ## Process
 
@@ -93,16 +93,64 @@ Additionally, verify the blueprint includes:
 
 Adapt output format to the probe target:
 
-**If probing a blueprint file** → create `[PROJECT]_ProductBlueprint_V1.0-probed.md`:
-- Copy the full blueprint, enhance technical sections with architecture review notes
-- Mark enhanced sections with `<!-- PROBED: [reason for change] -->` comments
-- Add an `## Architecture Review Summary` section at the top listing all changes made
+**If probing a Blueprint file** → write the **Architecture** section of `[PROJECT]_Pattern_V1.0.md` (the Pattern is the form /smith consumes):
 
-**If probing a plan, conversation, or other target** → present the review inline:
-- Lead with an `## Architecture Review Summary` listing all challenges and recommendations
+- If Pattern does NOT exist → create it with the full skeleton (Architecture + empty UX placeholder + Risks).
+- If Pattern EXISTS → update the Architecture section in place. **Preserve the UX section verbatim** (that belongs to /preen). Merge new risks into the Risks section.
+- Leave the original Blueprint file **untouched** — the Blueprint is the scope, the Pattern is the form. Never rewrite the Blueprint.
+- No `-probed.md` copies. The Pattern is the sole architecture artifact.
+
+Pattern file skeleton:
+
+```markdown
+# [PROJECT] — Pattern
+
+*The form the Blueprint takes — validated architecture and UX decisions /smith consumes.*
+
+Written: [YYYY-MM-DD] | Last updated: [YYYY-MM-DD]
+
+---
+
+## Architecture
+*Written by /probe — tech decisions validated against the stack guide and current best practices.*
+
+### [Section name, e.g., Tech Architecture (Blueprint §13)]
+- **Current recommendation**: [from Blueprint]
+- **Verdict**: confirmed / enhanced — [reason]
+- **Configuration**: [specific guidance — versions, flags, topology]
+- **Pitfalls**: [known gotchas and mitigations]
+- **References**: [links to docs / RFCs]
+
+[... one entry per technical Blueprint section (Sections 13–19 typically)]
+
+---
+
+## UX
+*Written by /preen when the product has UI-facing features. Empty otherwise.*
+
+[Placeholder — populated by /preen]
+
+---
+
+## Risks
+*Both /probe and /preen contribute. Severity: CRITICAL (blocks go-live) / IMPORTANT (significant risk) / MINOR (improvement opportunity).*
+
+### CRITICAL
+- [Risk — mitigation / required action]
+
+### IMPORTANT
+- [Risk — mitigation]
+
+### MINOR
+- [Observation — improvement opportunity]
+```
+
+**If probing a plan, conversation, or other non-Blueprint target** → present the review inline (no Pattern file):
+- Lead with `## Architecture Review Summary`
 - For each challenged decision: what was proposed, why it's questionable, what to consider instead
-- Severity levels: CRITICAL (blocks go-live), IMPORTANT (significant risk), MINOR (improvement opportunity)
+- Severity levels: CRITICAL / IMPORTANT / MINOR
+- Pattern requires a Blueprint as its anchor. Non-Blueprint targets get inline review only.
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/probe-learnings.md`. Present the probed blueprint to the user with a summary of changes.
+Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/probe-learnings.md`. Present the Pattern file (Architecture section) to the user with a summary of changes. If the Blueprint has UI-facing features, suggest running `/preen` next to append the UX section.

@@ -1,6 +1,6 @@
 ---
 name: smith
-description: "Master of the forge — consumes a probed blueprint, plan file, or conversation context and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The magnum opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a blueprint, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
+description: "Master of the forge — consumes a Blueprint + Pattern (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 user-invocable: true
 ---
 <!-- model: opus -->
@@ -12,36 +12,36 @@ The smith is not an art. The smith is the one who wields them all.
 ## Arguments
 
 `$ARGUMENTS` — one of:
-- A path to a probed blueprint file (e.g., `ProjectName_ProductBlueprint_V1.0-probed.md`)
-- A path to a plan/spec `.md` file (any non-blueprint markdown with implementation steps)
-- A project directory containing a blueprint
+- A path to a Blueprint file (e.g., `ProjectName_Blueprint_V1.0.md`) — smith will also load the paired `[PROJECT]_Pattern_V1.0.md`
+- A path to a plan/spec `.md` file (any non-Blueprint markdown with implementation steps)
+- A project directory containing a Blueprint (+ Pattern)
 - `--force` flag (can combine with any above) — bypasses the scope gate
 - Empty — smith auto-detects the work source
 
 ### Input Resolution (in priority order)
 
-1. **Explicit path provided** → use it (blueprint or plan file, detected by content)
-2. **No path** → scan cwd for `*-probed.md` → prefer the probed blueprint
-3. **No probed blueprint** → fall back to `*Blueprint*.md` → warn unprobed, offer `/probe`
-4. **No blueprint** → check for plan files in `~/.claude/plans/` or conversation context
+1. **Explicit path provided** → use it (Blueprint or plan file, detected by content). If Blueprint, also load the paired Pattern file if present.
+2. **No path** → scan cwd for `*Blueprint*.md` → load the Blueprint. Then glob for `*Pattern*.md` and load the Pattern alongside.
+3. **Blueprint exists, Pattern missing** → warn "Pattern not found — Blueprint has not been probed" and invoke `/probe` before proceeding. The Pattern is smith's source of design truth.
+4. **No Blueprint** → check for plan files in `~/.claude/plans/` or conversation context
 5. **Conversation context** → if the current conversation contains a discussed spec, architecture, or implementation steps, smith extracts a work spec from it
-6. **Nothing found** → error: "No blueprint, plan, or work context found. Run `/prime` to create a blueprint, or discuss the work first."
+6. **Nothing found** → error: "No Blueprint, plan, or work context found. Run `/prime` to create a Blueprint and Pattern, or discuss the work first."
 
 ### Input Modes
 
 | Mode | Source | Blueprint Sections? | Phase Gates? |
 |------|--------|--------------------:|:------------:|
-| **Blueprint** | `*-probed.md` or `*Blueprint*.md` | Yes — numbered sections | Full ceremony |
+| **Blueprint + Pattern** | `*Blueprint*.md` + `*Pattern*.md` | Yes — numbered sections + validated architecture/UX | Full ceremony |
 | **Plan file** | Any `.md` with implementation steps | No — free-form descriptions | Adapted |
 | **Conversation** | Work discussed in current session | No — free-form descriptions | Adapted |
 
-In **plan file** and **conversation** modes, smith synthesizes a work spec (see Step 0.5) and maps it to heats using free-form descriptions instead of blueprint section numbers.
+In **plan file** and **conversation** modes, smith synthesizes a work spec (see Step 0.5) and maps it to heats using free-form descriptions instead of Blueprint section numbers. Pattern-driven architecture review is skipped — `/poke` + `/press` replace the Pattern's design validation role.
 
 ## Step 0: Preflight
 
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line
 2. **Launch all reads in parallel** (all independent):
-   - Read the blueprint file, plan file, or extract work spec from conversation context (per Input Resolution)
+   - Read the Blueprint file **and the paired Pattern file** (if present), plan file, or extract work spec from conversation context (per Input Resolution)
    - Read project `CLAUDE.md` for stack, conventions, current state
    - Read `<forge>/skills/forge/stack-guide.md` for tech reference
    - Read `memory/smith-ledger.json` if it exists (resume mode — skip to Session Resume)
@@ -49,9 +49,9 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
    - Read `memory/smith-learnings.md` if it exists (Layer 1 — orchestration wisdom)
    - Read `memory/smith-apprentice-log.md` if it exists (Layer 3 — delegation wisdom)
 
-If the blueprint is unprobed (no `-probed` suffix, no `<!-- PROBED: -->` markers), invoke `/probe` on it before proceeding. Architecture must be validated before the smith swings.
+**Pattern gate** — if the Blueprint has no paired Pattern file (`[PROJECT]_Pattern_V1.0.md` absent OR present but empty Architecture section), invoke `/probe` on the Blueprint before proceeding. The Pattern is smith's source of design truth — architecture must be validated before the smith swings. If the Blueprint has UI-facing features, also invoke `/preen` to append the UX section after `/probe` completes.
 
-If the blueprint has no `<!-- PITCHED: -->` marker AND contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Use `AskUserQuestion` with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste.
+**Pitch gate** — if no `[PROJECT]_Pitch_V1.0.md` exists AND the Blueprint contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Use `AskUserQuestion` with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste. Pitch writes its verdict as a `<!-- PITCHED: [VERDICT] -->` marker at the top of the Pitch file (or the Blueprint if no Pitch file exists yet).
 
 ## Step 0.5: Scope Gate
 

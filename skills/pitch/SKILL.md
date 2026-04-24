@@ -23,7 +23,7 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
 
 1. **Explicit argument given** — use it (file path → read it; description → scope the review to that topic)
 2. **No argument — infer from context**:
-   - If a blueprint file exists (`*Blueprint*` or `*-probed.md` in cwd) → critique the business model sections
+   - If a Blueprint file exists (`*Blueprint*` in cwd) → critique the business model sections. If a `[PROJECT]_Pitch_V1.0.md` exists, read it as prior pitch context.
    - If `/prime` just ran in this conversation → critique that output's business model
    - If the conversation has a clear feature/decision topic → critique it through the business model lens
    - **If ambiguous** → ask: "What should I critique? The full business model, a specific feature, a pricing decision, or something else?"
@@ -126,9 +126,13 @@ Scoring: 1 = broken/absent, 2 = weak, 3 = adequate, 4 = strong, 5 = exceptional.
 Signal: red = 1–2, yellow = 3, green = 4–5.
 Verdict thresholds: FUNDABLE = 28–35, WORTH BUILDING = 21–27, NEEDS RETHINK = 14–20, KILL = ≤13.
 
-## Blueprint Integration
+## Marker Integration
 
-When the pitch target is a blueprint file, mark the outcome at the top after evaluation:
+After evaluation, mark the outcome at the top of the canonical artifact:
+
+- **If `[PROJECT]_Pitch_V1.0.md` exists** (the investor pitch pack from /prime) → write the marker there.
+- **Else if a Blueprint file exists** → write the marker on the Blueprint.
+- **Else** → inline output only; no marker.
 
 ```
 <!-- PITCHED: [VERDICT] — [date] -->
@@ -141,6 +145,6 @@ This marker is read by `/smith` during Step 0 preflight. A `KILL` or `NEEDS RETH
 Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/pitch-learnings.md`.
 
 Suggest next steps based on verdict:
-- **KILL or NEEDS RETHINK** → run `/prime` to revise the blueprint's business model sections before building
-- **WORTH BUILDING** → proceed to `/smith`, or run `/probe` first if architecture is not yet validated
+- **KILL or NEEDS RETHINK** → run `/prime` to revise the Vow and Blueprint's business model sections before building
+- **WORTH BUILDING** → proceed to `/smith`, or run `/probe` first if no Pattern file exists yet (architecture must be validated before smith swings)
 - **FUNDABLE** → the model is strong — proceed with confidence

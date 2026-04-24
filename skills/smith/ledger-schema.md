@@ -8,7 +8,8 @@
 {
   "version": 1,
   "inputMode": "blueprint|plan|conversation",
-  "blueprint": { "file": "...-probed.md", "hash": "<sha256>", "phase": "MVP" },
+  "blueprint": { "file": "...Blueprint_V1.0.md", "hash": "<sha256>", "phase": "MVP" },
+  "pattern": { "file": "...Pattern_V1.0.md", "hash": "<sha256>" },
   "workspec": { "file": "memory/smith-workspec.md", "hash": "<sha256>", "source": "plan-file-path or conversation" },
   "plan": {
     "units": [{
@@ -43,7 +44,8 @@
 
 ### Key Fields
 
-- **`inputMode`** — how smith received the work: `blueprint` (formal probed/unprobed blueprint), `plan` (plan file with implementation steps), or `conversation` (extracted from discussion context).
+- **`inputMode`** — how smith received the work: `blueprint` (Blueprint file, typically paired with a Pattern), `plan` (plan file with implementation steps), or `conversation` (extracted from discussion context).
+- **`pattern`** — only present in blueprint mode when the Pattern file exists. Hash lets smith detect post-build Pattern updates (e.g., /preen appending UX section mid-build). `null` in plan/conversation modes.
 - **`workspec`** — only present in plan/conversation modes. Points to `memory/smith-workspec.md` with hash for change detection on resume. `null` in blueprint mode.
 - **`decisions`** — per-heat decision rationale. Survives context compaction. "Heat 5: chose WebSocket over SSE because blueprint Section 14 specifies bidirectional."
 - **`checkpointSha`** — git commit SHA at each heat completion. Phase gates also snapshot the full ledger to `memory/smith-ledger-checkpoint-<gate>.json`.

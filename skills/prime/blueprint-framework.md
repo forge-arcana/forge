@@ -4,7 +4,7 @@
 >
 > **When to use:** At the START of a project — before any code exists. The founder has an idea; this process turns it into a buildable spec.
 >
-> **Output:** A completed `[PROJECT]_ProductBlueprint_V1.0.md` — a single document an AI agent can consume to plan architecture, choose technologies, and implement the product.
+> **Output:** A completed `[PROJECT]_Blueprint_V1.0.md` — the execution skeleton. An AI agent (typically /smith) consumes it paired with the Pattern artifact (from /probe + /preen) to plan architecture, choose technologies, and implement the product.
 
 ---
 
