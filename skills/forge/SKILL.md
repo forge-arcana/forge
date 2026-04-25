@@ -81,6 +81,18 @@ This resolves the forge path, syncs the remote (pull in active mode, fetch in dr
 
 ## Phase 1: Mark — Build the PLAN Table
 
+### 1a. Workaround status banner (always shown)
+
+Run `bash <forge>/scripts/forge-workarounds-check.sh` before rendering the PLAN table. It emits one status line per active workaround listed in `<forge>/WORKAROUNDS.md`. The actual GitHub API check is time-gated to once per 7 days per workaround; cached status is used otherwise.
+
+Print the output verbatim as a banner above the PLAN table. It always appears — healthy or alerting — so the workaround state stays visible on every cycle.
+
+If any line contains "READY FOR REMOVAL", surface it prominently (the script formats those lines to stand out) and remind the user: "Workaround can be retired — see `WORKAROUNDS.md` removal procedure."
+
+If the script has no output (no WORKAROUNDS.md or empty file), print nothing.
+
+### 1b. PLAN table
+
 From the preflight output, build a single triage table with three sections. Each row shows **the essence of what will change** — not the filename, but the rule, principle, or knowledge that will land.
 
 ```

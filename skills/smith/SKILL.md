@@ -39,6 +39,24 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
 
 ## Step 0: Preflight
 
+### 0a. Token Warmup (workaround for upstream Claude Code OAuth race — see [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001)
+
+Before any apprentice spawns, ensure the OAuth token is fresh and a background keeper is running. This prevents mid-build "auth failed" crashes caused by Claude Code's documented refresh-token race.
+
+1. Run `bash <forge>/scripts/smith-token-warmup.sh` synchronously. Refreshes OAuth token if <30 min remaining; no-op if healthy. Always exits 0.
+2. Spawn the background keeper passing the smith PID as parent:
+   ```bash
+   nohup bash <forge>/scripts/smith-token-keeper.sh $$ >/dev/null 2>&1 &
+   ```
+3. Set EXIT trap so the keeper is stopped on smith exit (any cause):
+   ```bash
+   trap 'PID=$(cat /tmp/forge-smith-token-keeper.$$.pid 2>/dev/null); [[ -n "$PID" ]] && kill "$PID" 2>/dev/null; rm -f /tmp/forge-smith-token-keeper.$$.pid' EXIT
+   ```
+
+The keeper loops every 5 min, dies cleanly when smith exits or when SIGTERM is received. Logs to `~/.claude/.smith-token.log`.
+
+### 0b. Standard preflight
+
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line
 2. **Launch all reads in parallel** (all independent):
    - Read the Blueprint file **and the paired Pattern file** (if present), plan file, or extract work spec from conversation context (per Input Resolution)
@@ -327,6 +345,13 @@ When smith encounters a wall — a dependency that doesn't exist, an API that do
 
 When the final gate converges (zero CRITICAL + IMPORTANT):
 
+0. **Stop the token keeper** (workaround teardown — see WA-001):
+   ```bash
+   PID=$(cat /tmp/forge-smith-token-keeper.$$.pid 2>/dev/null)
+   [[ -n "$PID" ]] && kill "$PID" 2>/dev/null
+   rm -f /tmp/forge-smith-token-keeper.$$.pid
+   ```
+   The EXIT trap from Step 0a will catch the case where smith exits abnormally — this step is the clean explicit teardown.
 1. Present the final status: heats completed, findings addressed, deferred minors, total cycles
 2. **Update source documents**:
    - **Blueprint mode** → update relevant blueprint sections with implementation status markers
@@ -448,3 +473,4 @@ Two files persist smith state:
 6. **ALWAYS** persist the ledger before any milestone or potential interruption point.
 7. **ALWAYS** follow the stack guide conventions when building. The blueprint defines *what*, the stack guide defines *how*.
 8. **ALWAYS** include the no-chaining rule in every apprentice prompt verbatim.
+9. **ALWAYS** start the token keeper in preflight (Step 0a) and stop it in completion (Step 5.0). The OAuth token-race workaround is mandatory for every smith run. See [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001.
