@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# smith-token-keeper.sh — Background token-refresh loop for /smith
+# agent-token-keeper.sh — Background token-refresh loop for any subagent-spawning skill
 # Workaround for Claude Code refresh-token race (see WORKAROUNDS.md WA-001)
 #
-# Usage: smith-token-keeper.sh <parent_pid>
+# Usage: agent-token-keeper.sh <parent_pid>
 #
 # Behavior:
-#   - Loops every 5 min calling smith-token-warmup.sh
+#   - Loops every 5 min calling agent-token-warmup.sh
 #   - Exits cleanly when parent process dies
 #   - Traps SIGTERM/SIGINT for clean shutdown
-#   - Records own PID at /tmp/forge-smith-token-keeper.<parent_pid>.pid
+#   - Records own PID at /tmp/forge-agent-token-keeper.<parent_pid>.pid
 
 set -uo pipefail
 
@@ -19,8 +19,8 @@ if [[ -z "$PARENT_PID" ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WARMUP="$SCRIPT_DIR/smith-token-warmup.sh"
-PID_FILE="/tmp/forge-smith-token-keeper.${PARENT_PID}.pid"
+WARMUP="$SCRIPT_DIR/agent-token-warmup.sh"
+PID_FILE="/tmp/forge-agent-token-keeper.${PARENT_PID}.pid"
 LOG="$HOME/.claude/.smith-token.log"
 INTERVAL=300  # 5 minutes
 

@@ -19,6 +19,12 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 
 ## Step 0: Setup
 
+0. **Token preflight** (workaround for OAuth race when running parallel subagents — see [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001):
+   ```bash
+   bash <forge>/scripts/agent-preflight.sh $$
+   ```
+   Required before the parallel poke + press fan-out below — without it, multiple subagents racing on token refresh can crash mid-pass.
+
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line
 2. **Determine project path**: from `$ARGUMENTS` or current working directory
 3. **Determine pass count**: from `$ARGUMENTS` or default to 3

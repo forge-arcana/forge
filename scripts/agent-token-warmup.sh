@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# smith-token-warmup.sh — Proactive OAuth token refresh for /smith
+# agent-token-warmup.sh — Proactive OAuth token refresh for any subagent-spawning skill
 # Workaround for Claude Code refresh-token race (see WORKAROUNDS.md WA-001)
 #
 # Behavior:
 #   1. Read ~/.claude/.credentials.json
 #   2. If token expires in >30 min → no-op (token healthy)
 #   3. Else → backup + trigger refresh via `claude -p` no-op call
-#   4. Always exit 0 (never fail smith on refresh issues)
+#   4. Always exit 0 (never fail caller on refresh issues)
 #
-# Logs to ~/.claude/.smith-token.log
+# Logs to ~/.claude/.smith-token.log (filename retained for log continuity)
 
 set -uo pipefail
 

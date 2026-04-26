@@ -37,6 +37,10 @@ For monorepos, detect package dependency order and run CI bottom-up: shared → 
 
 Before running the pipeline:
 
+0. **Token preflight** (workaround for OAuth race — cicd may escalate failures to /pry which spawns subagents. See [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001):
+   ```bash
+   bash <forge>/scripts/agent-preflight.sh $$
+   ```
 1. **Kill zombies**: Run `dev/kill-zombies.sh` if it exists (or kill processes on known ports)
 2. **Check DB**: If project has a database package, verify DB is reachable
 3. **Fresh state**: If schema changed since last build, rebuild/push schema first

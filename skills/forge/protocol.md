@@ -23,6 +23,12 @@ The learnings filename tells the protocol which file to read during pre-flight a
 
 ## Pre-Flight (every art runs these before starting)
 
+0. **Token preflight** (workaround for upstream Claude Code OAuth race — see [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001):
+   ```bash
+   bash <forge>/scripts/agent-preflight.sh $$
+   ```
+   Idempotent. Refreshes the OAuth token if <30 min remaining and spawns a background keeper for this session if one isn't already running. Required before any subagent fan-out — otherwise multi-agent skills race on token refresh and crash with `invalid_grant`. The keeper auto-exits when the calling skill's process dies; no teardown needed.
+
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line (managed by `/forge`)
 2. **Launch steps 2-6 in parallel** (all independent after forge path is resolved):
    - **Read accumulated learnings**: `<forge>/learnings/<learnings-file>` — skip if file doesn't exist yet (first run)
@@ -102,15 +108,27 @@ This ensures the same topic maps to one cache key regardless of when the search 
 3. **Present results** to the user
 4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/forge` to absorb learnings
 
-## The Smith — Master of the Forge
+## The Masters
 
-Above the arts stands `/smith` — the master builder, the user's proxy. Smith is not an art. It is the one who wields them all.
+Above the arts stand two masters — distinct domains, complementary roles. The Smith builds the work; the Warden tends the forge that does the building.
+
+### The Smith — Master Builder
+
+`/smith` is the user's proxy. Smith is not an art. It is the one who wields them all.
 
 Smith consumes a probed blueprint (from `/prime` + `/probe`) and autonomously forges the product through iterative **heats** — cycles of plan, build, evaluate, fix. It summons **apprentices** (subagents) for parallel work, selects arts by escalation ladder, and converges on perfection through a relentless final gate. The arts sharpen themselves through smith's repeated use. The more the smith works, the sharper everything gets.
 
 Smith has its own learning membrane (three layers: orchestration, delegation, art proficiency) and invokes `/wrap` at milestones autonomously. See `skills/smith/SKILL.md` for the full architecture.
 
-The forge cycle itself (`/forge`) is not an art but a task skill — it has no persona and no learning loop. It is the gate through which arts and all other knowledge flow between forge and membrane.
+### The Warden — Master Tender
+
+`/purge` is the Warden — guardian of the forge itself. While the Smith forges products from blueprints, the Warden ensures the forge that does the forging stays sharp and pure. Stale knowledge dulls the blade. Drift contaminates the steel. Duplicates weigh down the anvil. The Warden cleanses, consolidates, and prunes across four dimensions in parallel — Knowledge Purity, Memory Hygiene, Skill Fitness, Reference Integrity — then consolidates findings for user approval before applying.
+
+The Warden lives only at `.claude/skills/purge/` (never deployed to user membranes — the Warden writes to forge directly, so confining the skill to the forge repo by construction prevents projects from writing to forge by proxy).
+
+### The forge cycle itself
+
+`/forge` is not an art and not a master — it's a task skill with no persona and no learning loop. It is the gate through which arts and all other knowledge flow between forge and membrane. The Masters use the cycle; the cycle does not act on its own behalf.
 
 ## The Ten Arts
 

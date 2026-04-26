@@ -4,9 +4,16 @@ A shared tooling repo for AI-guided skills, conventions, and accumulated team wi
 
 ---
 
-## The Smith — Heart of the Forge
+## The Masters — Hearts of the Forge
 
-At the center of the forge stands the smith. Not an art — the master who wields them all.
+At the center of the forge stand two masters. Distinct domains, complementary roles. The Smith builds the work. The Warden tends the forge that does the building.
+
+| Title | Command | Role |
+|-------|---------|------|
+| **The Smith** | `/smith` | Master builder — wields every art, summons apprentices, forges the product through iterative heats |
+| **The Warden** | `/purge` | Master tender — guards the forge itself against drift, staleness, contamination, and bloat |
+
+### The Smith — Master Builder
 
 `/smith` is the user's proxy. Give it a probed blueprint (from `/prime` + `/probe`) and it autonomously builds the product through iterative **heats** — cycles of plan, build, evaluate, fix. Each heat sharpens the blade. The smith never stops until zero critical and zero important findings remain.
 
@@ -26,6 +33,14 @@ Three layers of wisdom accumulate independently:
 3. **Apprentice proficiency** — how to delegate (parallelization patterns, scope sizing)
 
 The more the smith works, the sharper everything gets. Never-ending mastery of its craft.
+
+### The Warden — Master Tender
+
+`/purge` is the Warden — guardian of the forge itself. While the Smith forges products from blueprints, the Warden ensures the forge that does the forging stays sharp and pure. Stale knowledge dulls the blade. Drift contaminates the steel. Duplicates weigh down the anvil. Project names that leak in betray the forge's universality. The Warden burns it all away until only what matters remains.
+
+Four dimensions, analyzed in parallel by independent subagents — Knowledge Purity (learnings), Memory Hygiene (memory), Skill Fitness (skill bloat and consistency), Reference Integrity (stack guide, rules, CLAUDE.md). The master consolidates findings, the user confirms, the Warden applies.
+
+The Warden is summoned, never scheduled. Lives only at `.claude/skills/purge/` (never deployed to user membranes — the Warden writes to forge directly, so containment by location prevents projects from writing to forge by proxy).
 
 ---
 
@@ -82,13 +97,7 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 |-----|-------------|
 | `/pry` | The Lever — relentless solution-finder that cracks "can't be done" claims (self-improving) |
 
-*`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift.*
-
-## The Master
-
-| Skill | What it does |
-|-------|-------------|
-| `/smith` | The user's proxy — consumes a probed blueprint and autonomously builds the product through iterative heats, wielding every art, summoning apprentices for parallel work, converging on perfection |
+> The Masters (`/smith` and `/purge`) are documented at the top of this README — they're not arts, they're the ones who wield (Smith) and tend (Warden) the forge itself.
 
 ## Task Skills
 
@@ -172,7 +181,7 @@ forge/
 ├── memory/                # Team identity & shared conventions
 ├── .claude/skills/
 │   ├── forge/             # Bootstrap (so /forge is discoverable on fresh clone)
-│   └── purge/             # Forge-internal hygiene art (maintainers only)
+│   └── purge/             # The Warden — master tender (forge-internal, never deployed)
 └── CLAUDE.md
 ```
 

@@ -71,6 +71,11 @@ Below is the flow for `/forge`, `/forge <path>`, `/forge --dry`, `/forge --dry <
 
 ## Phase 0: Preflight
 
+0. **Token preflight** (workaround for OAuth race — `/forge` spawns subagents in 3f. See [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001):
+   ```bash
+   bash <forge>/scripts/agent-preflight.sh $$
+   ```
+
 > Execute [Forge Preflight](preflight.md) in **pull** mode (or **fetch** mode if `--dry`).
 
 Run `<forge>/scripts/forge-status.sh --pull` (or `--fetch` for `--dry`).
