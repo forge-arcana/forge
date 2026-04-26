@@ -29,6 +29,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WARMUP="$SCRIPT_DIR/agent-token-warmup.sh"
 CREDS="$HOME/.claude/.credentials.json"
 LOG="$HOME/.claude/.smith-token.log"
+STALE_SENTINEL="$HOME/.claude/.token-stale"
 
 # --- Mode dispatch ---
 MODE=""
@@ -107,6 +108,20 @@ if [[ ! -x "$WARMUP" ]]; then
   exit 1
 fi
 
+# Verify jq is available — without it, expiresAt cannot be parsed and the loop
+# silently degrades to a no-op every 5 min until the token expires.
+if ! command -v jq >/dev/null 2>&1; then
+  log "FATAL: jq not installed — cannot parse expiresAt; refresh would be a silent no-op"
+  cat > "$STALE_SENTINEL" <<EOF
+jq is not installed. The OAuth refresh scheduler cannot read expiresAt without it,
+so token refresh has been a silent no-op. Install with:
+  sudo apt-get install -y jq
+Then re-login (run \`claude\` and use /login) and restart your Claude session.
+EOF
+  echo "FATAL: jq missing — token scheduler cannot run. See $STALE_SENTINEL" >&2
+  exit 1
+fi
+
 # --- Helpers ---
 read_expires_s() {
   if [[ ! -f "$CREDS" ]]; then
@@ -132,16 +147,37 @@ interruptible_sleep() {
 }
 
 # --- Main loop ---
-THRESHOLD_SECONDS=1800  # refresh 30 min before expiry
-MIN_SLEEP=60            # never sleep less than this (avoid hot loop on weird state)
+THRESHOLD_SECONDS=1800              # refresh 30 min before expiry
+MIN_SLEEP=60                        # never sleep less than this (avoid hot loop on weird state)
+EXPIRES_READ_FAILS=0                # consecutive read_expires_s failures
+EXPIRES_READ_FAIL_THRESHOLD=3       # after this many, write the stale sentinel
 
 while true; do
   # Re-read expiresAt on every wake — defends against WSL2 clock skew
   EXPIRES_S=$(read_expires_s)
   if [[ -z "$EXPIRES_S" ]]; then
-    log "WARN: could not read expiresAt — retrying in 5 min"
+    EXPIRES_READ_FAILS=$((EXPIRES_READ_FAILS + 1))
+    log "WARN: could not read expiresAt — retrying in 5 min (consecutive failures: $EXPIRES_READ_FAILS)"
+    if [[ $EXPIRES_READ_FAILS -ge $EXPIRES_READ_FAIL_THRESHOLD ]] && [[ ! -f "$STALE_SENTINEL" ]]; then
+      cat > "$STALE_SENTINEL" <<EOF
+Scheduler cannot read .claudeAiOauth.expiresAt from $CREDS after $EXPIRES_READ_FAILS attempts.
+Token refresh has been a silent no-op since $(date -u +"%Y-%m-%dT%H:%M:%SZ").
+Likely causes:
+  - Credentials file missing or unreadable
+  - .claudeAiOauth.expiresAt field absent or malformed
+  - jq broken (test: jq -r '.claudeAiOauth.expiresAt' $CREDS)
+After fixing, re-login (run \`claude\` and use /login) and restart your Claude session.
+EOF
+      log "ERROR: wrote stale sentinel — refresh has been silently failing for $EXPIRES_READ_FAILS cycles"
+    fi
     interruptible_sleep 300
     continue
+  fi
+  # Successful read — clear the failure counter and any sentinel we wrote.
+  if [[ $EXPIRES_READ_FAILS -gt 0 ]]; then
+    log "expiresAt readable again after $EXPIRES_READ_FAILS failures — clearing sentinel"
+    rm -f "$STALE_SENTINEL"
+    EXPIRES_READ_FAILS=0
   fi
 
   NOW_S=$(date +%s)
