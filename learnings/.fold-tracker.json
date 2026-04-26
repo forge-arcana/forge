@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-04-16T00:00:00Z",
+  "lastRun": "2026-04-26T23:20:17Z",
   "processedEntries": [
     "WSL Path Compatibility",
     "Disable Rate Limiting in E2E Test Mode",
@@ -82,7 +82,9 @@
     "Flaresolverr Is Deprecating in 2026 — Do Not Start New Integrations",
     "\"Extractor Works\" Does Not Mean \"Authority Produces Documents\" — Add Silent-Failure Alerts",
     "Patchright Cannot Solve Cloudflare's Current JS Challenge Tier",
-    "The Lever's Three Hats Must All Be Worn Before Conceding a Wall"
+    "The Lever's Three Hats Must All Be Worn Before Conceding a Wall",
+    "DNS, Email, and App Hosting Are Fully Decoupled — Don't Bundle Them",
+    "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
