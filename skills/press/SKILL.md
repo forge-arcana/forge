@@ -75,7 +75,7 @@ For each dimension, scan the codebase AND search the web for current best practi
 - Database migration strategy (up and down migrations)
 - Zero-downtime deployment capability
 - SSL/TLS configuration
-- Non-production bot protection: staging/preview must block crawlers. Internal staging: `--no-allow-unauthenticated` on Cloud Run + `robots.txt Disallow: /` + `X-Robots-Tag: noindex`. Customer-facing staging: app-level headers only (`robots.txt` + `X-Robots-Tag`), keep `--allow-unauthenticated`. Verify bot protection is wired into the deploy pipeline, not applied manually.
+- Non-production bot protection wired into deploy pipeline (not applied manually) — see Dimension 1 for the internal-vs-customer-facing split.
 
 ### 7. Documentation
 - API documentation (OpenAPI/Swagger or equivalent)

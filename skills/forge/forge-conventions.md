@@ -21,6 +21,7 @@
 - [ ] `memory/` directory exists (for learnings, context overflow)
 - [ ] `logs/` directory exists (if project has running services — for dev.log, browser console forwarding)
 - [ ] `docs/` directory exists (if project has documentation)
+- [ ] `[PROJECT]_Touchstone_V*.html` at project root (if `/wedge` has run — visual constitution Smith conforms to)
 
 ### 4. Workflow Rules
 - [ ] Plan mode for non-trivial tasks (3+ steps or architectural decisions)

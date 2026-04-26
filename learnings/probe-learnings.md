@@ -25,7 +25,7 @@
 **Apply when**: Starting any Supabase project with more than 15 tables or complex reporting requirements.
 
 ## LibreOffice in Docker Needs a Persistent Daemon (2026-03-28)
-**Learning**: LibreOffice headless Docker images are 400MB-1.2GB. Each conversion spawns a fresh `soffice` process (1-3 second cold start, 200-500MB memory spike). For production: use Gotenberg (Go microservice wrapping LibreOffice with queuing) or unoserver (keeps LibreOffice as a persistent daemon). Never convert documents synchronously in an API request — always queue conversions. Budget $7-10/month for a dedicated conversion container, not $5 free tier.
+**Learning**: LibreOffice headless Docker images are 400MB-1.2GB. Each conversion spawns a fresh `soffice` process (1-3 second cold start, 200-500MB memory spike). For production: use Gotenberg (Go microservice wrapping LibreOffice with queuing) or unoserver (keeps LibreOffice as a persistent daemon). Never convert documents synchronously in an API request — always queue conversions. Budget for a small dedicated conversion container — free-tier compute is insufficient for the memory profile.
 **Apply when**: Adding document conversion to any project. Never put LibreOffice on a free-tier container.
 
 ## Free Tier Limits Change Without Notice (2026-03-29)

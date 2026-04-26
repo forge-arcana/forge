@@ -72,44 +72,8 @@ Five visionaries, one tenet each. Apply these throughout every conversation:
 > 5. **Survives compaction** — the Opus file is the durable memory. Even if context is lost, the distillation can resume from the file.
 
 ### Opus manuscript structure
-```
-# [PROJECT] — Opus
 
-*The Opus — the grand work, given form. The living exchange between [user] and Prime.*
-
-Started: [YYYY-MM-DD]
-
----
-
-## Phase 1 — The Spark
-
-### [Thread: what is this thing?]
-**Prime**: [question verbatim]
-**[User]**: [response verbatim]
-**Prime (reflection)**: [read-back or follow-up]
-
-### [Thread: why does it matter?]
-...
-
----
-
-## Phase 2 — The Shape
-
-### [Direction check / external-vs-personal]
-...
-
-### [Viability thread]
-- Who specifically needs this?
-- Why would they pay / adopt / care enough to switch?
-- What kills this?
-- What must be true for this to work?
-- What does the first real user look like?
-
----
-
-## Crystallization
-[The idea, stated plainly, in the user's own words wherever possible. This becomes the seed of the Vow.]
-```
+The starter skeleton lives at `<forge>/skills/prime/opus-scaffold.md`. Copy it as the new project's `[PROJECT]_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md` if no project name yet) and append every turn (user response verbatim + Prime's reflection) into the appropriate Phase section. The file's outline: header + Phase 1 (Spark) + Phase 2 (Shape) + Crystallization.
 
 ## Arguments
 `$ARGUMENTS` — project name or raw idea description (e.g., `/prime MyApp`, `/prime "a tool that..."`)). If not provided, open with an invitation to talk about what they're building.

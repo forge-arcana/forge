@@ -27,13 +27,16 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ## Skills
 
-### Structure (2026-03-27)
-- **The Master**: `/smith` — the user's proxy, wields all arts autonomously through iterative heats. Summons apprentices for parallel work. Converges on perfection via temper+pound convergence loop. Has its own three-layer learning membrane (orchestration, delegation, art proficiency).
-- Arts (9): prime, probe, poke, preen, press, pound, pitch, pry + purge (forge-internal) — specialist agent skills with self-improving loops. Purge is the cleanser (forge-internal, `.claude/skills/purge/`).
-- Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design) and pitch (business model) run orthogonal — triggered by domain, not intensity. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship
+### Structure (2026-03-27, updated 2026-04-27)
+- **The Masters** (three — distinct domains, complementary roles):
+  - `/smith` — Master Builder. Wields all arts autonomously, summons apprentices, converges via temper+pound loop. Three-layer learning membrane (orchestration, delegation, art proficiency). Pre-flight reads Pattern + Touchstone.
+  - `/wedge` — Master of Aesthetic. Reads Opus + Vow, runs a council of three design-apprentices, crystallizes the chosen direction into the Touchstone (single HTML masterpiece). Drives ONE direction; no hedging.
+  - `/purge` — The Warden, Master Tender. Forge-internal four-dimension cleanse (Knowledge Purity, Memory Hygiene, Skill Fitness, Reference Integrity). Lives only at `.claude/skills/purge/`.
+- Arts (9 deployed): prime, probe, poke, preen, press, pound, pitch, pry, praise — specialist agent skills with self-improving loops. (Note: protocol.md previously listed /purge under arts; canonical position is now Master not Art.)
+- Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design), pitch (business model), and praise (feedback routing) run orthogonal — triggered by domain, not intensity. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, praise after every feedback cycle.
 - Task skills (12): forge, wawa, wrap, qt, srs, cicd, vsix, ponci, monci, dig, temper, eli5
 - `skills/forge/` holds both the `/forge` cycle SKILL.md AND reference docs (stack-guide, rules, conventions, protocol)
-- `/forge` absorbs the retired `/cast`, `/mark`, `/fold` trio — their verbs survive as internal cycle phases (inspect / apply-incoming / absorb-outgoing)
+- `/forge` absorbs the retired `/cast`, `/mark`, `/fold` trio — their verbs survive as the named internal phases of the cycle: **mark** (inspect drift, build PLAN table) → **cast** (pour forge → membrane) → **fold** (layer membrane → forge).
 - Skills are self-contained packages — reference docs live inside the owning skill directory
 - `skills/` is the git-tracked shared reference; `~/.claude/skills/` is the deployment target
 

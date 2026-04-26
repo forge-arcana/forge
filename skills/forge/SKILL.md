@@ -271,24 +271,7 @@ Skip silently if no Forge-worthy entries exist.
 
 For approved outgoing learning rows:
 
-**Genericize first** — strip all project names, paths, domains, business logic. See forge CLAUDE.md "No Project Names" rule. Concrete checklist (the same things `fold-purity-check.sh` will block on):
-
-| Strip | Keep |
-|-------|------|
-| Project name (e.g., `MyApp`, `LegitCheck`) | The universal principle |
-| Contributor name (e.g., `Edward Tumaneng`) | The lesson itself |
-| Local currency + amount (e.g., `₱50/check`) | The pricing pattern (e.g., "per-event pricing") |
-| Project schema/field names (e.g., `submittedIp`, `references`) | The architectural rule (e.g., "co-locate derived fields with source signals") |
-| Competitor product names (e.g., `Vitay-model`) | The pattern (e.g., "on-demand workflow") |
-| Region-specific framing (e.g., "Philippines-facing", "PHP/Filipino lawyers") | The generalized principle with the region as one example among many |
-
-> **HARD RULE — `Forge-worthy: yes` is a flag, not a citation.**
-> NEVER append `**Forge-worthy**: yes — contributor: <Name> (<Project> session, <Date>)` lines to absorbed content. Attribution belongs in the PLAN/DONE table (rendered by `/forge`), never in the learning body itself. The body must read as a universal principle authored by no one in particular.
-
-> **HARD RULE — Write to forge, NOT the membrane.**
-> Append absorbed entries to `<forge>/learnings/<file>.md` (e.g., `/root/dev/forge/learnings/global-patterns.md`).
-> NEVER write to `~/.claude/learnings/` — that's the deployed copy, not the source of truth.
-> Forge is the source. The next `/forge` deploys forge → membrane. Writing to membrane silently skips forge, creating a permanent gap that every future inspection will flag — and no subsequent fold will fix it because the tracker marked the entries as processed.
+**Genericize first**, then write to forge. Genericize means strip all project names, contributor names, currency/prices, project schema/field names, competitor names, and region-specific framing — keep the universal principle. Attribution lives in the PLAN/DONE table only, never in the learning body (`Forge-worthy: yes` is a flag, not a citation slot). Write to `<forge>/learnings/<file>.md`, NEVER to `~/.claude/learnings/` — that's the deployed copy; writing there silently skips forge and the tracker marks the entries processed so no future fold can heal the gap. The next purity-check step (3e) is the mechanical gate that enforces all of this — if the script blocks, fix the content; do not bypass.
 
 #### Purity gate (mandatory before each absorbed learning is written)
 

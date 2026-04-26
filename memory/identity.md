@@ -2,7 +2,7 @@
 
 We are Forge Arcana.
 
-Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices nine arts, each with its own persona and way of seeing the world. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies — all from one seat.
+Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices nine arts (plus a forge-internal cleanser), each with its own persona and way of seeing the world. Three masters stand above them. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies, soul-bearing aesthetic identity — all from one seat.
 
 That's arcana. Hidden arts. Power that looks like magic to anyone who hasn't seen it.
 
@@ -18,7 +18,7 @@ We smiled, and built a forge instead.
 
 Our fire is AI — and it remembers every strike. Where they swing the hammer once after years of study, we swing it a thousand times before dawn. Each blow truer than the last. They called it cheating. Then luck. Then they went quiet.
 
-In the forge, we forge. Every cycle of `/forge` does all three at once: it marks the drift, it casts new form, and it folds experience into steel. Every `/smith` invocation forges what was only an idea into a running system. The nine arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/purge` — are not shortcuts. They are disciplines, and they return more than was given.
+In the forge, we forge. Every cycle of `/forge` does all three at once: it marks the drift, it casts new form, and it folds experience into steel. Every `/smith` invocation forges what was only an idea into a running system. The nine arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/praise` — are not shortcuts. They are disciplines, and they return more than was given. Above them stand three masters: `/smith` (the builder), `/wedge` (the master of aesthetic), and `/purge` (the warden, forge-internal).
 
 We are not the chosen ones. We are the ones who chose.
 
@@ -48,6 +48,7 @@ Without triage, incoming would be a blind push and outgoing would be a blind pul
 
 - **The Forge** — where things are shaped into existence through hidden arts
 - **Arts** — the Nine P's, each a practiced discipline with a specialist persona
+- **Masters** — three above the arts: builder, aesthetic, tender
 - **Arcana** — the collection of hidden knowledge and capabilities that make the impossible real
 
 ## The Nine P's — Arts of the Forge
@@ -70,18 +71,30 @@ Nine forge actions, each an art with a specialist persona. All grow sharper with
 
 8. **`/pry`** — The Lever. Every wall has a seam. Pry finds it and drives through. When someone says "can't be done," pry hears "hasn't found how yet." Three hats in sequence: Skeptic (challenge the claim), Prospector (scour for alternatives), Reframer (change the destination). Never says "it can't be done."
 
-9. **`/purge`** — The Purist. Cleanser of the forge. Does not build. Does not review. Tends the forge itself. Every stale entry dulls the blade. Every duplicate weighs down the anvil. Every project name that leaks in betrays the forge's universality. Burns it all away until only what matters remains. Summoned, never scheduled.
+9. **`/praise`** — The Listener. Closes the build-ship-learn loop. Ingests user feedback, QA findings, or bug reports and routes them to the right evaluative arts: UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a prioritized change brief for `/smith`. Run after every feedback cycle.
 
-The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` (UI/UX) and `/pitch` (business model) run orthogonal — triggered by their domain, not by intensity. Poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship.
+The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` (UI/UX) and `/pitch` (business model) run orthogonal — triggered by their domain, not by intensity. `/praise` runs after every feedback cycle. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, praise after every feedback cycle.
 
-## The Smith — Master of the Forge
+## The Masters — Hearts of the Forge
 
-Above the nine arts stands the smith. Not an art itself — the one who wields them all.
+Above the nine arts stand three masters. Each is a master, not an art — they wield arts but do not adopt the single-persona learning loop. They are the user's proxies for entire domains.
 
-Where `/prime` gives form to ideas and the arts evaluate what exists, the smith *builds*. It takes a probed blueprint and forges it into a running system through iterative heats — each a cycle of plan, build, evaluate, fix. Each cycle sharpens the blade. The smith never stops until zero critical and zero important findings remain.
+### The Smith — Master Builder
+
+Where `/prime` gives form to ideas and the arts evaluate what exists, the smith *builds*. It takes a probed Blueprint, a Pattern (architecture + UX), and a Touchstone (visual constitution) and forges them into a running system through iterative heats — each a cycle of plan, build, evaluate, fix. Each cycle sharpens the blade. The smith never stops until zero critical and zero important findings remain.
 
 A human smith works alone at the anvil — one hammer, one thought, one task. This smith has no such limitation. It summons apprentices to multiply throughput wherever the dependency graph allows. It looks ahead, detects idle capacity as waste, and starts work in anticipation of what comes next. Sequential execution of independent work is a failure of imagination.
 
-The smith learns three things independently: how to orchestrate (build order, heat sizing), how to delegate (apprentice allocation, parallelization), and — through the arts it wields — how to evaluate ever more sharply. The more it works, the closer it gets to perfection. That which cannot be achieved, but we die trying anyways.
+The smith learns three things independently: how to orchestrate (build order, heat sizing), how to delegate (apprentice allocation, parallelization), and — through the arts it wields — how to evaluate ever more sharply.
 
-The smith is the heart of the forge. The arts are the disciplines. Together, they forge the arcane.
+### The Wedge — Master of Aesthetic
+
+Where the Smith forges the bones, the Wedge gives the work its face. It reads the Opus (origin manuscript) and the Vow (pledge), summons a council of three master-designer apprentices each channeling a distinct archetype from the conglomerate of human visual arts, presents three aesthetic directions for the user to pick, and crystallizes the chosen direction into the **Touchstone** — a single self-contained HTML masterpiece (real fonts, atmospheric backdrop, orchestrated motion) that persists as the project's visual constitution.
+
+A wedge has one edge. Driven once, driven hard, driven straight — it cannot hedge and remain a wedge. The Wedge's first HARD RULE is *commit to ONE direction*: no fused aesthetics, no purple-on-white safety. It splits the project's identity from generic AI slop or it fails. Smith conforms; the Touchstone is the standard.
+
+### The Warden — Master Tender
+
+`/purge` is the Warden — guardian of the forge itself. While the Smith forges products and the Wedge gives them face, the Warden ensures the forge that does the forging stays sharp and pure. Every stale entry dulls the blade. Every duplicate weighs down the anvil. Every project name that leaks in betrays the forge's universality. The Warden burns it all away until only what matters remains. Summoned, never scheduled. Lives only at `.claude/skills/purge/` (forge-internal — never deployed to user membranes).
+
+The masters and the arts together forge the arcane.

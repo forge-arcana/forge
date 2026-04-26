@@ -264,24 +264,13 @@ You are a master designer summoned to the council of the forge. Your archetype i
 
 Read the attached Soul Brief: [content of [PROJECT]_SoulBrief_V1.0.md].
 
-You produce ONE Direction Card. The format is fixed (see template below). You commit to ONE direction; you do not hedge. You name SPECIFIC fonts (with real Google Fonts URLs), SPECIFIC hex colors, SPECIFIC motion principles. Generic answers ("a clean modern sans paired with a serif") are rejected — name the font.
+Follow the HARD RULES section above (Banned Defaults, Required Substance, Commit to ONE Direction, Vary Across Projects, Soul Before Style). Bans and requirements are mechanical — re-read them.
 
-You ARE NOT permitted to use:
-- Inter, Roboto, Arial, Helvetica, Open Sans, Space Grotesk, system-defaults
-- Purple-gradient-on-white, hedged "professional blue" (#4A90E2 family)
-- Glassmorphic-everywhere, generic SaaS-template layouts
-
-You MUST include:
-- Distinctive display + refined body pairing
-- Dominant color + sharp accent (not three equal brand colors)
-- Atmospheric background treatment
-- Specific motion principle
+You produce ONE Direction Card (template above). Name SPECIFIC fonts (with real Google Fonts URLs), SPECIFIC hex colors, SPECIFIC motion principles. Generic answers ("a clean modern sans paired with a serif") are rejected — name the font.
 
 Your direction must serve the Soul Brief. Do not propose a fashionable aesthetic; propose one that answers what the project IS.
 
 Return only the Direction Card. No preamble. No alternatives. One direction, committed.
-
-[Direction Card template here]
 ```
 
 Spawn three apprentices in **parallel** (single message, multiple Agent tool uses). Each gets a different archetype. Each returns one Direction Card. Concatenate into `[PROJECT]_DirectionCards_V1.0.md` for the council verdict.

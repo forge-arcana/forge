@@ -154,16 +154,16 @@ done
 echo ""
 
 # ============================================================
-# Dimension 3: Art Fitness
+# Dimension 3: Skill Fitness
 # ============================================================
-echo "# Dimension 3: Art Fitness"
+echo "# Dimension 3: Skill Fitness"
 echo ""
 
 echo "### Art SKILL.md sizes"
 echo ""
 echo "| Art | Lines | Chars | Has Protocol Ref? |"
 echo "|-----|-------|-------|-------------------|"
-for art in prime probe poke preen press pound pry purge; do
+for art in prime probe poke preen press pound pitch pry praise; do
   skill_file="$FORGE_PATH/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     lines=$(wc -l < "$skill_file")
@@ -176,6 +176,16 @@ for art in prime probe poke preen press pound pry purge; do
     echo "| $art | -- | -- | SKILL.md MISSING |"
   fi
 done
+# /purge lives at .claude/skills/purge/ (forge-internal)
+purge_file="$FORGE_PATH/.claude/skills/purge/SKILL.md"
+if [[ -f "$purge_file" ]]; then
+  lines=$(wc -l < "$purge_file")
+  chars=$(wc -c < "$purge_file")
+  has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$purge_file" 2>/dev/null || echo "0")
+  proto_status="YES"
+  [[ "$has_protocol" -eq 0 ]] && proto_status="**MISSING**"
+  echo "| purge (forge-internal) | $lines | $chars | $proto_status |"
+fi
 echo ""
 
 echo "### Section-level bloat analysis (all skills)"
@@ -228,7 +238,7 @@ echo "### Consistency: frontmatter fields"
 echo ""
 echo "| Art | name | description | user-invocable |"
 echo "|-----|------|-------------|----------------|"
-for art in prime probe poke preen press pound pry purge; do
+for art in prime probe poke preen press pound pitch pry praise; do
   skill_file="$FORGE_PATH/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     has_name=$(grep -c '^name:' "$skill_file" 2>/dev/null || echo "0")
@@ -270,10 +280,12 @@ echo ""
 # Skill count verification
 echo "### Skill count verification"
 TOTAL_SKILLS=$(find "$FORGE_PATH/skills" -maxdepth 2 -name "SKILL.md" | wc -l)
-ARTS=$(echo "prime probe poke preen press pound pitch pry" | wc -w)
-MASTER=1
-TASK_SKILLS=$((TOTAL_SKILLS - ARTS - MASTER))
-echo "**Total skills**: $TOTAL_SKILLS ($ARTS arts + $MASTER master + $TASK_SKILLS task skills)"
+ARTS=$(echo "prime probe poke preen press pound pitch pry praise" | wc -w)
+MASTERS=2
+FORGE_CYCLE=1
+TASK_SKILLS=$((TOTAL_SKILLS - ARTS - MASTERS - FORGE_CYCLE))
+echo "**Total skills in skills/**: $TOTAL_SKILLS ($ARTS arts + $MASTERS masters + $FORGE_CYCLE forge-cycle + $TASK_SKILLS task skills)"
+echo "Note: /purge (The Warden) is forge-internal — lives at .claude/skills/purge/, not counted above."
 echo ""
 
 # Check if CLAUDE.md counts match

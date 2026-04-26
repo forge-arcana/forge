@@ -25,21 +25,9 @@
 **Learning**: When adding a new service to the production DI container, always update test helper factories (e.g., `createTestApp`) to create and inject the same service. CI tests use the test factory, not the production startup — so a missing service causes `undefined` errors that only surface in CI, not local dev.
 **Apply when**: Adding new services to a DI container in a project with separate test factory setup.
 
-## Barrel Imports Break Vite in Monorepos (2026-03-19)
-**Learning**: A shared package barrel (`index.ts`) that re-exports server-only code (pino, fs, path, crypto) causes Vite to pull Node.js modules into browser builds, failing with `"X" is not exported by "__vite-browser-external:path"`. Frontend files must use deep imports (`@pkg/utils/money.js`, `@pkg/constants/enums.js`) instead of the barrel. Enable with `"./*": "./src/*"` in package.json exports.
-**Apply when**: Any monorepo where a shared package has both server-only AND browser-safe exports.
-
 ## Shared Package @/ Alias Breaks in Consumers (2026-03-19)
 **Learning**: When app A's tsc processes files from a shared package via path mapping, the `@/` alias resolves using app A's tsconfig (not the shared package's). Fix: use relative imports in shared packages, never `@/` aliases.
 **Apply when**: Creating shared packages in pnpm/npm workspaces with TypeScript path aliases.
-
-## Integer Money Pattern (2026-03-19)
-**Learning**: Store all currency as smallest-unit integers (cents/centavos) in the database. $19.95 → `1995`. Convert at boundaries: user input → `toSmallest()` before DB writes, `fromSmallest()` at payment provider boundary, `format()` for display. Eliminates floating-point drift. Industry standard (Stripe, Xendit, PayMongo, Square). ORM `numeric`/`decimal` types map to strings in most ORMs (Drizzle, Prisma), causing scattered cast bugs.
-**Apply when**: Any project handling currency. Decide this on day one — retrofitting is painful.
-
-## Error Handler Environment Check (2026-03-19)
-**Learning**: `=== "production"` should be `!== "development"` for error handler stack trace visibility. Staging, preview, and unknown environments should hide stack traces too. Fail-safe toward production behavior.
-**Apply when**: Writing error handlers that conditionally expose stack traces or debug info.
 
 ## Cross-SPA Navigation Must Use window.location.href (2026-03-19)
 **Learning**: In multi-SPA architectures (separate Vite builds per role), cross-role redirects (login, role-switch, route guards) must use `window.location.href`. Framework router `navigate()` only works within a single SPA boundary — it can't cross to a different Vite build.
@@ -65,9 +53,9 @@
 **Learning**: Prefix AVDs with project name (`<project>-<role>`) to avoid collisions across projects sharing an Android SDK. Nuke commands must clean orphaned `.avd` data dirs under `ANDROID_AVD_HOME` — left behind when emulators run during `avdmanager delete`. Each project owns its own emulator config; no shared state.
 **Apply when**: Setting up Android emulator workflows for Capacitor/hybrid projects in multi-project environments.
 
-## Voice TTS Is the Dominant Cost at Scale (2026-03-21)
-**Learning**: For voice-first apps, TTS API cost is the single biggest scaling concern. At low user counts, TTS can be ~50% of total infrastructure cost. Making voice playback opt-in is both a good UX decision (avoids uncanny valley) and a critical cost lever. Always model voice costs separately and identify which tier boundary triggers the cost jump.
-**Apply when**: Any voice-first product — model TTS costs as the primary scaling constraint.
+## TTS Economics: Cache, Stream, Treat as Primary Cost Driver (2026-03-29)
+**Learning**: For voice-first apps, TTS API spend is typically the single biggest scaling cost — model it separately and identify the tier boundary where it dominates (often ~50% of total infra). Two practices keep it under control: (1) **persist audio on first generate** — store the rendered audio (base64 in a column or jsonb map keyed by content) and serve from storage on every replay; never regenerate the same text twice; (2) **stream when latency matters** — full TTS adds 3–5s for long messages. WebSocket streaming sends PCM chunks as they're generated; first audio plays in ~200–500ms via client-side AudioContext scheduling. Persistence kills cost; streaming kills wait. Voice playback opt-in is also a UX win (avoids uncanny valley).
+**Apply when**: Any project with TTS — make these three decisions on day one (cost model, persistence layer, streaming vs blocking).
 
 ## Three-Layer Architecture as Cost Control (2026-03-21)
 **Learning**: For AI-powered apps with high-frequency input, separating processing into layers with different cost profiles (free capture → cheap classification → expensive generation only on-demand) makes the product viable for solo founders. Most user interactions touch only the cheap layers. The expensive layer fires only when the user explicitly asks. This is an architecture decision that IS a business decision.
@@ -127,21 +115,13 @@
 **Learning**: When a system absorbs entries from a source it doesn't own (and can't delete from), maintain a tracker file with content hashes or titles of already-processed entries. This makes absorption idempotent — each run only evaluates new entries, not the full history. Without a tracker, every run re-triages everything, leading to duplicate work and potential inconsistencies.
 **Apply when**: Building any pipeline that reads from append-only sources (log files, learning files, changelog) and needs to process each entry exactly once.
 
-## Self-Contained Skill Packages (2026-03-26)
-**Learning**: When skills reference documentation or frameworks, those files must live inside the skill's directory — not in a separate shared location. Static reference docs at repo root become stale orphans because the skill self-iterates but the orphaned doc doesn't. Co-locating ensures everything evolves together.
-**Apply when**: Structuring skill or plugin directories in any system where skills/plugins reference supplementary docs or frameworks.
+## Skills Own Their Dependencies and Their Discovery (2026-03-26)
+**Learning**: A skill package must be self-contained in two senses. (1) **Dependencies**: any framework or reference doc the skill cites must live inside the skill's directory, not at repo root. Static reference docs in shared locations become stale orphans because the skill self-iterates but the orphan doesn't — co-location ensures everything evolves together. (2) **Discovery**: when a skill needs to be discoverable on fresh clone before global deployment, use a thin bootstrap file in the project's local skill directory (~3 lines) that points to the real skill file. Avoids symlinks (OS-dependent) and full duplication (drift risk).
+**Apply when**: Structuring skill or plugin directories in any repo that is itself the source of truth for those skills.
 
-## Thin Bootstrap for Skill Discovery (2026-03-26)
-**Learning**: When a skill repo needs a particular skill to be discoverable on fresh clone (before global deployment), use a thin bootstrap file in the project's local skill directory that simply points to the real skill file. Avoids symlinks (OS-dependent behavior) and full duplication (drift risk). The bootstrap is 3 lines; the real skill lives in the source directory.
-**Apply when**: Setting up local skill discovery in repos that are also the source of truth for those skills.
-
-## Three-Way Drift Detection for Bidirectional Sync (2026-03-26)
-**Learning**: When a system syncs files bidirectionally (source repo ↔ deployed copies), use a three-way comparison: source vs manifest vs deployed. This catches four cases: source updated (deploy it), deployed updated (reverse-sync it back), both updated (conflict — manual review), neither (skip). A two-way comparison (source vs deployed) can't distinguish "source is newer" from "deployed is newer" without a baseline.
-**Apply when**: Designing any bidirectional file sync mechanism between a source of truth and deployed copies.
-
-## Fold/Cast Race Condition on Direct Source Edits (2026-03-26)
-**Learning**: When source-of-truth files are edited directly, deployed copies in the sync target become stale instantly. If the absorption command runs from another session before the deployment command updates the target, it sees DIFFERS and absorbs the stale deployed version — silently reverting the source edit. This is a race condition in bidirectional sync: concurrent sessions can undo each other's work via the absorption path. Prevention: always run the deployment command immediately after direct source edits.
-**Apply when**: Operating any bidirectional sync system (deploy + absorb) where source files are edited directly.
+## Bidirectional Sync Discipline (2026-03-28)
+**Learning**: Any system that syncs files bidirectionally between a source-of-truth repo and deployed copies must enforce three rules together: (1) **three-way comparison** — source vs manifest vs deployed, so you can distinguish "source updated" (deploy it) from "deployed updated" (reverse-sync it back) from "both updated" (conflict, manual review) from "neither" (skip); a two-way comparison can't tell which side moved without a baseline. (2) **atomic edit-then-deploy** — direct source edits must immediately re-deploy to targets, otherwise a concurrent absorption run sees DIFFERS, treats the stale deployed copy as "newer," and silently reverts the source edit. (3) **reverse-sync writes to source, never to deployed** — writing to deployed copies creates a permanent gap (deployed has more entries than source) that re-running cannot heal because trackers mark the entries as already processed.
+**Apply when**: Designing or operating any bidirectional sync (deploy + absorb) between a canonical repo and its consumers.
 
 ## Firebase API Key Restriction for Public Repos (2026-03-29)
 **Learning**: Firebase API keys are project identifiers (not secrets), but in public repos, ALWAYS restrict the key to the deployment domain via Google Cloud API Keys API. Add HTTP referrer restrictions (deployment domain + `localhost/*` + `127.0.0.1/*`). Security rules protect data integrity, but unrestricted keys let unauthorized apps consume quota or abuse Firebase resources from other origins.
@@ -152,22 +132,8 @@
 **Apply when**: Any browser API behaves as if the user denied permission but no prompt was ever shown.
 
 ## Bot and Crawler Protection Strategy (2026-03-29)
-**Learning**: Bot/crawler access must be controlled at every deployment tier — not just staging.
-
-**Non-production (staging, preview, dev) — block crawlers, but distinguish internal vs customer-facing.**
-
-*Internal staging* (only developers/QA access): layer all defenses — (1) `robots.txt` with `Disallow: /` and `X-Robots-Tag: noindex, nofollow` response header, (2) IAM-gated access on Cloud Run (`--no-allow-unauthenticated`), (3) basic auth or IP allowlisting as fallback, (4) `noindex` meta tag in HTML `<head>`. Wire into the deploy pipeline — every `deploy.yml` targeting internal non-production must include bot protection as a required step.
-
-*Customer-facing staging* (beta testers, drivers, passengers use it): IAM gating (`--no-allow-unauthenticated`) locks out real users. Keep `--allow-unauthenticated` and rely on app-level bot protection only: `robots.txt Disallow: /` + `X-Robots-Tag: noindex, nofollow` header + `noindex` meta tag. Well-behaved crawlers respect these; malicious scrapers bypass them, but IAM gating isn't viable when real unauthenticated users need access.
-
-**Production — public pages only.** Only public-facing, unauthenticated pages (marketing, landing, docs, blog) should allow crawling for SEO. Everything behind authentication — dashboards, admin panels, internal tools, private APIs — must block bots. Serve `robots.txt` with targeted `Disallow` rules for authenticated paths. Set `X-Robots-Tag: noindex` on all responses that require auth. Never expose private services to crawlers — a bot that reaches an admin panel or internal API is a security incident waiting to happen.
-
-**Platform specifics**: GCP Cloud Run `--no-allow-unauthenticated` blocks all traffic at the infrastructure level. Vercel Password Protection, AWS WAF IP restrictions, Netlify Identity for other platforms.
-**Apply when**: Deploying any application to any environment. Non-production: check whether real end users need unauthenticated access — internal staging gets IAM gating, customer-facing staging gets app-level headers only. Production = allow crawling only on public-facing pages, block on private services.
-
-## Reverse-Sync Must Write to Source, Not Deployed Copies (2026-03-28)
-**Learning**: A reverse-sync process that classifies entries from a staging file into category-specific files must write to the **source repo copies**, NOT the **deployed copies**. Writing only to deployed copies creates a permanent gap: deployed has more entries than source, and every status check reports "new entries — sync needed." Re-running doesn't fix it because the staging file entries are already marked as processed in the tracker.
-**Apply when**: Building or debugging any bidirectional sync system where a staging area feeds into categorized files. The write target must always be the source of truth.
+**Learning**: Block crawlers at every non-production tier and on every authenticated production surface — not just staging. Internal-only environments should layer all defenses (`robots.txt Disallow`, `X-Robots-Tag: noindex,nofollow` header, infrastructure-level auth gating, `noindex` meta). Customer-facing pre-prod that needs unauthenticated user access can only use app-level headers — infrastructure auth gating locks out the real users you're trying to test with. Production: allow crawling only on truly public pages (marketing, docs); every authenticated path gets `X-Robots-Tag: noindex` plus `Disallow` rules. A bot reaching an admin panel is a security incident, not an SEO miss. Platform-specific gating commands belong in a stack guide, not in this evergreen learning.
+**Apply when**: Deploying any application. Decide upfront whether each environment needs unauthenticated end-user access — that decision dictates whether infrastructure gating or app-level headers is correct.
 
 ## Forward-Sync Must Not Duplicate Global Config Content (2026-03-28)
 **Learning**: A forward-sync that deploys conventions into a project workspace must check whether the global config layer already covers a convention before adding it to the project-level config. Duplicating rules (shorthand commands, hard rules, style guides) across global and project config creates maintenance drift. The user has corrected this pattern multiple times.
@@ -176,14 +142,6 @@
 ## Next.js 16 Process Renaming Breaks Zombie Kill Scripts (2026-03-29)
 **Learning**: Next.js 16 renames its dev server process to `next-server (v16.x.x)` — a custom process title with no `node`, `next dev`, or project name in the command string. Standard pgrep patterns (`node.*next.*dev`, `node.*(next|playwright).*<project>`) miss it entirely. The process also auto-selects non-standard ports when the configured port is busy, so port-based `fuser -k` also misses it. Kill/restart scripts must match the literal string `next-server` and scope to the project by checking `/proc/$PID/cwd`.
 **Apply when**: Writing or updating restart/kill-zombie scripts for any Next.js 16+ project. The `/srs` skill templates need this pattern.
-
-## Persist TTS Audio on First Generate, Not Every Play (2026-03-29)
-**Learning**: Voice TTS APIs charge per generation. Every "Listen" tap that hits the API is wasted money if the text hasn't changed. Persist audio on first generation: store base64 in a DB column (voice samples on the user record, message audio in a jsonb map keyed by message index). Serve the stored file on subsequent plays — zero API cost. For voice clone samples, generate and persist at clone time so the preview is instant.
-**Apply when**: Any app with TTS playback — never regenerate audio for the same text twice.
-
-## WebSocket Streaming TTS for Low-Latency Voice Dialogue (2026-03-29)
-**Learning**: Full TTS generation (send text → wait for complete WAV → play) adds 3-5s latency for long messages. WebSocket streaming TTS sends PCM audio chunks as they're generated — first audio plays in ~200-500ms. On the client, use AudioContext to schedule and play raw PCM chunks as they arrive. Fall back to non-streaming if WebSocket fails. Essential for voice dialogue loops where latency kills the conversational feel.
-**Apply when**: Any real-time voice dialogue feature — always use streaming TTS, never wait for the full audio file.
 
 ## Voice Clone Consent Flow Is a Legal Requirement (2026-03-29)
 **Learning**: Voice biometrics are sensitive data under GDPR, UK DPA, and emerging US state laws. Before cloning a user's voice, present a dedicated consent screen with: what you collect (audio sample), how it's used (private TTS only), user rights (delete anytime), and third-party processing disclosure (name the provider). Use a checkbox-based explicit consent mechanism — implied consent from "tapping record" is insufficient.
@@ -237,32 +195,25 @@
 **Learning**: When a 403 response includes `cf-mitigated: challenge`, Cloudflare is signaling a JavaScript challenge (not an IP block, WAF rule, or origin error). Absence of this header on a 403 means the block came from something else — different fix path. The exact value (`challenge`, `block`, `captcha`) tells you which tool to reach for.
 **Apply when**: Investigating any Cloudflare 403. Header inspection is free and eliminates guessing.
 
-## Flaresolverr Is Deprecating in 2026 — Do Not Start New Integrations (2026-04-16)
-**Learning**: Flaresolverr's success rate has collapsed below 30% after recent Cloudflare updates, maintainers signaling deprecation. Current recommendations: camoufox (Firefox-based, C++-level fingerprint spoofing) or nodriver (Python, successor to undetected-chromedriver). Re-evaluate every 6 months — the bypass landscape shifts fast.
-**Apply when**: Choosing a Cloudflare bypass strategy for a new scraper. Vendor status check must come before integration decision.
+## Anti-Bot Bypass Tooling Decays Rapidly — Verify Before Integrating (2026-04-16)
+**Learning**: The Cloudflare/anti-bot bypass space turns over within months — yesterday's recommended tool is today's dead end. A specific tool name in a long-lived doc is the wrong shape. Before any new integration: check the project's recent activity (last 90 days), open-issues trend, and community success rate against the *current* challenge tier. Treat any bypass tool as a 6-month asset; budget for replacement. Tool-specific recommendations belong in a stack guide with a "verified" date, not in an evergreen learning.
+**Apply when**: Choosing or revisiting a Cloudflare/anti-bot bypass strategy. Vendor status check must come before integration decision.
 
 ## Pipeline Silent-Failure Alerts: "Last Produced Output" Metric (2026-04-16)
 **Learning**: A scraping/ingestion pipeline can run cleanly and log success for weeks while producing zero documents — if the listing-discovery layer is broken. "Last successful run" is necessary but insufficient. Add a per-source "days since last new document" alert. Silent discovery failure is a real failure mode that unit tests and HTTP status checks will never catch.
 **Apply when**: Designing observability for any source→sink pipeline. Add a "last produced output" metric alongside "last successful run."
 
-## Patchright Cannot Solve Cloudflare's Current JS Challenge Tier (2026-04-16)
-**Learning**: As of April 2026, patchright (stealth-patched Playwright) fails to solve Cloudflare's full JS challenge across every tested configuration: headless-shell, full chromium headless, full chromium + Xvfb, with realistic UA/viewport/locale. The challenge page persists with no `cf_clearance` cookie issued. Skip directly to camoufox or reframe to an unprotected source.
-**Apply when**: Cloudflare JS challenge is confirmed (`cf-mitigated: challenge`). Patchright is a verified dead end; move on.
+## Verify Bypass Tools Against Current Cloudflare Tier Before Investing (2026-04-16)
+**Learning**: Stealth-patched Playwright variants and similar Chromium-fingerprint patches periodically lose effectiveness when Cloudflare ships a new challenge tier. Symptom: challenge page persists with no `cf_clearance` cookie issued, regardless of headless-shell vs full chromium, Xvfb, or realistic UA/viewport/locale. Before sinking time into one tool, confirm a fresh public report (within ~30 days) of success against the *current* challenge — and budget the reframe-to-unprotected-source path as the parallel option.
+**Apply when**: Cloudflare JS challenge is confirmed (`cf-mitigated: challenge`). Treat any specific bypass tool as time-bounded.
 
 ## Three Hats Before Conceding a Wall (2026-04-16)
 **Learning**: The investigative sequence for blockers is Skeptic (challenge the "can't" claim) → Prospector (scour for alternative tools) → Reframer (change the destination if the path is blocked). The failure mode is skipping the Reframer hat and defaulting to "keep banging on the wall." Many apparent dead-ends dissolve when the question changes from "how do I get through this wall?" to "does the actual goal require this wall to be cleared?"
 **Apply when**: Any blocker investigation, any time a direct fix has been exhausted. The Reframer question must be asked explicitly before reporting a hard wall.
 
 ## Proactive OAuth Refresh Before Concurrent Subagent Fan-Out (2026-04-26)
-**Learning**: Any workflow that spawns concurrent claude processes (subagents, parallel sessions, master+apprentice patterns) must proactively refresh the OAuth token before fan-out. Multiple processes that hit access-token expiry simultaneously will all attempt to refresh using the same single-use refresh token. The first wins; the rest receive `invalid_grant` from the API and crash with "auth failed". Mitigation: a single-source warmup before fan-out plus a long-lived scheduled refresher that fires once per token TTL at the precise expiry-minus-margin moment, ensuring newly-spawned subagents always inherit fresh tokens. Individual subagent lifespans must stay below the access-token TTL (~60 min) so no subagent ever needs to refresh during its own lifetime — this is already the discipline for short, discrete subagent tasks. Apprentices already running with stale in-memory tokens won't benefit from a mid-flight file refresh; the protection is for the spawn boundary, not the inner loop.
-
-**Sub-lesson — scheduled refresh, not polling**: when the token's `expiresAt` is known, schedule the refresh at the known expiry-minus-margin moment via `sleep $delta`, refresh once, recompute next sleep from the new `expiresAt`. Do not poll every N minutes. Polling is the wrong shape because it does work continuously to detect a moment we already know in advance, and it can still miss the expiry window if the poll interval straddles it. One refresh per TTL beats N polls per hour.
-
-**Sub-lesson — the refresher itself can race**: the warmup that triggers the refresh is itself a claude process. If multiple warmups fire simultaneously (e.g., burst of SessionStart hooks when WSL2 wakes from sleep), they each invoke a refresh and recreate the very race they were built to prevent. Serialize warmups via a non-blocking filesystem lock (`flock -n`); race-losers exit immediately because the lock-winner will refresh and the next caller will see a healthy token. This is double-checked locking applied to OAuth refresh: re-read `expiresAt` inside the critical section before deciding to refresh.
-
-**Sub-lesson — clock-skew defense**: a long-lived scheduler that has queued a `sleep` may wake into a wildly different wall-clock moment than expected (WSL2 host suspend can jump hours). Re-read `expiresAt` on every wake before deciding what to do. If past expiry, fire warmup immediately and reset the schedule. Never trust the queued sleep's notion of when "now" is.
-
-**Apply when**: Designing or fixing any multi-process Claude Code workflow — masters that spawn apprentices (smith), evaluations that run parallel passes (temper, pound), arts that do evidence-then-fan-out, or any user with multiple concurrent VS Code chats. The pattern is universal until Claude Code's auth client serializes refresh-token rotation upstream (or the API server adds a grace window for rotated tokens — a fix shape that would be invisible to clients).
+**Learning**: Any workflow that spawns concurrent claude processes (subagents, parallel sessions, master+apprentice patterns) must proactively refresh the OAuth token before fan-out. Multiple processes that hit access-token expiry simultaneously will all attempt to refresh using the same single-use refresh token; first wins, the rest crash with `invalid_grant`. The protection is at the spawn boundary, not the inner loop — keep individual subagent lifespans below the access-token TTL so no subagent ever has to refresh mid-flight. Three implementation traps the scheduled-refresher itself can fall into: (1) **scheduled, not polling** — sleep until `expiresAt - margin`, refresh once, recompute; polling does work continuously to detect a moment we already know in advance and can still miss the window; (2) **the refresher races itself** — burst SessionStart hooks invoke parallel warmups that recreate the very race they prevent; serialize via non-blocking `flock -n`, exit on lock loss; (3) **clock-skew on suspend** — a queued sleep can wake into a wildly different wall-clock; re-read `expiresAt` on every wake before deciding what to do. See `WORKAROUNDS.md` WA-001 for the full implementation.
+**Apply when**: Designing or fixing any multi-process Claude Code workflow. Universal until upstream serializes refresh-token rotation or adds a grace window for rotated tokens.
 
 ## Exhibit A — How a Project-Name Leak Happens (2026-04-25)
 **Learning**: A `/forge` fold-phase run absorbed seven learnings from a project session and committed them with the project name, the contributor's full name, the local currency price, project schema field names, a competitor product name, and region-specific framing all preserved verbatim. Even the commit title named the project and the person. Three layers of "no project names" rules (forge `CLAUDE.md` HARD RULE, `skills/forge/SKILL.md` Phase 3 instructions, "No Project Names Rule" footer) were prose instructions the agent was supposed to follow on its honor — there was no scanner, no reject step, and `Forge-worthy: yes` was treated as a citation slot rather than a flag. Worse, prior `/cast` improvements had wired contributor attribution into PLAN/DONE *tables*, and the agent generalized that to mean attribution belongs in absorbed *content* too. The boundary was lost.

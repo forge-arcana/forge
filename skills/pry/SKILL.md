@@ -39,15 +39,7 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
 
 ### Phase 1: Decompose the Wall
 
-Break the "can't" into atomic assumptions. For each one:
-
-| # | Assumption | Verified? | Evidence |
-|---|-----------|-----------|----------|
-| 1 | [e.g., "API doesn't expose endpoint X"] | ? | [to be filled] |
-| 2 | [e.g., "Library Y has no plugin for Z"] | ? | |
-| 3 | ... | | |
-
-Present this table before proceeding. Each assumption becomes an independent investigation target.
+Build a Decomposition table (columns: # / Assumption / Verified? / Evidence) — one row per atomic assumption that the "can't" depends on, typically 3–7 rows. Present the table before proceeding. Each assumption becomes an independent investigation target. The Output Format section below shows the post-investigation version with verdicts filled in.
 
 ### Phase 2: Challenge Each Assumption
 

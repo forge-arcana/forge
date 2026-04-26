@@ -35,25 +35,9 @@ Concise status snapshot. No prose preamble — just the header and table.
    - Completed phases (anything marked DONE)
    - Historical audit summaries with all items resolved
 
-5. **Output format** — one table with inline section headers:
-
-```
-**Branch**: `<branch>` | **Last commit**: `<hash> <msg>` | **Dirty**: <count> files
-```
-
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| | **Active Work** | | |
-| 1 | ... | in-progress | ... |
-| 2 | ... | blocked | ... |
-| | **Outstanding** | | |
-| 3 | ... | outstanding | ... |
-| 4 | ... | outstanding | ... |
-
-**Rules**:
-- **Active Work** header row, then active items (max 5). If none, single row: `Slate clean` in Task column.
-- **Outstanding** header row, then deferred/plan items + project memory items. Sources: CLAUDE.md `### Deferred`, incomplete plan items, and `project_*.md` memory files with unresolved work. Omit items that say "Do NOT surface in status updates" or are marked as fully resolved. If none, omit the Outstanding section entirely.
-- Active statuses: `in-progress` / `blocked` / `next`
-- Outstanding status: `outstanding`
+5. **Output format** — a one-line header (Branch / Last commit / Dirty count) followed by a markdown table grouped by section header rows (`Active Work`, `Outstanding`).
+   - Columns: `# | Task | Status | Notes`
+   - Active items: `in-progress` / `blocked` / `next`. Cap at 5. If none, single row `Slate clean`.
+   - Outstanding items: `outstanding`. Sources: CLAUDE.md `### Deferred`, incomplete plan items, `project_*.md` memory files with unresolved work. Omit items marked "Do NOT surface in status updates" or fully resolved. If none, omit the Outstanding section entirely.
 
 6. No narrative. No invented rows.

@@ -120,6 +120,11 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 |-----|-------------|
 | `/pry` | The Lever — relentless solution-finder that cracks "can't be done" claims (self-improving) |
 
+### Feedback Loop
+| Art | What it does |
+|-----|-------------|
+| `/praise` | The Listener — ingests user feedback, QA findings, or bug reports; routes through evaluative arts (probe, preen, poke, press) and hands off a prioritized change brief to /smith. Closes the build-ship-learn loop (self-improving) |
+
 > The Masters (`/smith`, `/wedge`, and `/purge`) are documented at the top of this README — they're not arts, they're the ones who wield (Smith), give visual form (Wedge), and tend (Warden) the forge itself.
 
 ## Task Skills
@@ -203,6 +208,7 @@ forge/
 │   └── wrap/              # Pre-commit ritual
 ├── learnings/             # Absorbed team wisdom (art-specific + global patterns)
 ├── memory/                # Team identity & shared conventions
+├── presentation/          # Canonical human-readable overview (index.html)
 ├── .claude/skills/
 │   ├── forge/             # Bootstrap (so /forge is discoverable on fresh clone)
 │   └── purge/             # The Warden — master tender (forge-internal, never deployed)
@@ -215,7 +221,7 @@ forge/
 
 **New idea?**
 ```
-/prime MyProject    → Opus → Vow → Touchstone (auto /wedge) → Pitch (HTML, if external) → Blueprint → Pattern
+/prime MyProject    → Opus → Vow → Touchstone (via /wedge) → Pitch (HTML) → Blueprint → Pattern → Smith
 /wedge              → drive the wedge into Touchstone (auto-invoked from /prime; explicit also)
 /probe              → polished Pattern (architecture)
 /smith              → Pattern + Touchstone → running product (the full forge)

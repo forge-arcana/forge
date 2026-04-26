@@ -1,6 +1,6 @@
 ---
 name: preen
-description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. When a Pattern file exists, appends findings as the UX section of [PROJECT]_Pattern_V1.0.md (paired with /probe's Architecture section). Otherwise returns an inline report. Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review of an interface."
+description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. Pattern-aware (writes UX section of [PROJECT]_Pattern_V1.0.md when present). Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review."
 user-invocable: true
 ---
 <!-- model: opus -->

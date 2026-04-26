@@ -142,7 +142,7 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 
 `/forge` is not an art and not a master — it's a task skill with no persona and no learning loop. It is the gate through which arts and all other knowledge flow between forge and membrane. The Masters use the cycle; the cycle does not act on its own behalf.
 
-## The Ten Arts
+## The Nine Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
@@ -154,8 +154,9 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
 | `/pitch` | VC partner / business strategist | Evaluative | Business |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
-| `/purge` | The Purist (cleanser of the forge) | Cleansing | — |
 | `/praise` | The feedback router (closes the build-ship-learn loop) | Orchestrative | — |
+
+(`/purge` is documented above under "The Warden — Master Tender" — it is a Master, not an art. It uses the same protocol but lives at `.claude/skills/purge/` and is forge-internal.)
 
 ### The Evaluative Trifecta — poke → press → pound
 
