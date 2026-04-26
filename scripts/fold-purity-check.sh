@@ -58,6 +58,8 @@ ALLOWLIST_TERMS=(
   "Docker" "Kubernetes" "Terraform" "Ansible" "GitHub" "GitLab" "Bitbucket"
   # Forge mythology + Claude tools
   "Smith" "Warden" "Forge" "Anthropic" "Claude" "WebSearch" "WebFetch" "AskUserQuestion" "TodoWrite"
+  # Claude Code hook event names (referenced in technical content)
+  "SessionStart" "SessionEnd" "PreToolUse" "PostToolUse" "PermissionRequest" "Stop" "Notification" "UserPromptSubmit"
   # Web APIs / browser standards (well-known compound names)
   "WebSocket" "WebSockets" "WebView" "WebRTC" "WebGL" "WebGPU" "WebAssembly" "WebAuthn" "WebCrypto"
   "AudioContext" "MediaStream" "MediaRecorder" "RTCPeerConnection" "IndexedDB" "LocalStorage" "SessionStorage"
@@ -153,7 +155,7 @@ scan_file_or_text() {
   backtick_hits=$(echo "$body" \
     | grep -oE '`[a-z][a-zA-Z_]*[A-Z][a-zA-Z_]*`|`[a-z][a-z_]+_[a-z_]+`' \
     | sort -u \
-    | grep -vE '`(camelCase|snake_case|kebab-case|env_var|api_key|access_token|refresh_token|node_modules|user_id|created_at|updated_at|deleted_at)`' \
+    | grep -vE '`(camelCase|snake_case|kebab-case|env_var|api_key|access_token|refresh_token|node_modules|user_id|created_at|updated_at|deleted_at|expiresAt|invalid_grant|client_id|client_secret|grant_type|expires_in|token_type|id_token|scope|state|redirect_uri|code_verifier|code_challenge)`' \
     || true)
   if [[ -n "$backtick_hits" ]]; then
     file_violations+="  BACKTICKED-IDENTIFIER (project-specific schema/field names — universalize the principle, drop the names):"$'\n'
@@ -170,6 +172,8 @@ scan_file_or_text() {
     | grep -vE '^\*\*(Apply when|Forge-worthy|Why|How to apply|Learning)\*\*' \
     | grep -nE '\b[A-Z][a-z]+ [A-Z][a-z]+\b' \
     | grep -vE '\b(Any|Every|All|Each|Some|No|Many|Few|Most|Both|This|That|These|Those|My|Our|Your|Their|The) [A-Z][a-z]+' \
+    | grep -vE '^\s*(Add|Update|Remove|Fix|Ship|Refactor|Move|Rename|Drop|Bump|Tighten|Loosen|Promote|Cleanse|Polish|Generalize|Absorb|Document|Note|Wire|Unify|Split|Merge|Archive|Resurrect) [A-Z][a-z]+' \
+    | grep -vE '\b(Add|Update|Remove|Fix|Ship|Refactor|Bump|Tighten|Polish|Generalize|Absorb|Document|Note|Wire|Unify|Promote) [A-Z][a-z]+ [0-9]' \
     | grep -vE 'Cloud Run|Cloud Tasks|Cloud Storage|Cloud Functions|Cloud SQL|Cloud Spanner|Cloud Pub|Cloud Build|Better Auth|Pub Sub|Service Bus|Lambda Function|Open Source|Active Directory|Big Query|Data Lake|Side Effect|Dead Letter|Last Known|Last Modified|Last Verified|First Class|First Party|Single Sign|Two Factor|Multi Factor|Plain Text|Rich Text|Cross Platform|Cross Origin|Same Origin|Source Of|Out Of|Ahead Of|Behind The|Day One|Phase One|Phase Two|Phase Three|Read Me|Markdown File|Test Driven|Domain Driven|Event Driven|Type Script|Java Script|Web Sockets|Server Sent|Edge Cases|Use Case|Side Project|Republic Act|Data Privacy|Personal Information|Personal Data|Sensitive Personal|Magic Link|Magic Links|Service Account|Service Accounts|Service Identity|Pre Generated|Per Event|Per Check|Per Request|Per Hour|Per Day|Per Year|Per Month|Per User|Per Tenant|Per Customer|Per Page|Auto Scaling|Cold Start|Hot Path|Happy Path|Edge Case|Best Practice|Anti Pattern|Black Box|Black List|White List|Open Source|Closed Source|Quality Gate|Quality Gates|Status Code|Status Codes|Token Refresh|Refresh Token|Republic Act|Firstname Lastname|Foo Bar' \
     || true)
   if [[ -n "$personal_name_hits" ]]; then

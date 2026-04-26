@@ -96,7 +96,31 @@ If any line contains "READY FOR REMOVAL", surface it prominently (the script for
 
 If the script has no output (no WORKAROUNDS.md or empty file), print nothing.
 
-### 1b. PLAN table
+### 1b. Workaround side-effect sync (rows in INCOMING section)
+
+Run `bash <forge>/scripts/sync-workaround-side-effects.sh`. It parses each WA's `Side effects` block in `WORKAROUNDS.md` and emits one line per declared artifact:
+
+```
+ACTION  TYPE     WA-ID   SOURCE                                  TARGET                                          PLATFORM
+INSTALL script   WA-001  /forge/scripts/agent-token-warmup.sh    /home/user/.claude/scripts/agent-token-warmup.sh -
+UPDATE  script   WA-001  /forge/scripts/agent-token-scheduler.sh /home/user/.claude/scripts/agent-token-scheduler.sh -
+INSTALL hook     WA-001  -                                       $HOME/.claude/scripts/user-agent-preflight.sh   WSL2
+OK      script   WA-001  ...                                     ...                                              -
+SKIP    hook     WA-001  -                                       ...                                              WSL2 (not on WSL2)
+```
+
+Add INSTALL / UPDATE rows (anything not `OK` or `SKIP`) to the **INCOMING** section of the PLAN table as `side-effect` typed rows:
+
+```
+  [ ] 7  side-effect  WA-001 script: agent-token-warmup.sh    INSTALL
+         → Refresh action with flock; called by both Layer 1 and Layer 2 schedulers
+  [ ] 8  side-effect  WA-001 hook: SessionStart → user-agent-preflight.sh  INSTALL
+         → Layer 2 OAuth race protection (WSL2 only)
+```
+
+**Platform gate**: lines tagged `SKIP ... (not on WSL2)` are not surfaced as rows on non-WSL2 machines. Keeps Mac/Linux-native users' PLAN tables clean.
+
+### 1c. PLAN table
 
 From the preflight output, build a single triage table with three sections. Each row shows **the essence of what will change** — not the filename, but the rule, principle, or knowledge that will land.
 
@@ -185,6 +209,16 @@ For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry i
 
 ### Memory
 For each approved memory row: copy `<forge>/memory/<file>.md` into `~/.claude/memory/<file>.md`.
+
+### Workaround side-effects
+For each approved `side-effect` row from Phase 1b:
+
+- **script INSTALL or UPDATE**: copy the source script to the target (use `cast-deploy.sh --scripts` for whole-manifest deploys, or per-file `cp` + `chmod +x` for one-offs).
+- **hook INSTALL**: invoke `bash <forge>/scripts/install-token-hook.sh` (idempotent, flocks `~/.claude/.settings.lock`).
+- **script REMOVE** (workaround retirement): `rm -f <target>`.
+- **hook REMOVE** (workaround retirement): `bash <forge>/scripts/install-token-hook.sh --uninstall`.
+
+After applying, verify: `bash <forge>/scripts/cast-deploy.sh --verify-scripts`.
 
 ### Record baseline
 After all incoming is applied (before starting outgoing), write `~/.claude/.last-cast.json`:
