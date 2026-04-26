@@ -1,6 +1,6 @@
 ---
 name: smith
-description: "Master of the forge — consumes a Blueprint + Pattern (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
+description: "Master of the forge — consumes a Blueprint + Pattern + Touchstone (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern + Touchstone, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 user-invocable: true
 ---
 <!-- model: opus -->
@@ -20,12 +20,13 @@ The smith is not an art. The smith is the one who wields them all.
 
 ### Input Resolution (in priority order)
 
-1. **Explicit path provided** → use it (Blueprint or plan file, detected by content). If Blueprint, also load the paired Pattern file if present.
-2. **No path** → scan cwd for `*Blueprint*.md` → load the Blueprint. Then glob for `*Pattern*.md` and load the Pattern alongside.
+1. **Explicit path provided** → use it (Blueprint or plan file, detected by content). If Blueprint, also load the paired Pattern file and Touchstone HTML if present.
+2. **No path** → scan cwd for `*Blueprint*.md` → load the Blueprint. Then glob for `*Pattern*.md` and `*Touchstone*.html` and load both alongside.
 3. **Blueprint exists, Pattern missing** → warn "Pattern not found — Blueprint has not been probed" and invoke `/probe` before proceeding. The Pattern is smith's source of design truth.
-4. **No Blueprint** → check for plan files in `~/.claude/plans/` or conversation context
-5. **Conversation context** → if the current conversation contains a discussed spec, architecture, or implementation steps, smith extracts a work spec from it
-6. **Nothing found** → error: "No Blueprint, plan, or work context found. Run `/prime` to create a Blueprint and Pattern, or discuss the work first."
+4. **Blueprint exists, Touchstone missing** → warn "Touchstone not found — the project has no aesthetic constitution. Smith will build with default styling, which is rarely what the magnum opus deserves." Offer to invoke `/wedge` first (recommended) or proceed with `--no-touchstone` (the user accepts that screens will lack aesthetic discipline).
+5. **No Blueprint** → check for plan files in `~/.claude/plans/` or conversation context
+6. **Conversation context** → if the current conversation contains a discussed spec, architecture, or implementation steps, smith extracts a work spec from it
+7. **Nothing found** → error: "No Blueprint, plan, or work context found. Run `/prime` to create an Opus, Vow, Touchstone, Blueprint, and Pattern, or discuss the work first."
 
 ### Input Modes
 
@@ -56,6 +57,7 @@ Logs to `~/.claude/.smith-token.log`.
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line
 2. **Launch all reads in parallel** (all independent):
    - Read the Blueprint file **and the paired Pattern file** (if present), plan file, or extract work spec from conversation context (per Input Resolution)
+   - Read the **Touchstone HTML** (`[PROJECT]_Touchstone_V1.0.html`) if present — extract the `:root` CSS variable block (typography, color, motion tokens). This is the aesthetic constitution every screen smith builds must inherit.
    - Read project `CLAUDE.md` for stack, conventions, current state
    - Read `<forge>/skills/forge/stack-guide.md` for tech reference
    - Read `memory/smith-ledger.json` if it exists (resume mode — skip to Session Resume)
@@ -64,6 +66,10 @@ Logs to `~/.claude/.smith-token.log`.
    - Read `memory/smith-apprentice-log.md` if it exists (Layer 3 — delegation wisdom)
 
 **Pattern gate** — if the Blueprint has no paired Pattern file (`[PROJECT]_Pattern_V1.0.md` absent OR present but empty Architecture section), invoke `/probe` on the Blueprint before proceeding. The Pattern is smith's source of design truth — architecture must be validated before the smith swings. If the Blueprint has UI-facing features, also invoke `/preen` to append the UX section after `/probe` completes.
+
+**Touchstone gate** — if no `[PROJECT]_Touchstone_V1.0.html` exists, surface a warning: "no Touchstone found — the project has no aesthetic constitution to inherit. Build will proceed with framework defaults, which is rarely what the magnum opus deserves." Offer to run `/wedge` before continuing (recommended for any UI-facing work). The user can override with `--no-touchstone` to proceed without one — typically appropriate for backend-only work, CLI tools, or libraries.
+
+**Touchstone conformance** — when the Touchstone exists, every UI-facing apprentice receives the extracted `:root` token block as part of its commission. Apprentices MUST use these tokens (font families, color variables, motion timing) instead of inventing new values. Apprentices that introduce non-Touchstone fonts, colors, or motion tokens are rejected and re-tasked.
 
 **Pitch gate** — if no `[PROJECT]_Pitch_V1.0.md` exists AND the Blueprint contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Use `AskUserQuestion` with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste. Pitch writes its verdict as a `<!-- PITCHED: [VERDICT] -->` marker at the top of the Pitch file (or the Blueprint if no Pitch file exists yet).
 

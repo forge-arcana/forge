@@ -23,11 +23,12 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
 
 1. **Explicit argument given** — use it (file path → read it; description → scope the review to that topic)
 2. **No argument — infer from context**:
-   - If a Blueprint file exists (`*Blueprint*` in cwd) → critique the business model sections. If a `[PROJECT]_Pitch_V1.0.md` exists, read it as prior pitch context.
+   - If a Blueprint file exists (`*Blueprint*` in cwd) → critique the business model sections. If a `[PROJECT]_Pitch_V1.0.html` exists (or legacy `.md`), read it as prior pitch context.
    - If `/prime` just ran in this conversation → critique that output's business model
    - If the conversation has a clear feature/decision topic → critique it through the business model lens
    - **If ambiguous** → ask: "What should I critique? The full business model, a specific feature, a pricing decision, or something else?"
 3. Read/review the full pitch target before proceeding
+4. **Read the Touchstone if it exists** — `[PROJECT]_Touchstone_V1.0.html`. The Touchstone is the visual constitution `/wedge` forged from the Opus + Vow. The Pitch is rendered as HTML through the Touchstone's tokens (typography, color, motion). If no Touchstone exists, recommend the user run `/wedge` before producing the Pitch — a Pitch deck without a Touchstone has no aesthetic discipline to inherit.
 
 ## Process
 
@@ -126,11 +127,37 @@ Scoring: 1 = broken/absent, 2 = weak, 3 = adequate, 4 = strong, 5 = exceptional.
 Signal: red = 1–2, yellow = 3, green = 4–5.
 Verdict thresholds: FUNDABLE = 28–35, WORTH BUILDING = 21–27, NEEDS RETHINK = 14–20, KILL = ≤13.
 
+## Output Artifact — `[PROJECT]_Pitch_V1.0.html`
+
+When `/pitch` is invoked from `/prime` Phase 2 (external direction) or directly to produce a Pitch deck, the output is **HTML**, not markdown. The Pitch is rendered through the Touchstone's tokens:
+
+- **Fonts**: import the same display + body fonts the Touchstone declares.
+- **Color tokens**: same dominant + accent + canvas + ink CSS variables.
+- **Motion**: same orchestration timing and easing curves.
+- **Layout**: deck-style — title slide, problem, solution, market, business model, moat, ask. Each slide is a viewport-tall section in one scrollable HTML page.
+
+The Pitch HTML reads the Touchstone at the top of `<head>`:
+
+```html
+<!-- Pitch inherits the Touchstone's aesthetic constitution -->
+<!-- Source: [PROJECT]_Touchstone_V1.0.html -->
+<style>
+  :root {
+    /* COPY the :root block from the Touchstone here */
+  }
+</style>
+```
+
+If no Touchstone exists, the Pitch is generated as plain `[PROJECT]_Pitch_V1.0.md` (legacy fallback) and the user is told: "no Touchstone found — Pitch generated as markdown. Run `/wedge` then re-run `/pitch` for a properly-rendered HTML deck."
+
+When invoked purely as an evaluative review (no Pitch artifact production), output the scorecard inline as markdown in the conversation.
+
 ## Marker Integration
 
 After evaluation, mark the outcome at the top of the canonical artifact:
 
-- **If `[PROJECT]_Pitch_V1.0.md` exists** (the investor pitch pack from /prime) → write the marker there.
+- **If `[PROJECT]_Pitch_V1.0.html` exists** → write the marker as an HTML comment at the top of `<body>`.
+- **Else if `[PROJECT]_Pitch_V1.0.md` exists** (legacy) → write the marker there.
 - **Else if a Blueprint file exists** → write the marker on the Blueprint.
 - **Else** → inline output only; no marker.
 

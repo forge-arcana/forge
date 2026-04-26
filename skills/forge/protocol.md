@@ -110,15 +110,27 @@ This ensures the same topic maps to one cache key regardless of when the search 
 
 ## The Masters
 
-Above the arts stand two masters — distinct domains, complementary roles. The Smith builds the work; the Warden tends the forge that does the building.
+Above the arts stand three masters — distinct domains, complementary roles. The Smith builds the work; the Wedge gives it a face; the Warden tends the forge that does the building.
 
 ### The Smith — Master Builder
 
-`/smith` is the user's proxy. Smith is not an art. It is the one who wields them all.
+`/smith` is the user's proxy for construction. Smith is not an art. It is the one who wields them all.
 
-Smith consumes a probed blueprint (from `/prime` + `/probe`) and autonomously forges the product through iterative **heats** — cycles of plan, build, evaluate, fix. It summons **apprentices** (subagents) for parallel work, selects arts by escalation ladder, and converges on perfection through a relentless final gate. The arts sharpen themselves through smith's repeated use. The more the smith works, the sharper everything gets.
+Smith consumes a probed Blueprint + Pattern (from `/prime` + `/probe` + `/preen`) plus a Touchstone (from `/wedge`) and autonomously forges the product through iterative **heats** — cycles of plan, build, evaluate, fix. It summons **apprentices** (subagents) for parallel work, selects arts by escalation ladder, and converges on perfection through a relentless final gate. The arts sharpen themselves through smith's repeated use. The more the smith works, the sharper everything gets.
+
+When a Touchstone exists, Smith extracts its `:root` token block and binds every UI-facing apprentice to those tokens. Apprentices that introduce non-Touchstone fonts, colors, or motion are rejected and re-tasked.
 
 Smith has its own learning membrane (three layers: orchestration, delegation, art proficiency) and invokes `/wrap` at milestones autonomously. See `skills/smith/SKILL.md` for the full architecture.
+
+### The Wedge — Master of Aesthetic
+
+`/wedge` is the user's proxy for visual identity. Wedge is not an art. It is the master that drives a single decisive thrust which separates the project's identity from generic AI slop.
+
+Wedge reads the **Opus + Vow** — the manuscript and the pledge — and from them runs a council of three parallel design-apprentices, each channeling a distinct master archetype from the conglomerate of human visual arts. The user picks one direction (or hybridizes via Other; the Wedge synthesizes into ONE — no two-aesthetics-fused). The crystallization heat builds `[PROJECT]_Touchstone_V1.0.html` — a single self-contained masterpiece that persists as the visual constitution.
+
+The Wedge enforces HARD RULES mechanically: banned defaults (no Inter/Roboto/Space Grotesk, no purple-on-white), required substance (distinctive font pairing, dominant + sharp accent, atmospheric background, intentional motion), commit to ONE direction (no hedging), vary across projects (never converge on a house style), soul before style.
+
+See `skills/wedge/SKILL.md` for the full six-heat process.
 
 ### The Warden — Master Tender
 

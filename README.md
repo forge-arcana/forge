@@ -6,16 +6,17 @@ A shared tooling repo for AI-guided skills, conventions, and accumulated team wi
 
 ## The Masters — Hearts of the Forge
 
-At the center of the forge stand two masters. Distinct domains, complementary roles. The Smith builds the work. The Warden tends the forge that does the building.
+At the center of the forge stand three masters. Distinct domains, complementary roles. The Smith builds the work. The Wedge gives it a face. The Warden tends the forge that does the building.
 
 | Title | Command | Role |
 |-------|---------|------|
 | **The Smith** | `/smith` | Master builder — wields every art, summons apprentices, forges the product through iterative heats |
+| **The Wedge** | `/wedge` | Master of aesthetic — drives a single decisive thrust that splits the project's identity from generic AI slop, crystallized into the Touchstone (an HTML masterpiece) |
 | **The Warden** | `/purge` | Master tender — guards the forge itself against drift, staleness, contamination, and bloat |
 
 ### The Smith — Master Builder
 
-`/smith` is the user's proxy. Give it a probed blueprint (from `/prime` + `/probe`) and it autonomously builds the product through iterative **heats** — cycles of plan, build, evaluate, fix. Each heat sharpens the blade. The smith never stops until zero critical and zero important findings remain.
+`/smith` is the user's proxy for construction. Give it a probed blueprint (from `/prime` + `/probe`) plus a Touchstone (from `/wedge`) and it autonomously builds the product through iterative **heats** — cycles of plan, build, evaluate, fix. Each heat sharpens the blade. The smith never stops until zero critical and zero important findings remain.
 
 A human smith works alone at the anvil. This smith summons **apprentices** — subagents that multiply throughput wherever the dependency graph allows. It looks ahead, detects idle capacity as waste, and starts work in anticipation of what comes next. Sequential execution of independent work is a failure of imagination.
 
@@ -32,7 +33,29 @@ Three layers of wisdom accumulate independently:
 2. **Art learnings** — how to evaluate (each art's self-improving loop, driven by smith's repeated use)
 3. **Apprentice proficiency** — how to delegate (parallelization patterns, scope sizing)
 
+When a Touchstone exists, every UI-facing apprentice receives the Touchstone's `:root` token block as part of its commission. Apprentices that introduce non-Touchstone fonts, colors, or motion are rejected and re-tasked. The Smith conforms; the Touchstone is the standard.
+
 The more the smith works, the sharper everything gets. Never-ending mastery of its craft.
+
+### The Wedge — Master of Aesthetic
+
+`/wedge` is the user's proxy for visual identity. Reads the **Opus + Vow** — the manuscript of the idea and the pledge that grounds it — and forges from them a **Touchstone**: a single self-contained HTML masterpiece that defines the project's visual constitution.
+
+A wedge has one edge. Driven once, driven hard, driven straight — it cannot hedge and remain a wedge. The Wedge's first HARD RULE is *commit to ONE direction*: no "modern but classic", no fused aesthetics, no purple-gradient-on-white safety. The wedge splits the project's identity from generic AI slop or it fails.
+
+The Wedge channels the **council of master designers** plus the **conglomerate of human visual arts** — Rynzhuk, Korpai, Kuznetsov, MDS, Locomotive, Obys, Clay, Ramotion, plus Bauhaus, Swiss typography, brutalism, Memphis, *ma*, Art Deco, illuminated manuscripts, Damascene metalwork, Constructivist propaganda, mid-century modernism. Plural in voices, singular in conviction.
+
+Six heats:
+1. **Distillation** — read Opus + Vow, produce a Soul Brief (3–5 emotional keywords + tonal anchor + refused tones)
+2. **Council fan-out** — three parallel design-apprentices, each channeling a distinct master archetype, return a Direction Card
+3. **Council verdict** — user picks one direction (or hybridizes via Other; the Wedge synthesizes into ONE)
+4. **Crystallization** — extends the touchstone-scaffold.html into the project's actual masterpiece (real Google Fonts, atmospheric backdrop, hero + primary task + moment of delight + token legend)
+5. **Refinement** — auto-invokes `/preen` for usability check; locks
+6. **Persist** — `[PROJECT]_Touchstone_V1.0.html` written; downstream conformance begins
+
+The Touchstone is **the standard**. Smith's apprentices inherit its tokens. The Pitch is rendered HTML through it. `/probe` and `/preen` load it for visual context. The wedge is driven once; what comes after conforms.
+
+Universal aesthetic principles propagate to `<forge>/learnings/global-patterns.md` during fold; project-specific Touchstones stay in their projects.
 
 ### The Warden — Master Tender
 
@@ -97,7 +120,7 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 |-----|-------------|
 | `/pry` | The Lever — relentless solution-finder that cracks "can't be done" claims (self-improving) |
 
-> The Masters (`/smith` and `/purge`) are documented at the top of this README — they're not arts, they're the ones who wield (Smith) and tend (Warden) the forge itself.
+> The Masters (`/smith`, `/wedge`, and `/purge`) are documented at the top of this README — they're not arts, they're the ones who wield (Smith), give visual form (Wedge), and tend (Warden) the forge itself.
 
 ## Task Skills
 
@@ -158,6 +181,7 @@ forge/
 │   ├── pry/               # The Lever — relentless solution-finder (art)
 │   ├── praise/            # Feedback router — closes the build-ship-learn loop (art)
 │   ├── smith/             # The Master Builder — autonomous product forging
+│   ├── wedge/             # The Master of Aesthetic — Touchstone (HTML masterpiece)
 │   ├── forge/             # The forge cycle SKILL.md + reference docs
 │   │   ├── SKILL.md               # /forge command
 │   │   ├── claude-code-rules.md   # Workflow rules
@@ -191,9 +215,10 @@ forge/
 
 **New idea?**
 ```
-/prime MyProject    → idea → pitch/opus → product blueprint
-/probe              → polished architecture
-/smith              → blueprint to running product (the full forge)
+/prime MyProject    → Opus → Vow → Touchstone (auto /wedge) → Pitch (HTML, if external) → Blueprint → Pattern
+/wedge              → drive the wedge into Touchstone (auto-invoked from /prime; explicit also)
+/probe              → polished Pattern (architecture)
+/smith              → Pattern + Touchstone → running product (the full forge)
 ```
 
 **Fresh machine?**

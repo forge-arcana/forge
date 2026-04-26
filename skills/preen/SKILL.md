@@ -29,6 +29,7 @@ Launch all in parallel (independent scans):
 3. **Check for design system**: look for theme files, design tokens, component libraries
 4. **Identify user flows**: read route definitions, navigation config, form handlers
 5. **Check for Pattern file**: glob for `*Pattern*.md` in cwd. If a Pattern exists (likely written by /probe), this run **appends** the UX section to it. If none exists, the report is returned inline and the user is told Pattern requires `/probe` on a Blueprint first.
+6. **Check for Touchstone**: glob for `[PROJECT]_Touchstone_V1.0.html` in cwd. If present, load it for visual context. The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. UX critique that contradicts the chosen aesthetic posture (e.g., suggesting a "playful microcopy tone" when the Touchstone is solemn editorial; arguing for a different motion philosophy than the Touchstone declares) is invalid. /preen evaluates usability *within* the Touchstone's frame, not against it. The Touchstone's direction is locked; only its execution within usability principles is critique-able.
 
 ## Arguments
 
