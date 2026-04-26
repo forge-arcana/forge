@@ -237,12 +237,38 @@ Skip silently if no Forge-worthy entries exist.
 
 For approved outgoing learning rows:
 
-**Genericize first** — strip all project names, paths, domains, business logic. See forge CLAUDE.md "No Project Names" rule.
+**Genericize first** — strip all project names, paths, domains, business logic. See forge CLAUDE.md "No Project Names" rule. Concrete checklist (the same things `fold-purity-check.sh` will block on):
+
+| Strip | Keep |
+|-------|------|
+| Project name (e.g., `MyApp`, `LegitCheck`) | The universal principle |
+| Contributor name (e.g., `Edward Tumaneng`) | The lesson itself |
+| Local currency + amount (e.g., `₱50/check`) | The pricing pattern (e.g., "per-event pricing") |
+| Project schema/field names (e.g., `submittedIp`, `references`) | The architectural rule (e.g., "co-locate derived fields with source signals") |
+| Competitor product names (e.g., `Vitay-model`) | The pattern (e.g., "on-demand workflow") |
+| Region-specific framing (e.g., "Philippines-facing", "PHP/Filipino lawyers") | The generalized principle with the region as one example among many |
+
+> **HARD RULE — `Forge-worthy: yes` is a flag, not a citation.**
+> NEVER append `**Forge-worthy**: yes — contributor: <Name> (<Project> session, <Date>)` lines to absorbed content. Attribution belongs in the PLAN/DONE table (rendered by `/forge`), never in the learning body itself. The body must read as a universal principle authored by no one in particular.
 
 > **HARD RULE — Write to forge, NOT the membrane.**
 > Append absorbed entries to `<forge>/learnings/<file>.md` (e.g., `/root/dev/forge/learnings/global-patterns.md`).
 > NEVER write to `~/.claude/learnings/` — that's the deployed copy, not the source of truth.
 > Forge is the source. The next `/forge` deploys forge → membrane. Writing to membrane silently skips forge, creating a permanent gap that every future inspection will flag — and no subsequent fold will fix it because the tracker marked the entries as processed.
+
+#### Purity gate (mandatory before each absorbed learning is written)
+
+After staging absorbed entries (and BEFORE finalizing them), run:
+```bash
+git -C <forge> add learnings/<file>.md
+bash <forge>/scripts/fold-purity-check.sh --staged
+```
+
+If the script exits non-zero, it lists the violations. Fix every one:
+- Re-genericize the flagged content
+- Add legitimate universal terms to the script's `ALLOWLIST_TERMS` if a flagged term is genuinely a well-known reference (e.g., a major framework, a standard API)
+
+Re-run until exit 0. **Do not unstage and commit anyway.** The script is the gate; bypassing it re-creates exactly the leak that prompted its existence (see `learnings/global-patterns.md` Exhibit A: "How a Project-Name Leak Happens, 2026-04-25").
 
 Target files in `<forge>/learnings/`:
 - `probe-learnings.md` — architecture
@@ -339,10 +365,20 @@ Never delete — archival is a move.
 
 1. **Conflict check**: `git -C <forge> diff --name-only --diff-filter=U`. If unresolved conflicts, STOP.
 2. **Stage** specific files with `git add <file>` (never `git add -A`).
-3. **Update context** in `<forge>/CLAUDE.md` Current Context section.
-4. **Compact check**: if CLAUDE.md > ~20k chars, overflow to `memory/`.
-5. **Commit**: descriptive message (what was absorbed, no project names). **No `Co-Authored-By: Claude` lines.**
-6. **Push decision**: `AskUserQuestion` — options: "Push to origin" / "Keep local".
+3. **Final purity gate** (catches anything 3e missed and any new content added in 3f/3g):
+   ```bash
+   bash <forge>/scripts/fold-purity-check.sh --staged
+   ```
+   If non-zero, do NOT proceed. Unstage offending content, re-genericize, restage, re-run until clean. This is a HARD gate.
+4. **Commit message purity check** — before invoking `git commit`, run:
+   ```bash
+   bash <forge>/scripts/fold-purity-check.sh --commit-msg "<message>"
+   ```
+   Commit messages have leaked project names and contributor names in the past. The check catches `Absorb 7 learnings from <Person> (<Project> session, ...)` patterns and similar. If non-zero, rewrite the message until clean.
+5. **Update context** in `<forge>/CLAUDE.md` Current Context section.
+6. **Compact check**: if CLAUDE.md > ~20k chars, overflow to `memory/`.
+7. **Commit**: descriptive message (what was absorbed, no project names, no contributor names). **No `Co-Authored-By: Claude` lines.**
+8. **Push decision**: `AskUserQuestion` — options: "Push to origin" / "Keep local".
 
 ## Phase 4: Project Scan & Divergence
 

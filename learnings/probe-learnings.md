@@ -57,21 +57,17 @@
 **Apply when**: Running `/probe` on any blueprint or architecture. The scaling runway should be part of every probe report.
 
 ## Fraud/Risk Fields Belong on the Event Table, Not the Entity Table (2026-04-25)
-**Learning**: When fraud detection fields (`fraudRiskScore`, `fraudFlagged`) are derived from per-submission signals (`submittedIp`, `submittedDevice`), they must live on the same table as those signals — not on the parent entity. Placing them on the entity (e.g., `references`) when the source data is on the event (e.g., `reference_responses`) forces either expensive joins or denormalization drift. The computation belongs where the evidence lives.
-**Apply when**: Any blueprint with fraud scoring, risk flagging, or audit fields — verify the scored fields and their source signals are co-located.
-**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+**Learning**: When fraud-detection fields (risk score, fraud flag) are derived from per-submission signals (IP, device, timestamp, fingerprint), they must live on the same table as those signals — not on the parent entity. Placing them on the entity when the source data is on the event forces either expensive joins or denormalization drift. The computation belongs where the evidence lives.
+**Apply when**: Any blueprint with fraud scoring, risk flagging, or audit fields — verify the scored fields and their source signals are co-located on the same table.
 
-## GCP Cloud Tasks → Cloud Run Authentication Must Use OIDC, Not Shared Secrets (2026-04-25)
-**Learning**: Using a shared `X-Internal-Secret` header for Cloud Tasks → Cloud Run authentication is an anti-pattern on GCP: secrets rotate manually, they can leak via logs, and they don't integrate with IAM auditing. The correct pattern is OIDC service account tokens — Cloud Tasks attaches a signed JWT from a dedicated service account (`cloud-tasks-invoker@PROJECT.iam.gserviceaccount.com`), and Cloud Run verifies it automatically when the endpoint is IAM-protected. Configuration: `oidcToken: { serviceAccountEmail, audience: CLOUD_RUN_URL }` in the task definition.
-**Apply when**: Any blueprint using GCP Cloud Tasks to invoke Cloud Run endpoints. Always specify OIDC auth; never use header-based shared secrets.
-**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+## Cloud Task Queues Should Use Platform IAM Tokens, Not Shared Secrets (2026-04-25)
+**Learning**: Using a shared-secret header (e.g., `X-Internal-Secret`) for cloud-task-queue → service authentication is an anti-pattern: secrets rotate manually, they can leak via logs, and they don't integrate with the platform's IAM auditing. The correct pattern is short-lived signed tokens — the task queue attaches a token from a dedicated service identity, and the receiving endpoint verifies it automatically when IAM-protected. Examples: GCP Cloud Tasks → Cloud Run uses `oidcToken: { serviceAccountEmail, audience: ENDPOINT_URL }`; AWS SQS → Lambda uses IAM execution roles; Azure Service Bus → Functions uses managed identity.
+**Apply when**: Any architecture using a cloud task queue to invoke a service endpoint. Always specify platform-native IAM tokens; never use header-based shared secrets.
 
-## Redis Rate Limiting Required from Day 1 for Cloud Run Multi-Instance Apps (2026-04-25)
-**Learning**: In-memory rate limiting (e.g., Hono's default in-memory store) silently breaks when Cloud Run scales beyond 1 instance — each instance maintains its own counter, so a user hitting multiple instances bypasses the limit by a factor of `max-instances`. The fix: Upstash Redis + `hono-rate-limiter` with `RedisStore`. This is not a scaling concern to defer; it's a Day 1 correctness issue for any app deployed on Cloud Run with default auto-scaling.
-**Apply when**: Any blueprint deploying a Node/Hono/Express server on Cloud Run with rate limiting. Always spec Redis-backed rate limiting, not in-memory.
-**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+## Rate Limiting Needs Shared State From Day 1 on Auto-Scaling Platforms (2026-04-25)
+**Learning**: In-memory rate-limit middleware silently breaks when a service scales beyond 1 instance — each instance maintains its own counter, so a client hitting multiple instances bypasses the limit by a factor of `max-instances`. This is not a scaling concern to defer; it's a Day 1 correctness issue for any app deployed on auto-scaling platforms (serverless containers, FaaS, managed compute). The fix: a shared store (Redis, Memcached, DynamoDB) backing the rate-limit middleware.
+**Apply when**: Any blueprint with rate limiting on an auto-scaling platform. Always spec shared-store rate limiting, never in-memory.
 
-## Philippine SMS Gateways May Not Accept Pre-Generated OTP Codes (2026-04-25)
-**Learning**: Better Auth's phone OTP plugin generates codes internally and passes them to a `sendOTP` callback. Philippine SMS gateways like Semaphore have their own OTP generation APIs and may reject pre-supplied codes that don't match their format or generation flow. Two paths: (A) use Better Auth's code generation + Semaphore's plain message API — `messages.create({ to, message: "Your OTP is: ${code}" })` — simplest and most reliable; (B) use Semaphore's OTP API and implement a custom OTP flow outside Better Auth. Path A is strongly preferred unless carrier-grade delivery is required.
-**Apply when**: Any Philippines-facing app using Better Auth phone OTP with Semaphore (or similar local gateways). Specify Path A in the blueprint.
-**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+## SMS Gateway OTP APIs May Reject Pre-Generated Codes From Auth Libraries (2026-04-25)
+**Learning**: Some SMS gateways have their own OTP generation APIs and reject codes pre-generated by your auth library — the formats, character sets, or expiry semantics don't match. Two paths: (A) use the auth library's code generation + the gateway's plain SMS message API (e.g., `Your OTP is: ${code}`) — simplest and most reliable; (B) use the gateway's OTP API and implement a custom flow outside the auth library. Path A is strongly preferred unless carrier-grade delivery features (delivery receipts, network priority routing) are required.
+**Apply when**: Integrating any auth library's phone OTP feature with a regional SMS gateway. Verify the gateway accepts pre-generated codes before committing to the auth library's native flow.
