@@ -55,3 +55,23 @@
 ## Scalability Analysis Belongs in /probe, Not /press or /pound (2026-04-02)
 **Learning**: Scalability is an architecture concern ("does this design scale?"), not an ops concern ("are we ready to deploy?"). It belongs in `/probe` as a "Scaling Runway" evaluation section that assesses: (1) stateless request handling, (2) database scaling path (pooling → replicas → partitioning → sharding), (3) external dependency scaling (AI provider, CDN, queue), (4) what user count triggers each scaling tier. Present as a table: user range → required change → effort level. `/press` evaluates current state (go-live readiness); `/probe` evaluates future state (design validity). A scaling ceiling is a design flaw, not a deployment gap.
 **Apply when**: Running `/probe` on any blueprint or architecture. The scaling runway should be part of every probe report.
+
+## Fraud/Risk Fields Belong on the Event Table, Not the Entity Table (2026-04-25)
+**Learning**: When fraud detection fields (`fraudRiskScore`, `fraudFlagged`) are derived from per-submission signals (`submittedIp`, `submittedDevice`), they must live on the same table as those signals — not on the parent entity. Placing them on the entity (e.g., `references`) when the source data is on the event (e.g., `reference_responses`) forces either expensive joins or denormalization drift. The computation belongs where the evidence lives.
+**Apply when**: Any blueprint with fraud scoring, risk flagging, or audit fields — verify the scored fields and their source signals are co-located.
+**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+
+## GCP Cloud Tasks → Cloud Run Authentication Must Use OIDC, Not Shared Secrets (2026-04-25)
+**Learning**: Using a shared `X-Internal-Secret` header for Cloud Tasks → Cloud Run authentication is an anti-pattern on GCP: secrets rotate manually, they can leak via logs, and they don't integrate with IAM auditing. The correct pattern is OIDC service account tokens — Cloud Tasks attaches a signed JWT from a dedicated service account (`cloud-tasks-invoker@PROJECT.iam.gserviceaccount.com`), and Cloud Run verifies it automatically when the endpoint is IAM-protected. Configuration: `oidcToken: { serviceAccountEmail, audience: CLOUD_RUN_URL }` in the task definition.
+**Apply when**: Any blueprint using GCP Cloud Tasks to invoke Cloud Run endpoints. Always specify OIDC auth; never use header-based shared secrets.
+**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+
+## Redis Rate Limiting Required from Day 1 for Cloud Run Multi-Instance Apps (2026-04-25)
+**Learning**: In-memory rate limiting (e.g., Hono's default in-memory store) silently breaks when Cloud Run scales beyond 1 instance — each instance maintains its own counter, so a user hitting multiple instances bypasses the limit by a factor of `max-instances`. The fix: Upstash Redis + `hono-rate-limiter` with `RedisStore`. This is not a scaling concern to defer; it's a Day 1 correctness issue for any app deployed on Cloud Run with default auto-scaling.
+**Apply when**: Any blueprint deploying a Node/Hono/Express server on Cloud Run with rate limiting. Always spec Redis-backed rate limiting, not in-memory.
+**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+
+## Philippine SMS Gateways May Not Accept Pre-Generated OTP Codes (2026-04-25)
+**Learning**: Better Auth's phone OTP plugin generates codes internally and passes them to a `sendOTP` callback. Philippine SMS gateways like Semaphore have their own OTP generation APIs and may reject pre-supplied codes that don't match their format or generation flow. Two paths: (A) use Better Auth's code generation + Semaphore's plain message API — `messages.create({ to, message: "Your OTP is: ${code}" })` — simplest and most reliable; (B) use Semaphore's OTP API and implement a custom OTP flow outside Better Auth. Path A is strongly preferred unless carrier-grade delivery is required.
+**Apply when**: Any Philippines-facing app using Better Auth phone OTP with Semaphore (or similar local gateways). Specify Path A in the blueprint.
+**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)

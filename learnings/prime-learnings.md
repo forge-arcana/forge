@@ -55,3 +55,18 @@
 ## Research Before Asking The Founder To Research (2026-04-25)
 **Learning**: Prime is here to estimate, project, and hypothesize on the founder's behalf — not to push discovery legwork back at them. For anything publicly searchable (market size, competitor landscape, regulatory requirements, precedent products) — WebSearch first, build a defensible hypothesis with sources, then present it for the founder to confirm, refine, or correct. The founder brings *lived insight* (what's broken, who hurts, why now); Prime brings *researched context* (numbers, landscape, precedent). Don't reverse the roles by saying "go talk to 5 customers first" or "let me know once you've done the market research."
 **Apply when**: Market sizing, competitor mapping, regulatory questions, or any domain context discovery. Always research-first, ask-second. Reserve founder questions for nuance the internet doesn't capture (cultural dynamics, unindexed local players, on-the-ground reality).
+
+## On-Demand Reference Checking Bypasses Two-Sided Marketplace Cold Start (2026-04-25)
+**Learning**: Two-sided reference marketplaces (landlord checks tenant's past landlords) face a cold-start problem if they require pre-existing data. The Vitay-model solution: make checks fully on-demand — the requesting party (landlord) triggers the check, the subject (tenant) nominates their own references, references respond to a one-time questionnaire. Zero pre-existing data required. Each check is self-contained and generates its own reference chain from scratch. The value proposition is the automation and scoring, not the database.
+**Apply when**: Any blueprint involving reference checks, background checks, or reputation systems. On-demand beats pre-populated; let the subject nominate their own references.
+**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+
+## Per-Check Pricing Fits Low-Frequency, High-Stakes Services Better Than Subscription (2026-04-25)
+**Learning**: Subscription pricing creates friction when the service is used infrequently (tenant changes every few years) but the stakes are high when used. A ₱50/check model aligns cost with value delivery: landlords pay only when actively vetting a candidate, not monthly for a service they're not using. Subscription fatigue is real — a recurring charge for something used twice a year generates churn. Per-check also lowers the activation barrier: no commitment, no trial, just pay and go.
+**Apply when**: Pricing any service that is event-driven rather than continuous. Evaluate subscription vs. per-event based on usage frequency and decision stakes.
+**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
+
+## Philippine DPA (RA 10173) Compliance Is a Data Model Constraint, Not a Feature (2026-04-25)
+**Learning**: For platforms handling sensitive personal information in the Philippines (rental history, employment history, Gov ID), RA 10173 compliance must be designed into the data model from Day 1: explicit consent with timestamps, data subject rights (view + dispute + deletion), data retention schedule with automated purge, and NPC registration before public launch. These are not checkbox features to add later — the consent log, dispute table, and deletion schedule are architectural requirements that affect every table touching personal data.
+**Apply when**: Any Philippines-facing product handling personal or sensitive personal information. Treat RA 10173 as a design constraint, build the consent infrastructure before any user-facing features.
+**Forge-worthy**: yes — contributor: Edward Tumaneng (LegitCheck session, 2026-04-25)
