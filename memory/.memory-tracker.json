@@ -1,11 +1,14 @@
 {
-  "lastRun": "2026-03-28T00:00:00Z",
+  "lastRun": "2026-04-27T00:00:00Z",
   "skippedFiles": [
     "audiences.md",
     "brand-voice.md",
     "channel-playbooks.md",
     "vendor-notes.md",
     "2026-03-28-forge-council-response.md",
-    "2026-03-28-karpathy-assessment.md"
+    "2026-03-28-karpathy-assessment.md",
+    "feedback_writing_style.md",
+    "project_ulit.md",
+    "user_paula.md"
   ]
 }
