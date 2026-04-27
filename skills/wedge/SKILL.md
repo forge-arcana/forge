@@ -1,6 +1,6 @@
 ---
 name: wedge
-description: "Master of aesthetic — drives a single decisive thrust that splits the project's identity from generic AI slop. Reads Opus + Vow, summons a council of master designers, and forges the Touchstone — a single HTML masterpiece that persists as the visual constitution every downstream artifact (Pitch, Smith-built screens) conforms to. TRIGGER when: user has an Opus and Vow and wants the project to have a soul-bearing visual face before scope or architecture lock."
+description: "Master of aesthetic. Drives a single decisive thrust that splits the project's identity from generic AI slop. Reads Opus + Vow, summons a council of three design-apprentices on Family × Tone commissions, and forges the Touchstone — paired artifacts (HTML vision + MD typed contract per DESIGN.md spec) that persist as the visual constitution every downstream artifact (Pitch, Smith-built screens) conforms to. TRIGGER when: user has an Opus and Vow and wants the project to have a soul-bearing visual face before scope or architecture lock."
 user-invocable: true
 ---
 <!-- model: opus -->
