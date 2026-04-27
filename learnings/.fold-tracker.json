@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-04-26T23:20:17Z",
+  "lastRun": "2026-04-27T00:00:00Z",
   "processedEntries": [
     "WSL Path Compatibility",
     "Disable Rate Limiting in E2E Test Mode",
@@ -84,7 +84,8 @@
     "Patchright Cannot Solve Cloudflare's Current JS Challenge Tier",
     "The Lever's Three Hats Must All Be Worn Before Conceding a Wall",
     "DNS, Email, and App Hosting Are Fully Decoupled — Don't Bundle Them",
-    "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack"
+    "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
+    "Avoid Em-Dashes and Tricolon Negation Cadence in User-Facing Copy"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

@@ -197,7 +197,7 @@ if [[ "$1" == "--commit-msg" ]]; then
   scan_file_or_text "<commit message>" "$*"
 
 elif [[ "$1" == "--staged" ]]; then
-  STAGED_FILES=$(git -C "$FORGE_DIR" diff --cached --name-only | grep -E '^(learnings/|memory/)' || true)
+  STAGED_FILES=$(git -C "$FORGE_DIR" diff --cached --name-only | grep -E '^(learnings/|memory/)' | grep -vE '/\.[^/]+$' || true)
   if [[ -z "$STAGED_FILES" ]]; then
     exit 0  # nothing relevant staged
   fi
