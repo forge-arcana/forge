@@ -1,0 +1,27 @@
+# Forge — Recent History (Archive)
+
+> Older "Recent" entries moved from `CLAUDE.md` during the 2026-04-27 wrap. Kept inline there: only the most recent ~5 entries. Anything older lives here.
+
+## 2026-04-26 — WA-001 forensic backing
+**WA-001 forensic backing** added at `evidence.md`. Genericized timeline of the OAuth refresh-token race incident (origin host's project name, user, session UUIDs stripped; technical substance preserved): two Claude Code processes at slightly different patch versions sharing one `.credentials.json`, second process rotates refresh token mid-`/smith`, first 401s. Pairs with WORKAROUNDS.md WA-001, deletes when Anthropic ships a fix.
+
+## 2026-04-26 — Layer 2 OAuth race protection (user-level, WSL2)
+Forge-internal preflight only protected forge skills; parallel research agents spawned from regular Claude chats still raced. New SessionStart hook calls `~/.claude/scripts/user-agent-preflight.sh` on every Claude session, which ensures a single user-scope **scheduled-refresh** process is alive (sleeps until `expiresAt - 30min`, refreshes once, repeats, not polling). Shipped as a unified `scripts/agent-token-scheduler.sh` with two modes (`--user`, `--parent`), replacing the old polling keeper. Warmup retrofitted with `flock` to close a race we were re-creating ourselves under SessionStart bursts. WORKAROUNDS.md grows a `Side effects` block per WA entry, it IS the manifest now (no separate JSON). `/forge` cycle reads `sync-workaround-side-effects.sh` to surface install/uninstall rows in the PLAN table per WA. Hook only surfaced on WSL2; script side-gate stays for dotfile-clone defense. Failure-recovery sentinel: `~/.claude/.token-stale` printed loud by every preflight after 3 consecutive refresh failures.
+
+## 2026-04-26 — Mechanical enforcement of "No Project Names in Forge"
+After a fold-phase run leaked project name, contributor name, local currency, project schema names, and competitor name into seven absorbed entries. Genericized the seven entries (Exhibit A in `learnings/global-patterns.md`). New `scripts/fold-purity-check.sh` scans staged forge content + commit messages for: currency-symbol prices, attribution lines, CamelCase project names, project-specific backticked identifiers, `Firstname Lastname` patterns. Wired into forge SKILL.md Phase 3e (per-learning gate) and Phase 3i (final commit gate, including commit-message check). Prose rules without enforcement get ignored mid-flow; the next layer is mechanical, not louder prose.
+
+## 2026-04-26 — Token-race workaround generalized to all subagent-spawning skills
+After `/temper` hit the same bug. Promoted to forge protocol pre-flight, covers all 9 deployed arts + /purge automatically. New `agent-preflight.sh` one-liner; smith/temper/forge-cycle/cicd call it explicitly. Idempotent (nested skills don't double-spawn keepers). Scripts renamed `smith-token-*` → `agent-token-*`. Learning moved from `smith-learnings.md` → `global-patterns.md` (universal pattern). Companion change: `/purge` elevated from "forge-internal aside" to **The Warden**, master tender of the forge, parallel to The Smith (master builder). README + protocol + CLAUDE.md restructured into "The Masters" sections. Purge's four dimensions also parallelized via subagent fan-out (evidence-then-fan-out pattern, matches /temper and /pound).
+
+## 2026-04-26 — `/smith` token-race workaround
+Preflight token warmup + background keeper proactively refresh OAuth tokens to defeat Claude Code's documented refresh-token race (issues #43392, #24317). New infrastructure: `WORKAROUNDS.md` registry at forge root + `scripts/forge-workarounds-check.sh` (time-gated weekly upstream check), banner shown above /forge PLAN table on every cycle. Removes itself the moment Anthropic ships a fix, full removal procedure in WORKAROUNDS.md.
+
+## 2026-04-25 — `/prime` polished from team feedback
+Three new HARD RULES: (1) **never infer founder identity** from IDE/extension/git/email metadata, a privacy boundary; (2) **no human-scale dev estimates**, banned questions like "what's your timeline?" because /smith builds MVPs in hours, replaced with priority/scope/external-milestone questions; (3) **research before asking the founder to research**, Prime WebSearches market data, competitors, and regulations first, then presents a hypothesis for the founder to confirm. Reverses the "ask the founder" patterns in pitch-framework and blueprint-framework. The founder brings lived insight; Prime brings researched context.
+
+## 2026-04-24 — `/prime` lineage formalized
+**Opus** (origin manuscript, continuous through Phases 1–2) → **Vow** (distilled pledge + viability thread, always) → **Pitch** (when external audience matters) → **Blueprint** (execution skeleton) → **Pattern** (architecture + UX decisions /smith consumes). *"My Magnum Opus"* is the sum of it all. Downstream alignment: `/probe` writes the Architecture section of Pattern (no more `-probed.md` copies), `/preen` appends the UX section to the same file. `/pitch` art's artifact name renamed `PitchForge` → `Pitch`. `/smith` preflight now reads Blueprint + Pattern together; Pattern gate auto-invokes `/probe` (and `/preen` if UI-facing) when missing.
+
+## 2026-04-23 — Unified `/mark` + `/cast` + `/fold` into single `/forge` cycle command
+Retired three top-level commands in favour of one bidirectional negotiation. Motion names (mark / cast / fold) survive as internal phases. The command absorbs session toggle via `/forge on|off`. Liturgical framing: *in the forge, we forge.*
