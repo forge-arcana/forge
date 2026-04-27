@@ -11,7 +11,7 @@ At the center of the forge stand three masters. Distinct domains, complementary 
 | Title | Command | Role |
 |-------|---------|------|
 | **The Smith** | `/smith` | Master builder — wields every art, summons apprentices, forges the product through iterative heats |
-| **The Wedge** | `/wedge` | Master of aesthetic — drives a single decisive thrust that splits the project's identity from generic AI slop, crystallized into the Touchstone (paired HTML vision + MD typed contract) |
+| **The Wedge** | `/wedge` | Master of aesthetic. Drives a single decisive thrust that splits the project's identity from generic AI slop, crystallized into the Touchstone (paired HTML vision and MD typed contract). |
 | **The Warden** | `/purge` | Master tender — guards the forge itself against drift, staleness, contamination, and bloat |
 
 ### The Smith — Master Builder
@@ -39,22 +39,22 @@ The more the smith works, the sharper everything gets. Never-ending mastery of i
 
 ### The Wedge — Master of Aesthetic
 
-`/wedge` is the user's proxy for visual identity. Reads the **Opus + Vow** — the manuscript of the idea and the pledge that grounds it — and forges from them a **Touchstone**: two paired artifacts that together define the project's visual constitution. The HTML carries the *vision* (a self-contained masterpiece — typography, motion, atmosphere, the soul made visible). The MD carries the *contract* (DESIGN.md format with typed YAML tokens that downstream skills consume programmatically). Soul and contract; vision and machinery.
+`/wedge` is the user's proxy for visual identity. It reads the **Opus + Vow** (the manuscript of the idea and the pledge that grounds it) and forges from them a **Touchstone**: two paired artifacts that together define the project's visual constitution. The HTML is the *vision*, a self-contained masterpiece carrying the typography, motion, atmosphere, the soul made visible. The MD is the *contract*, a DESIGN.md-format spec with typed YAML tokens that downstream skills consume programmatically. Soul and contract; vision and machinery.
 
-A wedge has one edge. Driven once, driven hard, driven straight — it cannot hedge and remain a wedge. The Wedge's HARD RULES are *commit to ONE direction* (no "modern but classic", no fused aesthetics, no purple-gradient-on-white safety) and *intentionality over intensity* (a refined-minimal direction is a legitimate commit; the failure mode is hedging in the middle, not picking the wrong end). Implementation matches vision — code density tracks the chosen tone.
+A wedge has one edge. Driven once, driven hard, driven straight, it cannot hedge and remain a wedge. The Wedge's HARD RULES are *commit to ONE direction* (against "modern but classic", fused aesthetics, purple-gradient-on-white safety) and *intentionality over intensity* (a refined-minimal direction is a legitimate commit; the failure mode is hedging in the middle, not picking the wrong end). Implementation matches vision: code density tracks the chosen tone.
 
-The Wedge channels the **council of master designers** plus the **conglomerate of human visual arts** — Rynzhuk, Korpai, Kuznetsov, MDS, Locomotive, Obys, Clay, Ramotion, plus Bauhaus, Swiss typography, brutalism, Memphis, *ma*, Art Deco, illuminated manuscripts, Damascene metalwork, Constructivist propaganda, mid-century modernism. Plural in voices, singular in conviction.
+The Wedge channels the **council of master designers** plus the **conglomerate of human visual arts**: Rynzhuk, Korpai, Kuznetsov, MDS, Locomotive, Obys, Clay, Ramotion, plus Bauhaus, Swiss typography, brutalism, Memphis, *ma*, Art Deco, illuminated manuscripts, Damascene metalwork, Constructivist propaganda, mid-century modernism. Plural in voices, singular in conviction.
 
 Seven heats:
-1. **Distillation** — read Opus + Vow, produce a WedgeBrief (3–5 emotional keywords + tonal anchor + memorable signature + refused tones)
-2. **Council fan-out** — three parallel design-apprentices, each given a Family × Tone commission, return a Direction Card
-3. **Council verdict** — user picks one direction (or hybridizes via Other; the Wedge synthesizes into ONE)
-4. **Crystallization** — extends the touchstone-scaffold.html into the project's actual masterpiece — code density calibrated to the chosen tone (maximalist / minimal / atmospheric)
-5. **Codification** — writes the companion `[PROJECT]_Touchstone_V1.0.md` (DESIGN.md format: YAML token contract + prose rationale). The HTML carries the soul; the MD carries the contract.
-6. **Refinement** — auto-invokes `/preen` for usability check + Implementation-Matches-Vision check + HTML↔MD parity check; locks
-7. **Persist & Hand-Off** — both `[PROJECT]_Touchstone_V1.0.html` and `[PROJECT]_Touchstone_V1.0.md` written; downstream conformance begins (Smith/Pitch/Probe/Preen consume the MD's YAML programmatically)
+1. **Distillation**: read Opus + Vow, produce a WedgeBrief (3 to 5 emotional keywords, tonal anchor, memorable signature, refused tones).
+2. **Council fan-out**: three parallel design-apprentices, each given a Family × Tone commission, return a Direction Card.
+3. **Council verdict**: user picks one direction (or hybridizes via Other; the Wedge synthesizes into ONE).
+4. **Crystallization**: extends the touchstone-scaffold.html into the project's actual masterpiece, with code density calibrated to the chosen tone (maximalist, minimal, or atmospheric).
+5. **Codification**: writes the companion `[PROJECT]_Touchstone_V1.0.md` (DESIGN.md format: YAML token contract plus prose rationale). The HTML carries the soul; the MD carries the contract.
+6. **Refinement**: auto-invokes `/preen` for usability check, Implementation-Matches-Vision check, and HTML ↔ MD parity check; locks.
+7. **Persist & Hand-Off**: writes both `[PROJECT]_Touchstone_V1.0.html` and `[PROJECT]_Touchstone_V1.0.md`; downstream conformance begins (Smith/Pitch/Probe/Preen consume the MD's YAML programmatically).
 
-The Touchstone is **the standard**. Smith's apprentices inherit the MD's tokens. The Pitch is rendered HTML through it. `/probe` and `/preen` load both for visual + contract context. The wedge is driven once; what comes after conforms.
+The Touchstone is **the standard**. Smith's apprentices inherit the MD's tokens. The Pitch is rendered HTML through it. `/probe` and `/preen` load both for visual and contract context. The wedge is driven once; what comes after conforms.
 
 Universal aesthetic principles propagate to `<forge>/learnings/global-patterns.md` during fold; project-specific Touchstones stay in their projects.
 
@@ -223,6 +223,7 @@ forge/
 **New idea?**
 ```
 /prime MyProject    → Opus → Vow → Touchstone HTML+MD (via /wedge) → Pitch (rendered through Touchstone) → Blueprint → Pattern → Smith
+                      (Touchstone produces both .html for vision and .md for the typed token contract.)
 /wedge              → drive the wedge into Touchstone (auto-invoked from /prime; explicit also)
 /probe              → polished Pattern (architecture)
 /smith              → Pattern + Touchstone → running product (the full forge)
