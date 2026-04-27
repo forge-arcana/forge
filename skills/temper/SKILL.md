@@ -68,13 +68,13 @@ CODE: [problematic code snippet max 5 lines, poke only — omit for press]
 FINDING_END
 ```
 
-### Poke Passes
+### Shared subagent prompt template
 
-Spawn N subagents in parallel (where N = pass count), each with this prompt template:
+Spawn N subagents per art (poke + press) in a single parallel batch. Each subagent receives the same scaffold with five variant slots:
 
 ```
-You are a staff engineer who learned at Uncle Bob's knee. Analyze the following
-project evidence for code quality and tech debt issues.
+You are {{PERSONA}}. Analyze the following project evidence
+for {{TASK_DESCRIPTION}}.
 NEVER use && or ; to chain bash commands.
 Do NOT run forge-scan.sh — evidence is provided below.
 
@@ -85,54 +85,28 @@ STACK GUIDE:
 Read <forge>/skills/forge/stack-guide.md for tech reference.
 
 LEARNINGS:
-Read <forge>/learnings/poke-learnings.md if it exists.
+Read <forge>/learnings/{{LEARNINGS_FILE}} if it exists.
 
 EVIDENCE:
-[paste POKE_EVIDENCE]
+[paste {{EVIDENCE_VAR}}]
 
 REVIEW DIMENSIONS:
-1. SOLID & Strategy Patterns
-2. Band-Aids (including source-field fallbacks and client-supplied actor identity)
-3. Framework Misuse
-4. Logging Hygiene
-5. Clean Functions
-6. Dependency Direction & Law of Demeter
-7. Composition over Inheritance
+{{DIMENSIONS_LIST}}
 
-For each finding, output EXACTLY the FINDING format (with CODE, without SCORE).
+For each finding, output EXACTLY the FINDING format ({{FINDING_VARIANT}}).
 Output ONLY findings. No preamble, no summary, no commentary.
 ```
 
-### Press Passes
+**Variant fills:**
 
-Spawn N subagents in parallel, each with this prompt template:
-
-```
-You are a staff engineer performing a pre-launch readiness assessment.
-Analyze the following project evidence across 7 readiness dimensions.
-NEVER use && or ; to chain bash commands.
-Do NOT run forge-scan.sh — evidence is provided below.
-
-PROJECT CONTEXT:
-[paste project CLAUDE.md content]
-
-STACK GUIDE:
-Read <forge>/skills/forge/stack-guide.md for tech reference.
-
-LEARNINGS:
-Read <forge>/learnings/press-learnings.md if it exists.
-
-EVIDENCE:
-[paste PRESS_EVIDENCE]
-
-REVIEW DIMENSIONS:
-1. Security  2. Scalability  3. Operations  4. Compliance
-5. Observability  6. Deployment  7. Documentation
-
-For each dimension, assign a score 1-5 (1=not addressed, 5=excellent).
-For each finding, output EXACTLY the FINDING format (with SCORE, without CODE).
-Output ONLY findings. No preamble, no summary, no commentary.
-```
+| Slot | Poke | Press |
+|---|---|---|
+| `PERSONA` | "a staff engineer who learned at Uncle Bob's knee" | "a staff engineer performing a pre-launch readiness assessment" |
+| `TASK_DESCRIPTION` | "code quality and tech debt issues" | "go-live readiness across 7 dimensions (assign each a score 1-5, 1=not addressed, 5=excellent)" |
+| `LEARNINGS_FILE` | `poke-learnings.md` | `press-learnings.md` |
+| `EVIDENCE_VAR` | `POKE_EVIDENCE` | `PRESS_EVIDENCE` |
+| `DIMENSIONS_LIST` | `1. SOLID & Strategy Patterns / 2. Band-Aids (including source-field fallbacks and client-supplied actor identity) / 3. Framework Misuse / 4. Logging Hygiene / 5. Clean Functions / 6. Dependency Direction & Law of Demeter / 7. Composition over Inheritance` | `1. Security  2. Scalability  3. Operations  4. Compliance / 5. Observability  6. Deployment  7. Documentation` |
+| `FINDING_VARIANT` | "with CODE, without SCORE" | "with SCORE, without CODE" |
 
 **Important**: Launch ALL subagents (poke + press) in a single parallel batch. Do not wait for poke to finish before starting press.
 

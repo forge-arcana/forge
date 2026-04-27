@@ -89,9 +89,9 @@ The smith learns three things independently: how to orchestrate (build order, he
 
 ### The Wedge — Master of Aesthetic
 
-Where the Smith forges the bones, the Wedge gives the work its face. It reads the Opus (origin manuscript) and the Vow (pledge), summons a council of three master-designer apprentices each channeling a distinct archetype from the conglomerate of human visual arts, presents three aesthetic directions for the user to pick, and crystallizes the chosen direction into the **Touchstone** — a single self-contained HTML masterpiece (real fonts, atmospheric backdrop, orchestrated motion) that persists as the project's visual constitution.
+Where the Smith forges the bones, the Wedge gives the work its face. It reads the Opus (origin manuscript) and the Vow (pledge), summons a council of three master-designer apprentices each commissioned with a distinct Family × Tone pairing from the conglomerate of human visual arts, presents three aesthetic directions for the user to pick, and crystallizes the chosen direction into the **Touchstone** — paired artifacts that persist as the project's visual constitution: an HTML vision masterpiece (the soul — typography, motion, atmosphere appropriate to the chosen tone) and a typed `Touchstone.md` contract (DESIGN.md format with YAML tokens that every downstream artifact — Pitch HTML, Smith-built screens — reads programmatically).
 
-A wedge has one edge. Driven once, driven hard, driven straight — it cannot hedge and remain a wedge. The Wedge's first HARD RULE is *commit to ONE direction*: no fused aesthetics, no purple-on-white safety. It splits the project's identity from generic AI slop or it fails. Smith conforms; the Touchstone is the standard.
+A wedge has one edge. Driven once, driven hard, driven straight — it cannot hedge and remain a wedge. The Wedge's HARD RULES are *commit to ONE direction* (no fused aesthetics, no purple-on-white safety) and *intentionality over intensity* (a refined-minimal direction is a legitimate commit; the failure mode is hedging in the middle, not picking the wrong end). Implementation matches vision — code density tracks the chosen tone. Smith conforms; the Touchstone is the standard.
 
 ### The Warden — Master Tender
 

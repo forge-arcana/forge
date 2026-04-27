@@ -118,7 +118,7 @@ Above the arts stand three masters — distinct domains, complementary roles. Th
 
 Smith consumes a probed Blueprint + Pattern (from `/prime` + `/probe` + `/preen`) plus a Touchstone (from `/wedge`) and autonomously forges the product through iterative **heats** — cycles of plan, build, evaluate, fix. It summons **apprentices** (subagents) for parallel work, selects arts by escalation ladder, and converges on perfection through a relentless final gate. The arts sharpen themselves through smith's repeated use. The more the smith works, the sharper everything gets.
 
-When a Touchstone exists, Smith extracts its `:root` token block and binds every UI-facing apprentice to those tokens. Apprentices that introduce non-Touchstone fonts, colors, or motion are rejected and re-tasked.
+When a Touchstone exists, Smith reads `[PROJECT]_Touchstone_V1.0.md` for the typed token contract (YAML frontmatter — colors, typography, spacing, components — plus Do's-and-Don'ts) and binds every UI-facing apprentice to those tokens AND the project-specific Do's/Don'ts. The HTML is consulted for visual reference. Apprentices that introduce non-Touchstone fonts, colors, motion, or violate a Do/Don't are rejected and re-tasked.
 
 Smith has its own learning membrane (three layers: orchestration, delegation, art proficiency) and invokes `/wrap` at milestones autonomously. See `skills/smith/SKILL.md` for the full architecture.
 
@@ -126,11 +126,11 @@ Smith has its own learning membrane (three layers: orchestration, delegation, ar
 
 `/wedge` is the user's proxy for visual identity. Wedge is not an art. It is the master that drives a single decisive thrust which separates the project's identity from generic AI slop.
 
-Wedge reads the **Opus + Vow** — the manuscript and the pledge — and from them runs a council of three parallel design-apprentices, each channeling a distinct master archetype from the conglomerate of human visual arts. The user picks one direction (or hybridizes via Other; the Wedge synthesizes into ONE — no two-aesthetics-fused). The crystallization heat builds `[PROJECT]_Touchstone_V1.0.html` — a single self-contained masterpiece that persists as the visual constitution.
+Wedge reads the **Opus + Vow** — the manuscript and the pledge — and from them runs a council of three parallel design-apprentices, each given a Family × Tone commission from the conglomerate of human visual arts. The user picks one direction (or hybridizes via Other; the Wedge synthesizes into ONE — no two-aesthetics-fused). Two later heats build the Touchstone in two paired forms: `[PROJECT]_Touchstone_V1.0.html` (the *vision* — a self-contained masterpiece) and `[PROJECT]_Touchstone_V1.0.md` (the *contract* — DESIGN.md format with typed YAML tokens + project-specific Do's/Don'ts). Together they persist as the visual constitution; downstream skills consume the MD programmatically and reference the HTML for soul.
 
-The Wedge enforces HARD RULES mechanically: banned defaults (no Inter/Roboto/Space Grotesk, no purple-on-white), required substance (distinctive font pairing, dominant + sharp accent, atmospheric background, intentional motion), commit to ONE direction (no hedging), vary across projects (never converge on a house style), soul before style.
+The Wedge enforces HARD RULES mechanically: banned defaults (no Inter/Roboto/Space Grotesk, no purple-on-white), required substance (tone-conditional — restraint counts as substance), commit to ONE direction (no hedging), vary across projects (never converge on a house style), soul before style, intentionality over intensity (hedging in the middle is the failure mode, not picking the wrong end), implementation matches vision (code density tracks chosen tone).
 
-See `skills/wedge/SKILL.md` for the full six-heat process.
+See `skills/wedge/SKILL.md` for the full seven-heat process.
 
 ### The Warden — Master Tender
 

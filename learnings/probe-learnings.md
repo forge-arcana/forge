@@ -4,17 +4,9 @@
 
 <!-- Add learnings below this line -->
 
-## Drizzle Programmatic Migration Journal Schema (2026-03-15)
-**Learning**: Drizzle's `migrate()` stores applied migrations in schema `drizzle` (not `public`) in table `__drizzle_migrations`. When switching an existing DB from `drizzle-kit push` to versioned migrations, seed the journal by creating the `drizzle` schema + table and inserting a row for the baseline migration. The migrator compares `created_at` (bigint timestamp) to decide which migrations to run.
-**Apply when**: Transitioning from drizzle-kit push to versioned migrations on an existing database.
-
-## Migration Fixup Scripts Must Guard Against Fresh DBs (2026-03-15)
-**Learning**: Pre-migration fixup SQL (e.g., `ALTER TABLE X ADD COLUMN IF NOT EXISTS`) crashes on fresh databases where the base table doesn't exist yet. Always wrap fixups in a table-existence check (`SELECT 1 FROM information_schema.tables WHERE table_name='X'`). Only run fixups when the table exists (i.e., DB was created via a different mechanism); skip on fresh DBs where the initial migration creates everything from scratch.
-**Apply when**: Writing database migration fixup or pre-migration scripts that may run against both existing and fresh databases.
-
-## Drizzle Migration Strategy: Versioned for Persistent, Push for Ephemeral (2026-03-19)
-**Learning**: Use versioned migrations (`db:migrate`) for production and any persistent database. Reserve `drizzle-kit push` only for ephemeral/throwaway databases (CI test runs, local dev reset). Mixing push and migrate on the same persistent DB causes drift — push doesn't track migration history, so `migrate()` can't know what's already applied. Deploy pipelines should auto-stamp the baseline migration before running `db:migrate` on databases that were originally created via push.
-**Apply when**: Setting up a Drizzle project's migration strategy, or transitioning from push-only to versioned migrations.
+## Drizzle Migration Operations Across Fresh and Existing DBs (2026-03-19)
+**Learning**: Three rules together govern safe Drizzle migrations: (1) **Versioned for persistent, push for ephemeral** — `db:migrate` for production and any persistent DB; `drizzle-kit push` only for throwaway DBs (CI test runs, local dev reset). Mixing on the same persistent DB causes drift, since push doesn't track history. (2) **Seed the journal when transitioning** — Drizzle's `migrate()` stores history in schema `drizzle` table `__drizzle_migrations`; when switching from push to versioned, create the schema/table and insert a row for the baseline migration so the migrator's `created_at` comparison knows what's already applied. Deploy pipelines should auto-stamp the baseline before running `db:migrate` on push-originated DBs. (3) **Guard fixup scripts against fresh DBs** — `ALTER TABLE` fixups crash when the base table doesn't exist yet; always wrap in `SELECT 1 FROM information_schema.tables WHERE table_name='X'` so the fixup only runs when the table is present.
+**Apply when**: Any project transitioning from drizzle-kit push to versioned migrations, or operating Drizzle migrations across both fresh and existing databases.
 
 ## Supabase RLS Must Use JWT Claims, Not Subqueries (2026-03-28)
 **Learning**: RLS policies with subqueries like `WHERE firm_id = (SELECT firm_id FROM profiles WHERE id = auth.uid())` re-execute the subquery per row — O(N) instead of O(1). The fix: store `firm_id` and `role` as custom JWT claims via a Supabase Auth hook, then use `auth.jwt()->'app_metadata'->>'firm_id'` in policies. This is a constant comparison with no subquery. Mark helper functions as `STABLE` not `IMMUTABLE` to avoid stale cache issues within transactions.
@@ -36,9 +28,9 @@
 **Learning**: Python ML libraries (speech processing, embeddings, computer vision) often have no JavaScript/WebView implementation path. When a blueprint specifies an ML model for on-device mobile use in a hybrid app, verify the language ecosystem compatibility first. ONNX export + native runtime is the bridge, but adds significant complexity vs. a server-side approach.
 **Apply when**: any blueprint or architecture that specifies ML inference on a mobile/hybrid client — verify the model has a JS-compatible runtime or plan for server-side inference.
 
-## Unlimited Neural TTS via Edge TTS Package (2026-03-29)
-**Learning**: The `edge-tts-universal` npm package provides unlimited access to Microsoft neural TTS voices (same quality as paid Azure TTS) with no API key and no monthly limit. Superior to cloud TTS free tiers for any project where the monthly character ceiling is a concern.
-**Apply when**: selecting a TTS provider for any voice-enabled project — evaluate this zero-cost option before committing to a paid TTS API.
+## Verify TTS Free-Tier Ceilings Against Project Volume Before Committing (2026-03-29)
+**Learning**: Cloud TTS free tiers have monthly character ceilings that are easy to exceed in voice-heavy products. Unofficial wrappers around vendor browser endpoints periodically appear in the npm/pip ecosystem promising "unlimited" access — they are unauthorized, fragile, and TOS-grey. Treat them as throwaway prototyping tools, not production dependencies. For production: model the monthly character volume against current verified free-tier limits at probe time, then choose between (a) staying within a verified free tier, (b) committing to a paid plan, or (c) self-hosting an open-weights TTS. Specific package names belong in stack guides, not in this evergreen learning — they decay rapidly when the underlying vendor endpoint changes.
+**Apply when**: Selecting a TTS provider for any voice-enabled project. Verify free-tier limits against current pricing pages, never trust cached recommendations.
 
 ## Serverless DB + Container Cold Start Warming Strategy (2026-03-29)
 **Learning**: Scale-to-zero serverless databases (300-500ms cold start) combined with scale-to-zero compute containers (2-5s cold start at min-instances=0) produce first-request latencies of 4-9 seconds. A health-check cron every 4 minutes during business hours is the free-tier warming strategy.
@@ -49,7 +41,7 @@
 **Apply when**: Any platform serving AI-generated content in sandboxed iframes.
 
 ## Auth Libraries With Flat User Models Need Custom Sub-Profile Tables (2026-03-29)
-**Learning**: Auth libraries with flat data models (User → Account, e.g., Better Auth) have no native support for hierarchical relationships like parent-child accounts. Organization plugins are for SaaS tenancy, not family structures. The correct pattern: auth library handles primary user auth only; subordinate profiles (children, sub-accounts) use a first-party table with scoped session tokens managed entirely by application code. This is what Netflix, Disney+, and Roblox do.
+**Learning**: The general rule is "auth library owns identity, don't create parallel user tables" (see `Auth Library Territory` in global-patterns.md). The exception: auth libraries with flat data models have no native support for hierarchical relationships like parent-child accounts. Organization plugins are for SaaS tenancy, not family structures. The correct pattern: auth library handles primary user auth only; subordinate profiles (children, sub-accounts) use a first-party table with scoped session tokens managed entirely by application code (Netflix, Disney+, Roblox pattern).
 **Apply when**: Any project using an auth library that needs hierarchical user relationships (parent-child, manager-employee, guardian-ward).
 
 ## Scalability Analysis Belongs in /probe, Not /press or /pound (2026-04-02)

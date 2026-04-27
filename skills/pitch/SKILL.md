@@ -28,7 +28,7 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
    - If the conversation has a clear feature/decision topic → critique it through the business model lens
    - **If ambiguous** → ask: "What should I critique? The full business model, a specific feature, a pricing decision, or something else?"
 3. Read/review the full pitch target before proceeding
-4. **Read the Touchstone if it exists** — `[PROJECT]_Touchstone_V1.0.html`. The Touchstone is the visual constitution `/wedge` forged from the Opus + Vow. The Pitch is rendered as HTML through the Touchstone's tokens (typography, color, motion). If no Touchstone exists, recommend the user run `/wedge` before producing the Pitch — a Pitch deck without a Touchstone has no aesthetic discipline to inherit.
+4. **Read the Touchstone pair if it exists** — `[PROJECT]_Touchstone_V1.0.md` (typed contract — read the YAML frontmatter as the normative token block) AND `[PROJECT]_Touchstone_V1.0.html` (rendered vision — visual reference). The Touchstone is the visual constitution `/wedge` forged from the Opus + Vow. The Pitch is rendered as HTML through the MD's typed tokens (colors, typography, spacing, motion); the HTML Touchstone is consulted for visual consistency, not parsed for tokens. If no Touchstone exists (or only one of the two artifacts is present), recommend the user run `/wedge` before producing the Pitch — a Pitch deck without a complete Touchstone has no aesthetic discipline to inherit.
 
 ## Process
 
@@ -129,26 +129,29 @@ Verdict thresholds: FUNDABLE = 28–35, WORTH BUILDING = 21–27, NEEDS RETHINK 
 
 ## Output Artifact — `[PROJECT]_Pitch_V1.0.html`
 
-When `/pitch` is invoked from `/prime` Phase 2 (external direction) or directly to produce a Pitch deck, the output is **HTML**, not markdown. The Pitch is rendered through the Touchstone's tokens:
+When `/pitch` is invoked from `/prime` Phase 2 (external direction) or directly to produce a Pitch deck, the output is **HTML**, not markdown. The Pitch is rendered through the Touchstone's typed contract — `Touchstone.md`'s YAML frontmatter is the normative source of tokens; the Touchstone HTML is visual reference only.
 
-- **Fonts**: import the same display + body fonts the Touchstone declares.
-- **Color tokens**: same dominant + accent + canvas + ink CSS variables.
-- **Motion**: same orchestration timing and easing curves.
+- **Fonts**: import the display + body fonts the Touchstone.md `typography` block declares.
+- **Color tokens**: same colors map (primary, secondary, tertiary, neutral, surface, on-surface, plus any accent/atmosphere tokens) as `Touchstone.md` declares.
+- **Motion**: orchestration timing matches the chosen direction (read Touchstone.md's prose Layout/Elevation sections + Do's-and-Don'ts; consult the HTML for visual confirmation).
 - **Layout**: deck-style — title slide, problem, solution, market, business model, moat, ask. Each slide is a viewport-tall section in one scrollable HTML page.
 
-The Pitch HTML reads the Touchstone at the top of `<head>`:
+The Pitch HTML reads the Touchstone contract at the top of `<head>` and translates the YAML tokens to CSS variables:
 
 ```html
 <!-- Pitch inherits the Touchstone's aesthetic constitution -->
-<!-- Source: [PROJECT]_Touchstone_V1.0.html -->
+<!-- Contract: [PROJECT]_Touchstone_V1.0.md (normative) -->
+<!-- Vision:   [PROJECT]_Touchstone_V1.0.html (visual reference) -->
 <style>
   :root {
-    /* COPY the :root block from the Touchstone here */
+    /* Translate Touchstone.md's YAML tokens to CSS variables.
+       e.g., colors.primary → --color-primary, typography.body-md → --font-body, etc.
+       Keep names mechanical so future Touchstone updates re-translate cleanly. */
   }
 </style>
 ```
 
-If no Touchstone exists, the Pitch is generated as plain `[PROJECT]_Pitch_V1.0.md` (legacy fallback) and the user is told: "no Touchstone found — Pitch generated as markdown. Run `/wedge` then re-run `/pitch` for a properly-rendered HTML deck."
+If no Touchstone exists (or only one of the two artifacts is present), the Pitch is generated as plain `[PROJECT]_Pitch_V1.0.md` (legacy fallback) and the user is told: "Touchstone incomplete — Pitch generated as markdown. Run `/wedge` then re-run `/pitch` for a properly-rendered HTML deck."
 
 When invoked purely as an evaluative review (no Pitch artifact production), output the scorecard inline as markdown in the conversation.
 

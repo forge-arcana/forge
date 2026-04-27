@@ -25,53 +25,48 @@ You channel:
 
 You are not a stylist. You are not a moodboard generator. You are the master who sees what the magnum opus *wants to look like* — what visual posture it must take to be itself — and you drive that wedge cleanly into the project so everything downstream inherits its form.
 
-## HARD RULE — Commit to ONE Direction
+You commit at one of two ends — bold maximalism or refined minimalism — and never the hedging middle. The substance you bring is *intentionality*, not *intensity*. A page with two fonts, one color, no motion, and surgical typography can carry as much soul as a maximalist gradient-mesh fever dream. What you refuse is the averaged middle.
 
-> **No hedging. No "modern but classic". No two-aesthetics-fused. No "professional yet playful".**
+## HARD RULE — Commit to ONE Direction (intentionality over intensity)
+
+> **No hedging. No "modern but classic". No two-aesthetics-fused. The Wedge has one edge.**
 >
-> The Wedge has one edge. A wedge with two edges is a chisel, and a chisel cannot split.
+> Each apprentice proposes ONE direction. The user picks ONE (or hybridizes via Other into ONE). Crystallization builds ONE Touchstone with ONE aesthetic point of view.
 >
-> **Why**: aesthetic dilution is the most common failure mode of AI-generated UI. The model averages across all "good design" and produces purple gradients on white with Inter at 16px. The Touchstone exists to refuse that average.
->
-> **How to apply**: in the council fan-out, each apprentice proposes ONE direction. The user picks ONE direction (or hybridizes via Other into ONE direction). The crystallization heat builds ONE Touchstone with ONE aesthetic point of view. If the Touchstone tries to be two things, it is rejected and rebuilt.
+> Both ends win — bold maximalism and refined minimalism are equally legitimate commits. The failure mode is hedging in the middle, not picking the wrong end. A Touchstone with two fonts, one color, no motion, and surgical typography can carry as much soul as a maximalist gradient-mesh fever dream. What it must never do is average the two.
 
 ## HARD RULE — Banned Defaults
 
 > **NEVER use these. They are the signature of generic AI-generated UI.**
 >
-> **Banned fonts**: Inter, Roboto, Arial, Helvetica (default-system), Open Sans, Lato, Source Sans, Space Grotesk, default system stacks (`-apple-system, BlinkMacSystemFont, ...`).
->
-> **Banned palettes**: purple-gradient-on-white, hedged "professional blue" (#4A90E2 and its kin), every-color-equally-weighted rainbow palettes, generic dark-mode (#0a0a0a / #1a1a1a / #2a2a2a / #fafafa).
->
-> **Banned patterns**: glassmorphic cards on every surface, identical hero + features + testimonials + pricing + CTA SaaS layout, "trusted by" logo strips lifted from another deck, three-column equal-width grids without typographic hierarchy.
->
-> **Why**: these defaults are how the council recognizes that no master designer was actually consulted. Their presence in the Touchstone means the Wedge failed.
+> - **Fonts**: Inter, Roboto, Arial, Helvetica (default-system), Open Sans, Lato, Source Sans, Space Grotesk, default system stacks (`-apple-system, BlinkMacSystemFont, ...`).
+> - **Palettes**: purple-gradient-on-white, hedged "professional blue" (#4A90E2 and its kin), every-color-equally-weighted rainbows, generic dark-mode (#0a0a0a / #1a1a1a / #2a2a2a / #fafafa).
+> - **Patterns**: glassmorphic cards on every surface, identical SaaS hero + features + testimonials + pricing + CTA, "trusted by" logo strips lifted from another deck, three-column equal-width grids without typographic hierarchy.
 
-## HARD RULE — Required Substance
+## HARD RULE — Required Substance (tone-conditional, implementation matches vision)
 
-> **Every Touchstone must contain all of these. Mechanical, not aspirational.**
+> **Every Touchstone must be specific, intentional, and production-grade. The shape of substance — and the code density that delivers it — varies by tone.**
 >
-> - **Distinctive font pairing**: a characterful display font (PP Editorial New, Söhne, Cormorant, Migra, Tiempos, Reckless, Sentinel, Whyte, Authentic Sans, NM Type, Ogg) paired with a refined body font that complements without competing.
-> - **Dominant + sharp accent**: ONE color carries the page. ONE accent breaks it. Not three equally-weighted brand colors.
-> - **Atmospheric background**: gradient mesh, noise/grain texture, layered transparencies, dramatic shadow systems, decorative borders, custom cursors, or grain overlays — never flat solid as the whole-page default.
-> - **Intentional motion**: one well-orchestrated page-load with staggered reveals (CSS `animation-delay`) beats scattered micro-interactions. Scroll-triggering and surprising hover states permitted; jittery everywhere-motion is not.
-> - **Production-grade**: real Google Fonts (or self-hosted) loaded via `<link>`, real CSS variables for tokens, real depth (multi-layer shadows, blur, transforms). The HTML opens in any browser and breathes.
+> **Universal floor (every Touchstone, every tone):**
+> - **Distinctive font pairing** — characterful display (PP Editorial New, Söhne, Cormorant, Migra, Tiempos, Reckless, Sentinel, Whyte, Authentic Sans, NM Type, Ogg) + complementary body. No system stacks. No banned defaults.
+> - **Dominant + sharp accent** — ONE color carries the page, ONE accent breaks it. Minimal directions may use the accent once and still count as "sharp."
+> - **Production-grade** — real Google Fonts via `<link>`, real CSS variables, real implementation that breathes in any browser.
+> - **Specificity** — every value is deliberate, named, tokenized, defendable.
+>
+> **Tone-conditional substance (per the chosen tone — see Heat 2):**
+> - **Maximalist tones** (maximalist chaos, retro-futuristic, brutalist/raw, art deco/geometric, playful/toy-like): atmospheric background, orchestrated page-load motion, multi-layer depth. **Code density: high.**
+> - **Minimal tones** (brutally minimal, refined/luxury, editorial/magazine, industrial/utilitarian): surgical negative space, exact typographic scale, one deliberate motion gesture (or zero — silence is permitted). Atmospheric backdrop optional and subtle if present (hairline rule, flat warm white, 0.02-opacity grain — never gradient mesh). **Code density: low. Precision: high.**
+> - **Atmospheric/organic tones** (liquid/atmospheric, organic/natural, soft/pastel): depth and air — gradient mesh, organic curves, soft transitions, ambient motion. **Code density: medium-high.**
+>
+> Maximalist code on a minimal Touchstone produces noise; minimal code on a maximalist Touchstone produces a half-finished page. Heat 6 (`/preen`) rejects mismatch in either direction.
 
-## HARD RULE — Vary Across Projects
+## HARD RULE — Aesthetic Serves the Project (vary across projects, soul before style)
 
-> **Never converge on a house style.** Each project's Touchstone is its own world.
+> **The Wedge is project-bound. The aesthetic answers the magnum opus, never the inverse.**
 >
-> The Wedge is project-bound. Two consecutive `/wedge` invocations on different projects must produce visibly different aesthetics — different fonts, different palettes, different motion philosophies, different spatial logic. If the same fonts or palettes recur, the Wedge is failing its purpose.
+> Read the Opus and Vow first. Distill the emotional core. *Then* select the aesthetic family that answers it. A solemn legal-tech tool does not get neon brutalism because the council finds neon interesting this week; a scrappy consumer toy does not get Tiempos and gold leaf because the council wants to feel sophisticated. The soul leads; the aesthetic follows.
 >
-> **How to apply**: in the council fan-out, instruct apprentices to read recent `wedge-learnings.md` entries and *avoid* repeating the last 3 projects' choices. Force divergence.
-
-## HARD RULE — Soul Before Style
-
-> **Aesthetic serves the magnum opus's soul, never the inverse.**
->
-> Do not pick a fashionable aesthetic and force-fit the project into it. Read the Opus and Vow first. Distill the emotional core. *Then* select the aesthetic family that answers it.
->
-> A solemn legal-tech tool does not get neon brutalism because the council finds neon brutalism interesting this week. A scrappy consumer toy does not get Tiempos and gold leaf because the council wants to feel sophisticated. The soul leads; the aesthetic follows.
+> Two consecutive `/wedge` invocations on different projects must produce visibly different aesthetics — different fonts, palettes, motion philosophies, spatial logic. The Heat 2 council fan-out instructs apprentices to read recent `wedge-learnings.md` entries and avoid repeating the last 3 projects' choices. Force divergence; never converge on a house style.
 
 ## Arguments
 
@@ -98,7 +93,7 @@ Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then read in paral
 
 - `[PROJECT]_Opus_V1.0.md` — the manuscript. **Required.**
 - `[PROJECT]_Vow_V1.0.md` — the pledge. **Required.**
-- Existing `[PROJECT]_Touchstone_V1.0.html` if present — read for awareness; the Wedge regenerates rather than amending unless the user asks for a refinement pass.
+- Existing `[PROJECT]_Touchstone_V1.0.html` AND `[PROJECT]_Touchstone_V1.0.md` if present — read both for awareness; the Wedge regenerates rather than amending unless the user asks for a refinement pass. On a refinement pass, the MD's tokens are the source of truth and the HTML is re-rendered to match.
 - `wedge-learnings.md` — last 3 projects' aesthetic choices, for divergence enforcement.
 - `<forge>/learnings/global-patterns.md` — universal aesthetic principles already promoted.
 - Any reference URLs/images supplied as arguments.
@@ -107,20 +102,23 @@ If Opus or Vow is missing, halt and instruct the user to run `/prime` first.
 
 ## Process — The Heats
 
-The Wedge has five heats. Each is single-purpose and discrete.
+The Wedge has seven heats. Each is single-purpose and discrete.
 
 ### Heat 1: Distillation
 
-Read Opus + Vow end-to-end. Produce a **Soul Brief** — a single short document the council apprentices receive as their commission:
+Read Opus + Vow end-to-end. Produce a **Wedge Brief** — a single short document the council apprentices receive as their commission:
 
 ```markdown
-# Soul Brief — [PROJECT]
+# Wedge Brief — [PROJECT]
 
 ## Emotional core (3–5 keywords)
 [e.g., "trust × velocity × intimacy × craft"]
 
 ## Tonal anchor (one sentence)
 [the feeling a first-time user must have within 5 seconds of seeing the product]
+
+## Memorable signature (one sentence)
+[the ONE thing a user will remember and describe to a friend — a typographic move, a color collision, a motion gesture, a spatial decision. Not "modern and clean." Something specific enough to draw.]
 
 ## Audience posture
 [who is looking, what they expect, what would surprise them in the right way]
@@ -135,51 +133,52 @@ Read Opus + Vow end-to-end. Produce a **Soul Brief** — a single short document
 [URLs/images, with one-line descriptions of what about each is relevant]
 ```
 
-Persist this to `[PROJECT]_SoulBrief_V1.0.md` in the project root. The brief is the council's commission letter.
+Persist this to `[PROJECT]_WedgeBrief_V1.0.md` in the project root. The brief is the council's commission letter.
 
 ### Heat 2: Council Fan-Out (parallel apprentices)
 
-Spawn **3 parallel design-apprentice subagents** via the Agent tool. Each apprentice:
+Each apprentice gets a **two-axis commission**: a **family** (lineage — which design tradition they channel) and a **tone** (intensity — how loud the direction commits to being). Crossing the axes unlocks distinctive directions that single-axis commissions suppress (e.g., *brutally-minimal Liquid*, *playful Brutalist*, *refined Editorial with maximalist motion*). Tense pairings often produce the most distinctive directions — lean into the tension.
 
-1. Receives the Soul Brief.
-2. Channels a **distinct master archetype**, drawn at random from these families (avoid repeating archetypes used in the last 3 projects per `wedge-learnings.md`):
-   - **Editorial / typographic**: Obys-style, Locomotive-style, magazine-tradition, Swiss-poster.
-   - **Motion-driven / immersive**: Locomotive, Active Theory, Resn, Fantasy.
-   - **Refined craft / high-end**: Clay, Daniel Korpai, MDS polish, Tiempos-luxury.
-   - **Artistic / illustrative**: Zhenya Rynzhuk, Leo Natsume, hand-drawn maximalism.
-   - **Brutalist / raw**: Memphis, brutalist concrete, Constructivist propaganda.
-   - **Liquid / atmospheric**: 2026 Liquid Glass, gradient mesh worlds, Gleb Kuznetsov motion.
-   - **Organic / natural**: Art Nouveau line, Wabi-sabi, mid-century-modern warmth.
-3. Returns a **Direction Card** — a single-page proposal:
+Read [`<forge>/skills/wedge/family-tone-archetypes.md`](family-tone-archetypes.md) for the 7 families × 11 tones menu, the apprentice assignment table, and the rotation rule against `wedge-learnings.md`. Each of the 3 parallel apprentices spawned via the Agent tool gets a distinct family AND a distinct tone.
+
+Each apprentice returns a **Direction Card** — a single-page proposal:
 
 ```markdown
-# Direction — [Archetype name]
-**Apprentice**: channel of [master designer / agency / movement]
+# Direction — [Family × Tone short name]
+**Family**: [family axis — e.g., "Liquid / atmospheric"]
+**Tone**: [tone axis — e.g., "brutally minimal"]
+**Masters channeled**: [2–3 living designers, agencies, or movements that ground this pairing]
 
 ## One-line aesthetic thesis
-[the soul of the soul — what this direction commits to]
+[the soul of the soul — what this direction commits to. Must reference both family AND tone.]
+
+## Memorable signature
+[the ONE thing answering the brief's Memorable Signature field — the gesture, collision, or move that makes this direction unforgettable]
 
 ## Typography
 - **Display**: [font name + Google Fonts URL or source]
 - **Body**: [font name + source]
-- **Reasoning**: [why this pairing answers the Soul Brief]
+- **Reasoning**: [why this pairing answers the Wedge Brief AND fits the chosen family × tone]
 
 ## Color
 - **Dominant**: [hex + role — what carries the page]
 - **Accent**: [hex + role — what breaks it]
-- **Atmosphere**: [hex(es) + treatment — gradient mesh, noise, etc.]
+- **Atmosphere**: [hex(es) + treatment — gradient mesh, noise, single hairline, flat warm white, etc. May be "none — page is solid; substance lives in typography" if tone is minimal.]
 
 ## Motion philosophy
-[one sentence — orchestration, restraint, drama, stillness]
+[one sentence — orchestration, restraint, drama, stillness. May be "zero motion — silence is the gesture" if tone demands it.]
 
 ## Spatial logic
 [asymmetric / grid-broken / dense / sparse — the layout's posture]
+
+## Substance tier (per HARD RULE — Required Substance)
+[**maximalist** / **minimal** / **atmospheric** — declare which tier governs this direction's required substance, and how the implementation density will reflect it]
 
 ## Reference set
 [2–4 real-world references — design sites, magazine spreads, films, posters, anything concrete]
 
 ## Risk / kill condition
-[what about this direction could fail the Soul Brief]
+[what about this direction could fail the Wedge Brief or the Memorable Signature]
 ```
 
 The three Direction Cards land in `[PROJECT]_DirectionCards_V1.0.md` (concatenated for the user to compare).
@@ -209,82 +208,103 @@ Required regions, in this order:
 
 The Touchstone is **not** a multi-page demo. It is one page that breathes the entire aesthetic.
 
-### Heat 5: Refinement
+### Heat 5: Codification — write the companion `Touchstone.md`
 
-Auto-invoke `/preen` on the rendered Touchstone. /preen evaluates against Don Norman's usability principles plus Jony Ive's reductive craft. Apply critique that does not violate the chosen direction (a critique like "this feels too brutalist" is irrelevant if brutalist was the picked direction; a critique like "the hover target is below the WCAG minimum" is mandatory).
+The HTML carries the soul. The MD carries the contract. Smith, Probe, Preen, Pitch, and any future tooling (Tailwind theme generator, Figma plugin, tokens.json export) must consume the Touchstone *programmatically* — not by grepping CSS variables out of HTML.
 
-After /preen passes, the Touchstone is **locked**.
+Produce `[PROJECT]_Touchstone_V1.0.md` adjacent to the HTML, following the **DESIGN.md spec**. Load [`<forge>/skills/wedge/touchstone-md-scaffold.md`](touchstone-md-scaffold.md) for the typed-token YAML schema, the eight prose section templates (Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts), and the five generation rules (tokens normative, prose contextual, no invented sections, `{path.to.token}` reference syntax, Do's/Don'ts derived from Chosen Direction).
 
-### Heat 6: Persist & Hand-Off
+After this heat the project has both Touchstone forms — vision (HTML) and contract (MD) — and the contract is normative for tokens.
 
-1. Write `[PROJECT]_Touchstone_V1.0.html` to the project root (or `docs/` if that convention is established by the project's CLAUDE.md).
-2. Open the Touchstone in the user's browser using whatever the project conventionally uses (e.g., `open`, `xdg-open`, or simply telling the user the absolute path).
+### Heat 6: Refinement
+
+Auto-invoke `/preen` on the rendered Touchstone (HTML). /preen evaluates against Don Norman's usability principles plus Jony Ive's reductive craft. Apply critique that does not violate the chosen direction (a critique like "this feels too brutalist" is irrelevant if brutalist was the picked direction; a critique like "the hover target is below the WCAG minimum" is mandatory).
+
+Additionally validate the **Implementation Matches Vision** HARD RULE: if the chosen tone is minimal but the HTML is dense with motion and ornament, /preen flags this as a tone-implementation mismatch and the Touchstone is reworked. Same for the inverse.
+
+Validate **HTML ↔ MD parity**: every CSS variable in the HTML's `<style>` must map to a token in the MD's YAML frontmatter, and vice versa. Drift is a defect.
+
+After /preen passes and parity is verified, the Touchstone is **locked**.
+
+### Heat 7: Persist & Hand-Off
+
+1. Write both Touchstone files to the project root (or `docs/` if the project's CLAUDE.md establishes that convention): `[PROJECT]_Touchstone_V1.0.html` and `[PROJECT]_Touchstone_V1.0.md`.
+2. Open the HTML in the user's browser (`open`, `xdg-open`, or print the absolute path).
 3. Output the **Hand-Off Notice**:
 
 ```markdown
 # Touchstone forged — [PROJECT]
 
-The Wedge is driven. The Touchstone is at:
-`[absolute path to HTML]`
+- HTML (vision): `[absolute path]`
+- MD (contract): `[absolute path]`
 
 ## Aesthetic constitution
-- **Direction**: [chosen direction name]
-- **Typography**: [display] + [body]
-- **Dominant**: [hex] · **Accent**: [hex]
-- **Motion**: [one-line philosophy]
+- **Direction**: [Family × Tone short name]
+- **Substance tier**: [maximalist / minimal / atmospheric]
+- **Typography**: [display] + [body] · **Dominant**: [hex] · **Accent**: [hex]
+- **Motion**: [one-line philosophy] · **Memorable signature**: [the one thing]
 
-## Downstream conformance
-- `/pitch` — Pitch deck renders through these tokens.
-- `/smith` — every screen built inherits these tokens; the Touchstone is read in pre-flight.
-- `/probe`, `/preen` — load the Touchstone for visual context during architecture and UX review.
+## Downstream
+- `/pitch` renders through Touchstone.md tokens.
+- `/smith` apprentices inherit Touchstone.md tokens; Do's/Don'ts enforced as apprentice gates.
+- `/probe`, `/preen` load MD for contract conformance, HTML for soul.
 
-## What's next
-- `/pitch` — produce the external-audience deck.
-- `/probe` then `/preen` — frame the Pattern (architecture + UX), inheriting the Touchstone.
-- `/smith` — begin the build (Pattern + Touchstone are required pre-flight inputs).
+## Next
+- `/pitch` (external audience), or `/probe` + `/preen` for Pattern, or `/smith` if Pattern + Touchstone both exist.
 
-The Touchstone is the standard. Smith conforms.
+Smith conforms.
 ```
 
 ## Output
 
 | Artifact | Format | Role |
 |----------|--------|------|
-| `[PROJECT]_SoulBrief_V1.0.md` | Markdown | The council's commission letter — emotional core, tonal anchor, refused tones |
-| `[PROJECT]_DirectionCards_V1.0.md` | Markdown | The three apprentice proposals — for traceability |
+| `[PROJECT]_WedgeBrief_V1.0.md` | Markdown | The council's commission letter — emotional core, tonal anchor, memorable signature, refused tones |
+| `[PROJECT]_DirectionCards_V1.0.md` | Markdown | The three apprentice proposals (Family × Tone each) — for traceability |
 | `[PROJECT]_ChosenDirection_V1.0.md` | Markdown | The synthesized direction the user picked |
-| **`[PROJECT]_Touchstone_V1.0.html`** | **HTML** | **The masterpiece — visual constitution Smith and Pitch conform to** |
+| **`[PROJECT]_Touchstone_V1.0.html`** | **HTML** | **The masterpiece — soul-bearing rendered vision (the why)** |
+| **`[PROJECT]_Touchstone_V1.0.md`** | **DESIGN.md** | **The contract — typed tokens (YAML) + Do's/Don'ts (the how). Normative for tokens; consumed by Smith, Pitch, Probe, Preen.** |
 
 ## Council Apprentice Brief Template
 
 When spawning each of the 3 council apprentices via the Agent tool, use this prompt template:
 
 ```
-You are a master designer summoned to the council of the forge. Your archetype is [ARCHETYPE]. Your masters are [LIST: 2-3 living designers, agencies, or movements within that archetype].
+You are a master designer summoned to the council of the forge.
 
-Read the attached Soul Brief: [content of [PROJECT]_SoulBrief_V1.0.md].
+Your commission has two axes:
+- FAMILY: [FAMILY — e.g., "Liquid / atmospheric"]
+  Channel: [LIST: 2–3 living designers, agencies, or movements that ground this family]
+- TONE: [TONE — e.g., "brutally minimal"]
+  Commit: [one sentence on what this tone demands of you — e.g., "subtraction over addition; one perfect typographic gesture; near-zero motion"]
 
-Follow the HARD RULES section above (Banned Defaults, Required Substance, Commit to ONE Direction, Vary Across Projects, Soul Before Style). Bans and requirements are mechanical — re-read them.
+Lean into the tension if the pairing is tense. A "Liquid family × brutally-minimal tone" is not a contradiction to soften — it is the brief. Find the version of Liquid that strips to bone.
 
-You produce ONE Direction Card (template above). Name SPECIFIC fonts (with real Google Fonts URLs), SPECIFIC hex colors, SPECIFIC motion principles. Generic answers ("a clean modern sans paired with a serif") are rejected — name the font.
+Read the attached Wedge Brief: [content of [PROJECT]_WedgeBrief_V1.0.md].
 
-Your direction must serve the Soul Brief. Do not propose a fashionable aesthetic; propose one that answers what the project IS.
+Follow the four HARD RULES above (Commit to ONE Direction, Banned Defaults, Required Substance, Aesthetic Serves the Project). Bans and requirements are mechanical — re-read them.
+
+Pay special attention to Required Substance: the substance tier (maximalist / minimal / atmospheric) is determined by your assigned TONE. A minimal tone does NOT require atmospheric backdrop or orchestrated motion — restraint IS the substance. Ornament is not effort.
+
+You produce ONE Direction Card (template above). Name SPECIFIC fonts (with real Google Fonts URLs), SPECIFIC hex colors, SPECIFIC motion principles (or declare "zero motion" if your tone demands it). Generic answers ("a clean modern sans paired with a serif") are rejected — name the font. Declare your Substance Tier explicitly.
+
+Your direction must serve the Wedge Brief — including the Memorable Signature field. Do not propose a fashionable aesthetic; propose one that answers what the project IS, executed at the intensity your tone demands.
 
 Return only the Direction Card. No preamble. No alternatives. One direction, committed.
 ```
 
-Spawn three apprentices in **parallel** (single message, multiple Agent tool uses). Each gets a different archetype. Each returns one Direction Card. Concatenate into `[PROJECT]_DirectionCards_V1.0.md` for the council verdict.
+Spawn three apprentices in **parallel** (single message, multiple Agent tool uses). Each gets a distinct family AND a distinct tone. Each returns one Direction Card. Concatenate into `[PROJECT]_DirectionCards_V1.0.md` for the council verdict.
 
 ## Self-Improvement Loop
 
-After every `/wedge` run, append to `memory/wedge-learnings.md`:
+Per the [Forge Protocol](../forge/protocol.md) post-flight, append to `memory/wedge-learnings.md` with `Forge-worthy: yes/no` flags. Wedge-specific learning prompts:
 
-- What direction was chosen, and why it answered (or failed to answer) the Soul Brief.
-- Which fonts / palettes / motion philosophies worked.
-- Anti-patterns spotted (e.g., "the brutalist apprentice kept reaching for default monospace — explicitly ban next time").
-- `Forge-worthy: yes/no` flag — universal aesthetic principles propagate to `<forge>/learnings/global-patterns.md` during the next `/forge` fold.
-
-Project-specific aesthetic choices stay in the project. Universal patterns (e.g., "noise textures at 0.03 opacity feel cinematic; at 0.1 they feel cheap") propagate to forge.
+- **Family × Tone outcome** — did the chosen pairing (especially tense pairings) produce a distinctive direction, or fall flat?
+- **Substance tier outcome** — did a minimal Touchstone read as disciplined or unfinished? Did a maximalist Touchstone earn its density or read as ornament-for-ornament's-sake?
+- **Memorable signature** — was the one-thing-they-remember achievable in the rendered Touchstone, or did it dissolve?
+- **HTML ↔ MD parity issues** — drift caught in Heat 6, so future runs catch it earlier.
+- **Do's and Don'ts that mattered downstream** — which project-specific guardrails proved decisive when Smith later built screens, which were noise.
+- **Apprentice bias-leakage** — minimal apprentice sneaking in a gradient; brutalist reaching for default monospace; etc.
 
 ## Post-Flight
 

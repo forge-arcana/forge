@@ -107,21 +107,19 @@
 **Learning**: Android 15 (API 35) enforces edge-to-edge rendering by default — app content renders behind the status bar. `StatusBar.setOverlaysWebView({ overlay: false })` is silently ignored. CSS `env(safe-area-inset-top)` returns `0px` on Android WebView (only `safe-area-inset-bottom` works). `WindowCompat.setDecorFitsSystemWindows(window, true)` in MainActivity also fails — Capacitor's BridgeActivity overrides it. The only working fix in Capacitor 7 is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do NOT stack multiple fixes — they each add padding independently, causing a visible gap.
 **Apply when**: Building Capacitor Android apps targeting API 35+ where content overlaps system status bar.
 
-## Self-Flagging Learnings (2026-03-26)
-**Learning**: When a skill generates learnings, it should self-classify each as "forge-worthy" or "project-specific" at write time. Downstream consumers (like commit rituals or absorption tools) can then auto-promote flagged entries without heuristic judgment. This eliminates guessing and ensures universal patterns reach the shared knowledge base.
-**Apply when**: Designing learning/knowledge capture systems where entries need to be triaged for promotion to a shared store.
-
-## Processing Tracker for Idempotent Absorption (2026-03-26)
-**Learning**: When a system absorbs entries from a source it doesn't own (and can't delete from), maintain a tracker file with content hashes or titles of already-processed entries. This makes absorption idempotent — each run only evaluates new entries, not the full history. Without a tracker, every run re-triages everything, leading to duplicate work and potential inconsistencies.
-**Apply when**: Building any pipeline that reads from append-only sources (log files, learning files, changelog) and needs to process each entry exactly once.
+## Bidirectional Sync System Design (2026-03-28)
+**Learning**: When designing any system that syncs files between a source-of-truth repo and deployed copies (skills, configs, knowledge), six rules must hold together:
+1. **Three-way comparison** — source vs manifest vs deployed, so you can distinguish "source updated" (deploy it), "deployed updated" (reverse-sync it back), "both updated" (conflict, manual review), "neither" (skip). A two-way comparison can't tell which side moved without a baseline.
+2. **Atomic edit-then-deploy** — direct source edits must immediately re-deploy to targets; otherwise a concurrent absorption run sees DIFFERS, treats the stale deployed copy as "newer," and silently reverts the source edit.
+3. **Reverse-sync writes to source, never to deployed** — writing to deployed copies creates a permanent gap (deployed has more entries than source) that re-running cannot heal because trackers mark entries as already processed.
+4. **Idempotent absorption tracker** — when absorbing entries from a source you don't own (append-only logs, learning files, changelogs), maintain a tracker (content hashes or titles) of already-processed entries so each run only evaluates new material.
+5. **Self-flagging entries beat heuristic triage** — when a producing skill writes learnings, it should self-classify each as "promote-worthy" or "local-only" at write time; downstream consumers auto-promote without guessing.
+6. **Don't duplicate the layer above** — forward-sync deploying conventions into a project workspace must check whether the global config layer already covers the convention before adding a project-level copy. Duplicating rules across layers creates drift.
+**Apply when**: Designing or operating any bidirectional sync system (deploy + absorb) between a canonical repo and its consumers.
 
 ## Skills Own Their Dependencies and Their Discovery (2026-03-26)
 **Learning**: A skill package must be self-contained in two senses. (1) **Dependencies**: any framework or reference doc the skill cites must live inside the skill's directory, not at repo root. Static reference docs in shared locations become stale orphans because the skill self-iterates but the orphan doesn't — co-location ensures everything evolves together. (2) **Discovery**: when a skill needs to be discoverable on fresh clone before global deployment, use a thin bootstrap file in the project's local skill directory (~3 lines) that points to the real skill file. Avoids symlinks (OS-dependent) and full duplication (drift risk).
 **Apply when**: Structuring skill or plugin directories in any repo that is itself the source of truth for those skills.
-
-## Bidirectional Sync Discipline (2026-03-28)
-**Learning**: Any system that syncs files bidirectionally between a source-of-truth repo and deployed copies must enforce three rules together: (1) **three-way comparison** — source vs manifest vs deployed, so you can distinguish "source updated" (deploy it) from "deployed updated" (reverse-sync it back) from "both updated" (conflict, manual review) from "neither" (skip); a two-way comparison can't tell which side moved without a baseline. (2) **atomic edit-then-deploy** — direct source edits must immediately re-deploy to targets, otherwise a concurrent absorption run sees DIFFERS, treats the stale deployed copy as "newer," and silently reverts the source edit. (3) **reverse-sync writes to source, never to deployed** — writing to deployed copies creates a permanent gap (deployed has more entries than source) that re-running cannot heal because trackers mark the entries as already processed.
-**Apply when**: Designing or operating any bidirectional sync (deploy + absorb) between a canonical repo and its consumers.
 
 ## Firebase API Key Restriction for Public Repos (2026-03-29)
 **Learning**: Firebase API keys are project identifiers (not secrets), but in public repos, ALWAYS restrict the key to the deployment domain via Google Cloud API Keys API. Add HTTP referrer restrictions (deployment domain + `localhost/*` + `127.0.0.1/*`). Security rules protect data integrity, but unrestricted keys let unauthorized apps consume quota or abuse Firebase resources from other origins.
@@ -135,10 +133,6 @@
 **Learning**: Block crawlers at every non-production tier and on every authenticated production surface — not just staging. Internal-only environments should layer all defenses (`robots.txt Disallow`, `X-Robots-Tag: noindex,nofollow` header, infrastructure-level auth gating, `noindex` meta). Customer-facing pre-prod that needs unauthenticated user access can only use app-level headers — infrastructure auth gating locks out the real users you're trying to test with. Production: allow crawling only on truly public pages (marketing, docs); every authenticated path gets `X-Robots-Tag: noindex` plus `Disallow` rules. A bot reaching an admin panel is a security incident, not an SEO miss. Platform-specific gating commands belong in a stack guide, not in this evergreen learning.
 **Apply when**: Deploying any application. Decide upfront whether each environment needs unauthenticated end-user access — that decision dictates whether infrastructure gating or app-level headers is correct.
 
-## Forward-Sync Must Not Duplicate Global Config Content (2026-03-28)
-**Learning**: A forward-sync that deploys conventions into a project workspace must check whether the global config layer already covers a convention before adding it to the project-level config. Duplicating rules (shorthand commands, hard rules, style guides) across global and project config creates maintenance drift. The user has corrected this pattern multiple times.
-**Apply when**: Running forward-sync on any project. Skip adding sections that already exist in the global config layer.
-
 ## Next.js 16 Process Renaming Breaks Zombie Kill Scripts (2026-03-29)
 **Learning**: Next.js 16 renames its dev server process to `next-server (v16.x.x)` — a custom process title with no `node`, `next dev`, or project name in the command string. Standard pgrep patterns (`node.*next.*dev`, `node.*(next|playwright).*<project>`) miss it entirely. The process also auto-selects non-standard ports when the configured port is busy, so port-based `fuser -k` also misses it. Kill/restart scripts must match the literal string `next-server` and scope to the project by checking `/proc/$PID/cwd`.
 **Apply when**: Writing or updating restart/kill-zombie scripts for any Next.js 16+ project. The `/srs` skill templates need this pattern.
@@ -151,13 +145,9 @@
 **Learning**: When a user captures input, the response must feel instant (<200ms). Heavy processing (LLM classification, theme assignment, TTS pre-generation) should fire-and-forget after the capture response is sent. Use `promise.catch(() => {})` pattern — don't await. The user sees results on next view. This is the "three-layer cost architecture" in practice: capture is free/instant, processing is async/cheap, generation is on-demand/expensive.
 **Apply when**: Any capture-first app where input frequency is high and processing is heavy.
 
-## Auth Library User Table — No Duplicate User-Like Tables (2026-03-29)
-**Learning**: Auth libraries that manage their own user/session/account tables must be the single source of truth for user identity. Projects that define a separate "user-like" table with overlapping fields (email, name, provider ID) create dual sources of truth. The correct pattern: FK directly to the auth library's `user.id`, extend with `additionalFields` if supported, or use a thin profile table with only app-specific fields.
-**Apply when**: designing database schemas for any project using an auth library with its own user table — never create a parallel identity table.
-
-## Mock Auth in Staging Must Use Real Auth Library (2026-03-29)
-**Learning**: Mock login for staging/dev must use the real auth library's `signIn.email()` method, not manual session/cookie creation. Unsigned cookies crafted by hand won't verify when the auth middleware checks them. Seed credential accounts via the auth library's own `hashPassword()`. Pattern: (1) Seed with library-hashed passwords, (2) Client calls `authClient.signIn.email({ email, password })`, (3) No custom session code needed.
-**Apply when**: Building any staging/dev mock login flow. If you're writing `response.cookies.set("session_token", ...)` in a mock auth route, STOP.
+## Auth Library Territory: Don't Recreate, Don't Bypass (2026-03-29)
+**Learning**: Any auth library that manages its own user/session/account tables owns identity, sessions, password hashing, and credential validation. Two anti-patterns to avoid together: (1) **never create a parallel "user-like" table** with overlapping fields (email, name, provider ID) — FK directly to the auth library's user table, extend via the library's own field-extension mechanism if supported, or use a thin profile table with only app-specific fields. (2) **never hand-craft sessions for mock/staging login** — use the library's own sign-in method and seed credentials via the library's own password-hash function. Unsigned cookies you craft by hand won't verify when the auth middleware checks them. If you're writing `response.cookies.set("session_token", ...)` in a mock auth route, STOP. The library is the single source of truth for identity AND for session shape.
+**Apply when**: Designing schemas or building staging/dev mock login for any project using an auth library with its own user table.
 
 ## Cloud Services Must Have Local Dev Fallbacks (2026-03-29)
 **Learning**: Every cloud service call (GCS, S3, email, push notifications) needs an env-gated local fallback. Write the local branch FIRST. Three tiers: local dev = filesystem/mock/console.log, staging = real cloud service, prod = real cloud service. Module-scope cloud client instantiation without an env check (`new Storage()`) crashes local dev immediately.
@@ -179,33 +169,18 @@
 **Learning**: Artifact Registry cleanup policies are per-repository only — no project-level default. Every new Docker repo starts with NO cleanup policy. Old images accumulate silently and cost money. Standard policy: keep last 5 versions, delete rest (`{"action":{"type":"Keep"},"mostRecentVersions":{"keepCount":5}}` + `{"action":{"type":"Delete"},"condition":{"tagState":"ANY"}}`). Apply immediately on repo creation via `gcloud artifacts repositories set-cleanup-policies`.
 **Apply when**: Any blueprint or deploy script that creates Artifact Registry repos for Cloud Run. Should be a checklist item in GCP deploy setup.
 
-## Reframe Before Bypass on Anti-Bot Protected Sites (2026-04-16)
-**Learning**: When a content site is behind Cloudflare JS challenge or similar bot-detection, search for alternative unprotected sources BEFORE investing in bypass tooling. The reframe often ships faster and stays cheaper. Most "content is only on site X" claims are false — content usually exists on at least one unprotected mirror, aggregator, or secondary publisher.
-**Apply when**: Any scraping target returns Cloudflare challenge or equivalent. Spend 10 minutes searching for the same content on unprotected sites before installing bypass tools.
-
-## Diagnose Cloudflare Blocks by IP Before Investing in Bypass Tools (2026-04-16)
-**Learning**: Cloudflare's challenge tier is often IP-reputation-driven. Cloud provider IP ranges are heavily flagged. Before assuming you need a stealth browser, test the same URL from a different IP pool. If the non-cloud IP also gets challenged, the site is in full challenge mode — no IP swap will help. If only the cloud IP is blocked, a residential proxy solves it without touching the browser stack.
-**Apply when**: Diagnosing any Cloudflare 403. Verify the failure mode (IP-specific vs site-wide) before choosing a fix.
-
-## Parallel-Probe All WordPress Scraper Surfaces Before Concluding Blocked (2026-04-16)
-**Learning**: WordPress sites expose 7+ scraper-friendly surfaces: `/`, `/robots.txt`, `/sitemap.xml`, `/wp-sitemap.xml`, `/wp-json/wp/v2/posts`, `/feed/?paged=N`, and direct asset URLs. Test ALL in a single parallel batch before concluding a site is fully blocked. Protection rules often differ across surfaces — a site may block HTML but leave the RSS feed or REST API open.
-**Apply when**: Reconnaissance on any WordPress-based scraping target. Batch all surface probes as one parallel operation.
-
-## `cf-mitigated: challenge` Header Is a Diagnostic Signal (2026-04-16)
-**Learning**: When a 403 response includes `cf-mitigated: challenge`, Cloudflare is signaling a JavaScript challenge (not an IP block, WAF rule, or origin error). Absence of this header on a 403 means the block came from something else — different fix path. The exact value (`challenge`, `block`, `captcha`) tells you which tool to reach for.
-**Apply when**: Investigating any Cloudflare 403. Header inspection is free and eliminates guessing.
-
-## Anti-Bot Bypass Tooling Decays Rapidly — Verify Before Integrating (2026-04-16)
-**Learning**: The Cloudflare/anti-bot bypass space turns over within months — yesterday's recommended tool is today's dead end. A specific tool name in a long-lived doc is the wrong shape. Before any new integration: check the project's recent activity (last 90 days), open-issues trend, and community success rate against the *current* challenge tier. Treat any bypass tool as a 6-month asset; budget for replacement. Tool-specific recommendations belong in a stack guide with a "verified" date, not in an evergreen learning.
-**Apply when**: Choosing or revisiting a Cloudflare/anti-bot bypass strategy. Vendor status check must come before integration decision.
+## Cloudflare / Anti-Bot Investigation Playbook (2026-04-16)
+**Learning**: When a scrape/fetch returns 403 from Cloudflare or similar, follow the playbook in order — each step is free and eliminates a class of cause before the next:
+1. **Read the response headers**. `cf-mitigated: challenge` confirms a JS challenge (vs. IP block / WAF rule / origin error). The exact value (`challenge` / `block` / `captcha`) tells you which fix path applies.
+2. **Diagnose by IP**. Cloudflare's challenge tier is often IP-reputation-driven; cloud provider ranges are heavily flagged. Test the same URL from a different IP pool (residential vs. cloud). If only the cloud IP is challenged, a residential proxy solves it. If both are challenged, the site is in full challenge mode — no IP swap will help.
+3. **Probe every surface**. WordPress sites expose 7+ scraper-friendly surfaces (`/`, `/robots.txt`, `/sitemap.xml`, `/wp-sitemap.xml`, `/wp-json/wp/v2/posts`, `/feed/?paged=N`, direct asset URLs). Test ALL in one parallel batch — protection rules often differ across surfaces (block HTML, leave RSS or REST API open).
+4. **Reframe before investing in bypass**. Search for alternative unprotected sources for the same content. Most "only on site X" claims are false; content usually exists on at least one mirror, aggregator, or secondary publisher. The reframe ships faster and stays cheaper than maintaining bypass tooling.
+5. **Treat bypass tools as 6-month assets**. Stealth-patched browsers and similar Chromium-fingerprint patches periodically lose effectiveness when Cloudflare ships a new challenge tier. Before integrating, confirm a public report of success against the *current* challenge tier (last ~30 days). Budget for replacement. Specific tool names belong in a stack guide with a "verified" date, not in an evergreen learning.
+**Apply when**: Any 403 from Cloudflare or similar bot-protection layer. Run the steps in order before declaring a hard wall.
 
 ## Pipeline Silent-Failure Alerts: "Last Produced Output" Metric (2026-04-16)
 **Learning**: A scraping/ingestion pipeline can run cleanly and log success for weeks while producing zero documents — if the listing-discovery layer is broken. "Last successful run" is necessary but insufficient. Add a per-source "days since last new document" alert. Silent discovery failure is a real failure mode that unit tests and HTTP status checks will never catch.
 **Apply when**: Designing observability for any source→sink pipeline. Add a "last produced output" metric alongside "last successful run."
-
-## Verify Bypass Tools Against Current Cloudflare Tier Before Investing (2026-04-16)
-**Learning**: Stealth-patched Playwright variants and similar Chromium-fingerprint patches periodically lose effectiveness when Cloudflare ships a new challenge tier. Symptom: challenge page persists with no `cf_clearance` cookie issued, regardless of headless-shell vs full chromium, Xvfb, or realistic UA/viewport/locale. Before sinking time into one tool, confirm a fresh public report (within ~30 days) of success against the *current* challenge — and budget the reframe-to-unprotected-source path as the parallel option.
-**Apply when**: Cloudflare JS challenge is confirmed (`cf-mitigated: challenge`). Treat any specific bypass tool as time-bounded.
 
 ## Three Hats Before Conceding a Wall (2026-04-16)
 **Learning**: The investigative sequence for blockers is Skeptic (challenge the "can't" claim) → Prospector (scour for alternative tools) → Reframer (change the destination if the path is blocked). The failure mode is skipping the Reframer hat and defaulting to "keep banging on the wall." Many apparent dead-ends dissolve when the question changes from "how do I get through this wall?" to "does the actual goal require this wall to be cleared?"

@@ -25,64 +25,34 @@ Use the script's output as your evidence base for scoring each dimension below. 
 
 ## Dimensions (7 total)
 
-For each dimension, scan the codebase AND search the web for current best practices (check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache)):
+Each dimension's scope statement scans the codebase AND web (cache first per [Forge Protocol](../forge/protocol.md#web-research-cache)). Generic readiness items (OWASP, N+1, env parity, etc.) the subagent already knows; the bullets below highlight the **project-specific scoring lenses** that often get missed.
 
 ### 1. Security
-- OWASP Top 10 coverage (XSS, SQLi, CSRF, SSRF, etc.)
-- Auth implementation (session management, token handling, password hashing)
-- Secrets management (no hardcoded secrets, proper .env handling, rotation strategy)
-- Input validation at all boundaries (API endpoints, form submissions)
-- Rate limiting on sensitive endpoints (login, registration, password reset)
-- CORS configuration
-- Content Security Policy headers
-- Bot/crawler protection: public-facing pages may allow crawling (SEO), but authenticated services, admin panels, and internal APIs must block bots (`robots.txt Disallow`, `X-Robots-Tag: noindex`, IAM gating). Never expose private services to crawlers. For non-production: internal staging uses IAM gating (`--no-allow-unauthenticated`); customer-facing staging (where real users need access) keeps `--allow-unauthenticated` and relies on app-level bot protection only.
+Standard OWASP coverage + auth/secrets/input-validation/CORS/CSP. Project-specific lens:
+- **Bot/crawler split** — public pages may allow crawling (SEO); authenticated services, admin panels, and internal APIs must block bots (`robots.txt Disallow`, `X-Robots-Tag: noindex`, IAM gating). Internal staging → IAM-gated (`--no-allow-unauthenticated`); customer-facing staging → keeps `--allow-unauthenticated`, relies on app-level bot protection.
 
 ### 2. Scalability
-- N+1 query detection (Drizzle relations, eager/lazy loading)
-- Connection pooling (database, Redis, external services)
-- Caching strategy (query cache, CDN, static assets)
-- Rate limiting and backpressure
-- Load testing readiness (can the app handle 10x current load?)
-- Database indexing (are queries hitting indexes?)
+Standard N+1, connection pooling, caching, indexing, load-testing readiness. Project-specific lens:
+- Drizzle relation eager/lazy loading audit (forge stack default).
 
 ### 3. Operations
-- Structured logging per `<forge>/skills/forge/stack-guide.md` Logging Convention (Pino, JSON output, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`)
-- Error tracking (Sentry or equivalent configured)
-- Health check endpoints
-- Backup/restore procedures documented
-- Rollback capability (blue-green, canary, or instant revert)
-- Graceful shutdown handling
-- `restart.sh` and `kill-zombies.sh` exist (per `<forge>/skills/forge/forge-conventions.md` items 6-7) — suggest `/srs` if missing
+Standard error tracking, health checks, backups, rollback, graceful shutdown. Project-specific lens:
+- **Structured logging** — must match `<forge>/skills/forge/stack-guide.md` Logging Convention (Pino, JSON, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`).
+- **Local dev tooling** — `restart.sh` + `kill-zombies.sh` exist per `<forge>/skills/forge/forge-conventions.md` items 6-7; suggest `/srs` if missing.
 
 ### 4. Compliance
-- Data privacy (GDPR/local equivalent, data retention, deletion)
-- Regulatory requirements per jurisdiction
-- Audit trail completeness (all user actions logged)
-- Terms of Service / Privacy Policy references in code
-- Cookie consent (if applicable)
+Standard data privacy, audit trail, ToS/Privacy refs, cookie consent. Project-specific lens informed by jurisdiction (GDPR / local equivalent / per-region retention rules).
 
 ### 5. Observability
-- Structured logging on all routes (success AND failure) — validate against `<forge>/skills/forge/forge-conventions.md` logging checklist (items 6: action context, pre-action intent, no pulsing, dev vs prod gating)
-- Request tracing (trace IDs across services)
-- Performance metrics (response times, error rates)
-- Alerting rules defined (what triggers a page?)
-- Dashboard readiness (key metrics identifiable)
+Standard structured logging on all routes, tracing, metrics, alerts, dashboards. Project-specific lens:
+- Validate against `<forge>/skills/forge/forge-conventions.md` logging checklist (action context, pre-action intent, no pulsing, dev vs prod gating).
 
 ### 6. Deployment
-- CI/CD pipeline completeness (lint, test, build, deploy)
-- Environment parity (dev ~ staging ~ production)
-- Feature flags or gradual rollout capability
-- Database migration strategy (up and down migrations)
-- Zero-downtime deployment capability
-- SSL/TLS configuration
-- Non-production bot protection wired into deploy pipeline (not applied manually) — see Dimension 1 for the internal-vs-customer-facing split.
+Standard CI/CD completeness, env parity, feature flags, migration up/down, zero-downtime, SSL/TLS. Project-specific lens:
+- Non-production bot protection wired into the deploy pipeline (not applied manually) — see Dimension 1 split.
 
 ### 7. Documentation
-- API documentation (OpenAPI/Swagger or equivalent)
-- Runbooks for common operations (deploy, rollback, debug)
-- Architecture decision records (ADRs)
-- Onboarding guide for new developers
-- README completeness
+Standard API docs, runbooks, ADRs, onboarding, README. (No project-specific lens — assess as-is.)
 
 ## Output Format
 
