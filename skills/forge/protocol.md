@@ -126,11 +126,11 @@ Smith has its own learning membrane (three layers: orchestration, delegation, ar
 
 `/wedge` is the user's proxy for visual identity. Wedge is not an art. It is the master that drives a single decisive thrust which separates the project's identity from generic AI slop.
 
-Wedge reads the **Opus + Vow** — the manuscript and the pledge — and from them runs a council of three parallel design-apprentices, each given a Family × Tone commission from the conglomerate of human visual arts. The user picks one direction (or hybridizes via Other; the Wedge synthesizes into ONE — no two-aesthetics-fused). Two later heats build the Touchstone in two paired forms: `[PROJECT]_Touchstone_V1.0.html` (the *vision* — a self-contained masterpiece) and `[PROJECT]_Touchstone_V1.0.md` (the *contract* — DESIGN.md format with typed YAML tokens + project-specific Do's/Don'ts). Together they persist as the visual constitution; downstream skills consume the MD programmatically and reference the HTML for soul.
+Wedge reads the **Opus + Vow** — the manuscript and the pledge — and from them runs a council of three parallel design-apprentices, each given a Family × Tone commission from the conglomerate of human visual arts. Each apprentice returns both a Direction Card (markdown spec) and a scoped HTML fragment (rendered vision); the Wedge mechanically assembles the three fragments into a single `[PROJECT]_PreviewTouchstone_V1.0.html` with a tab selector at the top. The user opens that one file, clicks through the directions side-by-side, and picks one (or hybridizes via Other; the Wedge synthesizes into ONE — no two-aesthetics-fused). Visual decisions need visual artifacts. Later heats then build the Touchstone in two paired forms: `[PROJECT]_Touchstone_V1.0.html` (the *vision* — a self-contained masterpiece) and `[PROJECT]_Touchstone_V1.0.md` (the *contract* — DESIGN.md format with typed YAML tokens + project-specific Do's/Don'ts). Together they persist as the visual constitution; downstream skills consume the MD programmatically and reference the HTML for soul.
 
 The Wedge enforces HARD RULES mechanically: banned defaults (no Inter/Roboto/Space Grotesk, no purple-on-white), required substance (tone-conditional — restraint counts as substance), commit to ONE direction (no hedging), vary across projects (never converge on a house style), soul before style, intentionality over intensity (hedging in the middle is the failure mode, not picking the wrong end), implementation matches vision (code density tracks chosen tone).
 
-See `skills/wedge/SKILL.md` for the full seven-heat process.
+See `skills/wedge/SKILL.md` for the full eight-heat process.
 
 ### The Warden — Master Tender
 

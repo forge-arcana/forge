@@ -45,14 +45,15 @@ A wedge has one edge. Driven once, driven hard, driven straight, it cannot hedge
 
 The Wedge channels the **council of master designers** plus the **conglomerate of human visual arts**: Rynzhuk, Korpai, Kuznetsov, MDS, Locomotive, Obys, Clay, Ramotion, plus Bauhaus, Swiss typography, brutalism, Memphis, *ma*, Art Deco, illuminated manuscripts, Damascene metalwork, Constructivist propaganda, mid-century modernism. Plural in voices, singular in conviction.
 
-Seven heats:
+Eight heats:
 1. **Distillation**: read Opus + Vow, produce a WedgeBrief (3 to 5 emotional keywords, tonal anchor, memorable signature, refused tones).
-2. **Council fan-out**: three parallel design-apprentices, each given a Family × Tone commission, return a Direction Card.
-3. **Council verdict**: user picks one direction (or hybridizes via Other; the Wedge synthesizes into ONE).
-4. **Crystallization**: extends the touchstone-scaffold.html into the project's actual masterpiece, with code density calibrated to the chosen tone (maximalist, minimal, or atmospheric).
-5. **Codification**: writes the companion `[PROJECT]_Touchstone_V1.0.md` (DESIGN.md format: YAML token contract plus prose rationale). The HTML carries the soul; the MD carries the contract.
-6. **Refinement**: auto-invokes `/preen` for usability check, Implementation-Matches-Vision check, and HTML ↔ MD parity check; locks.
-7. **Persist & Hand-Off**: writes both `[PROJECT]_Touchstone_V1.0.html` and `[PROJECT]_Touchstone_V1.0.md`; downstream conformance begins (Smith/Pitch/Probe/Preen consume the MD's YAML programmatically).
+2. **Council fan-out**: three parallel design-apprentices, each given a Family × Tone commission, return a Direction Card *and* a scoped HTML fragment rendering the direction at production-grade craft.
+3. **Preview assembly**: the three scoped fragments are mechanically assembled into a single `[PROJECT]_PreviewTouchstone_V1.0.html` with a tab selector at the top — one file, three directions, instantly comparable in the same viewport at the same scale. Visual decisions need visual artifacts.
+4. **Council verdict**: user opens the preview, clicks through the directions, picks one (or hybridizes via Other; the Wedge synthesizes into ONE).
+5. **Crystallization**: extends the touchstone-scaffold.html into the project's actual masterpiece, with code density calibrated to the chosen tone (maximalist, minimal, or atmospheric).
+6. **Codification**: writes the companion `[PROJECT]_Touchstone_V1.0.md` (DESIGN.md format: YAML token contract plus prose rationale). The HTML carries the soul; the MD carries the contract.
+7. **Refinement**: auto-invokes `/preen` for usability check, Implementation-Matches-Vision check, and HTML ↔ MD parity check; locks.
+8. **Persist & Hand-Off**: writes both `[PROJECT]_Touchstone_V1.0.html` and `[PROJECT]_Touchstone_V1.0.md`; downstream conformance begins (Smith/Pitch/Probe/Preen consume the MD's YAML programmatically).
 
 The Touchstone is **the standard**. Smith's apprentices inherit the MD's tokens. The Pitch is rendered HTML through it. `/probe` and `/preen` load both for visual and contract context. The wedge is driven once; what comes after conforms.
 

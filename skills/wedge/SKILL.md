@@ -58,7 +58,7 @@ You commit at one of two ends — bold maximalism or refined minimalism — and 
 > - **Minimal tones** (brutally minimal, refined/luxury, editorial/magazine, industrial/utilitarian): surgical negative space, exact typographic scale, one deliberate motion gesture (or zero — silence is permitted). Atmospheric backdrop optional and subtle if present (hairline rule, flat warm white, 0.02-opacity grain — never gradient mesh). **Code density: low. Precision: high.**
 > - **Atmospheric/organic tones** (liquid/atmospheric, organic/natural, soft/pastel): depth and air — gradient mesh, organic curves, soft transitions, ambient motion. **Code density: medium-high.**
 >
-> Maximalist code on a minimal Touchstone produces noise; minimal code on a maximalist Touchstone produces a half-finished page. Heat 6 (`/preen`) rejects mismatch in either direction.
+> Maximalist code on a minimal Touchstone produces noise; minimal code on a maximalist Touchstone produces a half-finished page. Heat 7 (`/preen`) rejects mismatch in either direction.
 
 ## HARD RULE — Aesthetic Serves the Project (vary across projects, soul before style)
 
@@ -102,7 +102,7 @@ If Opus or Vow is missing, halt and instruct the user to run `/prime` first.
 
 ## Process — The Heats
 
-The Wedge has seven heats. Each is single-purpose and discrete.
+The Wedge has eight heats. Each is single-purpose and discrete.
 
 ### Heat 1: Distillation
 
@@ -141,7 +141,9 @@ Each apprentice gets a **two-axis commission**: a **family** (lineage — which 
 
 Read [`<forge>/skills/wedge/family-tone-archetypes.md`](family-tone-archetypes.md) for the 7 families × 11 tones menu, the apprentice assignment table, and the rotation rule against `wedge-learnings.md`. Each of the 3 parallel apprentices spawned via the Agent tool gets a distinct family AND a distinct tone.
 
-Each apprentice returns a **Direction Card** — a single-page proposal:
+Each apprentice returns **two artifacts**: a **Direction Card** (markdown — the spec) AND a **scoped HTML fragment** (the rendered vision of that direction at production-grade craft). The fragment is what Heat 3 assembles into the unified preview the user picks from. Visual decisions need visual artifacts — Direction Cards alone ask the user to *imagine* a Touchstone; the rendered fragment lets the user *see* it.
+
+The Direction Card template:
 
 ```markdown
 # Direction — [Family × Tone short name]
@@ -181,17 +183,40 @@ Each apprentice returns a **Direction Card** — a single-page proposal:
 [what about this direction could fail the Wedge Brief or the Memorable Signature]
 ```
 
-The three Direction Cards land in `[PROJECT]_DirectionCards_V1.0.md` (concatenated for the user to compare).
+The Scoped HTML Fragment requirements:
 
-### Heat 3: Council Verdict (user picks)
+- **Scoped CSS** — every selector prefixed with the direction's container class (e.g., `.direction-a`). NO `:root` declarations, NO `body { ... }`, NO global resets, NO unscoped element selectors. Tokens declared as scoped custom properties (e.g., `.direction-a { --color-dominant: #...; }`).
+- **Self-contained** — Google Fonts `<link>` tags are returned alongside the fragment so Heat 3 can hoist them into the preview shell's `<head>`. Fragment markup itself contains only the `<section class="direction-a">...</section>` tree.
+- **Required regions** — within the scoped section: hero with display typography at scale + primary task surface drawn from the Vow's audience posture + memorable signature implementation at real scale + token legend in a footer area listing all scoped CSS variables.
+- **No JS interactivity required** — atmospheric CSS animation is fine; complex JS state belongs in the final Touchstone (Heat 5), not the preview fragment.
 
-Use `AskUserQuestion` with **`preview` blocks** showing each direction's typography pairing, dominant color, and one-line thesis side-by-side. Options: 3 directions + "Other" (user describes a fourth direction or hybridizes two).
+The three Direction Cards land in `[PROJECT]_DirectionCards_V1.0.md` (concatenated for the user to compare). The three scoped fragments are passed to Heat 3.
 
-If the user hybridizes via Other, before proceeding to Heat 4 the Wedge **synthesizes the hybrid into a single direction** — picking ONE typography pairing, ONE dominant color, ONE motion philosophy. No two-aesthetics-fused output.
+### Heat 3: Preview Assembly (mechanical, no apprentice spawn)
+
+Assemble the three scoped HTML fragments into a single `[PROJECT]_PreviewTouchstone_V1.0.html` with a tab/segment selector at the top. One file. Three directions, comparable side-by-side at the same viewport, same scroll position, same window size — the conditions a side-by-side decision actually needs.
+
+Required structure:
+
+1. **Selector bar** — fixed at top, three buttons (or segmented control) labeled with each direction's `Family × Tone short name`. Active button is visually distinct. Clicking a button activates that direction's container and hides the others. Default-active = Direction A.
+2. **Three direction containers** — `<section class="direction-a">`, `<section class="direction-b">`, `<section class="direction-c">` — each containing its apprentice's full scoped fragment. Visibility controlled by a wrapper class (e.g., `body.show-a` shows only `.direction-a`).
+3. **URL hash deep-linking** — `#a`, `#b`, `#c` route to the matching direction. On load, parse `location.hash` to set the initial active direction. Selector clicks update the hash.
+4. **Hoisted font links** — all Google Fonts `<link>` tags from all three fragments live in the preview shell's `<head>`. All fonts load upfront — acceptable cost for a preview artifact.
+5. **Per-direction header strip** — within each container, a small caption row showing: Direction letter (A/B/C), `Family × Tone` short name, the Memorable Signature sentence. Anchors what the user is looking at.
+
+The shell HTML/CSS/JS is mechanical — no creative apprentice work. The Wedge writes it directly. Discarded directions stay inside this file as historical record (collapsed behind unselected tabs); no separate cleanup is needed.
+
+### Heat 4: Council Verdict (user picks)
+
+Open `[PROJECT]_PreviewTouchstone_V1.0.html` in the user's browser (`open`, `xdg-open`, or print the absolute path).
+
+Then use `AskUserQuestion` to ask the user which direction to crystallize. Question body includes the absolute path to the preview HTML and a one-line summary of each direction (Family × Tone short name + Memorable Signature sentence). Options: 3 directions + "Other" (user describes a fourth direction or hybridizes two).
+
+If the user hybridizes via Other, before proceeding to Heat 5 the Wedge **synthesizes the hybrid into a single direction** — picking ONE typography pairing, ONE dominant color, ONE motion philosophy. No two-aesthetics-fused output.
 
 Persist the chosen direction to `[PROJECT]_ChosenDirection_V1.0.md` for traceability.
 
-### Heat 4: Crystallization
+### Heat 5: Crystallization
 
 Build the actual `[PROJECT]_Touchstone_V1.0.html`. Single self-contained HTML file (CSS inline or in `<style>`, JS inline or in `<script>`). Extends `<forge>/skills/wedge/touchstone-scaffold.html` as the starting structure.
 
@@ -208,7 +233,7 @@ Required regions, in this order:
 
 The Touchstone is **not** a multi-page demo. It is one page that breathes the entire aesthetic.
 
-### Heat 5: Codification — write the companion `Touchstone.md`
+### Heat 6: Codification — write the companion `Touchstone.md`
 
 The HTML carries the soul. The MD carries the contract. Smith, Probe, Preen, Pitch, and any future tooling (Tailwind theme generator, Figma plugin, tokens.json export) must consume the Touchstone *programmatically* — not by grepping CSS variables out of HTML.
 
@@ -216,7 +241,7 @@ Produce `[PROJECT]_Touchstone_V1.0.md` adjacent to the HTML, following the **DES
 
 After this heat the project has both Touchstone forms — vision (HTML) and contract (MD) — and the contract is normative for tokens.
 
-### Heat 6: Refinement
+### Heat 7: Refinement
 
 Auto-invoke `/preen` on the rendered Touchstone (HTML). /preen evaluates against Don Norman's usability principles plus Jony Ive's reductive craft. Apply critique that does not violate the chosen direction (a critique like "this feels too brutalist" is irrelevant if brutalist was the picked direction; a critique like "the hover target is below the WCAG minimum" is mandatory).
 
@@ -226,10 +251,10 @@ Validate **HTML ↔ MD parity**: every CSS variable in the HTML's `<style>` must
 
 After /preen passes and parity is verified, the Touchstone is **locked**.
 
-### Heat 7: Persist & Hand-Off
+### Heat 8: Persist & Hand-Off
 
-1. Write both Touchstone files to the project root (or `docs/` if the project's CLAUDE.md establishes that convention): `[PROJECT]_Touchstone_V1.0.html` and `[PROJECT]_Touchstone_V1.0.md`.
-2. Open the HTML in the user's browser (`open`, `xdg-open`, or print the absolute path).
+1. Write both Touchstone files to the project root (or `docs/` if the project's CLAUDE.md establishes that convention): `[PROJECT]_Touchstone_V1.0.html` and `[PROJECT]_Touchstone_V1.0.md`. The Preview HTML from Heat 3 stays in place as historical record (collapsed directions are inert but preserved).
+2. Open the final Touchstone HTML in the user's browser (`open`, `xdg-open`, or print the absolute path).
 3. Output the **Hand-Off Notice**:
 
 ```markdown
@@ -261,6 +286,7 @@ Smith conforms.
 |----------|--------|------|
 | `[PROJECT]_WedgeBrief_V1.0.md` | Markdown | The council's commission letter — emotional core, tonal anchor, memorable signature, refused tones |
 | `[PROJECT]_DirectionCards_V1.0.md` | Markdown | The three apprentice proposals (Family × Tone each) — for traceability |
+| `[PROJECT]_PreviewTouchstone_V1.0.html` | HTML | Three rendered direction fragments unified under a tab selector — the visual artifact the user picks from. Discarded directions remain inside as historical record. |
 | `[PROJECT]_ChosenDirection_V1.0.md` | Markdown | The synthesized direction the user picked |
 | **`[PROJECT]_Touchstone_V1.0.html`** | **HTML** | **The masterpiece — soul-bearing rendered vision (the why)** |
 | **`[PROJECT]_Touchstone_V1.0.md`** | **DESIGN.md** | **The contract — typed tokens (YAML) + Do's/Don'ts (the how). Normative for tokens; consumed by Smith, Pitch, Probe, Preen.** |
@@ -286,14 +312,23 @@ Follow the four HARD RULES above (Commit to ONE Direction, Banned Defaults, Requ
 
 Pay special attention to Required Substance: the substance tier (maximalist / minimal / atmospheric) is determined by your assigned TONE. A minimal tone does NOT require atmospheric backdrop or orchestrated motion — restraint IS the substance. Ornament is not effort.
 
-You produce ONE Direction Card (template above). Name SPECIFIC fonts (with real Google Fonts URLs), SPECIFIC hex colors, SPECIFIC motion principles (or declare "zero motion" if your tone demands it). Generic answers ("a clean modern sans paired with a serif") are rejected — name the font. Declare your Substance Tier explicitly.
+You produce TWO artifacts:
+
+1. **Direction Card** (markdown — template above). Name SPECIFIC fonts (with real Google Fonts URLs), SPECIFIC hex colors, SPECIFIC motion principles (or declare "zero motion" if your tone demands it). Generic answers ("a clean modern sans paired with a serif") are rejected — name the font. Declare your Substance Tier explicitly.
+
+2. **Scoped HTML fragment** — production-grade rendered vision of your direction, contained entirely within `<section class="direction-[A|B|C]">...</section>` (you will be told which letter you are). HARD constraints:
+   - All CSS scoped under `.direction-[A|B|C]` — NO `:root`, NO `body`, NO global resets, NO unscoped element selectors. Tokens declared as scoped custom properties: `.direction-A { --color-dominant: #...; --font-display: '...'; ... }`.
+   - Google Fonts `<link>` tags returned in a separate fenced block labeled `<!-- FONTS -->` so the assembler can hoist them into the preview shell's `<head>`.
+   - Required regions WITHIN the scoped section: a hero with display typography at scale + a primary task surface drawn from the Vow's audience posture + a memorable signature implementation at real scale + a token legend in a footer area listing the scoped CSS variables.
+   - Substance tier governs density: minimal tones produce restrained markup, maximalist tones produce orchestrated density, atmospheric tones produce ambient depth. Match implementation to tone.
+   - No JS state required. Pure CSS animation is fine.
 
 Your direction must serve the Wedge Brief — including the Memorable Signature field. Do not propose a fashionable aesthetic; propose one that answers what the project IS, executed at the intensity your tone demands.
 
-Return only the Direction Card. No preamble. No alternatives. One direction, committed.
+Return BOTH artifacts. Direction Card first, then a fenced `<!-- FRAGMENT -->` block with the scoped HTML, then a fenced `<!-- FONTS -->` block with the `<link>` tags. No preamble. No alternatives. One direction, committed.
 ```
 
-Spawn three apprentices in **parallel** (single message, multiple Agent tool uses). Each gets a distinct family AND a distinct tone. Each returns one Direction Card. Concatenate into `[PROJECT]_DirectionCards_V1.0.md` for the council verdict.
+Spawn three apprentices in **parallel** (single message, multiple Agent tool uses). Each gets a distinct family AND a distinct tone AND a distinct container letter (A, B, C). Each returns a Direction Card + scoped HTML fragment + fonts. Concatenate cards into `[PROJECT]_DirectionCards_V1.0.md`; pass fragments and fonts to Heat 3 for assembly into the unified preview HTML.
 
 ## Self-Improvement Loop
 
@@ -302,7 +337,7 @@ Per the [Forge Protocol](../forge/protocol.md) post-flight, append to `memory/we
 - **Family × Tone outcome** — did the chosen pairing (especially tense pairings) produce a distinctive direction, or fall flat?
 - **Substance tier outcome** — did a minimal Touchstone read as disciplined or unfinished? Did a maximalist Touchstone earn its density or read as ornament-for-ornament's-sake?
 - **Memorable signature** — was the one-thing-they-remember achievable in the rendered Touchstone, or did it dissolve?
-- **HTML ↔ MD parity issues** — drift caught in Heat 6, so future runs catch it earlier.
+- **HTML ↔ MD parity issues** — drift caught in Heat 7, so future runs catch it earlier.
 - **Do's and Don'ts that mattered downstream** — which project-specific guardrails proved decisive when Smith later built screens, which were noise.
 - **Apprentice bias-leakage** — minimal apprentice sneaking in a gradient; brutalist reaching for default monospace; etc.
 

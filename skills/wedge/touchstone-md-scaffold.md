@@ -1,6 +1,6 @@
 # Touchstone.md Scaffold
 
-The DESIGN.md-format scaffold the Wedge writes during Heat 5 (Codification). Companion to `SKILL.md` — referenced rather than inlined to keep the skill thin.
+The DESIGN.md-format scaffold the Wedge writes during Heat 6 (Codification). Companion to `SKILL.md` — referenced rather than inlined to keep the skill thin.
 
 The Touchstone has two paired forms:
 - **HTML** carries the soul (rendered vision — atmosphere, motion, typography in motion).
