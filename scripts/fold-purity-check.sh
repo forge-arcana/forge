@@ -155,7 +155,7 @@ scan_file_or_text() {
   backtick_hits=$(echo "$body" \
     | grep -oE '`[a-z][a-zA-Z_]*[A-Z][a-zA-Z_]*`|`[a-z][a-z_]+_[a-z_]+`' \
     | sort -u \
-    | grep -vE '`(camelCase|snake_case|kebab-case|env_var|api_key|access_token|refresh_token|node_modules|user_id|created_at|updated_at|deleted_at|expiresAt|invalid_grant|client_id|client_secret|grant_type|expires_in|token_type|id_token|scope|state|redirect_uri|code_verifier|code_challenge|cf_clearance|cf-mitigated)`' \
+    | grep -vE '`(camelCase|snake_case|kebab-case|env_var|api_key|access_token|refresh_token|node_modules|user_id|created_at|updated_at|deleted_at|expiresAt|invalid_grant|client_id|client_secret|grant_type|expires_in|token_type|id_token|scope|state|redirect_uri|code_verifier|code_challenge|cf_clearance|cf-mitigated|head_limit|output_mode|files_with_matches|forge-path|file_path)`' \
     || true)
   if [[ -n "$backtick_hits" ]]; then
     file_violations+="  BACKTICKED-IDENTIFIER (project-specific schema/field names — universalize the principle, drop the names):"$'\n'

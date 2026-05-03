@@ -211,3 +211,16 @@
 ## Avoid Em-Dashes and Tricolon Negation Cadence in User-Facing Copy (2026-04-27)
 **Learning**: Two specific prose patterns now read as obviously AI-generated to skeptical readers, regardless of the surrounding writing quality. (1) Em-dashes — every length, every position. Even "elegant" usage is a tell because current LLM defaults overuse them. Rewrite with commas, periods, colons, semicolons, or parentheses depending on the logical relationship. (2) Tricolon negation cadence: the "No X. No Y. No Z." or "No X. No Y. Just Z." three-beat hook. Pattern is so widespread in AI marketing/landing copy that it now signals templated output rather than original thinking. Both make text feel manufactured rather than written, undermining trust on pitches, decks, and any external-facing artifact where the reader's "is this AI slop?" filter is on.
 **Apply when**: Drafting or reviewing any external-facing copy — pitches, decks, marketing pages, in-app strings, landing copy, email outreach. Treat both patterns as defects on review passes; do not rely on "single em-dash is fine" carve-outs. To replace the tricolon, describe what the thing IS rather than enumerating what it is not.
+
+## Grep Defaults Are Tuned for Humans, Not Token-Metered Agents (2026-05-01)
+**Learning**: The Grep tool's default `output_mode: "content"` mirrors Unix `grep` — sensible for a human skimming output, wasteful for an LLM that pays per token to read every returned line. The analogy "grep has worked this way for 50 years" doesn't hold: a Unix tool returns bytes to a free reader; an agent tool returns tokens to a metered one. Default behavior should be the cheapest shape that preserves correctness, with verbosity opted *into*, not out of.
+**Apply when**: Any Grep call. Decision order:
+  1. **Default to `output_mode: "files_with_matches"`** — paths only. 10-100x fewer tokens. Sufficient for "where is X defined / referenced."
+  2. **Use `output_mode: "content"` only when surrounding lines matter for reasoning** (e.g., understanding how a symbol is used, not just where).
+  3. **Always set `head_limit`** when you expect more than a handful of hits. Unbounded content searches are the worst offender.
+  4. **For broad sweeps (>50 expected hits, or open-ended "find anything related to X")**, delegate to an exploration subagent — its context is isolated, only the summary crosses back.
+  5. **For known symbols/paths**, prefer Read or `rg` via Bash with tight flags over Grep — direct lookups don't need the tool's full result formatting.
+
+## /forge Runs From Anywhere (2026-05-01)
+**Learning**: The `/forge` skill is invocable from any cwd, not just from inside the forge repo. It resolves the forge path internally (via the `forge-path:` line in the global `~/.claude/CLAUDE.md`) and runs the bidirectional sync from wherever the user is. The HARD RULE "never write to forge from a project" governs *direct file edits* to the forge repo from project context — it does NOT restrict invoking `/forge` itself, which is the sanctioned channel for absorbing membrane learnings into forge.
+**Apply when**: User says "run /forge" or "absorb to forge" from any project. Do not tell them to `cd` into the forge repo first — that's wrong guidance. Just invoke the skill. The only forge-internal skill (cwd-restricted to forge repo) is `/purge`.

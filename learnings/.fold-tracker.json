@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-04-30T00:00:00Z",
+  "lastRun": "2026-05-03T00:00:00Z",
   "processedEntries": [
     "WSL Path Compatibility",
     "Disable Rate Limiting in E2E Test Mode",
@@ -86,7 +86,9 @@
     "DNS, Email, and App Hosting Are Fully Decoupled — Don't Bundle Them",
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Avoid Em-Dashes and Tricolon Negation Cadence in User-Facing Copy",
-    "Render previews BEFORE asking the user to pick a direction"
+    "Render previews BEFORE asking the user to pick a direction",
+    "Grep Defaults Are Tuned for Humans, Not Token-Metered Agents",
+    "/forge Runs From Anywhere"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
