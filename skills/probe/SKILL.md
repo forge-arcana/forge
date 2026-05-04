@@ -25,18 +25,22 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
    - If the conversation has a clear architectural topic (plan, design, RFC) → probe that (inline review)
    - **If ambiguous** → ask: "What should I probe? A Blueprint, the current plan, or something else?"
 3. Read/review the full probe target before proceeding. **Also read `[PROJECT]_06_Pattern_V1.0.md`** if it exists — preserve and update its Architecture section rather than overwriting; leave the UX section untouched (that belongs to /preen).
-4. **Read the Touchstone pair if it exists** — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter for tokens, prose Overview + Do's-and-Don'ts for posture) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: visual context). The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. Architecture decisions that fight the Touchstone's contract or posture (e.g., a chosen framework that cannot deliver the locked motion philosophy, or a state-management pattern that contradicts the interaction tempo declared in the MD's Components section) should be flagged. Probe is not the aesthetic art — it does not override Touchstone choices — but it should surface architecture-aesthetic conflicts as part of its critique.
+4. **Read `<forge>/skills/forge/stack-guide.md` in full.** This is the prescribed forge stack — Cloud Run + Cloud SQL/Neon + Hono + Drizzle + React/Vite + TanStack + Better Auth + Pino/Sentry, etc. Treat it as the **default baseline** for every architecture decision, not one option among many. Web search results that surface trendy combos (e.g., Vercel + Neon, Next.js on Vercel, Supabase) do **not** override the stack-guide unless a project-specific signal demands it (see "Deviation rule" below).
+5. **Read the Touchstone pair if it exists** — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter for tokens, prose Overview + Do's-and-Don'ts for posture) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: visual context). The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. Architecture decisions that fight the Touchstone's contract or posture (e.g., a chosen framework that cannot deliver the locked motion philosophy, or a state-management pattern that contradicts the interaction tempo declared in the MD's Components section) should be flagged. Probe is not the aesthetic art — it does not override Touchstone choices — but it should surface architecture-aesthetic conflicts as part of its critique.
 
 ## Process
 
-**Spawn parallel subagents** — one per technical section (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD). Each subagent independently:
+**Spawn parallel subagents** — one per technical section (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD). **Pass the stack-guide path (`<forge>/skills/forge/stack-guide.md`) into every subagent prompt** so each one anchors its review to the forge stack before consulting the web. Each subagent independently:
 
-1. **Analyzes** the current recommendation
-2. **Searches the web** for current best practices — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache). **Batch all uncached web searches in parallel.**
-3. **Challenges** the decision:
-   - Is this still the best choice? Has something better emerged?
+1. **Anchors to the stack-guide** — read the relevant rows of `<forge>/skills/forge/stack-guide.md` for this section. The stack-guide entry is the default recommendation. Web research informs *deviation analysis*, not the baseline.
+2. **Analyzes** the current Blueprint recommendation against the stack-guide:
+   - Does the Blueprint match the stack-guide? → confirm with stack-guide rationale.
+   - Does the Blueprint deviate from the stack-guide? → either justify the deviation with a project signal (see Deviation rule) or recommend reverting to the stack-guide default.
+3. **Searches the web** for current best practices — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache). **Batch all uncached web searches in parallel.** Web findings are used to (a) validate the stack-guide is still current, (b) surface known pitfalls, (c) identify *project-specific* signals that would justify deviation. Do **not** swap the stack-guide choice for a web-popular alternative without a concrete signal.
+4. **Challenges** the decision:
+   - Is the stack-guide choice still the best fit for *this* project? (not "what's trending")
    - Are there known pitfalls with this approach at the expected scale?
-   - Are there simpler alternatives that achieve the same outcome?
+   - Are there simpler alternatives that achieve the same outcome — *and* does the project have a signal that warrants the swap?
    - **Language fit check** (for Section 13 specifically):
      - Does the chosen language match the project's performance envelope? (CRUD app in Rust = over-engineered; high-throughput pipeline in Node.js = potential bottleneck)
      - Are there integration mismatches? (ML-heavy project without Python; mobile app without TypeScript)
@@ -44,11 +48,21 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
      - Does the blueprint justify the language choice, or did it just default without evaluation?
    - **Testing architecture evaluation** (for Section 18 specifically) — load the rubric from `<forge>/skills/probe/test-architecture-rubric.md`. Blueprint mode: 6 substantive-vs-vague criteria; Codebase mode: 7 infrastructure checks plus a per-package Test Coverage Map.
 
-4. **Enhance or confirm** the section with:
-   - Updated recommendations with justification
+5. **Enhance or confirm** the section with:
+   - Updated recommendations with justification (cite the stack-guide row when confirming the default)
    - Specific configuration guidance
    - Known gotchas and mitigation strategies
    - Links to relevant documentation
+
+### Deviation rule (HARD)
+
+> The forge stack-guide is the **default**. Subagents must not swap a stack-guide choice for a web-popular alternative (e.g., recommending Vercel over Cloud Run, Supabase over Better Auth + Drizzle, Next.js over React + Vite + TanStack) **unless** a concrete project signal demands it.
+>
+> Valid signals for deviation include: (a) a hard constraint (data residency, regulatory, existing team skill, mandated provider), (b) a scale/latency requirement the default cannot meet, (c) a workload mismatch (ML serving, CLI tool, embedded), (d) the founder explicitly requested it in /prime.
+>
+> "It's trending on Twitter" / "more popular per npm downloads" / "the Vercel + Neon combo is common in tutorials" are **not** valid signals.
+>
+> When recommending a deviation, the Pattern entry must include a `**Deviation signal**:` line naming the project signal that justifies it. Absent a signal, recommend the stack-guide default.
 
 **Run the additional checks as a parallel subagent** alongside the section reviews:
 

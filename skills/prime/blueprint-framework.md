@@ -297,12 +297,15 @@ Only after the founder confirms (or redirects), proceed to Q31. Language choice 
       - **Magic links:** Simple, email-dependent
     - "Which combination makes sense for your users?"
 
-33. **"Where should this be hosted? Any preference?"**
-    - Guide by context:
-      - **GCP/AWS/Azure:** Full control, scalable, complex
-      - **Vercel/Netlify + managed DB:** Simple, fast, limited backend
-      - **Railway/Render/Fly.io:** Middle ground, easy deploy, reasonable cost
-    - Consider: region requirements (data residency), budget, team expertise.
+33. **"Where should this be hosted?"**
+    - **Default (recommend unless a signal points elsewhere):** **GCP Cloud Run** for the app + **Cloud SQL** for production Postgres + **Neon** for dev/staging/CI. This is the forge stack-guide default — single deployment serves API + static build (no CORS), region-pinned, scales to zero, pay-per-request, WIF-based keyless GCP auth. Drizzle abstracts the DB so the dev/staging/prod split is just a connection string change.
+    - Lead the founder with: *"Unless you have a strong reason otherwise, I'd put this on Cloud Run + Cloud SQL with Neon for dev/staging — that's the default forge stack and it covers the vast majority of projects."*
+    - **Only deviate from the default if a concrete signal demands it:**
+      - **Data residency / sovereignty** (must run in a specific region/cloud) → may force AWS/Azure/Hetzner.
+      - **Existing team expertise** ("we already run on AWS") → respect the sunk cost.
+      - **Workload mismatch** (edge functions globally, static-only marketing site) → Vercel/Netlify *may* fit; flag the trade-off (limited backend, vendor lock-in).
+      - **Hard budget constraint with no GCP credits** → Railway/Render/Fly.io as a middle ground.
+    - **Do not present Vercel/Railway/Cloud Run as equal options.** The default is Cloud Run + Cloud SQL + Neon. Alternatives exist; they are not peers.
 
 34. **"How important is testing and CI/CD from day one?"**
     - Some founders want "just ship it." Others want production-grade from the start.
