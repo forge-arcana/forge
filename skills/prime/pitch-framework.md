@@ -4,7 +4,7 @@
 >
 > **When to use:** When the founder needs to communicate their idea to people who don't care about the tech stack — investors, advisors, partners, accelerator applications, or co-founders.
 >
-> **Output:** A completed `[PROJECT]_Pitch_V1.0.md` containing: elevator pitch, problem/solution narrative, market sizing, business model, competitive moat, team slide content, ask/use-of-funds, and a suggested deck outline.
+> **Output:** A completed `[PROJECT]_04_Pitch_V1.0.md` containing: elevator pitch, problem/solution narrative, market sizing, business model, competitive moat, team slide content, ask/use-of-funds, and a suggested deck outline.
 
 ---
 
@@ -303,7 +303,7 @@ Incorporate feedback. Remove all agent instructions. The final document should r
 ### Step 4: Generate PDF
 
 ```bash
-npx md-to-pdf [PROJECT]_Pitch_V1.0.md
+npx md-to-pdf [PROJECT]_04_Pitch_V1.0.md
 ```
 
 ---

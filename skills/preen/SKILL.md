@@ -1,6 +1,6 @@
 ---
 name: preen
-description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. Pattern-aware (writes UX section of [PROJECT]_Pattern_V1.0.md when present). Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review."
+description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. Pattern-aware (writes UX section of [PROJECT]_06_Pattern_V1.0.md when present). Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review."
 user-invocable: true
 ---
 <!-- model: opus -->
@@ -29,7 +29,7 @@ Launch all in parallel (independent scans):
 3. **Check for design system**: look for theme files, design tokens, component libraries
 4. **Identify user flows**: read route definitions, navigation config, form handlers
 5. **Check for Pattern file**: glob for `*Pattern*.md` in cwd. If a Pattern exists (likely written by /probe), this run **appends** the UX section to it. If none exists, the report is returned inline and the user is told Pattern requires `/probe` on a Blueprint first.
-6. **Check for Touchstone**: glob for `[PROJECT]_Touchstone_V1.0.md` AND `[PROJECT]_Touchstone_V1.0.html` in cwd. If both present, load the MD for the typed contract (Overview, Typography, Components, Do's-and-Don'ts prose; YAML tokens) and the HTML for visual context. The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. UX critique that contradicts the chosen aesthetic posture (e.g., suggesting a "playful microcopy tone" when the Touchstone is solemn editorial; arguing for a different motion philosophy than the Touchstone declares; suggesting a UX move that violates an explicit Don't) is invalid. /preen evaluates usability *within* the Touchstone's frame, not against it. The Touchstone's direction is locked; only its execution within usability principles is critique-able.
+6. **Check for Touchstone**: glob for `[PROJECT]_03e_Touchstone_V1.0.md` AND `[PROJECT]_03e_Touchstone_V1.0.html` in cwd. If both present, load the MD for the typed contract (Overview, Typography, Components, Do's-and-Don'ts prose; YAML tokens) and the HTML for visual context. The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. UX critique that contradicts the chosen aesthetic posture (e.g., suggesting a "playful microcopy tone" when the Touchstone is solemn editorial; arguing for a different motion philosophy than the Touchstone declares; suggesting a UX move that violates an explicit Don't) is invalid. /preen evaluates usability *within* the Touchstone's frame, not against it. The Touchstone's direction is locked; only its execution within usability principles is critique-able.
 
 ## Arguments
 
@@ -137,7 +137,7 @@ Adapt output to whether a Pattern file exists (from /probe).
 
 ### Pattern mode — Pattern file exists in cwd
 
-Append findings as the `## UX` section of `[PROJECT]_Pattern_V1.0.md`. The Pattern is the shared design artifact; /probe writes Architecture, /preen writes UX, and both contribute to Risks.
+Append findings as the `## UX` section of `[PROJECT]_06_Pattern_V1.0.md`. The Pattern is the shared design artifact; /probe writes Architecture, /preen writes UX, and both contribute to Risks.
 
 - **Preserve** the existing Architecture section verbatim — never rewrite /probe's work.
 - **Replace or insert** the UX section with the findings below.
@@ -166,7 +166,7 @@ UX section structure:
 - [Celebrate good design decisions and why they work — what NOT to change]
 ```
 
-After writing, present a summary to the user: "UX section appended to `[PROJECT]_Pattern_V1.0.md`. N critical, M improvements. The Pattern is now complete (Architecture + UX) — ready for /smith."
+After writing, present a summary to the user: "UX section appended to `[PROJECT]_06_Pattern_V1.0.md`. N critical, M improvements. The Pattern is now complete (Architecture + UX) — ready for /smith."
 
 ### Inline mode — no Pattern file
 

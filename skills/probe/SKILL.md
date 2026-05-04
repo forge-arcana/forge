@@ -1,6 +1,6 @@
 ---
 name: probe
-description: "Challenge architecture decisions against current best practices. On Blueprint targets, writes the Architecture section of the Pattern ([PROJECT]_Pattern_V1.0.md). On plans/conversations, returns inline review. Self-improving. TRIGGER when: user asks for architecture review, design validation, or 'is this the right approach?' on a technical decision."
+description: "Challenge architecture decisions against current best practices. On Blueprint targets, writes the Architecture section of the Pattern ([PROJECT]_06_Pattern_V1.0.md). On plans/conversations, returns inline review. Self-improving. TRIGGER when: user asks for architecture review, design validation, or 'is this the right approach?' on a technical decision."
 user-invocable: true
 ---
 <!-- model: opus -->
@@ -24,8 +24,8 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
    - If `/prime` just ran in this conversation → probe that output
    - If the conversation has a clear architectural topic (plan, design, RFC) → probe that (inline review)
    - **If ambiguous** → ask: "What should I probe? A Blueprint, the current plan, or something else?"
-3. Read/review the full probe target before proceeding. **Also read `[PROJECT]_Pattern_V1.0.md`** if it exists — preserve and update its Architecture section rather than overwriting; leave the UX section untouched (that belongs to /preen).
-4. **Read the Touchstone pair if it exists** — `[PROJECT]_Touchstone_V1.0.md` (typed contract: load YAML frontmatter for tokens, prose Overview + Do's-and-Don'ts for posture) and `[PROJECT]_Touchstone_V1.0.html` (rendered vision: visual context). The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. Architecture decisions that fight the Touchstone's contract or posture (e.g., a chosen framework that cannot deliver the locked motion philosophy, or a state-management pattern that contradicts the interaction tempo declared in the MD's Components section) should be flagged. Probe is not the aesthetic art — it does not override Touchstone choices — but it should surface architecture-aesthetic conflicts as part of its critique.
+3. Read/review the full probe target before proceeding. **Also read `[PROJECT]_06_Pattern_V1.0.md`** if it exists — preserve and update its Architecture section rather than overwriting; leave the UX section untouched (that belongs to /preen).
+4. **Read the Touchstone pair if it exists** — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter for tokens, prose Overview + Do's-and-Don'ts for posture) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: visual context). The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. Architecture decisions that fight the Touchstone's contract or posture (e.g., a chosen framework that cannot deliver the locked motion philosophy, or a state-management pattern that contradicts the interaction tempo declared in the MD's Components section) should be flagged. Probe is not the aesthetic art — it does not override Touchstone choices — but it should surface architecture-aesthetic conflicts as part of its critique.
 
 ## Process
 
@@ -62,7 +62,7 @@ Additionally, verify the blueprint includes:
 
 Adapt output format to the probe target:
 
-**If probing a Blueprint file** → write the **Architecture** section of `[PROJECT]_Pattern_V1.0.md` (the Pattern is the form /smith consumes):
+**If probing a Blueprint file** → write the **Architecture** section of `[PROJECT]_06_Pattern_V1.0.md` (the Pattern is the form /smith consumes):
 
 - If Pattern does NOT exist → create it with the full skeleton (Architecture + empty UX placeholder + Risks).
 - If Pattern EXISTS → update the Architecture section in place. **Preserve the UX section verbatim** (that belongs to /preen). Merge new risks into the Risks section.

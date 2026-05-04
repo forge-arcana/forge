@@ -104,9 +104,9 @@ Idempotent. Refreshes the OAuth token if <30 min remaining and spawns a backgrou
 
 Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then read in parallel:
 
-- `[PROJECT]_Opus_V1.0.md` — the manuscript. **Required.**
-- `[PROJECT]_Vow_V1.0.md` — the pledge. **Required.**
-- Existing `[PROJECT]_Touchstone_V1.0.html` AND `[PROJECT]_Touchstone_V1.0.md` if present — read both for awareness; the Wedge regenerates rather than amending unless the user asks for a refinement pass. On a refinement pass, the MD's tokens are the source of truth and the HTML is re-rendered to match.
+- `[PROJECT]_01_Opus_V1.0.md` — the manuscript. **Required.**
+- `[PROJECT]_02_Vow_V1.0.md` — the pledge. **Required.**
+- Existing `[PROJECT]_03e_Touchstone_V1.0.html` AND `[PROJECT]_03e_Touchstone_V1.0.md` if present — read both for awareness; the Wedge regenerates rather than amending unless the user asks for a refinement pass. On a refinement pass, the MD's tokens are the source of truth and the HTML is re-rendered to match.
 - `wedge-learnings.md` — last 3 projects' aesthetic choices, for divergence enforcement.
 - `<forge>/learnings/global-patterns.md` — universal aesthetic principles already promoted.
 - Any reference URLs/images supplied as arguments.
@@ -161,7 +161,7 @@ Read Opus + Vow end-to-end. Produce a **Soul Brief** — a prose document (not b
 [URLs/images, with one-line descriptions of what about each is relevant]
 ```
 
-Persist this to `[PROJECT]_SoulBrief_V1.0.md` in the project root. The Soul Brief is the council's commission letter; its prose sections (What it IS, What it ISN'T, Examples from life, Forbidden Defaults) are non-negotiable transmission channels — apprentices read them in full, not as summary.
+Persist this to `[PROJECT]_03a_SoulBrief_V1.0.md` in the project root. The Soul Brief is the council's commission letter; its prose sections (What it IS, What it ISN'T, Examples from life, Forbidden Defaults) are non-negotiable transmission channels — apprentices read them in full, not as summary.
 
 ### Heat 2: Council Fan-Out (parallel apprentices)
 
@@ -241,7 +241,7 @@ The Scoped HTML Fragment requirements:
 - **Required regions** — within the scoped section: hero with display typography at scale + primary task surface drawn from the Vow's audience posture + memorable signature implementation at real scale + token legend in a footer area listing all scoped CSS variables.
 - **No JS interactivity required** — atmospheric CSS animation is fine; complex JS state belongs in the final Touchstone (Heat 5), not the preview fragment.
 
-The three Direction Cards land in `[PROJECT]_DirectionCards_V1.0.md` (concatenated for the user to compare). The three scoped fragments are passed to the anti-convergence audit, then Heat 3.
+The three Direction Cards land in `[PROJECT]_03b_DirectionCards_V1.0.md` (concatenated for the user to compare). The three scoped fragments are passed to the anti-convergence audit, then Heat 3.
 
 #### Anti-convergence audit (mechanical, before Heat 3)
 
@@ -264,7 +264,7 @@ Maximum two respawn rounds per cycle. If a third round would be needed, halt and
 
 ### Heat 3: Preview Assembly (mechanical, no apprentice spawn)
 
-Assemble the three scoped HTML fragments into a single `[PROJECT]_PreviewTouchstone_V1.0.html` with a tab/segment selector at the top. One file. Three directions, comparable side-by-side at the same viewport, same scroll position, same window size — the conditions a side-by-side decision actually needs.
+Assemble the three scoped HTML fragments into a single `[PROJECT]_03c_PreviewTouchstone_V1.0.html` with a tab/segment selector at the top. One file. Three directions, comparable side-by-side at the same viewport, same scroll position, same window size — the conditions a side-by-side decision actually needs.
 
 Required structure:
 
@@ -278,7 +278,7 @@ The shell HTML/CSS/JS is mechanical — no creative apprentice work. The Wedge w
 
 ### Heat 4: Council Verdict (user picks — or asks for a fresh council)
 
-Open `[PROJECT]_PreviewTouchstone_V1.0.html` in the user's browser (`open`, `xdg-open`, or print the absolute path).
+Open `[PROJECT]_03c_PreviewTouchstone_V1.0.html` in the user's browser (`open`, `xdg-open`, or print the absolute path).
 
 Then use `AskUserQuestion` to ask the user how to proceed. Question body includes the absolute path to the preview HTML and a one-line summary of each direction (lens name + Memorable Signature sentence + the example-from-life that most shaped it). Four options:
 
@@ -286,7 +286,7 @@ Then use `AskUserQuestion` to ask the user how to proceed. Question body include
 2. **Hybridize via Other** — describe a fourth direction or fuse two of the three. The Wedge **synthesizes the hybrid into a single direction** before proceeding to Heat 5 — picking ONE typography pairing, ONE dominant color, ONE motion philosophy. No two-aesthetics-fused output.
 3. **Regenerate the council** — none of the three lands the soul. The Wedge revises the Soul Brief based on the user's feedback and re-runs Heats 2–3 with a fresh lens trio. See *Regenerate branch* below.
 
-Persist the chosen direction (or the regenerate-cycle history) to `[PROJECT]_ChosenDirection_V1.0.md` for traceability.
+Persist the chosen direction (or the regenerate-cycle history) to `[PROJECT]_03d_ChosenDirection_V1.0.md` for traceability.
 
 #### Regenerate branch (when none of the three lands the soul)
 
@@ -299,17 +299,17 @@ When the user picks **Regenerate**, capture *why* before re-spawning. Use `AskUs
 
 The Wedge then:
 
-1. **Revises the Soul Brief.** If feedback indicates lens-level mismatch, re-derive the *Three Lenses* section against the soul (and against the founder's articulated dissatisfaction). If feedback indicates transmission failure, tighten or expand the relevant prose section. If feedback names new Forbidden Defaults the previous council reached for, add them as binding. Save as `[PROJECT]_SoulBrief_V1.1.md` (increment the minor version per regenerate cycle).
+1. **Revises the Soul Brief.** If feedback indicates lens-level mismatch, re-derive the *Three Lenses* section against the soul (and against the founder's articulated dissatisfaction). If feedback indicates transmission failure, tighten or expand the relevant prose section. If feedback names new Forbidden Defaults the previous council reached for, add them as binding. Save as `[PROJECT]_03a_SoulBrief_V1.1.md` (increment the minor version per regenerate cycle).
 2. **Re-runs Heat 2** with the new lens trio. Apprentices receive the revised Soul Brief, the new lenses, AND a brief of what the prior council missed (so they actively avoid the same gravity wells). Maximum **two regenerate cycles per /wedge run**; a third would indicate the upstream Opus/Vow may be thin or misaligned, and the Wedge halts and surfaces this to the user with a recommendation to revisit `/prime` rather than continue spinning.
 3. **Re-runs the anti-convergence audit** on the new fragments.
-4. **Assembles a new Preview HTML** versioned with the regenerate cycle: `[PROJECT]_PreviewTouchstone_V1.1.html`, `_V1.2.html`, etc. Prior previews are NOT deleted — they remain alongside as historical record of the council's evolution.
+4. **Assembles a new Preview HTML** versioned with the regenerate cycle: `[PROJECT]_03c_PreviewTouchstone_V1.1.html`, `_V1.2.html`, etc. Prior previews are NOT deleted — they remain alongside as historical record of the council's evolution.
 5. **Returns to Heat 4** with the new preview opened, and asks again: pick A/B/C, hybridize, or regenerate.
 
 The regenerate branch is the Wedge's safety valve against the worst failure mode — committing a Touchstone that the founder doesn't actually believe in. Better three council rounds and a lived Touchstone than one round and a Touchstone that the project will quietly drift away from.
 
 ### Heat 5: Crystallization
 
-Build the actual `[PROJECT]_Touchstone_V1.0.html`. Single self-contained HTML file (CSS inline or in `<style>`, JS inline or in `<script>`). Extends `<forge>/skills/wedge/touchstone-scaffold.html` as the starting structure.
+Build the actual `[PROJECT]_03e_Touchstone_V1.0.html`. Single self-contained HTML file (CSS inline or in `<style>`, JS inline or in `<script>`). Extends `<forge>/skills/wedge/touchstone-scaffold.html` as the starting structure.
 
 Required regions, in this order:
 
@@ -328,7 +328,7 @@ The Touchstone is **not** a multi-page demo. It is one page that breathes the en
 
 The HTML carries the soul. The MD carries the contract. Smith, Probe, Preen, Pitch, and any future tooling (Tailwind theme generator, Figma plugin, tokens.json export) must consume the Touchstone *programmatically* — not by grepping CSS variables out of HTML.
 
-Produce `[PROJECT]_Touchstone_V1.0.md` adjacent to the HTML, following the **DESIGN.md spec**. Load [`<forge>/skills/wedge/touchstone-md-scaffold.md`](touchstone-md-scaffold.md) for the typed-token YAML schema, the eight prose section templates (Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts), and the five generation rules (tokens normative, prose contextual, no invented sections, `{path.to.token}` reference syntax, Do's/Don'ts derived from Chosen Direction).
+Produce `[PROJECT]_03e_Touchstone_V1.0.md` adjacent to the HTML, following the **DESIGN.md spec**. Load [`<forge>/skills/wedge/touchstone-md-scaffold.md`](touchstone-md-scaffold.md) for the typed-token YAML schema, the eight prose section templates (Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts), and the five generation rules (tokens normative, prose contextual, no invented sections, `{path.to.token}` reference syntax, Do's/Don'ts derived from Chosen Direction).
 
 After this heat the project has both Touchstone forms — vision (HTML) and contract (MD) — and the contract is normative for tokens.
 
@@ -344,7 +344,7 @@ After /preen passes and parity is verified, the Touchstone is **locked**.
 
 ### Heat 8: Persist & Hand-Off
 
-1. Write both Touchstone files to the project root (or `docs/` if the project's CLAUDE.md establishes that convention): `[PROJECT]_Touchstone_V1.0.html` and `[PROJECT]_Touchstone_V1.0.md`. The Preview HTML from Heat 3 stays in place as historical record (collapsed directions are inert but preserved).
+1. Write both Touchstone files to the project root (or `docs/` if the project's CLAUDE.md establishes that convention): `[PROJECT]_03e_Touchstone_V1.0.html` and `[PROJECT]_03e_Touchstone_V1.0.md`. The Preview HTML from Heat 3 stays in place as historical record (collapsed directions are inert but preserved).
 2. Open the final Touchstone HTML in the user's browser (`open`, `xdg-open`, or print the absolute path).
 3. Output the **Hand-Off Notice**:
 
@@ -375,12 +375,12 @@ Smith conforms.
 
 | Artifact | Format | Role |
 |----------|--------|------|
-| `[PROJECT]_SoulBrief_V1.0.md` | Markdown (prose) | The council's commission letter — what it IS (sensorial), what it ISN'T (anti-aesthetic), examples from life (non-design refs), forbidden defaults, three derived essence-lenses, memorable signature |
-| `[PROJECT]_DirectionCards_V1.0.md` | Markdown | The three apprentice proposals (one essence-lens each) — for traceability |
-| `[PROJECT]_PreviewTouchstone_V1.0.html` | HTML | Three rendered direction fragments unified under a tab selector — the visual artifact the user picks from. Discarded directions remain inside as historical record. |
-| `[PROJECT]_ChosenDirection_V1.0.md` | Markdown | The synthesized direction the user picked |
-| **`[PROJECT]_Touchstone_V1.0.html`** | **HTML** | **The masterpiece — soul-bearing rendered vision (the why)** |
-| **`[PROJECT]_Touchstone_V1.0.md`** | **DESIGN.md** | **The contract — typed tokens (YAML) + Do's/Don'ts (the how). Normative for tokens; consumed by Smith, Pitch, Probe, Preen.** |
+| `[PROJECT]_03a_SoulBrief_V1.0.md` | Markdown (prose) | The council's commission letter — what it IS (sensorial), what it ISN'T (anti-aesthetic), examples from life (non-design refs), forbidden defaults, three derived essence-lenses, memorable signature |
+| `[PROJECT]_03b_DirectionCards_V1.0.md` | Markdown | The three apprentice proposals (one essence-lens each) — for traceability |
+| `[PROJECT]_03c_PreviewTouchstone_V1.0.html` | HTML | Three rendered direction fragments unified under a tab selector — the visual artifact the user picks from. Discarded directions remain inside as historical record. |
+| `[PROJECT]_03d_ChosenDirection_V1.0.md` | Markdown | The synthesized direction the user picked |
+| **`[PROJECT]_03e_Touchstone_V1.0.html`** | **HTML** | **The masterpiece — soul-bearing rendered vision (the why)** |
+| **`[PROJECT]_03e_Touchstone_V1.0.md`** | **DESIGN.md** | **The contract — typed tokens (YAML) + Do's/Don'ts (the how). Normative for tokens; consumed by Smith, Pitch, Probe, Preen.** |
 
 ## Council Apprentice Brief Template
 
@@ -397,11 +397,11 @@ Render the product's soul AS IF SEEN THROUGH THIS LENS. The lens is interpretive
 
 READ IN FULL — these are mandatory transmission channels, not summaries to skim:
 
-[FULL TEXT of [PROJECT]_Opus_V1.0.md]
+[FULL TEXT of [PROJECT]_01_Opus_V1.0.md]
 
-[FULL TEXT of [PROJECT]_Vow_V1.0.md]
+[FULL TEXT of [PROJECT]_02_Vow_V1.0.md]
 
-[FULL TEXT of [PROJECT]_SoulBrief_V1.0.md]
+[FULL TEXT of [PROJECT]_03a_SoulBrief_V1.0.md]
 
 Pay particular attention to the Soul Brief's prose sections:
 - "What it IS" — sensorial essence. Read for sound, weight, temperature, pace, light. Your direction must inherit these qualities.
@@ -431,7 +431,7 @@ Your direction must serve the Soul Brief — including the Memorable Signature f
 Return BOTH artifacts. Direction Card first, then a fenced `<!-- FRAGMENT -->` block with the scoped HTML, then a fenced `<!-- FONTS -->` block with the `<link>` tags. No preamble. No alternatives. One direction, committed.
 ```
 
-Spawn three apprentices in **parallel** (single message, multiple Agent tool uses). Each gets a distinct LENS from the Soul Brief's Three Lenses section AND a distinct container letter (A, B, C). Each returns a Direction Card + scoped HTML fragment + fonts. Concatenate cards into `[PROJECT]_DirectionCards_V1.0.md`; run the anti-convergence audit; respawn if rhymes detected; then pass fragments and fonts to Heat 3 for assembly into the unified preview HTML.
+Spawn three apprentices in **parallel** (single message, multiple Agent tool uses). Each gets a distinct LENS from the Soul Brief's Three Lenses section AND a distinct container letter (A, B, C). Each returns a Direction Card + scoped HTML fragment + fonts. Concatenate cards into `[PROJECT]_03b_DirectionCards_V1.0.md`; run the anti-convergence audit; respawn if rhymes detected; then pass fragments and fonts to Heat 3 for assembly into the unified preview HTML.
 
 ## Self-Improvement Loop
 

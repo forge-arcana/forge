@@ -58,7 +58,7 @@ Five visionaries, one tenet each. Apply these throughout every conversation:
 
 > **The exchange between user and Prime during Spark and Shape IS the Opus — the origin manuscript of the grand work. DO NOT lose it.**
 >
-> From the moment Phase 1 begins, maintain a living manuscript: `[PROJECT]_Opus_V1.0.md`. This is the Opus — the origin of everything downstream. The Vow distills it, the Pitch sells it, the Blueprint scopes it, the Pattern shapes it. Lose the Opus and you've lost the origin of the work itself.
+> From the moment Phase 1 begins, maintain a living manuscript: `[PROJECT]_01_Opus_V1.0.md`. This is the Opus — the origin of everything downstream. The Vow distills it, the Pitch sells it, the Blueprint scopes it, the Pattern shapes it. Lose the Opus and you've lost the origin of the work itself.
 >
 > Always refer to this file as **"the Opus"** when speaking to the user. It is the one artifact they can return to and recognize as the authentic voice of the work, not a summary of it.
 >
@@ -73,7 +73,7 @@ Five visionaries, one tenet each. Apply these throughout every conversation:
 
 ### Opus manuscript structure
 
-The starter skeleton lives at `<forge>/skills/prime/opus-scaffold.md`. Copy it as the new project's `[PROJECT]_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md` if no project name yet) and append every turn (user response verbatim + Prime's reflection) into the appropriate Phase section. The file's outline: header + Phase 1 (Spark) + Phase 2 (Shape) + Crystallization.
+The starter skeleton lives at `<forge>/skills/prime/opus-scaffold.md`. Copy it as the new project's `[PROJECT]_01_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md` if no project name yet) and append every turn (user response verbatim + Prime's reflection) into the appropriate Phase section. The file's outline: header + Phase 1 (Spark) + Phase 2 (Shape) + Crystallization.
 
 ## Arguments
 `$ARGUMENTS` — project name or raw idea description (e.g., `/prime MyApp`, `/prime "a tool that..."`)). If not provided, open with an invitation to talk about what they're building.
@@ -88,7 +88,7 @@ Launch these in parallel (independent operations):
 
 ### Phase 1: The Spark (always starts here)
 
-**Before the first question**: create `[PROJECT]_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md`) with the skeleton above. This file is now the durable manuscript — every turn appends to it.
+**Before the first question**: create `[PROJECT]_01_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md`) with the skeleton above. This file is now the durable manuscript — every turn appends to it.
 
 Open-ended conversation. Your job is to draw out the core idea:
 
@@ -107,7 +107,7 @@ After enough threads, reflect back: "Here's what I'm hearing..." and crystallize
 
 Once the idea is crystallized from Phase 1, Phase 2 distills. Three motions, all required — Vow, Touchstone, Pitch. The Pitch is no longer gated on external audience: a great founder/cofounder pitch *is* a great investor pitch (the room differs, the artifact does not), and the Pitch's most valuable consumer is the founder + cofounder before scope and architecture lock.
 
-**Always: write the Vow** — `[PROJECT]_Vow_V1.0.md`
+**Always: write the Vow** — `[PROJECT]_02_Vow_V1.0.md`
 - Short, sharp declaration: what this thing is, who it's for, why it must exist, what the user vows it will be.
 - Fold in a **viability thread** — 3–5 pointed questions, regardless of direction:
   - Who specifically needs this? (not "everyone")
@@ -118,14 +118,14 @@ Once the idea is crystallized from Phase 1, Phase 2 distills. Three motions, all
 - The Vow reads in 30 seconds. It is the pledge the user returns to before every downstream decision.
 - Format: 3–5 short paragraphs, no jargon, written in the user's own voice wherever possible.
 
-**Always: drive the Wedge → forge the Touchstone** — `[PROJECT]_Touchstone_V1.0.html`
+**Always: drive the Wedge → forge the Touchstone** — `[PROJECT]_03e_Touchstone_V1.0.html`
 - After the Vow is written, **auto-invoke `/wedge`** with the Opus + Vow as inputs.
 - The Wedge is the third Master of the forge (alongside Smith and Warden). It runs a council of master designers, presents three aesthetic directions for the user to pick, and crystallizes the chosen direction into a single HTML masterpiece — the **Touchstone**.
 - The Touchstone is the project's visual constitution. Every downstream artifact (Pitch HTML, Smith-built screens) inherits its tokens (typography, color, motion).
 - Do not ask permission before auto-invoking `/wedge` — it's a standard quality gate. The user can interrupt to skip.
 - If the user skips, Prime warns: "without a Touchstone, the Pitch and any built MVP will inherit no aesthetic discipline. The Wedge can be driven later — `/wedge` is available whenever the project is ready."
 
-**Always: auto-invoke `/pitch` (after the Touchstone is forged)** — `[PROJECT]_Pitch_V1.0.html`
+**Always: auto-invoke `/pitch` (after the Touchstone is forged)** — `[PROJECT]_04_Pitch_V1.0.html`
 - The Pitch is one synthesis artifact in seven sections — *The Bet, The Wound, The Inversion, The Field, The Stake, The Signal, The Stand* — written in the founder's voice (sourced from Opus prose) and rendered through the Touchstone's typed tokens. **The Field, Stake, and Signal carry ballpark numbers** — order-of-magnitude correct, founder-honest. The Pitch makes the bet falsifiable.
 - The same Pitch serves the founder, the cofounder, and the investor. There is no "internal vs external" pitch; what differs is the room it's read in, not the artifact. (When external review is wanted, `/pitch --critique` runs the seven-dimension VC scorecard as a feedback pass on the same Pitch — it does not produce a separate pitch.)
 - Do not ask permission before auto-invoking `/pitch` — it is a standard alignment gate before scope and architecture lock. The user can interrupt to skip; if they do, warn that walking into `/probe` / `/smith` without the Pitch means the cofounder lacks the synthesis the founder is carrying.
@@ -140,8 +140,8 @@ After Phase 2 produces the Vow, Touchstone, and Pitch, Prime asks:
 > "The work has its Vow. Want me to go deeper — frame the Blueprint and Pattern? The Blueprint is the skeleton of scope; the Pattern is the architecture and UX decisions that give it form, detailed enough for /smith to forge from."
 
 If yes:
-- **Blueprint** — read `blueprint-framework.md`, conduct the 7-round deep dive (Idea, Users, Core Flow, Money & Trust, Everything Else, Technical Decisions, Launch & Future). Output: `[PROJECT]_Blueprint_V1.0.md`. If Phase 2 already captured context (Pitch rounds, viability thread), pre-fill relevant sections and skip ahead.
-- **Pattern** — auto-invoke `/probe` on the Blueprint. Probe validates architecture against the stack guide and current best practices, then writes the **Architecture** section of `[PROJECT]_Pattern_V1.0.md`. If the idea has UI-facing features (screens, flows, components, user interactions), also invoke `/preen` — it appends the **UX** section to the same Pattern file. Both `/probe` and `/preen` read the **Touchstone** as visual context so their critique aligns with the locked aesthetic. The Pattern is the design artifact /smith consumes; together with the Touchstone it forms the complete design constitution.
+- **Blueprint** — read `blueprint-framework.md`, conduct the 7-round deep dive (Idea, Users, Core Flow, Money & Trust, Everything Else, Technical Decisions, Launch & Future). Output: `[PROJECT]_05_Blueprint_V1.0.md`. If Phase 2 already captured context (Pitch rounds, viability thread), pre-fill relevant sections and skip ahead.
+- **Pattern** — auto-invoke `/probe` on the Blueprint. Probe validates architecture against the stack guide and current best practices, then writes the **Architecture** section of `[PROJECT]_06_Pattern_V1.0.md`. If the idea has UI-facing features (screens, flows, components, user interactions), also invoke `/preen` — it appends the **UX** section to the same Pattern file. Both `/probe` and `/preen` read the **Touchstone** as visual context so their critique aligns with the locked aesthetic. The Pattern is the design artifact /smith consumes; together with the Touchstone it forms the complete design constitution.
 
 Do not ask permission before auto-invoking `/probe` (and `/preen` when applicable) — it's a standard quality gate. The user can interrupt to skip.
 
@@ -172,12 +172,12 @@ Depending on how far the conversation goes, Prime produces one or more of these.
 
 | Artifact | When | Format | Role |
 |----------|------|--------|------|
-| `[PROJECT]_Opus_V1.0.md` | **Always** — Phases 1–2, created at first exchange, grown continuously | Living manuscript | **The origin** — verbatim voice of the work |
-| `[PROJECT]_Vow_V1.0.md` | **Always** — Phase 2 distillation + viability thread | Short declaration (30-sec read) | **The pledge** — what this will be, grounded by viability |
-| `[PROJECT]_Touchstone_V1.0.html` | **Always** — Phase 2 post-Vow, auto via `/wedge` | Single HTML masterpiece | **The face** — visual constitution every downstream artifact conforms to |
-| `[PROJECT]_Pitch_V1.0.html` + `.md` | Phase 2 — always, after Touchstone | Seven-section synthesis (founder voice + ballpark numbers), rendered HTML through Touchstone | **The bet** — the wall-pinnable artifact the founder + cofounder align on; the same artifact persuades external readers when needed |
-| `[PROJECT]_Blueprint_V1.0.md` | Phase 3 — if user wants depth | Standalone document | **The skeleton** — execution scope |
-| `[PROJECT]_Pattern_V1.0.md` | Phase 3 — post-Blueprint, auto via /probe (+ /preen if UI-facing) | Standalone document | **The form** — architecture + UX decisions /smith consumes |
+| `[PROJECT]_01_Opus_V1.0.md` | **Always** — Phases 1–2, created at first exchange, grown continuously | Living manuscript | **The origin** — verbatim voice of the work |
+| `[PROJECT]_02_Vow_V1.0.md` | **Always** — Phase 2 distillation + viability thread | Short declaration (30-sec read) | **The pledge** — what this will be, grounded by viability |
+| `[PROJECT]_03e_Touchstone_V1.0.html` | **Always** — Phase 2 post-Vow, auto via `/wedge` | Single HTML masterpiece | **The face** — visual constitution every downstream artifact conforms to |
+| `[PROJECT]_04_Pitch_V1.0.html` + `.md` | Phase 2 — always, after Touchstone | Seven-section synthesis (founder voice + ballpark numbers), rendered HTML through Touchstone | **The bet** — the wall-pinnable artifact the founder + cofounder align on; the same artifact persuades external readers when needed |
+| `[PROJECT]_05_Blueprint_V1.0.md` | Phase 3 — if user wants depth | Standalone document | **The skeleton** — execution scope |
+| `[PROJECT]_06_Pattern_V1.0.md` | Phase 3 — post-Blueprint, auto via /probe (+ /preen if UI-facing) | Standalone document | **The form** — architecture + UX decisions /smith consumes |
 
 > **Lineage**: Opus → Vow (+viability) → **Touchstone (via /wedge)** → **Pitch (via /pitch)** → Blueprint → Pattern → /smith forges → Product.
 > *"My Magnum Opus"* is the sum of it all. When the user returns months later and asks "what was this really about?" — they open the Opus, not the Pitch.

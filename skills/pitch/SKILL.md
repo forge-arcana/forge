@@ -25,7 +25,7 @@ When invoked with `--critique`, you adopt a second mode: a VC partner who has ev
 
 ### HARD RULE — Touchstone is Required
 
-> **No Touchstone, no Pitch.** `/pitch` reads `[PROJECT]_Touchstone_V1.0.md` (the contract, normative for tokens) AND `[PROJECT]_Touchstone_V1.0.html` (the vision, visual reference). If either is missing, halt and instruct the user: *"Run `/wedge` first. The Pitch is rendered through the Touchstone's typed tokens; without a Touchstone, the rendered Pitch has no aesthetic constitution and would inherit generic styling."*
+> **No Touchstone, no Pitch.** `/pitch` reads `[PROJECT]_03e_Touchstone_V1.0.md` (the contract, normative for tokens) AND `[PROJECT]_03e_Touchstone_V1.0.html` (the vision, visual reference). If either is missing, halt and instruct the user: *"Run `/wedge` first. The Pitch is rendered through the Touchstone's typed tokens; without a Touchstone, the rendered Pitch has no aesthetic constitution and would inherit generic styling."*
 
 ### HARD RULE — Founder Voice, Not Marketing Voice
 
@@ -43,18 +43,18 @@ When invoked with `--critique`, you adopt a second mode: a VC partner who has ev
 
 `$ARGUMENTS` — optional:
 - *No args* → generate the Pitch (default).
-- `--refine` → regenerate as `[PROJECT]_Pitch_V1.1.md` / `.html` (founder/cofounder feedback drove a revision; previous version preserved as historical record).
-- `--critique [path]` → run the VC-style review pass on the existing Pitch (default path: most recent `[PROJECT]_Pitch_V*.html` in cwd). Output is feedback markdown, not a new pitch artifact.
+- `--refine` → regenerate as `[PROJECT]_04_Pitch_V1.1.md` / `.html` (founder/cofounder feedback drove a revision; previous version preserved as historical record).
+- `--critique [path]` → run the VC-style review pass on the existing Pitch (default path: most recent `[PROJECT]_04_Pitch_V*.html` in cwd). Output is feedback markdown, not a new pitch artifact.
 
 ## Pre-Flight
 
 Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then read **in parallel**:
 
-- `[PROJECT]_Opus_V1.0.md` — the manuscript. **Required.**
-- `[PROJECT]_Vow_V1.0.md` — the pledge (and viability thread, which seeds The Field, Stake, Signal). **Required.**
-- `[PROJECT]_Touchstone_V1.0.md` AND `[PROJECT]_Touchstone_V1.0.html` — the visual constitution. **Required.**
-- `[PROJECT]_SoulBrief_V1.0.md` if present — the council's commission letter from `/wedge`; useful for sensorial language and Forbidden Defaults that should also bind the Pitch's rendered HTML.
-- Any existing `[PROJECT]_Pitch_V*.html` / `.md` — for awareness, especially on a `--refine` pass.
+- `[PROJECT]_01_Opus_V1.0.md` — the manuscript. **Required.**
+- `[PROJECT]_02_Vow_V1.0.md` — the pledge (and viability thread, which seeds The Field, Stake, Signal). **Required.**
+- `[PROJECT]_03e_Touchstone_V1.0.md` AND `[PROJECT]_03e_Touchstone_V1.0.html` — the visual constitution. **Required.**
+- `[PROJECT]_03a_SoulBrief_V1.0.md` if present — the council's commission letter from `/wedge`; useful for sensorial language and Forbidden Defaults that should also bind the Pitch's rendered HTML.
+- Any existing `[PROJECT]_04_Pitch_V*.html` / `.md` — for awareness, especially on a `--refine` pass.
 - `pitch-learnings.md` — last 3 projects' alignment outcomes (which sections proved load-bearing, which kill conditions actually killed, which signals actually validated).
 
 If Opus / Vow / Touchstone is missing, halt and instruct the user accordingly.
@@ -116,15 +116,15 @@ Why us — why this team, why now. Distilled from the Opus's "Why us" thread. No
 
 | Artifact | Form | Role |
 |----------|------|------|
-| `[PROJECT]_Pitch_V1.0.md` | Markdown source, seven sections | The text, the founder's voice |
-| `[PROJECT]_Pitch_V1.0.html` | Rendered HTML through Touchstone tokens | **The pitch** — pinned to the wall, read with the cofounder, sent to the investor |
+| `[PROJECT]_04_Pitch_V1.0.md` | Markdown source, seven sections | The text, the founder's voice |
+| `[PROJECT]_04_Pitch_V1.0.html` | Rendered HTML through Touchstone tokens | **The pitch** — pinned to the wall, read with the cofounder, sent to the investor |
 
 The HTML reads the Touchstone contract at the top of `<head>` and translates the YAML tokens to CSS variables:
 
 ```html
 <!-- Pitch — inherits the Touchstone's aesthetic constitution -->
-<!-- Contract: [PROJECT]_Touchstone_V1.0.md (normative) -->
-<!-- Vision:   [PROJECT]_Touchstone_V1.0.html (visual reference) -->
+<!-- Contract: [PROJECT]_03e_Touchstone_V1.0.md (normative) -->
+<!-- Vision:   [PROJECT]_03e_Touchstone_V1.0.html (visual reference) -->
 <style>
   :root {
     /* Translate Touchstone.md's YAML tokens to CSS variables.
@@ -203,7 +203,7 @@ Runs the seven-dimension VC-style review pass on the existing Pitch. **This is f
 
 ```markdown
 # Pitch Review — [PROJECT]
-**Date**: [date] | **Review by**: /pitch --critique | **Source**: `[PROJECT]_Pitch_V1.0.html`
+**Date**: [date] | **Review by**: /pitch --critique | **Source**: `[PROJECT]_04_Pitch_V1.0.html`
 
 ## Scorecard
 
@@ -239,7 +239,7 @@ Verdict thresholds: FUNDABLE = 28–35, WORTH BUILDING = 21–27, NEEDS RETHINK 
 
 ### Marker Integration
 
-After the critique runs, mark the verdict at the top of `<body>` in `[PROJECT]_Pitch_V1.0.html` as an HTML comment:
+After the critique runs, mark the verdict at the top of `<body>` in `[PROJECT]_04_Pitch_V1.0.html` as an HTML comment:
 
 ```
 <!-- PITCHED: [VERDICT] — [date] -->

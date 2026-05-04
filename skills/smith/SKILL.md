@@ -12,7 +12,7 @@ The smith is not an art. The smith is the one who wields them all.
 ## Arguments
 
 `$ARGUMENTS` — one of:
-- A path to a Blueprint file (e.g., `ProjectName_Blueprint_V1.0.md`) — smith will also load the paired `[PROJECT]_Pattern_V1.0.md`
+- A path to a Blueprint file (e.g., `ProjectName_Blueprint_V1.0.md`) — smith will also load the paired `[PROJECT]_06_Pattern_V1.0.md`
 - A path to a plan/spec `.md` file (any non-Blueprint markdown with implementation steps)
 - A project directory containing a Blueprint (+ Pattern)
 - `--force` flag (can combine with any above) — bypasses the scope gate
@@ -57,7 +57,7 @@ Logs to `~/.claude/.smith-token.log`.
 1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line
 2. **Launch all reads in parallel** (all independent):
    - Read the Blueprint file **and the paired Pattern file** (if present), plan file, or extract work spec from conversation context (per Input Resolution)
-   - Read the **Touchstone pair** if present — `[PROJECT]_Touchstone_V1.0.md` (typed contract: load YAML frontmatter as the normative token block — colors, typography, spacing, rounded, components, plus the Do's/Don'ts prose section) and `[PROJECT]_Touchstone_V1.0.html` (rendered vision: load for visual reference). The MD is the aesthetic contract every screen smith builds must inherit; the HTML is the soul that contract serves.
+   - Read the **Touchstone pair** if present — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter as the normative token block — colors, typography, spacing, rounded, components, plus the Do's/Don'ts prose section) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: load for visual reference). The MD is the aesthetic contract every screen smith builds must inherit; the HTML is the soul that contract serves.
    - Read project `CLAUDE.md` for stack, conventions, current state
    - Read `<forge>/skills/forge/stack-guide.md` for tech reference
    - Read `memory/smith-ledger.json` if it exists (resume mode — skip to Session Resume)
@@ -65,13 +65,13 @@ Logs to `~/.claude/.smith-token.log`.
    - Read `memory/smith-learnings.md` if it exists (Layer 1 — orchestration wisdom)
    - Read `memory/smith-apprentice-log.md` if it exists (Layer 3 — delegation wisdom)
 
-**Pattern gate** — if the Blueprint has no paired Pattern file (`[PROJECT]_Pattern_V1.0.md` absent OR present but empty Architecture section), invoke `/probe` on the Blueprint before proceeding. The Pattern is smith's source of design truth — architecture must be validated before the smith swings. If the Blueprint has UI-facing features, also invoke `/preen` to append the UX section after `/probe` completes.
+**Pattern gate** — if the Blueprint has no paired Pattern file (`[PROJECT]_06_Pattern_V1.0.md` absent OR present but empty Architecture section), invoke `/probe` on the Blueprint before proceeding. The Pattern is smith's source of design truth — architecture must be validated before the smith swings. If the Blueprint has UI-facing features, also invoke `/preen` to append the UX section after `/probe` completes.
 
-**Touchstone gate** — if either `[PROJECT]_Touchstone_V1.0.md` or `[PROJECT]_Touchstone_V1.0.html` is missing, surface a warning: "Touchstone incomplete — the project has no aesthetic constitution to inherit. Build will proceed with framework defaults, which is rarely what the magnum opus deserves." Offer to run `/wedge` before continuing (recommended for any UI-facing work). The user can override with `--no-touchstone` to proceed without one — typically appropriate for backend-only work, CLI tools, or libraries. (A partial Touchstone — only HTML, only MD — is a defect; either re-run `/wedge` or accept `--no-touchstone`.)
+**Touchstone gate** — if either `[PROJECT]_03e_Touchstone_V1.0.md` or `[PROJECT]_03e_Touchstone_V1.0.html` is missing, surface a warning: "Touchstone incomplete — the project has no aesthetic constitution to inherit. Build will proceed with framework defaults, which is rarely what the magnum opus deserves." Offer to run `/wedge` before continuing (recommended for any UI-facing work). The user can override with `--no-touchstone` to proceed without one — typically appropriate for backend-only work, CLI tools, or libraries. (A partial Touchstone — only HTML, only MD — is a defect; either re-run `/wedge` or accept `--no-touchstone`.)
 
 **Touchstone conformance** — when the Touchstone exists, every UI-facing apprentice receives the MD's YAML token block (colors, typography, spacing, rounded, components) AND the Do's/Don'ts prose section as part of its commission. Apprentices MUST use these tokens (font families, color variables, motion timing) instead of inventing new values, AND comply with the project-specific Do's/Don'ts. Apprentices that introduce non-Touchstone fonts, colors, motion tokens, or violate a Do/Don't are rejected and re-tasked.
 
-**Pitch gate** — if no `[PROJECT]_Pitch_V1.0.md` exists AND the Blueprint contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Use `AskUserQuestion` with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste. Pitch writes its verdict as a `<!-- PITCHED: [VERDICT] -->` marker at the top of the Pitch file (or the Blueprint if no Pitch file exists yet).
+**Pitch gate** — if no `[PROJECT]_04_Pitch_V1.0.md` exists AND the Blueprint contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Use `AskUserQuestion` with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste. Pitch writes its verdict as a `<!-- PITCHED: [VERDICT] -->` marker at the top of the Pitch file (or the Blueprint if no Pitch file exists yet).
 
 ## Step 0.5: Scope Gate
 

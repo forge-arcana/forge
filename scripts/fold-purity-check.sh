@@ -58,6 +58,8 @@ ALLOWLIST_TERMS=(
   "Docker" "Kubernetes" "Terraform" "Ansible" "GitHub" "GitLab" "Bitbucket"
   # Forge mythology + Claude tools
   "Smith" "Warden" "Forge" "Anthropic" "Claude" "WebSearch" "WebFetch" "AskUserQuestion" "TodoWrite"
+  # Forge artifact names (canonical lineage and Wedge intermediates; "WedgeBrief" is a retired predecessor of SoulBrief, kept for historical references)
+  "SoulBrief" "WedgeBrief" "DirectionCards" "PreviewTouchstone" "ChosenDirection" "PitchCritique"
   # Claude Code hook event names (referenced in technical content)
   "SessionStart" "SessionEnd" "PreToolUse" "PostToolUse" "PermissionRequest" "Stop" "Notification" "UserPromptSubmit"
   # Web APIs / browser standards (well-known compound names)
