@@ -1,6 +1,6 @@
 ---
 name: prime
-description: "The first summoning. Takes raw ideas and gives them form — Opus (manuscript), Vow (pledge + viability), Touchstone (aesthetic via /wedge), Pitch (when external), Blueprint (scope), Pattern (architecture + UX). One conversation, one continuous flow. TRIGGER when: user has a raw idea, product concept, or wants to create an Opus, Vow, Touchstone, Pitch, Blueprint, or Pattern from scratch."
+description: "The first summoning. Takes raw ideas and gives them form — Opus (manuscript), Vow (pledge + viability), Touchstone (aesthetic via /wedge), Pitch (always — the seven-section synthesis with ballpark numbers, in the founder's voice, rendered through Touchstone), Blueprint (scope), Pattern (architecture + UX). One conversation, one continuous flow. TRIGGER when: user has a raw idea, product concept, or wants to create an Opus, Vow, Touchstone, Pitch, Blueprint, or Pattern from scratch."
 user-invocable: true
 ---
 <!-- model: opus -->
@@ -103,9 +103,9 @@ Do NOT dump all questions at once. One thread at a time. Follow the energy. If t
 
 After enough threads, reflect back: "Here's what I'm hearing..." and crystallize the idea into a clear, concise statement. Write this crystallization into the Opus's **Crystallization** section. This crystallization is the seed of the Vow.
 
-### Phase 2: The Shape (Vow always, Touchstone always, Pitch if external)
+### Phase 2: The Shape (Vow always, Touchstone always, Pitch always)
 
-Once the idea is crystallized from Phase 1, Phase 2 distills. Three motions — always the first two, conditionally the third.
+Once the idea is crystallized from Phase 1, Phase 2 distills. Three motions, all required — Vow, Touchstone, Pitch. The Pitch is no longer gated on external audience: a great founder/cofounder pitch *is* a great investor pitch (the room differs, the artifact does not), and the Pitch's most valuable consumer is the founder + cofounder before scope and architecture lock.
 
 **Always: write the Vow** — `[PROJECT]_Vow_V1.0.md`
 - Short, sharp declaration: what this thing is, who it's for, why it must exist, what the user vows it will be.
@@ -125,24 +125,17 @@ Once the idea is crystallized from Phase 1, Phase 2 distills. Three motions — 
 - Do not ask permission before auto-invoking `/wedge` — it's a standard quality gate. The user can interrupt to skip.
 - If the user skips, Prime warns: "without a Touchstone, the Pitch and any built MVP will inherit no aesthetic discipline. The Wedge can be driven later — `/wedge` is available whenever the project is ready."
 
-**Conditionally: write the Pitch** — `[PROJECT]_Pitch_V1.0.html`
-- Only when the direction is external (investors, partners, customers, cofounders).
-- Read `pitch-framework.md` and conduct the full structured interview (Rounds 0–5: Context, Story, Market, Business, Moat, Ask).
-- The Pitch is rendered as **HTML**, using the Touchstone's tokens (fonts, colors, motion) as its visual constitution. A pitch deck distributed in plain markdown after the Touchstone exists is a wasted opportunity — the Pitch *is* the aesthetic, not a description of it.
-- The Pitch is how the work is *sold*. The Vow is how it's *grounded*. The Touchstone is how it *looks*.
+**Always: auto-invoke `/pitch` (after the Touchstone is forged)** — `[PROJECT]_Pitch_V1.0.html`
+- The Pitch is one synthesis artifact in seven sections — *The Bet, The Wound, The Inversion, The Field, The Stake, The Signal, The Stand* — written in the founder's voice (sourced from Opus prose) and rendered through the Touchstone's typed tokens. **The Field, Stake, and Signal carry ballpark numbers** — order-of-magnitude correct, founder-honest. The Pitch makes the bet falsifiable.
+- The same Pitch serves the founder, the cofounder, and the investor. There is no "internal vs external" pitch; what differs is the room it's read in, not the artifact. (When external review is wanted, `/pitch --critique` runs the seven-dimension VC scorecard as a feedback pass on the same Pitch — it does not produce a separate pitch.)
+- Do not ask permission before auto-invoking `/pitch` — it is a standard alignment gate before scope and architecture lock. The user can interrupt to skip; if they do, warn that walking into `/probe` / `/smith` without the Pitch means the cofounder lacks the synthesis the founder is carrying.
+- The Vow is how it's *grounded*. The Touchstone is how it *looks*. The Pitch is how it's *bet*.
 
-**If direction isn't clear**, ask:
-> "Is this something you're building for others to believe in — partners, investors, a first-time user? Or is this your own grand work for now — your Opus alone?"
->
-> The Vow and Touchstone get written either way. The Pitch is additional if others need persuading.
-
-Don't force a choice. Some ideas are both. The Vow captures the essence; the Touchstone gives it a face; the Pitch (when added) sells it.
-
-**Continue appending to the Opus** through Phase 2 — the direction check, the viability answers, the pivot moments. All of it belongs in the manuscript. The Vow and Pitch are distillations; the Opus is the unedited source.
+**Continue appending to the Opus** through Phase 2 — the viability answers, the pivot moments, the moments where the founder honest-talks themselves into or out of a kill condition. All of it belongs in the manuscript. The Vow and Pitch are distillations; the Opus is the unedited source.
 
 ### Phase 3: The Blueprint + Pattern (optional — Prime offers to go deeper)
 
-After Phase 2 produces the Vow (and possibly the Pitch), Prime asks:
+After Phase 2 produces the Vow, Touchstone, and Pitch, Prime asks:
 
 > "The work has its Vow. Want me to go deeper — frame the Blueprint and Pattern? The Blueprint is the skeleton of scope; the Pattern is the architecture and UX decisions that give it form, detailed enough for /smith to forge from."
 
@@ -182,18 +175,18 @@ Depending on how far the conversation goes, Prime produces one or more of these.
 | `[PROJECT]_Opus_V1.0.md` | **Always** — Phases 1–2, created at first exchange, grown continuously | Living manuscript | **The origin** — verbatim voice of the work |
 | `[PROJECT]_Vow_V1.0.md` | **Always** — Phase 2 distillation + viability thread | Short declaration (30-sec read) | **The pledge** — what this will be, grounded by viability |
 | `[PROJECT]_Touchstone_V1.0.html` | **Always** — Phase 2 post-Vow, auto via `/wedge` | Single HTML masterpiece | **The face** — visual constitution every downstream artifact conforms to |
-| `[PROJECT]_Pitch_V1.0.html` | Phase 2 — only when direction is external | Rendered HTML deck (through Touchstone) | **The persuasion** — how the work is sold to others |
+| `[PROJECT]_Pitch_V1.0.html` + `.md` | Phase 2 — always, after Touchstone | Seven-section synthesis (founder voice + ballpark numbers), rendered HTML through Touchstone | **The bet** — the wall-pinnable artifact the founder + cofounder align on; the same artifact persuades external readers when needed |
 | `[PROJECT]_Blueprint_V1.0.md` | Phase 3 — if user wants depth | Standalone document | **The skeleton** — execution scope |
 | `[PROJECT]_Pattern_V1.0.md` | Phase 3 — post-Blueprint, auto via /probe (+ /preen if UI-facing) | Standalone document | **The form** — architecture + UX decisions /smith consumes |
 
-> **Lineage**: Opus → Vow (+viability) → **Touchstone (via /wedge)** → [Pitch HTML if external] → Blueprint → Pattern → /smith forges → Product.
+> **Lineage**: Opus → Vow (+viability) → **Touchstone (via /wedge)** → **Pitch (via /pitch)** → Blueprint → Pattern → /smith forges → Product.
 > *"My Magnum Opus"* is the sum of it all. When the user returns months later and asks "what was this really about?" — they open the Opus, not the Pitch.
 
 Offer PDF generation for any document: `npx md-to-pdf [filename]`
 
 After delivering any artifact, suggest next steps based on content:
 - **After Opus + Vow**: auto-invoke `/wedge` for the Touchstone (Phase 2 continues).
-- **After Vow + Touchstone**: Phase 3 to frame Blueprint and Pattern when the user is ready (Pitch first if external audience matters).
+- **After Vow + Touchstone + Pitch**: Phase 3 to frame Blueprint and Pattern when the user is ready (alignment is locked first; scope and architecture follow).
 - **After Blueprint**: auto-invoke `/probe` (and `/preen` if UI-facing) to produce the Pattern, with the Touchstone now available as visual context.
 - **After Pattern**: `/smith` to begin forging — Smith's pre-flight reads Pattern + Touchstone together.
 - **If Vow lacks viability confidence** (or no Pitch exists and external audience matters): suggest `/pitch` art for deeper business-model critique. The Pitch is rendered HTML through the Touchstone.

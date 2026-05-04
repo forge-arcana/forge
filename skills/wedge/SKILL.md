@@ -361,12 +361,12 @@ After /preen passes and parity is verified, the Touchstone is **locked**.
 - **Motion**: [one-line philosophy] · **Memorable signature**: [the one thing]
 
 ## Downstream
-- `/pitch` renders through Touchstone.md tokens.
+- `/pitch` is the **mandatory next step** — it generates the seven-section Pitch (alignment artifact, founder voice, ballpark numbers) rendered through Touchstone.md tokens. Read it with your cofounder before anything else.
 - `/smith` apprentices inherit Touchstone.md tokens; Do's/Don'ts enforced as apprentice gates.
-- `/probe`, `/preen` load MD for contract conformance, HTML for soul.
+- `/probe`, `/preen` load MD for contract conformance, HTML for soul, and the Pitch for synthesis context.
 
 ## Next
-- `/pitch` (external audience), or `/probe` + `/preen` for Pattern, or `/smith` if Pattern + Touchstone both exist.
+- **`/pitch`** — required next. The Touchstone is the soul; the Pitch is the bet. Without the Pitch, /probe and /smith run on intuition the cofounder doesn't share. After /pitch lands cleanly, proceed to /probe + /preen for Pattern, then /smith.
 
 Smith conforms.
 ```
@@ -454,7 +454,7 @@ Per the [Forge Protocol](../forge/protocol.md) post-flight, append to `memory/we
 Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/wedge-learnings.md`.
 
 Suggest next steps:
-- **No Pitch yet, external audience matters** → `/pitch` (will render through the Touchstone).
+- **`/pitch` is the mandatory next step** — generates the seven-section Pitch (alignment artifact for founder + cofounder, with ballpark numbers grounding viability) rendered through the Touchstone. Without it, /probe and /smith proceed on intuition the cofounder may not share. After /pitch lands cleanly, proceed to:
 - **Have Vow + Touchstone, want to go deeper** → `/prime` Phase 3 to frame Blueprint and Pattern.
 - **Have Blueprint, no Pattern** → `/probe` (and `/preen` if UI-facing) to produce the Pattern, with the Touchstone now available as visual context.
 - **Pattern + Touchstone both exist** → `/smith` to begin forging.
