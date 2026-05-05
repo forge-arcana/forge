@@ -1,0 +1,63 @@
+name: forge.adapter
+version: 1
+
+# An adapter is a recipe for turning the tool-neutral `core/` tree into
+# a deployable artifact for one specific coding agent (Claude Code, Bob, Cursor, ...).
+# The build pipeline (`bin/forge-build <adapter>`) reads `core/` plus the adapter's
+# `manifest.yaml` and emits a directory the user can install.
+
+contract:
+
+  # Where each kind of artifact lives in `core/` (read by the build).
+  inputs:
+    skills_dir: core/skills           # one subdir per skill, each with SKILL.md (+ optional refs)
+    scripts_dir: core/scripts         # tool-neutral bash; uses ${FORGE_MEMBRANE} for state path
+    rules_dir:   core/rules           # neutral HARD RULES; adapter chooses how to surface them
+
+  # The minimal frontmatter every core SKILL.md MUST carry.
+  # Anything else is adapter-specific and lives in the manifest's `frontmatter_inject`.
+  skill_frontmatter_required:
+    - name           # slug, must match dir name
+    - description    # one-line summary; adapters that auto-route on description should preserve verbatim
+
+  # Optional core fields that adapters MAY honor.
+  skill_frontmatter_optional:
+    - triggers       # list of phrases that should invoke; adapter may translate to its own format
+    - model_hint     # advisory model class: 'fast' | 'balanced' | 'deep'; adapter maps to a real model id
+
+  # What every adapter manifest must declare.
+  adapter_manifest_required:
+    - tool                         # 'claude-code' | 'bob' | 'cursor' | 'codex' | 'generic'
+    - deploy:
+        skills_target              # absolute path or ${HOME}-rooted, e.g. ~/.claude/skills
+        commands_target            # may be null if tool has no slash-command system
+        rules_target               # where global rules go; may be a single file or a dir
+    - frontmatter_inject           # extra YAML fields to merge into every emitted SKILL.md
+    - prompt_primitive             # how 'ask the user a multi-choice question' lowers; see PROMPT_PRIMITIVES below
+    - bash_invocation              # how the adapter runs core/scripts (e.g., direct, via wrapper, MCP)
+
+  # Optional adapter capabilities. Skills written for the lowest-common-denominator
+  # MUST work even if all of these are absent. Adapters that have them get richer behavior.
+  adapter_manifest_optional:
+    - hooks                        # event lifecycle (SessionStart, pre-tool, post-tool); only Claude Code today
+    - subagent_spawning            # parallel apprentice spawn; Claude has Task, Bob may have Orchestrator
+    - memory_dir                   # persistent memory between sessions
+    - mcp_server_registry          # how to register MCP servers
+    - workarounds                  # adapter-specific scripts/hooks (e.g., Claude WA-001 OAuth race)
+
+# How the 'ask user a multi-choice question' primitive lowers per adapter.
+# Skill bodies use the neutral phrasing 'ask the user with a multi-choice prompt'.
+# The adapter binds it to whatever the tool actually exposes.
+prompt_primitives:
+  claude_code:    AskUserQuestion           # native tool
+  bob:            inline_chat_prompt        # placeholder; investigate during Phase 3
+  cursor:         inline_chat_prompt
+  generic:        stdin_numbered_choices    # shell fallback
+
+# Build pipeline contract.
+build:
+  command: bin/forge-build <adapter-name>
+  outputs_to: build/<adapter-name>/        # gitignored; user copies/symlinks to deploy_target
+  verification:
+    claude-code: build output MUST be byte-identical to current ~/.claude/skills/ contents
+                 EXCEPT for fields the build adds intentionally (tracked in adapter manifest).
