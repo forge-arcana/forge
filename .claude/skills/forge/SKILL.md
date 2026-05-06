@@ -9,7 +9,7 @@ user-invocable: true
 
 > In the forge, we forge.
 
-The single gate between your membrane (`~/.claude/`) and the forge repo. One command, three motions, one decision point.
+The single gate between your membrane (the harness's per-tool config directory — e.g., `~/.claude/` for Claude Code, `~/.bob/` for Bob, `~/.cursor/` for Cursor — referenced below as `<membrane>`) and the forge repo. One command, three motions, one decision point.
 
 The command absorbs what used to be three separate skills:
 
@@ -23,7 +23,7 @@ You no longer summon these individually. `/forge` runs them in order and present
 
 ## HARD RULE — /forge is the ONLY gate
 > No project, no skill, no manual edit moves knowledge between forge and membrane outside this command.
-> Direct edits to forge repo files are only for skill development (editing `SKILL.md` files in `skills/`).
+> Direct edits to forge repo files are only for skill development (editing source files in `core/skills/`).
 
 ## HARD RULE — Protected skills are never absorbed outgoing
 > `forge` and `purge` can never be absorbed from membrane → forge within this command.
@@ -48,7 +48,7 @@ If `$ARGUMENTS` is literally `on` or `off`, handle as session toggle (see [Sessi
 
 ## Session Toggle
 
-When `$ARGUMENTS` is `on` or `off`, do NOT run the cycle. The toggle is session-scoped (each CLI / VS Code instance is independent, no files written).
+When `$ARGUMENTS` is `on` or `off`, do NOT run the cycle. The toggle is session-scoped (each CLI / IDE instance is independent, no files written).
 
 ### `on`
 Output exactly:
@@ -61,7 +61,7 @@ Output exactly:
 When forge is disabled and the user invokes a disabled skill (e.g., `/poke`, `/wawa`), respond:
 > Forge is disabled for this session. Run `/forge on` to re-enable.
 
-Do not use `AskUserQuestion` for toggle output — it is immediate.
+The toggle output is immediate — do not wrap it in a multi-choice prompt.
 
 ---
 
@@ -71,15 +71,59 @@ Below is the flow for `/forge`, `/forge <path>`, `/forge --dry`, `/forge --dry <
 
 ## Phase 0: Preflight
 
+0. **Token preflight (Claude Code only)** — workaround for the Claude Code OAuth race when `/forge` spawns subagents in 3f (see [WORKAROUNDS.md](../../../WORKAROUNDS.md) WA-001):
+   ```bash
+   bash <forge>/core/scripts/agent-preflight.sh $$
+   ```
+   Skip this step on harnesses without OAuth race issues (Bob, Cursor, etc.).
+
 > Execute [Forge Preflight](preflight.md) in **pull** mode (or **fetch** mode if `--dry`).
 
-Run `<forge>/scripts/forge-status.sh --pull` (or `--fetch` for `--dry`).
+Run `<forge>/core/scripts/forge-status.sh --pull` (or `--fetch` for `--dry`).
 
 This resolves the forge path, syncs the remote (pull in active mode, fetch in dry mode), and produces the full drift report: Skill Drift, Learning Details, Memory Status, Classification Checks.
 
-**Forge path management**: If the resolved forge path differs from the `forge-path:` line in `~/.claude/CLAUDE.md` (or the line doesn't exist), update/add it. `/forge` owns `forge-path:` management. (Skip this write in `--dry` mode.)
+**Forge path management**: If the resolved forge path differs from the `forge-path:` line in the harness's global rules file (e.g., `~/.claude/CLAUDE.md` for Claude Code, `~/.bob/rules/00-forge.md` or AGENTS.md for Bob), update/add it. `/forge` owns `forge-path:` management. (Skip this write in `--dry` mode.)
 
 ## Phase 1: Mark — Build the PLAN Table
+
+### 1a. Workaround status banner (always shown)
+
+Run `bash <forge>/core/scripts/forge-workarounds-check.sh` before rendering the PLAN table. It emits one status line per active workaround listed in `<forge>/WORKAROUNDS.md`. The actual GitHub API check is time-gated to once per 7 days per workaround; cached status is used otherwise.
+
+Print the output verbatim as a banner above the PLAN table. It always appears — healthy or alerting — so the workaround state stays visible on every cycle.
+
+If any line contains "READY FOR REMOVAL", surface it prominently (the script formats those lines to stand out) and remind the user: "Workaround can be retired — see `WORKAROUNDS.md` removal procedure."
+
+If the script has no output (no WORKAROUNDS.md or empty file), print nothing.
+
+### 1b. Workaround side-effect sync (rows in INCOMING section)
+
+Run `bash <forge>/core/scripts/sync-workaround-side-effects.sh`. It parses each WA's `Side effects` block in `WORKAROUNDS.md` and emits one line per declared artifact:
+
+```
+ACTION  TYPE     WA-ID   SOURCE                                  TARGET                                          PLATFORM
+INSTALL script   WA-001  /forge/scripts/agent-token-warmup.sh    <membrane>/scripts/agent-token-warmup.sh        -
+UPDATE  script   WA-001  /forge/scripts/agent-token-scheduler.sh <membrane>/scripts/agent-token-scheduler.sh     -
+INSTALL hook     WA-001  -                                       $HOME/.claude/scripts/user-agent-preflight.sh   WSL2
+OK      script   WA-001  ...                                     ...                                              -
+SKIP    hook     WA-001  -                                       ...                                              WSL2 (not on WSL2)
+```
+
+Add INSTALL / UPDATE rows (anything not `OK` or `SKIP`) to the **INCOMING** section of the PLAN table as `side-effect` typed rows:
+
+```
+  [ ] 7  side-effect  WA-001 script: agent-token-warmup.sh    INSTALL
+         → Refresh action with flock; called by both Layer 1 and Layer 2 schedulers
+  [ ] 8  side-effect  WA-001 hook: SessionStart → user-agent-preflight.sh  INSTALL
+         → Layer 2 OAuth race protection (WSL2 only)
+```
+
+**Platform gate**: lines tagged `SKIP ... (not on WSL2)` are not surfaced as rows on non-WSL2 machines. Keeps Mac/Linux-native users' PLAN tables clean.
+
+**Adapter gate**: workaround side effects only apply to harnesses where the workaround is relevant. WA-001 is a Claude-Code-only workaround (the upstream OAuth race is Anthropic-SDK-specific) — adapters that don't bind WA-001 in their manifest skip this section entirely.
+
+### 1c. PLAN table
 
 From the preflight output, build a single triage table with three sections. Each row shows **the essence of what will change** — not the filename, but the rule, principle, or knowledge that will land.
 
@@ -95,7 +139,7 @@ forge @ <sha> ⇄ membrane @ <last-cast-sha>                     N items
          → Gate deploy scripts behind env checks
 
 ↑ OUTGOING (you → forge) — Y items
-  [ ] 4  config     claude-code-rules.md  DRIFT
+  [ ] 4  config     <harness-rules-file>  DRIFT
          → Adding WebFetch domain: better-auth.com
   [ ] 5  learning   Prisma enum migration gotcha  (cygnum)
          → enum ALTER requires USING cast clause on Postgres
@@ -145,7 +189,7 @@ If all three sections are empty: print a single line — `✓ Membrane synced.` 
 - `[ENTER]` applies selected.
 - `[q]` quits. If any rows are toggled, soft-confirm: "discard selections? [y/N]".
 
-Present the rendered table as console text, then use `AskUserQuestion` for the final apply decision with options: "Apply selected" / "Adjust" / "Cancel".
+Present the rendered table as console text, then ask the user — using your harness's multi-choice prompt if available, otherwise inline — for the final apply decision with options: "Apply selected" / "Adjust" / "Cancel".
 
 In `--dry` mode: skip the selection prompt. Print the table and exit.
 
@@ -156,21 +200,31 @@ Skip this phase entirely if `--dry`. Run BEFORE outgoing absorption so the lates
 For each approved incoming row (and each conflict row where user chose `[↓]`):
 
 ### Skills
-- Run `bash <forge>/scripts/cast-deploy.sh skill1 skill2 ...` for approved `FORGE-UPDATED` / `ADDED`
-- Run `rm -rf ~/.claude/skills/<name>/` for approved `REMOVED`
-- Verify: `bash <forge>/scripts/cast-deploy.sh --verify`
+- Run `bash <forge>/core/scripts/cast-deploy.sh skill1 skill2 ...` for approved `FORGE-UPDATED` / `ADDED`
+- Run `rm -rf <membrane>/skills/<name>/` for approved `REMOVED`
+- Verify: `bash <forge>/core/scripts/cast-deploy.sh --verify`
 - **Never use `cp -r` directly.** Always go through `cast-deploy.sh`.
 
-Fresh machine (no deployed skills): create `~/.claude/learnings/`, `~/.claude/memory/`, then deploy ALL with `cast-deploy.sh --all`.
+Fresh machine (no deployed skills): create `<membrane>/learnings/`, `<membrane>/memory/`, then deploy ALL with `cast-deploy.sh --all`.
 
 ### Learnings
-For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry into `~/.claude/learnings/<file>.md`.
+For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry into `<membrane>/learnings/<file>.md`.
 
 ### Memory
-For each approved memory row: copy `<forge>/memory/<file>.md` into `~/.claude/memory/<file>.md`.
+For each approved memory row: copy `<forge>/memory/<file>.md` into `<membrane>/memory/<file>.md`.
+
+### Workaround side-effects
+For each approved `side-effect` row from Phase 1b:
+
+- **script INSTALL or UPDATE**: copy the source script to the target (use `cast-deploy.sh --scripts` for whole-manifest deploys, or per-file `cp` + `chmod +x` for one-offs).
+- **hook INSTALL** (Claude Code only): invoke `bash <forge>/core/scripts/install-token-hook.sh` (idempotent, flocks `<membrane>/.settings.lock`).
+- **script REMOVE** (workaround retirement): `rm -f <target>`.
+- **hook REMOVE** (workaround retirement, Claude Code only): `bash <forge>/core/scripts/install-token-hook.sh --uninstall`.
+
+After applying, verify: `bash <forge>/core/scripts/cast-deploy.sh --verify-scripts`.
 
 ### Record baseline
-After all incoming is applied (before starting outgoing), write `~/.claude/.last-cast.json`:
+After all incoming is applied (before starting outgoing), write `<membrane>/.last-cast.json`:
 ```json
 { "lastCastCommit": "<git -C <forge> rev-parse HEAD>" }
 ```
@@ -181,17 +235,17 @@ After all incoming is applied (before starting outgoing), write `~/.claude/.last
 
 Skip this phase entirely if `--dry` or if no outgoing / `[↑]` conflict rows were approved.
 
-### 3a: Config sync (claude-code-rules.md)
+### 3a: Config sync (harness-specific rules file)
 
-For approved config rows: merge selected changes into `<forge>/skills/forge/claude-code-rules.md`. Sync rules:
-- CLAUDE.md ↔ reference auto-allowed table
+For approved config rows: merge selected changes into the adapter-specific rules reference for the active harness — for Claude Code that lives at `<forge>/adapters/claude-code/refs/claude-code-rules.md`; other adapters bind their own rules file. Sync rules:
+- Global rules file (e.g., `~/.claude/CLAUDE.md`, `AGENTS.md`) ↔ reference auto-allowed table
 - WebFetch domains must match exactly
 - Destructive commands NEVER in allow list
-- Hooks, `additionalDirectories`, `forge-path` are machine-specific — never sync
+- Hooks, additional working directories, `forge-path` are machine-specific — never sync
 
 ### 3b: Skill reverse-sync
 
-For approved `DEPLOYED-DIFFERS` rows (and conflict rows where user chose `[↑]`): diff deployed vs forge, apply membrane version to forge.
+For approved `DEPLOYED-DIFFERS` rows (and conflict rows where user chose `[↑]`): diff deployed vs forge, apply membrane version to forge source (`<forge>/core/skills/<name>/`).
 
 Protected skills (`forge`, `purge`) are already excluded at PLAN table level — no need to re-guard here.
 
@@ -202,16 +256,16 @@ Protected skills (`forge`, `purge`) are already excluded at PLAN table level —
 | Any `<forge>/learnings/*.md` > 50 entries | Learning review |
 | `<forge>/memory/` has > 20 files | Memory review |
 
-Run `<forge>/scripts/fold-evidence.sh` to collect evidence. Classify each entry: **CURRENT** / **STALE** / **MERGED** / **EVOLVED** / **PROMOTED**. Present review sub-table, apply after user confirms.
+Run `<forge>/core/scripts/fold-evidence.sh` to collect evidence. Classify each entry: **CURRENT** / **STALE** / **MERGED** / **EVOLVED** / **PROMOTED**. Present review sub-table, apply after user confirms.
 
 If no triggers fire, skip entirely.
 
 ### 3d: Promote Forge-worthy learnings from project memories
 
-Scan `~/.claude/projects/*/memory/*-learnings.md` for entries tagged `Forge-worthy: yes`. For each:
-1. Skip if title already in `<forge>/learnings/.fold-tracker.json` `promotedEntries` or in `~/.claude/learnings/general.md`
+Scan project memory directories (e.g., `~/.claude/projects/*/memory/*-learnings.md` for Claude Code; the equivalent location for the active harness) for entries tagged `Forge-worthy: yes`. For each:
+1. Skip if title already in `<forge>/learnings/.fold-tracker.json` `promotedEntries` or in `<membrane>/learnings/general.md`
 2. Genericize (strip project names, paths, domains — see "No Project Names" rule below)
-3. Append to `~/.claude/learnings/general.md` with `<!-- promoted from project memory, YYYY-MM-DD -->` comment
+3. Append to `<membrane>/learnings/general.md` with `<!-- promoted from project memory, YYYY-MM-DD -->` comment
 4. Add title to tracker `promotedEntries`
 
 Skip silently if no Forge-worthy entries exist.
@@ -220,12 +274,21 @@ Skip silently if no Forge-worthy entries exist.
 
 For approved outgoing learning rows:
 
-**Genericize first** — strip all project names, paths, domains, business logic. See forge CLAUDE.md "No Project Names" rule.
+**Genericize first**, then write to forge. Genericize means strip all project names, contributor names, currency/prices, project schema/field names, competitor names, and region-specific framing — keep the universal principle. Attribution lives in the PLAN/DONE table only, never in the learning body (`Forge-worthy: yes` is a flag, not a citation slot). Write to `<forge>/learnings/<file>.md`, NEVER to `<membrane>/learnings/` — that's the deployed copy; writing there silently skips forge and the tracker marks the entries processed so no future fold can heal the gap. The next purity-check step is the mechanical gate that enforces all of this — if the script blocks, fix the content; do not bypass.
 
-> **HARD RULE — Write to forge, NOT the membrane.**
-> Append absorbed entries to `<forge>/learnings/<file>.md` (e.g., `/root/dev/forge/learnings/global-patterns.md`).
-> NEVER write to `~/.claude/learnings/` — that's the deployed copy, not the source of truth.
-> Forge is the source. The next `/forge` deploys forge → membrane. Writing to membrane silently skips forge, creating a permanent gap that every future inspection will flag — and no subsequent fold will fix it because the tracker marked the entries as processed.
+#### Purity gate (mandatory before each absorbed learning is written)
+
+After staging absorbed entries (and BEFORE finalizing them), run:
+```bash
+git -C <forge> add learnings/<file>.md
+bash <forge>/core/scripts/fold-purity-check.sh --staged
+```
+
+If the script exits non-zero, it lists the violations. Fix every one:
+- Re-genericize the flagged content
+- Add legitimate universal terms to the script's `ALLOWLIST_TERMS` if a flagged term is genuinely a well-known reference (e.g., a major framework, a standard API)
+
+Re-run until exit 0. **Do not unstage and commit anyway.** The script is the gate; bypassing it re-creates exactly the leak that prompted its existence (see `learnings/global-patterns.md` Exhibit A: "How a Project-Name Leak Happens, 2026-04-25").
 
 Target files in `<forge>/learnings/`:
 - `probe-learnings.md` — architecture
@@ -237,7 +300,7 @@ Target files in `<forge>/learnings/`:
 
 Format: `## [Title] (YYYY-MM-DD)` + `**Learning**:` + `**Apply when**:`
 
-Source entries in `~/.claude/learnings/` are NEVER deleted.
+Source entries in `<membrane>/learnings/` are NEVER deleted.
 
 **Tracker**: maintain `<forge>/learnings/.fold-tracker.json` with `lastRun`, `processedEntries`, `promotedEntries`. Append title on each absorb.
 
@@ -247,11 +310,11 @@ Source entries in `~/.claude/learnings/` are NEVER deleted.
 
 ### 3f: Skill presentation refresh
 
-Runs after 3e if at least one skill learning file was modified. For each modified `<forge>/learnings/<art>-learnings.md` → corresponding `<forge>/skills/<art>/SKILL.md`:
+Runs after 3e if at least one skill learning file was modified. For each modified `<forge>/learnings/<art>-learnings.md` → corresponding `<forge>/core/skills/<art>/SKILL.md`:
 
 Skills describe themselves in two places: the `description:` frontmatter and the `TRIGGER when:` line. As learnings accumulate, these can drift — a skill that has learned to handle edge cases it didn't originally anticipate, or that now covers more triggers than it declared.
 
-Launch one subagent per skill (in parallel):
+Launch one subagent per skill (in parallel — or sequentially if your harness lacks parallel sub-agent spawning):
 
 ```
 You are reviewing whether the description and trigger conditions for /<skill>
@@ -277,9 +340,9 @@ Rules:
 Add presentation changes as rows in the DONE report. If no changes needed: omit presentation rows (no noise).
 
 For each approved change:
-1. Update `description:` in `<forge>/skills/<skill>/SKILL.md`
+1. Update `description:` in `<forge>/core/skills/<skill>/SKILL.md`
 2. Update `TRIGGER when:` line (if changed)
-3. Also update deployed copy at `~/.claude/skills/<skill>/SKILL.md` — presentation takes effect immediately
+3. Also update deployed copy at `<membrane>/skills/<skill>/SKILL.md` — presentation takes effect immediately
 
 > **HARD RULE**: Only update `description:` frontmatter and `TRIGGER when:` lines. Never rewrite skill logic, process steps, or examples. Presentation only.
 
@@ -301,18 +364,18 @@ Classification rules:
 
 Tracker: `<forge>/memory/.memory-tracker.json` with `lastRun` and `skippedFiles`. Append-only.
 
-Source entries in `~/.claude/memory/` are NEVER deleted.
+Source entries in `<membrane>/memory/` are NEVER deleted.
 
 ### 3h: Staging archival (triggers only)
 
 | Trigger | What fires |
 |---------|-----------|
-| `~/.claude/learnings/general.md` > 100 entries | Learning archival |
-| `~/.claude/memory/` > 30 files | Memory archival |
+| `<membrane>/learnings/general.md` > 100 entries | Learning archival |
+| `<membrane>/memory/` > 30 files | Memory archival |
 
-**Learning archival**: cross-reference entries against tracker `processedEntries` AND forge learning files. Entries that are BOTH processed AND present in forge → offer to move to `~/.claude/learnings/archive/general.md`.
+**Learning archival**: cross-reference entries against tracker `processedEntries` AND forge learning files. Entries that are BOTH processed AND present in forge → offer to move to `<membrane>/learnings/archive/general.md`.
 
-**Memory archival**: files identical in both membrane and forge → offer to move to `~/.claude/memory/archive/`.
+**Memory archival**: files identical in both membrane and forge → offer to move to `<membrane>/memory/archive/`.
 
 Never delete — archival is a move.
 
@@ -322,10 +385,20 @@ Never delete — archival is a move.
 
 1. **Conflict check**: `git -C <forge> diff --name-only --diff-filter=U`. If unresolved conflicts, STOP.
 2. **Stage** specific files with `git add <file>` (never `git add -A`).
-3. **Update context** in `<forge>/CLAUDE.md` Current Context section.
-4. **Compact check**: if CLAUDE.md > ~20k chars, overflow to `memory/`.
-5. **Commit**: descriptive message (what was absorbed, no project names). **No `Co-Authored-By: Claude` lines.**
-6. **Push decision**: `AskUserQuestion` — options: "Push to origin" / "Keep local".
+3. **Final purity gate** (catches anything 3e missed and any new content added in 3f/3g):
+   ```bash
+   bash <forge>/core/scripts/fold-purity-check.sh --staged
+   ```
+   If non-zero, do NOT proceed. Unstage offending content, re-genericize, restage, re-run until clean. This is a HARD gate.
+4. **Commit message purity check** — before invoking `git commit`, run:
+   ```bash
+   bash <forge>/core/scripts/fold-purity-check.sh --commit-msg "<message>"
+   ```
+   Commit messages have leaked project names and contributor names in the past. The check catches `Absorb 7 learnings from <Person> (<Project> session, ...)` patterns and similar. If non-zero, rewrite the message until clean.
+5. **Update context** in `<forge>/CLAUDE.md` Current Context section.
+6. **Compact check**: if CLAUDE.md > ~20k chars, overflow to `memory/`.
+7. **Commit**: descriptive message (what was absorbed, no project names, no contributor names). **No AI/agent attribution metadata (no `Co-Authored-By` lines).**
+8. **Push decision**: ask the user — using your harness's multi-choice prompt if available, otherwise inline — options: "Push to origin" / "Keep local".
 
 ## Phase 4: Project Scan & Divergence
 
@@ -333,14 +406,14 @@ Always runs (even for subsequent cycles) against the target project. Skips only 
 
 ### 4a: Read forge reference (parallel)
 
-- `<forge>/skills/forge/claude-code-rules.md` — workflow rules
-- `<forge>/skills/forge/stack-guide.md` — tech stack reference
-- `<forge>/skills/forge/forge-conventions.md` — distilled conventions checklist
+- The active adapter's rules reference (e.g., `<forge>/adapters/claude-code/refs/claude-code-rules.md` for Claude Code)
+- `<forge>/core/skills/forge/stack-guide.md` — tech stack reference
+- `<forge>/core/skills/forge/forge-conventions.md` — distilled conventions checklist
 
 ### 4b: Scan project (parallel)
 
-- Read `CLAUDE.md` (if exists)
-- Read `.claude/settings.json` (if exists)
+- Read project rules file (`CLAUDE.md` for Claude Code, `AGENTS.md` as cross-tool fallback)
+- Read harness-specific settings file (e.g., `.claude/settings.json`) if present
 - Glob for `package.json`, `tsconfig*`, `pnpm-workspace.yaml`, `packages/`
 - Check for `memory/`, `docs/`, `dev/restart.sh`, `dev/kill-zombies.sh`
 
@@ -351,23 +424,23 @@ Always runs (even for subsequent cycles) against the target project. Skips only 
 
 | Aspect | Forge Convention | Current Project | Action |
 |--------|-----------------|-----------------|--------|
-| CLAUDE.md | Required with standard sections | [exists/missing] | [create/update] |
-| Hard rules | Live in global `~/.claude/CLAUDE.md` — do NOT duplicate | [global/missing] | Skip if global membrane exists |
-| .claude/settings.json | Only if project-specific overrides needed | [exists/missing/not needed] | [skip/create] |
+| Project rules file | Required with standard sections | [exists/missing] | [create/update] |
+| Hard rules | Live in global rules file — do NOT duplicate | [global/missing] | Skip if global membrane exists |
+| Harness settings | Only if project-specific overrides needed | [exists/missing/not needed] | [skip/create] |
 | memory/ directory | Required | [exists/missing] | [create] |
 | logs/ directory | Required (app projects with services only) | [exists/missing/N/A] | [create/skip] |
-| Shorthand commands | Live in global `~/.claude/CLAUDE.md` — do NOT duplicate | [global/duplicated] | Skip if global membrane exists; remove from project if duplicated |
+| Shorthand commands | Live in global rules file — do NOT duplicate | [global/duplicated] | Skip if global membrane exists; remove from project if duplicated |
 | dev/restart.sh | Recommended (run /srs) | [exists/missing] | [suggest /srs] |
 | dev/kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
 | Documentation | `docs/` in-repo OR `## Documentation` section with `**Docs path:**` | [in-repo/external/missing] | [add section] |
 | Logging setup | dev.log + browser forwarding | [present/missing] | [flag for /poke] |
 ```
 
-Present as console markdown, then `AskUserQuestion`: "Apply all / Skip some / Skip all".
+Present as console markdown, then ask the user — using your harness's multi-choice prompt if available, otherwise inline: "Apply all / Skip some / Skip all".
 
 ### 4d: Apply (after confirmation)
 
-**CLAUDE.md** (create or update) — standard sections. Hard rules and shorthand commands live in the global `~/.claude/CLAUDE.md` — do NOT duplicate. If the project already has a `## Shorthand Commands` section, remove it during this forge cycle.
+**Project rules file** (create or update) — standard sections. Hard rules and shorthand commands live in the global rules file — do NOT duplicate. If the project already has a `## Shorthand Commands` section, remove it during this forge cycle.
 
 ```markdown
 # [Project Name] — Project Rules
@@ -382,7 +455,7 @@ Present as console markdown, then `AskUserQuestion`: "Apply all / Skip some / Sk
 [branch, recent work, test status — filled by /wrap]
 ```
 
-**.claude/settings.json** — only if project-specific overrides needed. Global handles standard permissions.
+**Harness settings** — only if project-specific overrides needed. Global handles standard permissions.
 
 **Directories** — create `memory/` if missing. Create `logs/` if missing (projects with running services only).
 
@@ -402,7 +475,7 @@ Every changed row must include a sub-row showing the **essence** of the change �
 | Tailwind v4 class scanning | ↓ in  | synced → global-patterns.md | cygnum |
 |   → Learning: @source directive required for pnpm workspace symlinks. | | | |
 |   → Apply when: Tailwind v4 + pnpm monorepo + shared UI package | | | |
-| claude-code-rules.md | ↑ out | merged | — |
+| Harness rules file | ↑ out | merged | — |
 |   → Added WebFetch domain: better-auth.com | | | |
 | Prisma enum migration gotcha | ↑ out | absorbed → poke-learnings.md | cygnum |
 |   → Learning: enum ALTER requires USING cast clause on Postgres. | | | |
@@ -419,7 +492,7 @@ If nothing changed in the cycle: `✓ Membrane synced.` and skip the report.
 After the DONE report (and only when the target is a project, not the forge repo itself), output:
 > **FORGE ENABLED** — all forge skills and art auto-invocation are active for this session.
 
-Do NOT commit the project's own changes. Use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
+Do NOT commit the project's own changes. Ask the user — using your harness's multi-choice prompt if available, otherwise inline — "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
 
 ## No Project Names Rule
 

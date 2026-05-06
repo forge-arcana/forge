@@ -94,7 +94,7 @@ Invocation forms:
 
 ## Arts (the Nine P's)
 
-Arts are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `skills/forge/protocol.md`.
+Arts are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `core/skills/forge/protocol.md`.
 
 ### Ideation
 | Art | What it does |

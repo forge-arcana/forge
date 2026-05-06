@@ -9,7 +9,7 @@ user-invocable: true
 
 > **Art** (learnings: `purge-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 >
-> **Location is intentional.** This skill lives only at `<forge>/.claude/skills/purge/`, never under `<forge>/skills/`. The `/forge` cycle does not deploy it to user membranes — `/purge` writes to forge files directly, so running it from any project other than the forge repo would violate the "no writing to forge from a project" HARD RULE. Keeping it in `.claude/skills/` confines it to the forge repo by construction.
+> **Location is intentional.** This skill lives only at `<forge>/.claude/skills/purge/`, never under `<forge>/core/skills/`. The `/forge` cycle does not deploy it to user membranes — `/purge` writes to forge files directly, so running it from any project other than the forge repo would violate the "no writing to forge from a project" HARD RULE. Keeping it in `.claude/skills/` confines it to the forge repo by construction. Purge is intentionally Claude-Code-coupled (the de-Claude pivot left it as-is); forge maintainers using a different harness invoke its logic via the same prose, manually.
 
 ## Persona
 
@@ -25,11 +25,11 @@ You are summoned, never scheduled. When the forge grows heavy, when the learning
 
 ## Pre-Flight
 
-1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line
+1. **Resolve forge path** from `~/.claude/CLAUDE.md` `forge-path:` line (purge is Claude-Code-coupled by design — see Location note above)
 2. **Read ALL forge learnings**: every `.md` file in `<forge>/learnings/`
 3. **Read ALL forge memory**: every `.md` file in `<forge>/memory/`
-4. **Read ALL art SKILL.md files**: `<forge>/skills/*/SKILL.md`
-5. **Read reference docs**: `<forge>/skills/forge/stack-guide.md`, `claude-code-rules.md`, `forge-conventions.md`
+4. **Read ALL art SKILL.md files**: `<forge>/core/skills/*/SKILL.md`
+5. **Read reference docs**: `<forge>/core/skills/forge/stack-guide.md`, `<forge>/core/skills/forge/forge-conventions.md`, `<forge>/adapters/claude-code/refs/claude-code-rules.md`
 6. **Read accumulated purge learnings**: `<forge>/memory/purge-learnings.md` (skip if first run)
 7. **Read project CLAUDE.md**: `<forge>/CLAUDE.md`
 
@@ -50,13 +50,13 @@ When triggered, classify each entry/file: **CURRENT** (keep), **STALE** (remove 
 
 ## Evidence Collection
 
-Run `<forge>/scripts/forge-purge-scan.sh` to collect mechanical evidence across all four dimensions. This single command replaces ~30 sequential file read and grep tool calls.
+Run `<forge>/core/scripts/forge-purge-scan.sh` to collect mechanical evidence across all four dimensions. This single command replaces ~30 sequential file read and grep tool calls.
 
 Use the script's output as your evidence base for the parallel dimension analysis below. The script detects contamination patterns, counts entries, checks consistency — the dimension subagents classify severity, decide what to remove/rewrite/consolidate, and produce findings.
 
 ## Dimension Fan-Out (parallel subagents)
 
-The four dimensions are independent — each analyzes a distinct slice of forge state with no shared mutable dependencies. Following the protocol's evidence-then-fan-out pattern (see `<forge>/skills/forge/protocol.md`), launch four subagents in parallel — one per dimension — each receiving the full scan evidence and the dimension-specific rules from the sections below.
+The four dimensions are independent — each analyzes a distinct slice of forge state with no shared mutable dependencies. Following the protocol's evidence-then-fan-out pattern (see `<forge>/core/skills/forge/protocol.md`), launch four subagents in parallel — one per dimension — each receiving the full scan evidence and the dimension-specific rules from the sections below.
 
 **Token preflight is mandatory** before this fan-out — already handled by the protocol Pre-Flight step 0.
 
@@ -146,7 +146,7 @@ Scan ALL files in `<forge>/memory/` for:
 
 ## Dimension 3: Skill Fitness (arts AND task skills)
 
-For ALL skills in `<forge>/skills/*/SKILL.md` (not just arts):
+For ALL skills in `<forge>/core/skills/*/SKILL.md` (not just arts):
 
 ### 3a: Bloat Analysis
 Use the scan script's section-level breakdown. Flag any skill where:
@@ -169,7 +169,7 @@ Use the scan script's section-level breakdown. Flag any skill where:
 Scan reference docs for internal consistency:
 
 - **stack-guide.md**: are the technology choices current? Any deprecated libraries? Web-search for major version changes.
-- **claude-code-rules.md**: does it match `~/.claude/CLAUDE.md`? Any drift?
+- **claude-code-rules.md** (now at `<forge>/adapters/claude-code/refs/claude-code-rules.md`): does it match `~/.claude/CLAUDE.md`? Any drift?
 - **CLAUDE.md (forge)**: is the Current Context section accurate? Arts table correct? Skill counts right?
 
 ## Consolidation
@@ -200,13 +200,13 @@ After user confirms:
    - **Conflict check**: Run `git -C <forge> diff --name-only --diff-filter=U`. If ANY unresolved files exist, **STOP** and list them.
    - **Stage** changed files with `git add <file>` (never `git add -A`)
    - **Update context** in `<forge>/CLAUDE.md` Current Context section
-   - **Commit**: `"Purge: [what was cleansed]"` with `Co-Authored-By`
+   - **Commit**: `"Purge: [what was cleansed]"` (no AI/agent attribution metadata — no `Co-Authored-By` footers)
    - If no changes were made, skip the commit.
-   - **Push decision**: Use `AskUserQuestion` — options: "Yes, push" / "No, keep local"
+   - **Push decision**: Use `AskUserQuestion` (purge is Claude-Code-coupled, so the Claude tool is the prompt primitive) — options: "Yes, push" / "No, keep local"
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/purge-learnings.md`.
+Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/purge-learnings.md`.
 
 Learnings should capture:
 - New contamination patterns discovered (so future `/forge` runs catch them)
