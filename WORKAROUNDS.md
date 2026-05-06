@@ -79,4 +79,4 @@ Future work: extend the check to also detect server-side fixes by analyzing `~/.
 9. Run `/forge` to propagate changes through the cycle.
 
 **Added**: 2026-04-25
-**Last verified active**: 2026-04-26
+**Last verified active**: 2026-05-04
