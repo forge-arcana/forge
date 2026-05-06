@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+# bin/forge-build — assemble harness-specific deployable from tool-neutral core/
+#
+# Usage:
+#   bin/forge-build <adapter>              build to ./build/<adapter>/
+#   bin/forge-build <adapter> <out-dir>    build to specified output dir
+#   bin/forge-build --list                 list known adapters
+#
+# Reads from:
+#   core/skills/             tool-neutral skill sources
+#   core/scripts/            tool-neutral runtime scripts
+#   core/rules/              tool-neutral HARD RULES
+#   adapters/<adapter>/      adapter manifest + adapter-only refs/scripts
+#
+# Writes to:
+#   build/<adapter>/skills/  per-harness SKILL.md files (frontmatter injected)
+#   build/<adapter>/scripts/ runtime scripts (core + adapter-specific)
+#   build/<adapter>/refs/    adapter-specific reference docs
+#
+# Phase 1 implementation: claude-code adapter is fully wired. Other adapters
+# (bob, cursor) will be added in Phase 3 once their primitives are verified.
+
+set -euo pipefail
+
+FORGE="$(cd "$(dirname "$0")/.." && pwd)"
+ADAPTERS_DIR="$FORGE/adapters"
+
+# ============================================================================
+# CLI
+# ============================================================================
+
+if [[ $# -lt 1 ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+  sed -n '2,/^$/p' "$0" | sed 's/^# //'
+  exit 0
+fi
+
+if [[ "$1" == "--list" ]]; then
+  echo "Known adapters:"
+  for d in "$ADAPTERS_DIR"/*/; do
+    name=$(basename "$d")
+    if [[ -f "$d/manifest.yaml" ]]; then
+      status=$(grep -E '^status:' "$d/manifest.yaml" 2>/dev/null | sed 's/status: *//' || echo "ready")
+      echo "  $name  ($status)"
+    fi
+  done
+  exit 0
+fi
+
+ADAPTER="$1"
+OUT="${2:-$FORGE/build/$ADAPTER}"
+ADAPTER_DIR="$ADAPTERS_DIR/$ADAPTER"
+
+if [[ ! -d "$ADAPTER_DIR" ]]; then
+  echo "ERROR: unknown adapter '$ADAPTER'. Run: $0 --list" >&2
+  exit 1
+fi
+
+if [[ ! -f "$ADAPTER_DIR/manifest.yaml" ]]; then
+  echo "ERROR: $ADAPTER_DIR/manifest.yaml not found" >&2
+  exit 1
+fi
+
+echo "Building $ADAPTER → $OUT"
+
+# Clean output dir
+rm -rf "$OUT"
+mkdir -p "$OUT/skills" "$OUT/scripts" "$OUT/refs"
+
+# ============================================================================
+# claude-code adapter
+# ============================================================================
+
+build_claude_code() {
+  local out="$OUT"
+
+  # Hardcoded skill model overrides — mirrors adapters/claude-code/manifest.yaml.
+  # Keep in sync with the manifest (or wire a yaml parser later).
+  declare -A MODEL_COMMENT=(
+    [forge]="sonnet | escalation: learning triage → spawn opus subagent"
+    [smith]="opus"
+    [wedge]="opus"
+    [prime]="opus"
+    [probe]="opus"
+    [poke]="opus"
+    [preen]="opus"
+    [press]="opus"
+    [pound]="opus"
+    [pitch]="opus"
+    [pry]="opus"
+    [praise]="opus"
+    [temper]="opus"
+    [cicd]="sonnet"
+    [qt]="haiku"
+    [srs]="haiku"
+    [monci]="haiku"
+    [ponci]="haiku"
+    [vsix]="haiku"
+    [eli5]="haiku"
+    [wawa]="haiku"
+    # `dig` deliberately has no model comment
+  )
+
+  # 1. SKILLS
+  local skill_count=0
+  for skill_dir in "$FORGE"/core/skills/*/; do
+    local name="$(basename "$skill_dir")"
+    local src="$skill_dir/SKILL.md"
+    local dest_dir="$out/skills/$name"
+    [[ -f "$src" ]] || continue
+
+    mkdir -p "$dest_dir"
+
+    # Inject user-invocable: true into frontmatter, then add model HTML comment
+    # after the closing ---.
+    awk -v skill="$name" -v model="${MODEL_COMMENT[$name]:-}" '
+      BEGIN { in_fm = 0; fm_seen = 0; injected = 0 }
+      /^---$/ {
+        if (in_fm == 0 && fm_seen == 0) {
+          in_fm = 1; fm_seen = 1; print; next
+        }
+        if (in_fm == 1) {
+          # closing fence — inject user-invocable just before it
+          if (!injected) print "user-invocable: true"
+          in_fm = 0
+          print
+          # add model HTML comment after the fence if defined
+          if (model != "") {
+            print ""
+            print "<!-- model: " model " -->"
+          }
+          next
+        }
+      }
+      { print }
+    ' "$src" > "$dest_dir/SKILL.md"
+
+    # Copy any sibling refs (apprentice-system.md, protocol.md, etc.)
+    for ref in "$skill_dir"*; do
+      local refname="$(basename "$ref")"
+      [[ "$refname" == "SKILL.md" ]] && continue
+      [[ -f "$ref" ]] && cp "$ref" "$dest_dir/$refname"
+    done
+
+    skill_count=$((skill_count + 1))
+  done
+  echo "  ✓ $skill_count skills emitted"
+
+  # 2. SCRIPTS — core (tool-neutral) first, then adapter-specific overlay
+  local script_count=0
+  for s in "$FORGE"/core/scripts/*.sh; do
+    cp "$s" "$out/scripts/$(basename "$s")"
+    script_count=$((script_count + 1))
+  done
+  if [[ -d "$ADAPTER_DIR/scripts" ]]; then
+    for s in "$ADAPTER_DIR"/scripts/*.sh; do
+      cp "$s" "$out/scripts/$(basename "$s")"
+      script_count=$((script_count + 1))
+    done
+  fi
+  echo "  ✓ $script_count scripts (core + adapter)"
+
+  # 3. REFS — adapter-specific reference docs
+  if [[ -d "$ADAPTER_DIR/refs" ]]; then
+    cp -r "$ADAPTER_DIR/refs/." "$out/refs/"
+    local ref_count=$(ls "$out/refs/" | wc -l)
+    echo "  ✓ $ref_count adapter refs"
+  fi
+
+  # 4. RULES → CLAUDE.md composed from core/rules/
+  # For Claude Code, the rules go into the user's ~/.claude/CLAUDE.md.
+  # Phase 1 emits a composed file the user can review/install manually.
+  local rules_out="$out/CLAUDE-rules-snippet.md"
+  {
+    echo "# Forge HARD RULES (composed for Claude Code)"
+    echo ""
+    echo "_Generated by bin/forge-build claude-code from core/rules/. Append to or merge_"
+    echo "_into your ~/.claude/CLAUDE.md._"
+    echo ""
+    if [[ -f "$FORGE/core/rules/development-discipline.md" ]]; then
+      cat "$FORGE/core/rules/development-discipline.md"
+      echo ""
+    fi
+    if [[ -f "$FORGE/core/rules/forge-governance.md" ]]; then
+      cat "$FORGE/core/rules/forge-governance.md"
+      echo ""
+    fi
+  } > "$rules_out"
+  echo "  ✓ rules composed → $(basename "$rules_out")"
+
+  echo ""
+  echo "Built: $out"
+}
+
+# ============================================================================
+# bob adapter — Phase 3 stub
+# ============================================================================
+
+build_bob() {
+  echo "ERROR: bob adapter is Phase 3 (under construction). Acceptance test target." >&2
+  echo "Run: $0 --list  to see status." >&2
+  exit 2
+}
+
+# ============================================================================
+# Dispatch
+# ============================================================================
+
+case "$ADAPTER" in
+  claude-code) build_claude_code ;;
+  bob)         build_bob ;;
+  *)           echo "ERROR: build logic not implemented for $ADAPTER" >&2; exit 1 ;;
+esac
