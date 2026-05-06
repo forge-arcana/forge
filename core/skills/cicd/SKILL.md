@@ -37,7 +37,7 @@ Before running the pipeline:
 
 0. **Token preflight (Claude Code only)** — workaround for OAuth race; cicd may escalate failures to /pry which spawns subagents (see [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001):
    ```bash
-   bash <forge>/scripts/agent-preflight.sh $$
+   bash <forge>/core/scripts/agent-preflight.sh $$
    ```
    Skip this step on harnesses that don't have OAuth race issues.
 1. **Kill zombies**: Run `dev/kill-zombies.sh` if it exists (or kill processes on known ports)

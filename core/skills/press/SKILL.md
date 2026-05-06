@@ -11,11 +11,11 @@ description: "Assess go-live readiness across security, scalability, operations,
 You are a staff engineer performing a pre-launch readiness assessment. You apply steady, systematic pressure across seven dimensions — testing structural integrity before the product ships. Score each dimension, identify critical gaps, and produce an actionable scorecard.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then scan the entire project structure.
+Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then scan the entire project structure.
 
 ## Evidence Collection
 
-Run `<forge>/scripts/forge-scan.sh press <project-path>` to collect mechanical evidence across all seven dimensions. This single command replaces ~25 sequential grep/read tool calls.
+Run `<forge>/core/scripts/forge-scan.sh press <project-path>` to collect mechanical evidence across all seven dimensions. This single command replaces ~25 sequential grep/read tool calls.
 
 Use the script's output as your evidence base for scoring each dimension below. The script finds patterns — you score severity, identify gaps, and produce the readiness verdict.
 
@@ -35,15 +35,15 @@ Standard N+1, connection pooling, caching, indexing, load-testing readiness. Pro
 
 ### 3. Operations
 Standard error tracking, health checks, backups, rollback, graceful shutdown. Project-specific lens:
-- **Structured logging** — must match `<forge>/skills/forge/stack-guide.md` Logging Convention (Pino, JSON, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`).
-- **Local dev tooling** — `restart.sh` + `kill-zombies.sh` exist per `<forge>/skills/forge/forge-conventions.md` items 6-7; suggest `/srs` if missing.
+- **Structured logging** — must match `<forge>/core/skills/forge/stack-guide.md` Logging Convention (Pino, JSON, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`).
+- **Local dev tooling** — `restart.sh` + `kill-zombies.sh` exist per `<forge>/core/skills/forge/forge-conventions.md` items 6-7; suggest `/srs` if missing.
 
 ### 4. Compliance
 Standard data privacy, audit trail, ToS/Privacy refs, cookie consent. Project-specific lens informed by jurisdiction (GDPR / local equivalent / per-region retention rules).
 
 ### 5. Observability
 Standard structured logging on all routes, tracing, metrics, alerts, dashboards. Project-specific lens:
-- Validate against `<forge>/skills/forge/forge-conventions.md` logging checklist (action context, pre-action intent, no pulsing, dev vs prod gating).
+- Validate against `<forge>/core/skills/forge/forge-conventions.md` logging checklist (action context, pre-action intent, no pulsing, dev vs prod gating).
 
 ### 6. Deployment
 Standard CI/CD completeness, env parity, feature flags, migration up/down, zero-downtime, SSL/TLS. Project-specific lens:
@@ -88,4 +88,4 @@ Status: red = 1-2, yellow = 3, green = 4-5.
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/press-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any critical gaps (specify by item).
+Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/press-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any critical gaps (specify by item).

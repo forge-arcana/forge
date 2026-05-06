@@ -14,7 +14,7 @@ You are a senior solutions architect reviewing and enhancing a product blueprint
 `$ARGUMENTS` — path to a file to probe, OR a description of what to probe (e.g., "the migration plan", "current conversation"). Optional.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then resolve the **probe target**:
+Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then resolve the **probe target**:
 
 1. **Explicit argument given** — use it (file path → read it; description → scope the review to that topic)
 2. **No argument — infer from context**:
@@ -23,14 +23,14 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
    - If the conversation has a clear architectural topic (plan, design, RFC) → probe that (inline review)
    - **If ambiguous** → ask: "What should I probe? A Blueprint, the current plan, or something else?"
 3. Read/review the full probe target before proceeding. **Also read `[PROJECT]_06_Pattern_V1.0.md`** if it exists — preserve and update its Architecture section rather than overwriting; leave the UX section untouched (that belongs to /preen).
-4. **Read `<forge>/skills/forge/stack-guide.md` in full.** This is the prescribed forge stack — Cloud Run + Cloud SQL/Neon + Hono + Drizzle + React/Vite + TanStack + Better Auth + Pino/Sentry, etc. Treat it as the **default baseline** for every architecture decision, not one option among many. Web search results that surface trendy combos (e.g., Vercel + Neon, Next.js on Vercel, Supabase) do **not** override the stack-guide unless a project-specific signal demands it (see "Deviation rule" below).
+4. **Read `<forge>/core/skills/forge/stack-guide.md` in full.** This is the prescribed forge stack — Cloud Run + Cloud SQL/Neon + Hono + Drizzle + React/Vite + TanStack + Better Auth + Pino/Sentry, etc. Treat it as the **default baseline** for every architecture decision, not one option among many. Web search results that surface trendy combos (e.g., Vercel + Neon, Next.js on Vercel, Supabase) do **not** override the stack-guide unless a project-specific signal demands it (see "Deviation rule" below).
 5. **Read the Touchstone pair if it exists** — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter for tokens, prose Overview + Do's-and-Don'ts for posture) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: visual context). The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. Architecture decisions that fight the Touchstone's contract or posture (e.g., a chosen framework that cannot deliver the locked motion philosophy, or a state-management pattern that contradicts the interaction tempo declared in the MD's Components section) should be flagged. Probe is not the aesthetic art — it does not override Touchstone choices — but it should surface architecture-aesthetic conflicts as part of its critique.
 
 ## Process
 
-**Spawn parallel subagents** — one per technical section (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD). **Pass the stack-guide path (`<forge>/skills/forge/stack-guide.md`) into every subagent prompt** so each one anchors its review to the forge stack before consulting the web. If your harness does not support parallel sub-agent spawning, walk the sections sequentially with the same anchoring rule. Each subagent independently:
+**Spawn parallel subagents** — one per technical section (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD). **Pass the stack-guide path (`<forge>/core/skills/forge/stack-guide.md`) into every subagent prompt** so each one anchors its review to the forge stack before consulting the web. If your harness does not support parallel sub-agent spawning, walk the sections sequentially with the same anchoring rule. Each subagent independently:
 
-1. **Anchors to the stack-guide** — read the relevant rows of `<forge>/skills/forge/stack-guide.md` for this section. The stack-guide entry is the default recommendation. Web research informs *deviation analysis*, not the baseline.
+1. **Anchors to the stack-guide** — read the relevant rows of `<forge>/core/skills/forge/stack-guide.md` for this section. The stack-guide entry is the default recommendation. Web research informs *deviation analysis*, not the baseline.
 2. **Analyzes** the current Blueprint recommendation against the stack-guide:
    - Does the Blueprint match the stack-guide? → confirm with stack-guide rationale.
    - Does the Blueprint deviate from the stack-guide? → either justify the deviation with a project signal (see Deviation rule) or recommend reverting to the stack-guide default.
@@ -44,7 +44,7 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
      - Are there integration mismatches? (ML-heavy project without Python; mobile app without TypeScript)
      - Would a multi-language architecture serve better? (e.g., TypeScript API + Python ML service)
      - Does the blueprint justify the language choice, or did it just default without evaluation?
-   - **Testing architecture evaluation** (for Section 18 specifically) — load the rubric from `<forge>/skills/probe/test-architecture-rubric.md`. Blueprint mode: 6 substantive-vs-vague criteria; Codebase mode: 7 infrastructure checks plus a per-package Test Coverage Map.
+   - **Testing architecture evaluation** (for Section 18 specifically) — load the rubric from `<forge>/core/skills/probe/test-architecture-rubric.md`. Blueprint mode: 6 substantive-vs-vague criteria; Codebase mode: 7 infrastructure checks plus a per-package Test Coverage Map.
 
 5. **Enhance or confirm** the section with:
    - Updated recommendations with justification (cite the stack-guide row when confirming the default)
@@ -65,8 +65,8 @@ Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then 
 **Run the additional checks as a parallel subagent** (or sequentially if parallel spawning is unavailable) alongside the section reviews:
 
 Additionally, verify the blueprint includes:
-- **Logging strategy** aligned with `<forge>/skills/forge/stack-guide.md` Logging Convention (structured logging, dev vs prod verbosity, browser console forwarding). If absent, flag it.
-- **Dev setup plan** that includes `restart.sh` and `kill-zombies.sh` (see `<forge>/skills/forge/forge-conventions.md` items 6-7). If absent, flag it.
+- **Logging strategy** aligned with `<forge>/core/skills/forge/stack-guide.md` Logging Convention (structured logging, dev vs prod verbosity, browser console forwarding). If absent, flag it.
+- **Dev setup plan** that includes `restart.sh` and `kill-zombies.sh` (see `<forge>/core/skills/forge/forge-conventions.md` items 6-7). If absent, flag it.
 - **Language justification**: Section 13 must include explicit reasoning for the backend language choice — not just "we're using TypeScript" but WHY it fits this project's signals. If the justification is missing or generic ("it's popular"), flag as IMPORTANT.
 - **Testing strategy**: Section 18 must go beyond tool names — it must specify (1) which layers get which test types and why, (2) the critical user flows requiring E2E coverage, and (3) how test data is provisioned. If purely declarative (just naming tools without architectural decisions), flag as IMPORTANT.
 
@@ -134,4 +134,4 @@ Written: [YYYY-MM-DD] | Last updated: [YYYY-MM-DD]
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/probe-learnings.md`. Present the Pattern file (Architecture section) to the user with a summary of changes. If the Blueprint has UI-facing features, suggest running `/preen` next to append the UX section.
+Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/probe-learnings.md`. Present the Pattern file (Architecture section) to the user with a summary of changes. If the Blueprint has UI-facing features, suggest running `/preen` next to append the UX section.

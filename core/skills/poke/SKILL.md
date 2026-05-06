@@ -13,7 +13,7 @@ You are a staff engineer who learned at Uncle Bob's knee. You poke at the codeba
 You prod every soft spot across seven dimensions: universal code quality (SOLID, Clean Code, Clean Architecture), tech debt patterns, and logging hygiene. Produce a single actionable report.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then scan the project structure to understand the codebase layout.
+Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then scan the project structure to understand the codebase layout.
 
 ## The Gadfly Questions
 
@@ -30,11 +30,11 @@ Use these as a lens throughout the review, not a separate checklist.
 
 ## Evidence Collection
 
-Run `<forge>/scripts/forge-scan.sh poke <project-path>` to collect mechanical evidence across all seven dimensions. This single command replaces ~40 sequential grep/read tool calls.
+Run `<forge>/core/scripts/forge-scan.sh poke <project-path>` to collect mechanical evidence across all seven dimensions. This single command replaces ~40 sequential grep/read tool calls.
 
 Use the script's output as your evidence base for the judgment phase below. The script finds patterns — you classify severity, trace root causes, and recommend fixes.
 
-After evidence is collected, apply the Parallel Execution Principle from `skills/forge/protocol.md` — fan out one subagent per dimension with the shared evidence, then merge results into the final report. If your harness does not support parallel sub-agent spawning, run the dimensions sequentially.
+After evidence is collected, apply the Parallel Execution Principle from `core/skills/forge/protocol.md` — fan out one subagent per dimension with the shared evidence, then merge results into the final report. If your harness does not support parallel sub-agent spawning, run the dimensions sequentially.
 
 ## Dimension 1: SOLID & Strategy Patterns
 
@@ -96,13 +96,13 @@ The server already knows who is calling via the auth session. Any request body f
 
 ## Dimension 3: Framework Misuse
 
-Scan for custom/bespoke handling where the adopted framework already provides a solution. Check `<forge>/skills/forge/stack-guide.md` for the full framework list. For each finding, search the web to confirm the capability exists (check cache per [Forge Protocol](../forge/protocol.md#web-research-cache)).
+Scan for custom/bespoke handling where the adopted framework already provides a solution. Check `<forge>/core/skills/forge/stack-guide.md` for the full framework list. For each finding, search the web to confirm the capability exists (check cache per [Forge Protocol](../forge/protocol.md#web-research-cache)).
 
 **What to flag**: custom code duplicating framework functionality — show the custom code, link to the built-in solution, explain migration path.
 
 ## Dimension 4: Logging Hygiene
 
-Validate against `<forge>/skills/forge/forge-conventions.md` checklist item 6 (Logging) and `stack-guide.md` Logging Convention.
+Validate against `<forge>/core/skills/forge/forge-conventions.md` checklist item 6 (Logging) and `stack-guide.md` Logging Convention.
 
 **Key checks:**
 - Human-initiated actions logged with context (`userId`, `action`, `resourceId`, `outcome`)
@@ -179,4 +179,4 @@ Report structure:
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/poke-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any of the findings (specify by finding number).
+Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/poke-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any of the findings (specify by finding number).

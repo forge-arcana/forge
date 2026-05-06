@@ -43,7 +43,7 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
 Before any apprentice spawns on Claude Code, run the universal token preflight:
 
 ```bash
-bash <forge>/scripts/agent-preflight.sh $$
+bash <forge>/core/scripts/agent-preflight.sh $$
 ```
 
 Idempotent. Refreshes the OAuth token if <30 min remaining and spawns a background keeper for this smith session. The keeper auto-exits when smith dies (parent-PID watchdog, ~5 min granularity). No explicit teardown needed.
@@ -242,7 +242,7 @@ If verify fails, smith fixes before invoking arts — no point evaluating broken
 
 Select art(s) per the Escalation Ladder, then:
 
-1. **Collect evidence** — run `<forge>/scripts/forge-scan.sh <art> <project-path>` for /poke and /press evaluations
+1. **Collect evidence** — run `<forge>/core/scripts/forge-scan.sh <art> <project-path>` for /poke and /press evaluations
 2. **Invoke art(s) via subagents** — each art runs in a subagent with pre-loaded evidence and context. Multiple arts on the same heat run in parallel where the harness supports it (evaluate fan-out).
 3. **Collect findings** — parse subagent outputs for CRITICAL / IMPORTANT / MINOR classifications
 
@@ -470,4 +470,4 @@ Two files persist smith state:
 6. **ALWAYS** persist the ledger before any milestone or potential interruption point.
 7. **ALWAYS** follow the stack guide conventions when building. The blueprint defines *what*, the stack guide defines *how*.
 8. **ALWAYS** include the no-chaining rule in every apprentice prompt verbatim.
-9. **On Claude Code**: ALWAYS run `bash <forge>/scripts/agent-preflight.sh $$` in Step 0a. The OAuth token-race workaround is mandatory for every smith run on Claude Code. See [WORKAROUNDS.md](../../../WORKAROUNDS.md) WA-001. On other harnesses without OAuth race issues, this step is silently skipped.
+9. **On Claude Code**: ALWAYS run `bash <forge>/core/scripts/agent-preflight.sh $$` in Step 0a. The OAuth token-race workaround is mandatory for every smith run on Claude Code. See [WORKAROUNDS.md](../../../WORKAROUNDS.md) WA-001. On other harnesses without OAuth race issues, this step is silently skipped.

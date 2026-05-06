@@ -12,7 +12,7 @@ Watch GitHub Actions runs on the current branch until all complete. No push — 
 
 ## Primary Path: Automated Polling
 
-Run `<forge>/scripts/gh-poll.sh --branch <branch>`. The script waits for runs (30s timeout), polls every 60s (10min timeout), auto-drills into failures with logs, and outputs a structured markdown report. Use its output directly.
+Run `<forge>/core/scripts/gh-poll.sh --branch <branch>`. The script waits for runs (30s timeout), polls every 60s (10min timeout), auto-drills into failures with logs, and outputs a structured markdown report. Use its output directly.
 
 ## Step 1: Determine Scope
 

@@ -38,6 +38,7 @@ skill_overrides:
   vsix:     { model_comment: "haiku" }
   eli5:     { model_comment: "haiku" }
   wawa:     { model_comment: "haiku" }
+  wrap:     { model_comment: "haiku" }
   # `dig` deliberately has no model comment (current state had no frontmatter at all)
 
 prompt_primitive: AskUserQuestion

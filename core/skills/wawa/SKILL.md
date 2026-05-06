@@ -15,7 +15,7 @@ Concise status snapshot. No prose preamble — just the header and table.
    - Read the project's `CLAUDE.md`/`AGENTS.md` (especially `## Current Context` section)
    - Glob for active plan files in your harness's plan directory (e.g. `.claude/plans/*.md` for Claude Code; check the equivalent path for other harnesses)
    - Glob for project memory files: `memory/project_*.md`
-   - Run `<forge>/scripts/wawa-status.sh` (collapses `git status` + `git log` + `git diff --stat` into one call)
+   - Run `<forge>/core/scripts/wawa-status.sh` (collapses `git status` + `git log` + `git diff --stat` into one call)
 
    **Batch B** — after globs return, read any found plan files and project memory files in parallel
 

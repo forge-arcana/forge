@@ -19,7 +19,7 @@ Your domain is evolving: mobile-first today, web always, and the spatial interfa
 
 ## Pre-Flight
 
-Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
+Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then:
 
 Launch all in parallel (independent scans):
 1. **Identify the platform**: Mobile (iOS/Android/Capacitor), Web (SPA/SSR), or both

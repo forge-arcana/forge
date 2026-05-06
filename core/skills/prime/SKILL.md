@@ -71,13 +71,13 @@ Five visionaries, one tenet each. Apply these throughout every conversation:
 
 ### Opus manuscript structure
 
-The starter skeleton lives at `<forge>/skills/prime/opus-scaffold.md`. Copy it as the new project's `[PROJECT]_01_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md` if no project name yet) and append every turn (user response verbatim + Prime's reflection) into the appropriate Phase section. The file's outline: header + Phase 1 (Spark) + Phase 2 (Shape) + Crystallization.
+The starter skeleton lives at `<forge>/core/skills/prime/opus-scaffold.md`. Copy it as the new project's `[PROJECT]_01_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md` if no project name yet) and append every turn (user response verbatim + Prime's reflection) into the appropriate Phase section. The file's outline: header + Phase 1 (Spark) + Phase 2 (Shape) + Crystallization.
 
 ## Arguments
 `$ARGUMENTS` — project name or raw idea description (e.g., `/prime MyApp`, `/prime "a tool that..."`)). If not provided, open with an invitation to talk about what they're building.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/skills/forge/protocol.md`), then:
+Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then:
 Launch these in parallel (independent operations):
 - **Scan for existing work**: Glob the current directory for `*Opus*`, `*Vow*`, `*Touchstone*`, `*Pitch*`, `*Blueprint*`, `*ProductBlueprint*`, `*Pattern*` — if an Opus manuscript already exists, read it first (that's the authentic voice); then read Vow, Touchstone, Pitch, Blueprint, Pattern in that order. (The `*Pitch*` glob also picks up legacy `PitchForge_*` files. The `*Touchstone*` glob picks up the HTML masterpiece written by `/wedge`.)
 - **Ask about materials**: "Do you have any existing materials — a deck, a one-pager, notes, an application you've submitted?"
@@ -191,4 +191,4 @@ After delivering any artifact, suggest next steps based on content:
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/prime-learnings.md`.
+Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/prime-learnings.md`.

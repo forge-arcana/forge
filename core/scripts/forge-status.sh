@@ -119,7 +119,7 @@ CHANGED_SKILLS=()
 ADDED_SKILLS=()
 
 # Scan forge skills
-for skill_dir in "$FORGE_PATH"/skills/*/; do
+for skill_dir in "$FORGE_PATH"/core/skills/*/; do
   skill=$(basename "$skill_dir")
   [[ ! -f "$skill_dir/SKILL.md" ]] && continue
 
@@ -132,7 +132,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
     continue
   fi
 
-  diff_output=$(diff -rq --strip-trailing-cr "$FORGE_PATH/skills/$skill" "$deployed" 2>/dev/null || true)
+  diff_output=$(diff -rq --strip-trailing-cr "$FORGE_PATH/core/skills/$skill" "$deployed" 2>/dev/null || true)
 
   if [[ -z "$diff_output" ]]; then
     echo "| $skill | IDENTICAL | -- |"
@@ -147,7 +147,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
       # Three-way comparison using baseline
       # Q1: Did forge change since last cast?
       forge_changed="no"
-      git -C "$FORGE_PATH" diff --quiet "$LAST_CAST_SHA" HEAD -- "skills/$skill/" 2>/dev/null || forge_changed="yes"
+      git -C "$FORGE_PATH" diff --quiet "$LAST_CAST_SHA" HEAD -- "core/skills/$skill/" 2>/dev/null || forge_changed="yes"
 
       if [[ "$forge_changed" == "no" ]]; then
         # Forge didn't move — membrane was edited
@@ -161,7 +161,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
       else
         # Forge moved — check if deployed matches baseline (stale) or was also modified (conflict)
         # Check if skill existed at baseline
-        baseline_skill_exists=$(git -C "$FORGE_PATH" ls-tree "$LAST_CAST_SHA" "skills/$skill/" 2>/dev/null | head -1)
+        baseline_skill_exists=$(git -C "$FORGE_PATH" ls-tree "$LAST_CAST_SHA" "core/skills/$skill/" 2>/dev/null | head -1)
 
         if [[ -z "$baseline_skill_exists" ]]; then
           # Skill didn't exist at baseline — forge added it, incoming
@@ -171,7 +171,7 @@ for skill_dir in "$FORGE_PATH"/skills/*/; do
         else
           # Compare FULL deployed skill dir against baseline (not just SKILL.md)
           tmp_baseline=$(mktemp -d)
-          git -C "$FORGE_PATH" archive --format=tar "$LAST_CAST_SHA" "skills/$skill/" 2>/dev/null \
+          git -C "$FORGE_PATH" archive --format=tar "$LAST_CAST_SHA" "core/skills/$skill/" 2>/dev/null \
             | tar -x -C "$tmp_baseline" 2>/dev/null || true
           deployed_vs_baseline=$(diff -rq --strip-trailing-cr \
             "$tmp_baseline/skills/$skill" "$deployed" 2>/dev/null || true)
@@ -199,8 +199,8 @@ if [[ -d "$MEMBRANE/skills" ]]; then
   for deployed_dir in "$MEMBRANE/skills"/*/; do
     [[ ! -d "$deployed_dir" ]] && continue
     skill=$(basename "$deployed_dir")
-    [[ ! -f "$FORGE_PATH/skills/$skill/SKILL.md" ]] && continue
-    if [[ ! -d "$FORGE_PATH/skills/$skill" ]]; then
+    [[ ! -f "$FORGE_PATH/core/skills/$skill/SKILL.md" ]] && continue
+    if [[ ! -d "$FORGE_PATH/core/skills/$skill" ]]; then
       echo "| $skill | REMOVED | outgoing (deployed only) |"
       REMOVED=$((REMOVED + 1))
     fi
@@ -223,14 +223,14 @@ if [[ ${#CHANGED_SKILLS[@]} -gt 0 && -n "$LAST_CAST_SHA" ]]; then
     deployed="$MEMBRANE/skills/$skill"
 
     # Show git log of what changed in this skill since baseline
-    changes=$(git -C "$FORGE_PATH" log --format="  - %h %s (%an)" "$LAST_CAST_SHA"..HEAD -- "skills/$skill/" 2>/dev/null || true)
+    changes=$(git -C "$FORGE_PATH" log --format="  - %h %s (%an)" "$LAST_CAST_SHA"..HEAD -- "core/skills/$skill/" 2>/dev/null || true)
     if [[ -n "$changes" ]]; then
       echo "**$skill**:"
       echo "$changes"
     else
       # Deployed differs but no forge commits — membrane was edited
       # Wrap diff in || true so pipefail doesn't append "0" after grep's count
-      diff_stat=$( (diff --strip-trailing-cr "$FORGE_PATH/skills/$skill/SKILL.md" "$deployed/SKILL.md" 2>/dev/null || true) | grep -c '^[<>]' || echo "0")
+      diff_stat=$( (diff --strip-trailing-cr "$FORGE_PATH/core/skills/$skill/SKILL.md" "$deployed/SKILL.md" 2>/dev/null || true) | grep -c '^[<>]' || echo "0")
       if [[ "$diff_stat" -gt 0 ]]; then
         echo "**$skill** (deployed copy modified):"
         echo "  - $diff_stat lines changed in deployed copy"

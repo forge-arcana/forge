@@ -93,7 +93,7 @@ If no arguments and no Opus/Vow exist in cwd, output:
 ### 1. Token warmup (Claude Code only)
 
 ```bash
-bash <forge>/scripts/agent-preflight.sh $$
+bash <forge>/core/scripts/agent-preflight.sh $$
 ```
 
 Idempotent. Refreshes the OAuth token if <30 min remaining and spawns a background keeper. Required on Claude Code before the council fan-out (parallel apprentice spawn). Skip on harnesses without OAuth race issues.

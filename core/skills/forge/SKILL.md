@@ -71,13 +71,13 @@ Below is the flow for `/forge`, `/forge <path>`, `/forge --dry`, `/forge --dry <
 
 0. **Token preflight (Claude Code only)** — workaround for the Claude Code OAuth race when `/forge` spawns subagents in 3f (see [WORKAROUNDS.md](../../../WORKAROUNDS.md) WA-001):
    ```bash
-   bash <forge>/scripts/agent-preflight.sh $$
+   bash <forge>/core/scripts/agent-preflight.sh $$
    ```
    Skip this step on harnesses without OAuth race issues (Bob, Cursor, etc.).
 
 > Execute [Forge Preflight](preflight.md) in **pull** mode (or **fetch** mode if `--dry`).
 
-Run `<forge>/scripts/forge-status.sh --pull` (or `--fetch` for `--dry`).
+Run `<forge>/core/scripts/forge-status.sh --pull` (or `--fetch` for `--dry`).
 
 This resolves the forge path, syncs the remote (pull in active mode, fetch in dry mode), and produces the full drift report: Skill Drift, Learning Details, Memory Status, Classification Checks.
 
@@ -87,7 +87,7 @@ This resolves the forge path, syncs the remote (pull in active mode, fetch in dr
 
 ### 1a. Workaround status banner (always shown)
 
-Run `bash <forge>/scripts/forge-workarounds-check.sh` before rendering the PLAN table. It emits one status line per active workaround listed in `<forge>/WORKAROUNDS.md`. The actual GitHub API check is time-gated to once per 7 days per workaround; cached status is used otherwise.
+Run `bash <forge>/core/scripts/forge-workarounds-check.sh` before rendering the PLAN table. It emits one status line per active workaround listed in `<forge>/WORKAROUNDS.md`. The actual GitHub API check is time-gated to once per 7 days per workaround; cached status is used otherwise.
 
 Print the output verbatim as a banner above the PLAN table. It always appears — healthy or alerting — so the workaround state stays visible on every cycle.
 
@@ -97,7 +97,7 @@ If the script has no output (no WORKAROUNDS.md or empty file), print nothing.
 
 ### 1b. Workaround side-effect sync (rows in INCOMING section)
 
-Run `bash <forge>/scripts/sync-workaround-side-effects.sh`. It parses each WA's `Side effects` block in `WORKAROUNDS.md` and emits one line per declared artifact:
+Run `bash <forge>/core/scripts/sync-workaround-side-effects.sh`. It parses each WA's `Side effects` block in `WORKAROUNDS.md` and emits one line per declared artifact:
 
 ```
 ACTION  TYPE     WA-ID   SOURCE                                  TARGET                                          PLATFORM
@@ -198,9 +198,9 @@ Skip this phase entirely if `--dry`. Run BEFORE outgoing absorption so the lates
 For each approved incoming row (and each conflict row where user chose `[↓]`):
 
 ### Skills
-- Run `bash <forge>/scripts/cast-deploy.sh skill1 skill2 ...` for approved `FORGE-UPDATED` / `ADDED`
+- Run `bash <forge>/core/scripts/cast-deploy.sh skill1 skill2 ...` for approved `FORGE-UPDATED` / `ADDED`
 - Run `rm -rf <membrane>/skills/<name>/` for approved `REMOVED`
-- Verify: `bash <forge>/scripts/cast-deploy.sh --verify`
+- Verify: `bash <forge>/core/scripts/cast-deploy.sh --verify`
 - **Never use `cp -r` directly.** Always go through `cast-deploy.sh`.
 
 Fresh machine (no deployed skills): create `<membrane>/learnings/`, `<membrane>/memory/`, then deploy ALL with `cast-deploy.sh --all`.
@@ -215,11 +215,11 @@ For each approved memory row: copy `<forge>/memory/<file>.md` into `<membrane>/m
 For each approved `side-effect` row from Phase 1b:
 
 - **script INSTALL or UPDATE**: copy the source script to the target (use `cast-deploy.sh --scripts` for whole-manifest deploys, or per-file `cp` + `chmod +x` for one-offs).
-- **hook INSTALL** (Claude Code only): invoke `bash <forge>/scripts/install-token-hook.sh` (idempotent, flocks `<membrane>/.settings.lock`).
+- **hook INSTALL** (Claude Code only): invoke `bash <forge>/core/scripts/install-token-hook.sh` (idempotent, flocks `<membrane>/.settings.lock`).
 - **script REMOVE** (workaround retirement): `rm -f <target>`.
-- **hook REMOVE** (workaround retirement, Claude Code only): `bash <forge>/scripts/install-token-hook.sh --uninstall`.
+- **hook REMOVE** (workaround retirement, Claude Code only): `bash <forge>/core/scripts/install-token-hook.sh --uninstall`.
 
-After applying, verify: `bash <forge>/scripts/cast-deploy.sh --verify-scripts`.
+After applying, verify: `bash <forge>/core/scripts/cast-deploy.sh --verify-scripts`.
 
 ### Record baseline
 After all incoming is applied (before starting outgoing), write `<membrane>/.last-cast.json`:
@@ -254,7 +254,7 @@ Protected skills (`forge`, `purge`) are already excluded at PLAN table level —
 | Any `<forge>/learnings/*.md` > 50 entries | Learning review |
 | `<forge>/memory/` has > 20 files | Memory review |
 
-Run `<forge>/scripts/fold-evidence.sh` to collect evidence. Classify each entry: **CURRENT** / **STALE** / **MERGED** / **EVOLVED** / **PROMOTED**. Present review sub-table, apply after user confirms.
+Run `<forge>/core/scripts/fold-evidence.sh` to collect evidence. Classify each entry: **CURRENT** / **STALE** / **MERGED** / **EVOLVED** / **PROMOTED**. Present review sub-table, apply after user confirms.
 
 If no triggers fire, skip entirely.
 
@@ -279,7 +279,7 @@ For approved outgoing learning rows:
 After staging absorbed entries (and BEFORE finalizing them), run:
 ```bash
 git -C <forge> add learnings/<file>.md
-bash <forge>/scripts/fold-purity-check.sh --staged
+bash <forge>/core/scripts/fold-purity-check.sh --staged
 ```
 
 If the script exits non-zero, it lists the violations. Fix every one:
@@ -385,12 +385,12 @@ Never delete — archival is a move.
 2. **Stage** specific files with `git add <file>` (never `git add -A`).
 3. **Final purity gate** (catches anything 3e missed and any new content added in 3f/3g):
    ```bash
-   bash <forge>/scripts/fold-purity-check.sh --staged
+   bash <forge>/core/scripts/fold-purity-check.sh --staged
    ```
    If non-zero, do NOT proceed. Unstage offending content, re-genericize, restage, re-run until clean. This is a HARD gate.
 4. **Commit message purity check** — before invoking `git commit`, run:
    ```bash
-   bash <forge>/scripts/fold-purity-check.sh --commit-msg "<message>"
+   bash <forge>/core/scripts/fold-purity-check.sh --commit-msg "<message>"
    ```
    Commit messages have leaked project names and contributor names in the past. The check catches `Absorb 7 learnings from <Person> (<Project> session, ...)` patterns and similar. If non-zero, rewrite the message until clean.
 5. **Update context** in `<forge>/CLAUDE.md` Current Context section.

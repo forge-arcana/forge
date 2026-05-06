@@ -55,4 +55,4 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/skills/forge/protocol.md`), writing learnings to `memory/pound-learnings.md`.
+Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/pound-learnings.md`.

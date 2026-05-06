@@ -19,7 +19,7 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 
 0. **Token preflight (Claude Code only)** — workaround for OAuth race when running parallel subagents (see [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001):
    ```bash
-   bash <forge>/scripts/agent-preflight.sh $$
+   bash <forge>/core/scripts/agent-preflight.sh $$
    ```
    Required on Claude Code before the parallel poke + press fan-out below — without it, multiple subagents racing on token refresh can crash mid-pass. Skip this step on harnesses that don't have OAuth race issues (e.g., Bob, Cursor).
 
@@ -35,11 +35,11 @@ Evidence is deterministic — collect it once and share across all passes.
 Run both scans in parallel (they are independent):
 
 ```bash
-<forge>/scripts/forge-scan.sh poke <project-path>
+<forge>/core/scripts/forge-scan.sh poke <project-path>
 ```
 
 ```bash
-<forge>/scripts/forge-scan.sh press <project-path>
+<forge>/core/scripts/forge-scan.sh press <project-path>
 ```
 
 Save the outputs as `POKE_EVIDENCE` and `PRESS_EVIDENCE` respectively.
@@ -80,7 +80,7 @@ PROJECT CONTEXT:
 [paste project rules-file content]
 
 STACK GUIDE:
-Read <forge>/skills/forge/stack-guide.md for tech reference.
+Read <forge>/core/skills/forge/stack-guide.md for tech reference.
 
 LEARNINGS:
 Read <forge>/learnings/{{LEARNINGS_FILE}} if it exists.

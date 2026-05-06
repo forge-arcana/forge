@@ -14,7 +14,7 @@ Generate or update `restart.sh` and `kill-zombies.sh` in the **project root** (n
 Launch all pre-flight reads in parallel (all independent):
 
 2. Read the project's `CLAUDE.md`/`AGENTS.md` and `package.json` to understand the stack
-3. Read the stack guide: `<forge>/skills/forge/stack-guide.md` (resolve `<forge>` from your harness's global config — e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses — managed by `/forge`)
+3. Read the stack guide: `<forge>/core/skills/forge/stack-guide.md` (resolve `<forge>` from your harness's global config — e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses — managed by `/forge`)
 4. Scan for existing `restart.sh` — if found, read it and propose updates rather than overwriting
 5. Read the `restart-template.sh` file in the same directory as this skill
 6. Scan for `docker-compose.yml` or `compose.yml` to determine DB setup

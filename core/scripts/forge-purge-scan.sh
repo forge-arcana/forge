@@ -167,7 +167,7 @@ echo ""
 echo "| Art | Lines | Chars | Has Protocol Ref? |"
 echo "|-----|-------|-------|-------------------|"
 for art in prime probe poke preen press pound pitch pry praise; do
-  skill_file="$FORGE_PATH/skills/$art/SKILL.md"
+  skill_file="$FORGE_PATH/core/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     lines=$(wc -l < "$skill_file")
     chars=$(wc -c < "$skill_file")
@@ -195,7 +195,7 @@ echo "### Section-level bloat analysis (all skills)"
 echo ""
 echo "| Skill | Section | Lines | % of File |"
 echo "|-------|---------|-------|-----------|"
-for f in "$FORGE_PATH"/skills/*/SKILL.md; do
+for f in "$FORGE_PATH"/core/skills/*/SKILL.md; do
   [[ ! -f "$f" ]] && continue
   skill_name=$(basename "$(dirname "$f")")
   # no skip needed — loop already filters by SKILL.md presence
@@ -218,7 +218,7 @@ echo ""
 
 echo "### Redundancy check: content duplicated from reference docs"
 echo '```'
-for f in "$FORGE_PATH"/skills/*/SKILL.md; do
+for f in "$FORGE_PATH"/core/skills/*/SKILL.md; do
   [[ ! -f "$f" ]] && continue
   skill_name=$(basename "$(dirname "$f")")
   # no skip needed — loop already filters by SKILL.md presence
@@ -242,7 +242,7 @@ echo ""
 echo "| Art | name | description | user-invocable |"
 echo "|-----|------|-------------|----------------|"
 for art in prime probe poke preen press pound pitch pry praise; do
-  skill_file="$FORGE_PATH/skills/$art/SKILL.md"
+  skill_file="$FORGE_PATH/core/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     has_name=$(grep -c '^name:' "$skill_file" 2>/dev/null || echo "0")
     has_desc=$(grep -c '^description:' "$skill_file" 2>/dev/null || echo "0")
@@ -262,11 +262,20 @@ echo "### Reference doc sizes"
 echo ""
 echo "| File | Lines | Last Modified |"
 echo "|------|-------|---------------|"
+# Tool-neutral refs live under core/; adapter-specific refs live under adapters/<adapter>/refs/.
+declare -A REF_LOCATIONS=(
+  [stack-guide.md]="core/skills/forge"
+  [forge-conventions.md]="core/skills/forge"
+  [protocol.md]="core/skills/forge"
+  [preflight.md]="core/skills/forge"
+  [claude-code-rules.md]="adapters/claude-code/refs"
+)
 for ref in stack-guide.md claude-code-rules.md forge-conventions.md protocol.md preflight.md; do
-  ref_file="$FORGE_PATH/skills/forge/$ref"
+  rel="${REF_LOCATIONS[$ref]}/$ref"
+  ref_file="$FORGE_PATH/$rel"
   if [[ -f "$ref_file" ]]; then
     lines=$(wc -l < "$ref_file")
-    modified=$(git -C "$FORGE_PATH" log -1 --format='%cr' -- "skills/forge/$ref" 2>/dev/null || echo "unknown")
+    modified=$(git -C "$FORGE_PATH" log -1 --format='%cr' -- "$rel" 2>/dev/null || echo "unknown")
     echo "| $ref | $lines | $modified |"
   else
     echo "| $ref | -- | **MISSING** |"
@@ -282,7 +291,7 @@ echo ""
 
 # Skill count verification
 echo "### Skill count verification"
-TOTAL_SKILLS=$(find "$FORGE_PATH/skills" -maxdepth 2 -name "SKILL.md" | wc -l)
+TOTAL_SKILLS=$(find "$FORGE_PATH/core/skills" -maxdepth 2 -name "SKILL.md" | wc -l)
 ARTS=$(echo "prime probe poke preen press pound pitch pry praise" | wc -w)
 MASTERS=2
 FORGE_CYCLE=1

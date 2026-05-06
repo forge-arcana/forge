@@ -4,6 +4,8 @@
 # Usage:
 #   bin/forge-build <adapter>              build to ./build/<adapter>/
 #   bin/forge-build <adapter> <out-dir>    build to specified output dir
+#   bin/forge-build <adapter> --deploy     build, then copy output into the harness membrane
+#   bin/forge-build <adapter> --deploy --dry-run    show what --deploy would do, no writes
 #   bin/forge-build --list                 list known adapters
 #
 # Reads from:
@@ -17,7 +19,12 @@
 #   build/<adapter>/scripts/ runtime scripts (core + adapter-specific)
 #   build/<adapter>/refs/    adapter-specific reference docs
 #
-# Phase 1 implementation: claude-code adapter is fully wired. Other adapters
+# --deploy targets (claude-code):
+#   ~/.claude/skills/        from build/claude-code/skills/
+#   ~/.claude/scripts/       from build/claude-code/scripts/  (whole-dir overlay)
+#   CLAUDE-rules-snippet.md  printed; the user merges manually into ~/.claude/CLAUDE.md
+#
+# Phase 1+2 implementation: claude-code adapter is fully wired. Other adapters
 # (bob, cursor) will be added in Phase 3 once their primitives are verified.
 
 set -euo pipefail
@@ -47,7 +54,21 @@ if [[ "$1" == "--list" ]]; then
 fi
 
 ADAPTER="$1"
-OUT="${2:-$FORGE/build/$ADAPTER}"
+shift
+
+DEPLOY=0
+DRY_RUN=0
+OUT="$FORGE/build/$ADAPTER"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --deploy)   DEPLOY=1 ;;
+    --dry-run)  DRY_RUN=1 ;;
+    -*)         echo "ERROR: unknown flag '$1'" >&2; exit 1 ;;
+    *)          OUT="$1" ;;
+  esac
+  shift
+done
+
 ADAPTER_DIR="$ADAPTERS_DIR/$ADAPTER"
 
 if [[ ! -d "$ADAPTER_DIR" ]]; then
@@ -97,6 +118,7 @@ build_claude_code() {
     [vsix]="haiku"
     [eli5]="haiku"
     [wawa]="haiku"
+    [wrap]="haiku"
     # `dig` deliberately has no model comment
   )
 
@@ -123,9 +145,9 @@ build_claude_code() {
           if (!injected) print "user-invocable: true"
           in_fm = 0
           print
-          # add model HTML comment after the fence if defined
+          # add model HTML comment immediately after the fence if defined
+          # (no blank line — matches the original Claude SKILL.md layout)
           if (model != "") {
-            print ""
             print "<!-- model: " model " -->"
           }
           next
@@ -210,3 +232,71 @@ case "$ADAPTER" in
   bob)         build_bob ;;
   *)           echo "ERROR: build logic not implemented for $ADAPTER" >&2; exit 1 ;;
 esac
+
+# ============================================================================
+# Deploy
+# ============================================================================
+
+deploy_claude_code() {
+  local membrane="${FORGE_MEMBRANE:-$HOME/.claude}"
+  local skills_target="$membrane/skills"
+  local scripts_target="$membrane/scripts"
+
+  echo ""
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "Deploy plan (claude-code) — dry run, no writes:"
+  else
+    echo "Deploying to $membrane:"
+  fi
+
+  # Skills: per-skill rsync-style overlay (remove dest first to avoid cp nesting)
+  for skill_dir in "$OUT"/skills/*/; do
+    local name="$(basename "$skill_dir")"
+    local dest="$skills_target/$name"
+    if [[ $DRY_RUN -eq 1 ]]; then
+      if [[ -d "$dest" ]]; then echo "  REPLACE $dest"; else echo "  CREATE  $dest"; fi
+    else
+      mkdir -p "$skills_target"
+      rm -rf "$dest"
+      cp -r "$skill_dir" "$dest"
+    fi
+  done
+
+  # Scripts: deploy ONLY the WA-001 trio that hooks invoke by absolute path.
+  # Core scripts (forge-status.sh, fold-evidence.sh, etc.) stay in the forge
+  # repo — skills invoke them via `bash <forge>/core/scripts/...`. Deploying
+  # them to the membrane would create dead duplicates.
+  local DEPLOYED_SCRIPTS=(
+    agent-token-warmup.sh
+    agent-token-scheduler.sh
+    user-agent-preflight.sh
+  )
+  for sname in "${DEPLOYED_SCRIPTS[@]}"; do
+    local s="$OUT/scripts/$sname"
+    [[ -f "$s" ]] || continue
+    local dest="$scripts_target/$sname"
+    if [[ $DRY_RUN -eq 1 ]]; then
+      if [[ -f "$dest" ]]; then echo "  REPLACE $dest"; else echo "  CREATE  $dest"; fi
+    else
+      mkdir -p "$scripts_target"
+      cp "$s" "$dest"
+      chmod +x "$dest"
+    fi
+  done
+
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo ""
+    echo "Rules snippet (would be printed for manual merge): $OUT/CLAUDE-rules-snippet.md"
+  else
+    echo ""
+    echo "Deploy complete. Manual step remaining:"
+    echo "  Review $OUT/CLAUDE-rules-snippet.md and merge HARD RULES into $membrane/CLAUDE.md"
+  fi
+}
+
+if [[ $DEPLOY -eq 1 ]]; then
+  case "$ADAPTER" in
+    claude-code) deploy_claude_code ;;
+    *)           echo "ERROR: --deploy not implemented for $ADAPTER" >&2; exit 1 ;;
+  esac
+fi
