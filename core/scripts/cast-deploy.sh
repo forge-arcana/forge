@@ -30,9 +30,8 @@ fi
 
 FORGE_SKILLS="$FORGE_PATH/core/skills"
 # WA-001 scripts are Claude-Code-only (the OAuth race is an Anthropic-SDK bug).
-# When Bob/Cursor adapters come online (Phase 3), this needs to be adapter-aware
-# rather than hardcoded.
-FORGE_SCRIPTS="$FORGE_PATH/adapters/claude-code/scripts"
+# Lives in claude-helpers/ (the bug-workaround box, not a vendor adapter).
+FORGE_SCRIPTS="$FORGE_PATH/claude-helpers/scripts"
 MEMBRANE_SKILLS="$MEMBRANE/skills"
 MEMBRANE_SCRIPTS="$MEMBRANE/scripts"
 

@@ -262,15 +262,15 @@ echo "### Reference doc sizes"
 echo ""
 echo "| File | Lines | Last Modified |"
 echo "|------|-------|---------------|"
-# Tool-neutral refs live under core/; adapter-specific refs live under adapters/<adapter>/refs/.
+# Tool-neutral refs live under core/; Claude-specific descriptive refs live under claude-helpers/refs/.
 declare -A REF_LOCATIONS=(
   [stack-guide.md]="core/skills/forge"
   [forge-conventions.md]="core/skills/forge"
   [protocol.md]="core/skills/forge"
   [preflight.md]="core/skills/forge"
-  [claude-code-rules.md]="adapters/claude-code/refs"
+  [auto-allowed-bash.md]="claude-helpers/refs"
 )
-for ref in stack-guide.md claude-code-rules.md forge-conventions.md protocol.md preflight.md; do
+for ref in stack-guide.md auto-allowed-bash.md forge-conventions.md protocol.md preflight.md; do
   rel="${REF_LOCATIONS[$ref]}/$ref"
   ref_file="$FORGE_PATH/$rel"
   if [[ -f "$ref_file" ]]; then
