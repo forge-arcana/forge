@@ -38,7 +38,7 @@ MEMBRANE_SCRIPTS="$MEMBRANE/scripts"
 
 # Runtime scripts to deploy to $MEMBRANE/scripts/ (manifest — explicit, no globbing).
 # These are scripts the user's environment needs (hooks call them by absolute path),
-# not forge-internal helpers. See WORKAROUNDS.md WA-001.
+# not forge-internal helpers. See claude-helpers/WORKAROUNDS.md WA-001.
 SCRIPTS_MANIFEST=(
   agent-token-warmup.sh
   agent-token-scheduler.sh

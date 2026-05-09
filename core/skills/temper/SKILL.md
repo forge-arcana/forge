@@ -17,7 +17,7 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 
 ## Step 0: Setup
 
-0. **Token preflight (Claude Code only)** — workaround for OAuth race when running parallel subagents (see [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001):
+0. **Token preflight (Claude Code only)** — workaround for OAuth race when running parallel subagents (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
    ```bash
    bash <forge>/core/scripts/agent-preflight.sh $$
    ```

@@ -21,7 +21,7 @@ Factory, etc. — work out of the box with zero forge-side configuration.
    Workaround: a 1-line `CLAUDE.md` containing `@AGENTS.md` uses Claude Code's
    officially documented `@-import` mechanism to load AGENTS.md content.
 2. Claude Code has an OAuth token-refresh race that breaks long-running
-   sub-agent skills (see `<forge>/WORKAROUNDS.md` WA-001). Workaround: a
+   sub-agent skills (see `<forge>/claude-helpers/WORKAROUNDS.md` WA-001). Workaround: a
    SessionStart hook that proactively refreshes the token.
 
 Both workarounds are **opt-in**. Run `bootstrap.sh <project>` to apply them.
@@ -55,7 +55,7 @@ claude-helpers/
 Each contained file has a clear retirement criterion:
 
 - **All scripts under `scripts/`** retire when Anthropic ships the OAuth
-  refresh-token race fix (see `<forge>/WORKAROUNDS.md` WA-001). At that point,
+  refresh-token race fix (see `<forge>/claude-helpers/WORKAROUNDS.md` WA-001). At that point,
   `claude-helpers/scripts/` should be deleted entirely.
 - **`bootstrap.sh`** retires when Claude Code natively reads `AGENTS.md`
   ([#6235](https://github.com/anthropics/claude-code/issues/6235) /

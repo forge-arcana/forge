@@ -8,10 +8,20 @@
 
 set -uo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FORGE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-WORKAROUNDS_FILE="$FORGE_DIR/WORKAROUNDS.md"
-TRACKER_FILE="$FORGE_DIR/learnings/.workarounds-tracker.json"
+# Resolve forge path: FORGE_PATH env var > CLAUDE.md fallback > script-relative fallback
+FORGE_PATH="${FORGE_PATH:-}"
+MEMBRANE="${FORGE_MEMBRANE:-$HOME/.claude}"
+if [[ -z "$FORGE_PATH" && -f "$MEMBRANE/CLAUDE.md" ]]; then
+  FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$MEMBRANE/CLAUDE.md" 2>/dev/null | sed 's/[[:space:]]*$//' || true)
+fi
+if [[ -z "$FORGE_PATH" ]]; then
+  # Last-resort: derive from script location (assumes core/scripts/ layout)
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  FORGE_PATH="$(cd "$SCRIPT_DIR/../.." && pwd)"
+fi
+
+WORKAROUNDS_FILE="$FORGE_PATH/claude-helpers/WORKAROUNDS.md"
+TRACKER_FILE="$FORGE_PATH/learnings/.workarounds-tracker.json"
 CACHE_TTL_DAYS=7
 
 if [[ ! -f "$WORKAROUNDS_FILE" ]]; then

@@ -16,7 +16,7 @@
 #
 #   2. (optional, opt-in via INSTALL_WA001=yes) WA-001 SessionStart hook that
 #      proactively refreshes the OAuth token to mitigate the long-known
-#      Claude-Code refresh-token race (see <forge>/WORKAROUNDS.md WA-001).
+#      Claude-Code refresh-token race (see <forge>/claude-helpers/WORKAROUNDS.md WA-001).
 #
 # Usage:
 #   bash claude-helpers/bootstrap.sh <project-path>

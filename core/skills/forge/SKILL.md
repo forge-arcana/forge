@@ -69,7 +69,7 @@ Below is the flow for `/forge`, `/forge <path>`, `/forge --dry`, `/forge --dry <
 
 ## Phase 0: Preflight
 
-0. **Token preflight (Claude Code only)** — workaround for the Claude Code OAuth race when `/forge` spawns subagents in 3f (see [WORKAROUNDS.md](../../../WORKAROUNDS.md) WA-001):
+0. **Token preflight (Claude Code only)** — workaround for the Claude Code OAuth race when `/forge` spawns subagents in 3f (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
    ```bash
    bash <forge>/core/scripts/agent-preflight.sh $$
    ```
@@ -87,17 +87,17 @@ This resolves the forge path, syncs the remote (pull in active mode, fetch in dr
 
 ### 1a. Workaround status banner (always shown)
 
-Run `bash <forge>/core/scripts/forge-workarounds-check.sh` before rendering the PLAN table. It emits one status line per active workaround listed in `<forge>/WORKAROUNDS.md`. The actual GitHub API check is time-gated to once per 7 days per workaround; cached status is used otherwise.
+Run `bash <forge>/core/scripts/forge-workarounds-check.sh` before rendering the PLAN table. It emits one status line per active workaround listed in `<forge>/claude-helpers/WORKAROUNDS.md`. The actual GitHub API check is time-gated to once per 7 days per workaround; cached status is used otherwise.
 
 Print the output verbatim as a banner above the PLAN table. It always appears — healthy or alerting — so the workaround state stays visible on every cycle.
 
-If any line contains "READY FOR REMOVAL", surface it prominently (the script formats those lines to stand out) and remind the user: "Workaround can be retired — see `WORKAROUNDS.md` removal procedure."
+If any line contains "READY FOR REMOVAL", surface it prominently (the script formats those lines to stand out) and remind the user: "Workaround can be retired — see `claude-helpers/WORKAROUNDS.md` removal procedure."
 
-If the script has no output (no WORKAROUNDS.md or empty file), print nothing.
+If the script has no output (no claude-helpers/WORKAROUNDS.md or empty file), print nothing.
 
 ### 1b. Workaround side-effect sync (rows in INCOMING section)
 
-Run `bash <forge>/core/scripts/sync-workaround-side-effects.sh`. It parses each WA's `Side effects` block in `WORKAROUNDS.md` and emits one line per declared artifact:
+Run `bash <forge>/claude-helpers/scripts/sync-workaround-side-effects.sh`. It parses each WA's `Side effects` block in `claude-helpers/WORKAROUNDS.md` and emits one line per declared artifact:
 
 ```
 ACTION  TYPE     WA-ID   SOURCE                                  TARGET                                          PLATFORM

@@ -35,7 +35,7 @@ For monorepos, detect package dependency order and run CI bottom-up: shared → 
 
 Before running the pipeline:
 
-0. **Token preflight (Claude Code only)** — workaround for OAuth race; cicd may escalate failures to /pry which spawns subagents (see [WORKAROUNDS.md](../../WORKAROUNDS.md) WA-001):
+0. **Token preflight (Claude Code only)** — workaround for OAuth race; cicd may escalate failures to /pry which spawns subagents (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
    ```bash
    bash <forge>/core/scripts/agent-preflight.sh $$
    ```
