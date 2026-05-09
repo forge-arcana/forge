@@ -1,6 +1,6 @@
 ---
 name: wawa
-description: "Where Are We At?" — concise status snapshot. Use when user types "wawa" or asks about project status.
+description: 'Where Are We At? — concise status snapshot. Use when user types "wawa" or asks about project status.'
 ---
 
 # /wawa — Where Are We At?
