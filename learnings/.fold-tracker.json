@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-05-04T00:00:00Z",
+  "lastRun": "2026-05-09T00:00:00Z",
   "processedEntries": [
     "Soul Brief Beats Fielded Brief; Lens Beats Family×Tone",
     "WSL Path Compatibility",
@@ -89,7 +89,8 @@
     "Avoid Em-Dashes and Tricolon Negation Cadence in User-Facing Copy",
     "Render previews BEFORE asking the user to pick a direction",
     "Grep Defaults Are Tuned for Humans, Not Token-Metered Agents",
-    "/forge Runs From Anywhere"
+    "/forge Runs From Anywhere",
+    "/prime Artifacts Belong in `opus/`, Not Project Root"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
