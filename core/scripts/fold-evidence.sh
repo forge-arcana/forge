@@ -7,15 +7,14 @@ set -euo pipefail
 # Membrane = the harness's per-tool config dir (~/.claude/ for Claude Code, ~/.bob/ for Bob, etc.)
 MEMBRANE="${FORGE_MEMBRANE:-$HOME/.claude}"
 
-FORGE_PATH="${1:-}"
+# Resolve forge path: explicit arg > FORGE_PATH env var > CLAUDE.md fallback (backward compat)
+FORGE_PATH="${1:-${FORGE_PATH:-}}"
+if [[ -z "$FORGE_PATH" && -f "$MEMBRANE/CLAUDE.md" ]]; then
+  FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$MEMBRANE/CLAUDE.md" 2>/dev/null | sed 's/[[:space:]]*$//' || true)
+fi
 if [[ -z "$FORGE_PATH" ]]; then
-  if [[ -f "$MEMBRANE/CLAUDE.md" ]]; then
-    FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$MEMBRANE/CLAUDE.md" 2>/dev/null | sed 's/[[:space:]]*$//' || true)
-  fi
-  if [[ -z "$FORGE_PATH" ]]; then
-    echo "ERROR: forge-path not found in $MEMBRANE/CLAUDE.md. Run /forge to configure."
-    exit 1
-  fi
+  echo "ERROR: forge path not configured. Set FORGE_PATH env var, pass as arg, or add 'forge-path: /path/to/forge' to $MEMBRANE/CLAUDE.md."
+  exit 1
 fi
 
 if [[ ! -d "$FORGE_PATH" ]]; then

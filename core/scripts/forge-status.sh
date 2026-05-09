@@ -34,13 +34,13 @@ winpath() {
   fi
 }
 
-# --- Step 1: Resolve forge path ---
-FORGE_PATH=""
-if [[ -f "$MEMBRANE/CLAUDE.md" ]]; then
+# --- Step 1: Resolve forge path (FORGE_PATH env var > CLAUDE.md fallback) ---
+FORGE_PATH="${FORGE_PATH:-}"
+if [[ -z "$FORGE_PATH" && -f "$MEMBRANE/CLAUDE.md" ]]; then
   FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$MEMBRANE/CLAUDE.md" 2>/dev/null | sed 's/[[:space:]]*$//' || true)
 fi
 if [[ -z "$FORGE_PATH" ]]; then
-  echo "ERROR: forge-path not found in $MEMBRANE/CLAUDE.md. Run /forge to configure."
+  echo "ERROR: forge path not configured. Set FORGE_PATH env var, or add 'forge-path: /path/to/forge' to $MEMBRANE/CLAUDE.md."
   exit 1
 fi
 
