@@ -1,461 +1,254 @@
 #!/usr/bin/env bash
-# bin/forge-build — assemble harness-specific deployable from tool-neutral core/
+# bin/forge-build — Generic Forge v2 build pipeline.
+#
+# Reads tool-neutral sources from core/ and emits a single universal payload:
+#   build/AGENTS.md          — thin pointer file (<150 lines, <32 KiB)
+#   build/.agents/skills/    — Open Agent Skills standard path (Anthropic, Dec 2025;
+#                              cross-tool standard since Jan 2026)
+#   build/.agents/rules/     — full HARD RULES bodies linked from AGENTS.md
+#   build/scripts/           — runtime helpers from core/scripts/
+#
+# No <adapter> argument. No per-vendor builds. No adapter manifests. The output
+# is the cross-tool standard; tools that natively read it (Codex, Cursor,
+# Gemini CLI, DeepSeek TUI, Bob, Amp, Factory) consume it directly. Claude Code
+# users opt in via claude-helpers/bootstrap.sh which writes a 1-line CLAUDE.md
+# (`@AGENTS.md`) so Claude's @-import mechanism resolves to AGENTS.md content.
 #
 # Usage:
-#   bin/forge-build <adapter>              build to ./build/<adapter>/
-#   bin/forge-build <adapter> <out-dir>    build to specified output dir
-#   bin/forge-build <adapter> --deploy     build, then copy output into the harness membrane
-#   bin/forge-build <adapter> --deploy --dry-run    show what --deploy would do, no writes
-#   bin/forge-build --list                 list known adapters
+#   bin/forge-build                              build to ./build/
+#   bin/forge-build --deploy <project>           build then copy outputs to <project>
+#   bin/forge-build --deploy <project> --dry-run preview deploy without writing
+#   bin/forge-build --help                       show this message
 #
-# Reads from:
-#   core/skills/             tool-neutral skill sources
-#   core/scripts/            tool-neutral runtime scripts
-#   core/rules/              tool-neutral HARD RULES
-#   adapters/<adapter>/      adapter manifest + adapter-only refs/scripts
-#
-# Writes to:
-#   build/<adapter>/skills/  per-harness SKILL.md files (frontmatter injected)
-#   build/<adapter>/scripts/ runtime scripts (core + adapter-specific)
-#   build/<adapter>/refs/    adapter-specific reference docs
-#
-# --deploy targets:
-#   claude-code:
-#     ~/.claude/skills/        from build/claude-code/skills/
-#     ~/.claude/scripts/       from build/claude-code/scripts/  (whole-dir overlay)
-#     CLAUDE-rules-snippet.md  printed; the user merges manually into ~/.claude/CLAUDE.md
-#   antigravity:
-#     <project>/.agents/workflows/  from build/antigravity/workflows/  (workspace scope)
-#     AGENTS.md                printed; user copies to project root (auto-loaded by Antigravity since v1.20.3)
-#
-# Phase 1+2: claude-code fully wired. Phase 3 (in progress): antigravity smoke test.
-# Bob adapter is still a stub (manifest only).
+# See memory/maxima-pivot-plan.md for the architectural rationale.
 
 set -euo pipefail
 
-FORGE="$(cd "$(dirname "$0")/.." && pwd)"
-ADAPTERS_DIR="$FORGE/adapters"
+# --- Resolve paths ---
+FORGE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BUILD_DIR="${BUILD_DIR:-$FORGE_ROOT/build}"
 
-# ============================================================================
-# CLI
-# ============================================================================
-
-if [[ $# -lt 1 ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-  sed -n '2,/^$/p' "$0" | sed 's/^# //'
-  exit 0
-fi
-
-if [[ "$1" == "--list" ]]; then
-  echo "Known adapters:"
-  for d in "$ADAPTERS_DIR"/*/; do
-    name=$(basename "$d")
-    if [[ -f "$d/manifest.yaml" ]]; then
-      status=$(grep -E '^status:' "$d/manifest.yaml" 2>/dev/null | sed 's/status: *//' || echo "ready")
-      echo "  $name  ($status)"
-    fi
-  done
-  exit 0
-fi
-
-ADAPTER="$1"
-shift
-
-DEPLOY=0
+# --- Args ---
+DEPLOY_TARGET=""
 DRY_RUN=0
-OUT="$FORGE/build/$ADAPTER"
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --deploy)   DEPLOY=1 ;;
-    --dry-run)  DRY_RUN=1 ;;
-    -*)         echo "ERROR: unknown flag '$1'" >&2; exit 1 ;;
-    *)          OUT="$1" ;;
+    --deploy)
+      DEPLOY_TARGET="${2:-}"
+      if [[ -z "$DEPLOY_TARGET" ]]; then
+        echo "ERROR: --deploy requires a project path" >&2; exit 1
+      fi
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    --help|-h)
+      sed -n '2,21p' "${BASH_SOURCE[0]}" | sed 's|^# \{0,1\}||'
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      echo "Run 'bin/forge-build --help' for usage." >&2
+      exit 1
+      ;;
   esac
-  shift
 done
 
-ADAPTER_DIR="$ADAPTERS_DIR/$ADAPTER"
+# --- Source dirs (sanity check) ---
+SRC_SKILLS="$FORGE_ROOT/core/skills"
+SRC_SCRIPTS="$FORGE_ROOT/core/scripts"
+SRC_RULES="$FORGE_ROOT/core/rules"
 
-if [[ ! -d "$ADAPTER_DIR" ]]; then
-  echo "ERROR: unknown adapter '$ADAPTER'. Run: $0 --list" >&2
-  exit 1
+for required in "$SRC_SKILLS" "$SRC_SCRIPTS" "$SRC_RULES"; do
+  if [[ ! -d "$required" ]]; then
+    echo "ERROR: required source directory missing: $required" >&2
+    exit 1
+  fi
+done
+
+echo "Generic Forge v2 build → $BUILD_DIR"
+echo ""
+
+# --- 1. Clean and recreate build dir ---
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR/.agents/skills" "$BUILD_DIR/.agents/rules" "$BUILD_DIR/scripts"
+
+# --- 2. Skills: copy core/skills/<name>/ → build/.agents/skills/<name>/ ---
+SKILL_COUNT=0
+for skill_dir in "$SRC_SKILLS"/*/; do
+  [[ -d "$skill_dir" ]] || continue
+  skill_name=$(basename "$skill_dir")
+  cp -r "$skill_dir" "$BUILD_DIR/.agents/skills/"
+  SKILL_COUNT=$((SKILL_COUNT + 1))
+done
+echo "  ✓ $SKILL_COUNT skills emitted to .agents/skills/"
+
+# --- 3. Rules: copy core/rules/<name>.md → build/.agents/rules/<name>.md ---
+RULE_COUNT=0
+for rule_file in "$SRC_RULES"/*.md; do
+  [[ -f "$rule_file" ]] || continue
+  cp "$rule_file" "$BUILD_DIR/.agents/rules/"
+  RULE_COUNT=$((RULE_COUNT + 1))
+done
+echo "  ✓ $RULE_COUNT rules emitted to .agents/rules/"
+
+# --- 4. Scripts: copy core/scripts/*.sh → build/scripts/ ---
+SCRIPT_COUNT=0
+if compgen -G "$SRC_SCRIPTS"/*.sh > /dev/null; then
+  cp "$SRC_SCRIPTS"/*.sh "$BUILD_DIR/scripts/"
+  chmod +x "$BUILD_DIR/scripts"/*.sh
+  SCRIPT_COUNT=$(ls "$BUILD_DIR/scripts/" | wc -l)
+fi
+echo "  ✓ $SCRIPT_COUNT scripts emitted to scripts/"
+
+# --- 5. Compose AGENTS.md ---
+AGENTS_MD="$BUILD_DIR/AGENTS.md"
+
+# Helper: extract first descriptive paragraph from a markdown file.
+# Skips H1 heading, then captures the first content block (blockquote or paragraph),
+# stripping leading "> " from blockquote lines.
+first_paragraph() {
+  awk '
+    /^# / { next }
+    /^## / { exit }
+    /^[[:space:]]*$/ { if (p) exit; next }
+    {
+      sub(/^> ?/, "")
+      print
+      p=1
+    }
+  ' "$1"
+}
+
+# Helper: extract a frontmatter field (first occurrence)
+frontmatter_field() {
+  local file="$1" field="$2"
+  awk -v field="$field" '
+    /^---/ { f++; next }
+    f == 1 && $0 ~ "^"field":" {
+      sub("^"field": *", "")
+      gsub(/^"|"$/, "")
+      print
+      exit
+    }
+  ' "$file"
+}
+
+{
+  cat <<HEADER
+# Forge — Agent Instructions
+
+Forge is a tool-neutral knowledge + skills framework for AI coding agents. Skills (a.k.a. arts and masters) live in \`.agents/skills/<name>/SKILL.md\` per the [Open Agent Skills specification](https://agentskills.io/) (Anthropic, December 2025; cross-tool standard since January 2026). Most agents auto-discover them; some let you invoke explicitly via \`/<name>\` slash commands.
+
+This file is the registry. Skill bodies live in \`.agents/skills/\`. HARD RULES live in \`.agents/rules/\`.
+HEADER
+
+  # Rules pointers (first paragraph + link)
+  echo ""
+  echo "## Rules"
+  echo ""
+  for rule_file in "$SRC_RULES"/*.md; do
+    [[ -f "$rule_file" ]] || continue
+    rule_name=$(basename "$rule_file" .md)
+    summary=$(first_paragraph "$rule_file" | head -2 | tr '\n' ' ' | sed 's/  */ /g' | sed 's/ *$//')
+    echo "**${rule_name}** — ${summary}"
+    echo ""
+    echo "→ Full rules: [.agents/rules/${rule_name}.md](.agents/rules/${rule_name}.md)"
+    echo ""
+  done
+
+  # Model-hint guidance
+  cat <<MODELHINT
+## Model selection
+
+Skills marked with \`<!-- model: opus -->\` benefit from a deep-reasoning model. On Codex CLI / DeepSeek TUI / Gemini CLI, switch via \`/model\` before invoking these skills.
+
+MODELHINT
+
+  # Skill registry table
+  echo "## Skills"
+  echo ""
+  echo "| Skill | Description | Body |"
+  echo "|---|---|---|"
+
+  for skill_dir in "$SRC_SKILLS"/*/; do
+    [[ -d "$skill_dir" ]] || continue
+    skill_name=$(basename "$skill_dir")
+    skill_file="$skill_dir/SKILL.md"
+    [[ -f "$skill_file" ]] || continue
+
+    desc=$(frontmatter_field "$skill_file" "description")
+    # Strip the "TRIGGER when:" suffix and trim
+    short_desc=$(echo "$desc" | sed 's/ TRIGGER when:.*$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    # Truncate to 100 chars to keep table tidy
+    if [[ ${#short_desc} -gt 100 ]]; then
+      short_desc="${short_desc:0:97}..."
+    fi
+    [[ -z "$short_desc" ]] && short_desc="—"
+
+    echo "| /${skill_name} | ${short_desc} | [.agents/skills/${skill_name}/SKILL.md](.agents/skills/${skill_name}/SKILL.md) |"
+  done
+
+  # Footer
+  cat <<FOOTER
+
+---
+
+Generic Forge v2. Built from [forge-arcana/forge](https://github.com/forge-arcana/forge). See \`memory/maxima-pivot-plan.md\` for the architecture rationale.
+
+For Claude Code users: \`bash <forge>/claude-helpers/bootstrap.sh <project>\` writes a 1-line \`CLAUDE.md\` containing \`@AGENTS.md\` so Claude's @-import mechanism reads this file. Other tools require no bootstrap.
+FOOTER
+} > "$AGENTS_MD"
+
+# --- 6. Validate AGENTS.md size ---
+agents_bytes=$(wc -c < "$AGENTS_MD")
+agents_lines=$(wc -l < "$AGENTS_MD")
+echo "  ✓ AGENTS.md composed (${agents_lines} lines, ${agents_bytes} bytes)"
+
+if [[ $agents_bytes -gt 32768 ]]; then
+  echo "  ⚠ AGENTS.md exceeds Codex's 32 KiB project_doc_max_bytes cap (${agents_bytes} bytes)" >&2
+  echo "     Trim required — consider further progressive disclosure." >&2
+fi
+if [[ $agents_lines -gt 150 ]]; then
+  echo "  ⚠ AGENTS.md exceeds 150-line target (${agents_lines} lines)" >&2
 fi
 
-if [[ ! -f "$ADAPTER_DIR/manifest.yaml" ]]; then
-  echo "ERROR: $ADAPTER_DIR/manifest.yaml not found" >&2
-  exit 1
-fi
+echo ""
+echo "Built: $BUILD_DIR"
 
-echo "Building $ADAPTER → $OUT"
+# --- 7. Deploy if requested ---
+if [[ -n "$DEPLOY_TARGET" ]]; then
+  DEPLOY_TARGET=$(cd "$DEPLOY_TARGET" 2>/dev/null && pwd) || {
+    echo "ERROR: deploy target does not exist: $DEPLOY_TARGET" >&2
+    exit 1
+  }
 
-# Clean output dir
-rm -rf "$OUT"
-mkdir -p "$OUT/skills" "$OUT/scripts" "$OUT/refs"
-
-# ============================================================================
-# claude-code adapter
-# ============================================================================
-
-build_claude_code() {
-  local out="$OUT"
-
-  # Hardcoded skill model overrides — mirrors adapters/claude-code/manifest.yaml.
-  # Keep in sync with the manifest (or wire a yaml parser later).
-  declare -A MODEL_COMMENT=(
-    [forge]="sonnet | escalation: learning triage → spawn opus subagent"
-    [smith]="opus"
-    [wedge]="opus"
-    [prime]="opus"
-    [probe]="opus"
-    [poke]="opus"
-    [preen]="opus"
-    [press]="opus"
-    [pound]="opus"
-    [pitch]="opus"
-    [pry]="opus"
-    [praise]="opus"
-    [temper]="opus"
-    [cicd]="sonnet"
-    [qt]="haiku"
-    [srs]="haiku"
-    [monci]="haiku"
-    [ponci]="haiku"
-    [vsix]="haiku"
-    [eli5]="haiku"
-    [wawa]="haiku"
-    [wrap]="haiku"
-    # `dig` deliberately has no model comment
-  )
-
-  # 1. SKILLS
-  local skill_count=0
-  for skill_dir in "$FORGE"/core/skills/*/; do
-    local name="$(basename "$skill_dir")"
-    local src="$skill_dir/SKILL.md"
-    local dest_dir="$out/skills/$name"
-    [[ -f "$src" ]] || continue
-
-    mkdir -p "$dest_dir"
-
-    # Inject user-invocable: true into frontmatter, then add model HTML comment
-    # after the closing ---.
-    awk -v skill="$name" -v model="${MODEL_COMMENT[$name]:-}" '
-      BEGIN { in_fm = 0; fm_seen = 0; injected = 0 }
-      /^---$/ {
-        if (in_fm == 0 && fm_seen == 0) {
-          in_fm = 1; fm_seen = 1; print; next
-        }
-        if (in_fm == 1) {
-          # closing fence — inject user-invocable just before it
-          if (!injected) print "user-invocable: true"
-          in_fm = 0
-          print
-          # add model HTML comment immediately after the fence if defined
-          # (no blank line — matches the original Claude SKILL.md layout)
-          if (model != "") {
-            print "<!-- model: " model " -->"
-          }
-          next
-        }
-      }
-      { print }
-    ' "$src" > "$dest_dir/SKILL.md"
-
-    # Copy any sibling refs (apprentice-system.md, protocol.md, etc.)
-    for ref in "$skill_dir"*; do
-      local refname="$(basename "$ref")"
-      [[ "$refname" == "SKILL.md" ]] && continue
-      [[ -f "$ref" ]] && cp "$ref" "$dest_dir/$refname"
-    done
-
-    skill_count=$((skill_count + 1))
-  done
-  echo "  ✓ $skill_count skills emitted"
-
-  # 2. SCRIPTS — core (tool-neutral) first, then adapter-specific overlay
-  local script_count=0
-  for s in "$FORGE"/core/scripts/*.sh; do
-    cp "$s" "$out/scripts/$(basename "$s")"
-    script_count=$((script_count + 1))
-  done
-  if [[ -d "$ADAPTER_DIR/scripts" ]]; then
-    for s in "$ADAPTER_DIR"/scripts/*.sh; do
-      cp "$s" "$out/scripts/$(basename "$s")"
-      script_count=$((script_count + 1))
-    done
-  fi
-  echo "  ✓ $script_count scripts (core + adapter)"
-
-  # 3. REFS — adapter-specific reference docs
-  if [[ -d "$ADAPTER_DIR/refs" ]]; then
-    cp -r "$ADAPTER_DIR/refs/." "$out/refs/"
-    local ref_count=$(ls "$out/refs/" | wc -l)
-    echo "  ✓ $ref_count adapter refs"
-  fi
-
-  # 4. RULES → CLAUDE.md composed from core/rules/
-  # For Claude Code, the rules go into the user's ~/.claude/CLAUDE.md.
-  # Phase 1 emits a composed file the user can review/install manually.
-  local rules_out="$out/CLAUDE-rules-snippet.md"
-  {
-    echo "# Forge HARD RULES (composed for Claude Code)"
+  if [[ "$DRY_RUN" -eq 1 ]]; then
     echo ""
-    echo "_Generated by bin/forge-build claude-code from core/rules/. Append to or merge_"
-    echo "_into your ~/.claude/CLAUDE.md._"
-    echo ""
-    if [[ -f "$FORGE/core/rules/development-discipline.md" ]]; then
-      cat "$FORGE/core/rules/development-discipline.md"
-      echo ""
-    fi
-    if [[ -f "$FORGE/core/rules/forge-governance.md" ]]; then
-      cat "$FORGE/core/rules/forge-governance.md"
-      echo ""
-    fi
-  } > "$rules_out"
-  echo "  ✓ rules composed → $(basename "$rules_out")"
-
-  echo ""
-  echo "Built: $out"
-}
-
-# ============================================================================
-# bob adapter — Phase 3 smoke test
-# ============================================================================
-
-build_bob() {
-  local out="$OUT"
-  mkdir -p "$out/skills" "$out/commands" "$out/rules"
-
-  # 1. SKILLS — Bob skills go in dir-per-skill: <name>/SKILL.md
-  # Auto-activated by Bob based on the skill's description matching the user's request.
-  local skill_count=0
-  for skill_dir in "$FORGE"/core/skills/*/; do
-    local name="$(basename "$skill_dir")"
-    local src="$skill_dir/SKILL.md"
-    [[ -f "$src" ]] || continue
-    local dest_dir="$out/skills/$name"
-    mkdir -p "$dest_dir"
-    # Bob accepts core's name + description frontmatter unchanged.
-    cp "$src" "$dest_dir/SKILL.md"
-    # Copy any sibling refs alongside
-    for ref in "$skill_dir"*; do
-      local refname="$(basename "$ref")"
-      [[ "$refname" == "SKILL.md" ]] && continue
-      [[ -f "$ref" ]] && cp "$ref" "$dest_dir/$refname"
-    done
-    skill_count=$((skill_count + 1))
-  done
-  echo "  ✓ $skill_count skills emitted (auto-activation by description)"
-
-  # 2. SLASH COMMANDS — Bob commands are flat <name>.md files in commands/
-  # Filename = command name. Same body as the skill, so /eli5 explicit-invocation
-  # mirrors the skill's auto-activation behavior.
-  local cmd_count=0
-  for skill_dir in "$FORGE"/core/skills/*/; do
-    local name="$(basename "$skill_dir")"
-    local src="$skill_dir/SKILL.md"
-    [[ -f "$src" ]] || continue
-    cp "$src" "$out/commands/$name.md"
-    cmd_count=$((cmd_count + 1))
-  done
-  echo "  ✓ $cmd_count slash commands emitted (explicit /<name> invocation)"
-
-  # 3. AGENTS.md — same composed cross-tool rules file. Bob auto-loads from project root.
-  if [[ -d "$FORGE/core/rules" ]]; then
-    {
-      echo "# Forge Rules (composed for Bob / cross-tool AGENTS.md)"
-      echo ""
-      echo "_Generated by \`bin/forge-build bob\` from \`core/rules/\`._"
-      echo "_Bob auto-loads AGENTS.md from project root by default. Same file works for Antigravity._"
-      echo ""
-      for f in "$FORGE"/core/rules/*.md; do
-        cat "$f"
-        echo ""
-      done
-    } > "$out/AGENTS.md"
-    echo "  ✓ AGENTS.md composed"
+    echo "DRY-RUN: would deploy:"
+    echo "  $BUILD_DIR/AGENTS.md           → $DEPLOY_TARGET/AGENTS.md"
+    echo "  $BUILD_DIR/.agents/skills/     → $DEPLOY_TARGET/.agents/skills/"
+    echo "  $BUILD_DIR/.agents/rules/      → $DEPLOY_TARGET/.agents/rules/"
+    echo "  $BUILD_DIR/scripts/            → $DEPLOY_TARGET/scripts/"
+    exit 0
   fi
 
   echo ""
-  echo "Built: $out"
+  echo "Deploying to $DEPLOY_TARGET ..."
+
+  cp "$BUILD_DIR/AGENTS.md" "$DEPLOY_TARGET/AGENTS.md"
+
+  mkdir -p "$DEPLOY_TARGET/.agents"
+  rm -rf "$DEPLOY_TARGET/.agents/skills" "$DEPLOY_TARGET/.agents/rules"
+  cp -r "$BUILD_DIR/.agents/skills" "$DEPLOY_TARGET/.agents/skills"
+  cp -r "$BUILD_DIR/.agents/rules" "$DEPLOY_TARGET/.agents/rules"
+
+  rm -rf "$DEPLOY_TARGET/scripts"
+  cp -r "$BUILD_DIR/scripts" "$DEPLOY_TARGET/scripts"
+
+  echo "  ✓ AGENTS.md, .agents/skills/, .agents/rules/, scripts/ deployed"
   echo ""
-  echo "Smoke test (Phase 3 entry — /eli5 only, slash command path):"
-  echo "  Source:      $out/commands/eli5.md"
-  echo "  Drop into:   <project>/.bob/commands/eli5.md   (workspace scope)"
-  echo "  OR:          ~/.bob/commands/eli5.md            (global scope)"
-  echo "  Invoke:      /eli5 [something to explain]      (in Bob chat)"
-}
-
-# ============================================================================
-# antigravity adapter — Phase 3 smoke test
-# ============================================================================
-
-build_antigravity() {
-  local out="$OUT"
-  mkdir -p "$out/workflows" "$out/rules"
-
-  # 1. WORKFLOWS — Antigravity workflows are .md files in .agents/workflows/.
-  # Forge core SKILL.md frontmatter (name + description) maps directly to
-  # Antigravity's workflow frontmatter — no transformation needed.
-  local workflow_count=0
-  for skill_dir in "$FORGE"/core/skills/*/; do
-    local name="$(basename "$skill_dir")"
-    local src="$skill_dir/SKILL.md"
-    [[ -f "$src" ]] || continue
-    # Workflow filename = skill name + .md (e.g., eli5.md → invoked as /eli5)
-    cp "$src" "$out/workflows/$name.md"
-    workflow_count=$((workflow_count + 1))
-  done
-  echo "  ✓ $workflow_count workflows emitted"
-
-  # 2. AGENTS.md — compose from core/rules/. Antigravity auto-loads this from
-  # project root since v1.20.3. Same file serves Bob too (cross-tool standard).
-  if [[ -d "$FORGE/core/rules" ]]; then
-    {
-      echo "# Forge Rules (composed for Antigravity / cross-tool AGENTS.md)"
-      echo ""
-      echo "_Generated by \`bin/forge-build antigravity\` from \`core/rules/\`._"
-      echo "_Antigravity auto-loads AGENTS.md from project root since v1.20.3._"
-      echo "_Same file works for Bob and any other harness that respects the cross-tool AGENTS.md standard._"
-      echo ""
-      for f in "$FORGE"/core/rules/*.md; do
-        cat "$f"
-        echo ""
-      done
-    } > "$out/AGENTS.md"
-    echo "  ✓ AGENTS.md composed"
-  fi
-
-  # 3. Workspace rules — also emit individual rule files for the alternate
-  # .agents/rules/ location (in case the user prefers per-rule files).
-  if [[ -d "$FORGE/core/rules" ]]; then
-    cp "$FORGE"/core/rules/*.md "$out/rules/"
-    local rule_count=$(ls "$out/rules" | wc -l)
-    echo "  ✓ $rule_count rule files emitted (alternate location)"
-  fi
-
-  echo ""
-  echo "Built: $out"
-  echo ""
-  echo "Smoke test (Phase 3 entry — /eli5 only):"
-  echo "  Source:      $out/workflows/eli5.md"
-  echo "  Drop into:   <project>/.agents/workflows/eli5.md"
-  echo "  Invoke:      /eli5 [something to explain]   (in Antigravity chat)"
-}
-
-# ============================================================================
-# Dispatch
-# ============================================================================
-
-case "$ADAPTER" in
-  claude-code) build_claude_code ;;
-  bob)         build_bob ;;
-  antigravity) build_antigravity ;;
-  *)           echo "ERROR: build logic not implemented for $ADAPTER" >&2; exit 1 ;;
-esac
-
-# ============================================================================
-# Deploy
-# ============================================================================
-
-deploy_claude_code() {
-  local membrane="${FORGE_MEMBRANE:-$HOME/.claude}"
-  local skills_target="$membrane/skills"
-  local scripts_target="$membrane/scripts"
-
-  echo ""
-  if [[ $DRY_RUN -eq 1 ]]; then
-    echo "Deploy plan (claude-code) — dry run, no writes:"
-  else
-    echo "Deploying to $membrane:"
-  fi
-
-  # Skills: per-skill rsync-style overlay (remove dest first to avoid cp nesting)
-  for skill_dir in "$OUT"/skills/*/; do
-    local name="$(basename "$skill_dir")"
-    local dest="$skills_target/$name"
-    if [[ $DRY_RUN -eq 1 ]]; then
-      if [[ -d "$dest" ]]; then echo "  REPLACE $dest"; else echo "  CREATE  $dest"; fi
-    else
-      mkdir -p "$skills_target"
-      rm -rf "$dest"
-      cp -r "$skill_dir" "$dest"
-    fi
-  done
-
-  # Scripts: deploy ONLY the WA-001 trio that hooks invoke by absolute path.
-  # Core scripts (forge-status.sh, fold-evidence.sh, etc.) stay in the forge
-  # repo — skills invoke them via `bash <forge>/core/scripts/...`. Deploying
-  # them to the membrane would create dead duplicates.
-  local DEPLOYED_SCRIPTS=(
-    agent-token-warmup.sh
-    agent-token-scheduler.sh
-    user-agent-preflight.sh
-  )
-  for sname in "${DEPLOYED_SCRIPTS[@]}"; do
-    local s="$OUT/scripts/$sname"
-    [[ -f "$s" ]] || continue
-    local dest="$scripts_target/$sname"
-    if [[ $DRY_RUN -eq 1 ]]; then
-      if [[ -f "$dest" ]]; then echo "  REPLACE $dest"; else echo "  CREATE  $dest"; fi
-    else
-      mkdir -p "$scripts_target"
-      cp "$s" "$dest"
-      chmod +x "$dest"
-    fi
-  done
-
-  if [[ $DRY_RUN -eq 1 ]]; then
-    echo ""
-    echo "Rules snippet (would be printed for manual merge): $OUT/CLAUDE-rules-snippet.md"
-  else
-    echo ""
-    echo "Deploy complete. Manual step remaining:"
-    echo "  Review $OUT/CLAUDE-rules-snippet.md and merge HARD RULES into $membrane/CLAUDE.md"
-  fi
-}
-
-deploy_antigravity() {
-  # Antigravity workflows deploy at workspace scope (the project the user has
-  # open in Antigravity — typically the forge repo itself). Global scope
-  # (~/.gemini/antigravity/global_workflows/) lives on the Windows host when
-  # Antigravity is a Windows IDE; that path is up to the user to copy across.
-  # AGENTS.md is NOT auto-merged — the user reviews and copies manually.
-
-  local target="${ANTIGRAVITY_WORKSPACE:-$FORGE}/.agents/workflows"
-
-  echo ""
-  if [[ $DRY_RUN -eq 1 ]]; then
-    echo "Deploy plan (antigravity, workspace=$ANTIGRAVITY_WORKSPACE${ANTIGRAVITY_WORKSPACE:+, default=$FORGE}) — dry run:"
-  else
-    echo "Deploying to $target:"
-  fi
-
-  for w in "$OUT"/workflows/*.md; do
-    [[ -f "$w" ]] || continue
-    local wname="$(basename "$w")"
-    local dest="$target/$wname"
-    if [[ $DRY_RUN -eq 1 ]]; then
-      if [[ -f "$dest" ]]; then echo "  REPLACE $dest"; else echo "  CREATE  $dest"; fi
-    else
-      mkdir -p "$target"
-      cp "$w" "$dest"
-    fi
-  done
-
-  echo ""
-  if [[ $DRY_RUN -eq 1 ]]; then
-    echo "AGENTS.md (manual merge target): $OUT/AGENTS.md  →  <project-root>/AGENTS.md"
-  else
-    echo "Workflows deployed. Manual step remaining:"
-    echo "  Review $OUT/AGENTS.md and copy to <project>/AGENTS.md if you want global rules"
-    echo "  (Antigravity auto-loads AGENTS.md from project root since v1.20.3)"
-  fi
-}
-
-if [[ $DEPLOY -eq 1 ]]; then
-  case "$ADAPTER" in
-    claude-code) deploy_claude_code ;;
-    antigravity) deploy_antigravity ;;
-    *)           echo "ERROR: --deploy not implemented for $ADAPTER" >&2; exit 1 ;;
-  esac
+  echo "For Claude Code users: bash $FORGE_ROOT/claude-helpers/bootstrap.sh $DEPLOY_TARGET"
 fi
