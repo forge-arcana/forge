@@ -154,25 +154,39 @@ Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry
 No docs/ directory — forge is a tooling repo. Skill documentation lives inside each skill's directory (`skills/<name>/SKILL.md`).
 
 ## Current Context
-- **Branch**: main, ahead of origin/main by 8 commits (de-Claude pivot Phases 1–3, not pushed)
-- **Active work**: De-Claude pivot fully validated end-to-end. The forge runs natively on a non-Claude harness (Bob, backed by Gemini) without modification.
-- **Phase 1 (complete)**: 23 skills migrated to `core/skills/`, 9 tool-neutral scripts to `core/scripts/` with `${FORGE_MEMBRANE}` templating, 6 Claude-only WA-001 scripts isolated to `adapters/claude-code/scripts/`, HARD RULES extracted to `core/rules/`, `bin/forge-build` wired for claude-code.
-- **Phase 2 (complete)**: Build verified, `bin/forge-build --deploy` added, legacy `skills/`/`scripts/` deleted, bootstraps in `.claude/skills/{forge,purge}/` updated.
-- **Phase 3 (complete — first acceptance test)**:
-  - **Antigravity adapter** (`adapters/antigravity/`) and `build_antigravity()` wired into `bin/forge-build`. Workflows emit to `<project>/.agents/workflows/<name>.md` (plural per Codelab; singular `.agent/` was an older convention). `build_antigravity --deploy` writes to workspace; `AGENTS.md` is composed for manual review/merge.
-  - **Antigravity blocked by upstream Google bug** in v1.20.3 → v1.23.2: workspace-detection failure causes Customizations panel to be empty and the `/` slash dropdown to show no results despite well-formed YAML on disk. Forum-acknowledged, no fix shipped. Workaround: downgrade to v1.19.6. We confirmed a single workflow loaded cleanly *before* the user updated to v1.23.2 — the de-Claude artifact is correct; the harness is broken.
-  - **Bob adapter** (`adapters/bob/manifest.yaml` + `build_bob()`) emits per-skill SKILL.md dirs (auto-activation by description) AND flat slash commands (`<name>.md`) plus AGENTS.md. **Workspace deploy works** (`<project>/.bob/commands/`). **Global deploy does NOT** in this WSL+Windows configuration (Bob is a Windows VS Code extension reading the WSL forge repo through a mount; it ignores Windows-side `~/.bob/commands/`).
-  - **`/eli5` smoke test on Bob: PASS**. Same `core/skills/eli5/SKILL.md` source loads via Bob's slash dropdown, persona executes, response follows the eli5 voice. Cross-tool de-Claude is real, not theoretical.
-  - **`/poke` heavy-skill test on Bob: PASS**. Loaded persona, ran `forge-scan.sh` across the WSL/Windows boundary (the riskiest cross-boundary), walked 7 dimensions sequentially per the graceful-degradation prose (Bob has no programmatic sub-agent spawn API), produced structured Strengths + Recommendations + Numbered Next Steps report.
-  - **Three Bob native primitives discovered** during /poke that weren't in the docs we'd fetched: native multi-choice prompt UI (clickable options, not inline text), native todo-list UI with state dots, plan/code mode-switching primitive. Bob's adapter manifest currently lists most of these as TBD; needs an update pass to record them.
-  - **Cross-project memory contamination caught** — Bob, when writing `memory/poke-learnings.md`, merged 7 learnings from another project (Jeepi) it had context on, alongside the 4 entries from this run. Pruned to the 4 forge-relevant entries. This is a /poke skill design gap (no explicit "do not merge across projects" HARD RULE) — followup item.
-  - **Bob picked wrong file for the durable report** — wrote the /poke chat report into `evidence.md` (a forge artifact backing WA-001 forensics) before being corrected. /poke skill spec is silent on report-file path; /temper has an explicit pattern (`memory/YYYY-MM-DD-temper-report.md`) that /poke should match. Followup item. evidence.md restored from HEAD.
-- **Phase 3 followups (Phase 4 candidates)**:
-  - **/poke skill body**: add HARD RULE — "Project Isolation: write only this run's findings; never merge entries from other projects' memory directories"
-  - **/poke skill body**: add explicit report-file path matching /temper's pattern (`memory/YYYY-MM-DD-poke-report.md`)
-  - **adapters/bob/manifest.yaml**: replace `prompt_primitive: TBD` with `multi_choice_native`, add fields for `todo_list: native` and `mode_switching: plan/code`
-  - **bin/forge-build bob --deploy**: only emit to workspace `<project>/.bob/commands/` (drop the global path it never used)
-  - **Antigravity bug-watch**: monitor Google's forum thread; re-test when v1.24+ ships
+
+- **Branch**: `MAXIMA-build-rewrite` — feature branch for the Generic Forge v2 pivot, off `MAXIMA` (which itself sits 8 commits ahead of `main` carrying de-Claude pivot Phases 1–3).
+- **Active work**: Generic Forge v2 pivot — five commits implementing the architectural reframe from the per-vendor adapter approach to a single universal AGENTS.md + `.agents/skills/` build per the Open Agent Skills standard (Anthropic Dec 2025; cross-tool by Jan 2026). See `memory/maxima-pivot-plan.md` for the blueprint.
+
+### Generic Forge v2 — pivot status (this branch)
+
+| Commit | Status | Effect |
+|---|---|---|
+| A: pre-pivot prep | ✓ done (on MAXIMA, e6d6fa6) | Dropped vendor adapters (bob, antigravity), archived design notes, added pivot plan doc |
+| B: rename adapter dir | ✓ done | `adapters/claude-code/` → `claude-helpers/` (bug-workaround box, not an adapter); refs renamed to honest names; bootstrap.sh added; runtime scripts updated |
+| C: FORGE_PATH env var | ✓ done | Four runtime scripts now resolve forge path via FORGE_PATH env var first, CLAUDE.md `forge-path:` line as backward-compat fallback |
+| D: forge-build rewrite | ✓ done | `bin/forge-build` agnostic mode (461 → 205 lines); emits `build/AGENTS.md` (53 lines, 5.8 KiB) + `build/.agents/skills/<name>/SKILL.md` (Open Agent Skills standard) + `build/.agents/rules/` + `build/scripts/` |
+| E: dogfood validation | ✓ this commit | Build + deploy to `/tmp/forge-dogfood/` + claude-helpers/bootstrap.sh tested end-to-end |
+
+**Dogfood results**:
+- ✓ Build runs clean: 23 skills + 2 rules + 9 scripts emitted
+- ✓ AGENTS.md is 53 lines / 5828 bytes (under 150-line target and 32 KiB Codex cap)
+- ✓ Deploy to test project lands AGENTS.md + .agents/skills/ + .agents/rules/ + scripts/ in correct paths
+- ✓ Bootstrap creates 1-line `CLAUDE.md` containing `@AGENTS.md` (Anthropic's documented `@-import` mechanism)
+- ✓ Bootstrap is idempotent (re-run reports "already contains the @-import — no change")
+- ✓ `--dry-run` mode shows planned changes without writing
+
+**Phase B (post-merge follow-ups)**:
+- Migrate forge's own project CLAUDE.md to a 1-line `@AGENTS.md` and move current rules content into `core/rules/` or AGENTS.md (forge fully dogfoods)
+- Reconcile forge's bootstrap: `.claude/skills/forge/` (legacy) → `.agents/skills/forge/`. Decide whether to ungitignore that path so a fresh clone has /forge discoverable across tools
+- Validate the same `AGENTS.md` + `.agents/skills/` payload runs end-to-end on a non-Claude harness (Codex CLI / Gemini CLI / DeepSeek TUI)
+- Update `presentation/index.html` to describe Generic Forge v2
+
+### Earlier de-Claude pivot phases (pre-Generic Forge v2)
+
+- **Phase 1 (complete, on MAXIMA)**: 23 skills migrated to `core/skills/`, 9 tool-neutral scripts to `core/scripts/` with `${FORGE_MEMBRANE}` templating, HARD RULES extracted to `core/rules/`, original `bin/forge-build` wired for per-vendor adapter builds.
+- **Phase 2 (complete, on MAXIMA)**: Build verified, `bin/forge-build --deploy` added, legacy `skills/`/`scripts/` deleted, bootstraps in `.claude/skills/{forge,purge}/` updated.
+- **Phase 3 (complete, on MAXIMA — and now superseded by Generic Forge v2)**: Built Antigravity and Bob adapters; ran acceptance tests on Bob (`/eli5` PASS, `/poke` end-to-end PASS); confirmed cross-tool dogfood works. Then realized the per-vendor adapter approach was a softer flavour of vendor lock-in and pivoted to the Open Agent Skills standard (this branch).
 - **Earlier completed (pre-pivot)**: Three-pillar architecture, git-based drift detection, unified `/forge` cycle (replacing retired `/cast`, `/mark`, `/fold`), forge protocol formalization, Forge Arcana identity + ethos, project name sanitization, shared preflight extraction, hash-free trackers, evaluative trifecta (poke → press → pound), art auto-invocation with TRIGGER conditions, `/forge on|off` session toggle folded into cycle command, SKILL.md-based deploy detection, `/praise` wired as 10th art (feedback routing → build-ship-learn loop closure), `/prime` privacy + research-first + no-dev-cycle-estimates HARD RULES, two-layer OAuth-token-race workaround (Layer 1 forge preflight + Layer 2 SessionStart hook with WSL2-gated user-scope scheduler) + workaround tracking + side-effect lifecycle management via WORKAROUNDS.md as manifest
 - **Masters** (three — distinct domains, complementary roles):
   - `/smith` — **The Smith**. Master builder. The user's proxy for construction, wields all arts, summons apprentices. Lives in `skills/smith/SKILL.md`. Three-layer learning membrane (orchestration, delegation, art proficiency). Reads Pattern + Touchstone in pre-flight.
