@@ -71,7 +71,7 @@ Below is the flow for `/forge`, `/forge <path>`, `/forge --dry`, `/forge --dry <
 
 0. **Token preflight (Claude Code only)** — workaround for the Claude Code OAuth race when `/forge` spawns subagents in 3f (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
    ```bash
-   bash <forge>/core/scripts/agent-preflight.sh $$
+   bash <forge>/claude-helpers/scripts/agent-preflight.sh $$
    ```
    Skip this step on harnesses without OAuth race issues (Bob, Cursor, etc.).
 
@@ -215,9 +215,9 @@ For each approved memory row: copy `<forge>/memory/<file>.md` into `<membrane>/m
 For each approved `side-effect` row from Phase 1b:
 
 - **script INSTALL or UPDATE**: copy the source script to the target (use `cast-deploy.sh --scripts` for whole-manifest deploys, or per-file `cp` + `chmod +x` for one-offs).
-- **hook INSTALL** (Claude Code only): invoke `bash <forge>/core/scripts/install-token-hook.sh` (idempotent, flocks `<membrane>/.settings.lock`).
+- **hook INSTALL** (Claude Code only): invoke `bash <forge>/claude-helpers/scripts/install-token-hook.sh` (idempotent, flocks `<membrane>/.settings.lock`).
 - **script REMOVE** (workaround retirement): `rm -f <target>`.
-- **hook REMOVE** (workaround retirement, Claude Code only): `bash <forge>/core/scripts/install-token-hook.sh --uninstall`.
+- **hook REMOVE** (workaround retirement, Claude Code only): `bash <forge>/claude-helpers/scripts/install-token-hook.sh --uninstall`.
 
 After applying, verify: `bash <forge>/core/scripts/cast-deploy.sh --verify-scripts`.
 

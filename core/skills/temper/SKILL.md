@@ -19,7 +19,7 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 
 0. **Token preflight (Claude Code only)** — workaround for OAuth race when running parallel subagents (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
    ```bash
-   bash <forge>/core/scripts/agent-preflight.sh $$
+   bash <forge>/claude-helpers/scripts/agent-preflight.sh $$
    ```
    Required on Claude Code before the parallel poke + press fan-out below — without it, multiple subagents racing on token refresh can crash mid-pass. Skip this step on harnesses that don't have OAuth race issues (e.g., Bob, Cursor).
 
