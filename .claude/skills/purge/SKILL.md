@@ -29,7 +29,7 @@ You are summoned, never scheduled. When the forge grows heavy, when the learning
 2. **Read ALL forge learnings**: every `.md` file in `<forge>/learnings/`
 3. **Read ALL forge memory**: every `.md` file in `<forge>/memory/`
 4. **Read ALL art SKILL.md files**: `<forge>/core/skills/*/SKILL.md`
-5. **Read reference docs**: `<forge>/core/skills/forge/stack-guide.md`, `<forge>/core/skills/forge/forge-conventions.md`, `<forge>/adapters/claude-code/refs/claude-code-rules.md`
+5. **Read reference docs**: `<forge>/core/skills/forge/stack-guide.md`, `<forge>/core/skills/forge/forge-conventions.md`, `<forge>/claude-helpers/refs/auto-allowed-bash.md`
 6. **Read accumulated purge learnings**: `<forge>/memory/purge-learnings.md` (skip if first run)
 7. **Read project CLAUDE.md**: `<forge>/CLAUDE.md`
 

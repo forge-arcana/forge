@@ -16,7 +16,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - **Outgoing (user → forge)**: `DEPLOYED-DIFFERS` / `REMOVED` rows. User approves → cycle's fold phase absorbs. Richer skip reasons (duplicate, incorporated, superseded, personal); routes to specific files. Action vocabulary: `absorb`, `merge`, `skip (reason)`.
 - **Conflicts (both changed)**: user picks a side per row (`[↓]` accept forge / `[↑]` keep membrane / `[ ]` skip).
 - **Symmetry principle**: one gate, both directions, same review ceremony. User reviews every row. No direction skips review.
-- **Config sync**: 1:1 mapping — `claude-code-rules.md` ↔ `~/.claude/CLAUDE.md`, `claude-code-settings.json` ↔ `~/.claude/settings.json`. Neither direction removes the other side's content.
+- **Harness-coupling boundary**: post-pivot, the global rules file is harness-managed (e.g., `~/.claude/CLAUDE.md` for Claude Code) and `/forge` writes the `forge-path:` line into it as the only forge-side coupling. Reference docs in `claude-helpers/refs/` (e.g., `auto-allowed-bash.md`) describe the harness setup but are not config-synced anywhere.
 - Arts flag learnings as `Forge-worthy: yes/no` at write time during art runs
 - Learnings accumulate in project memory (`~/.claude/projects/*/memory/*-learnings.md`), then `/forge`'s fold phase (3d) scans for `Forge-worthy: yes` entries, genericizes, and promotes to `~/.claude/learnings/general.md`
 - Fold phase (3e) then triages and absorbs into `forge/learnings/` → next art run reads them first
@@ -35,13 +35,13 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - Arts (9 deployed): prime, probe, poke, preen, press, pound, pitch, pry, praise — specialist agent skills with self-improving loops. (Note: protocol.md previously listed /purge under arts; canonical position is now Master not Art.)
 - Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design), pitch (business model), and praise (feedback routing) run orthogonal — triggered by domain, not intensity. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, praise after every feedback cycle.
 - Task skills (12): forge, wawa, wrap, qt, srs, cicd, vsix, ponci, monci, dig, temper, eli5
-- `skills/forge/` holds both the `/forge` cycle SKILL.md AND reference docs (stack-guide, rules, conventions, protocol)
+- `core/skills/forge/` holds both the `/forge` cycle SKILL.md AND reference docs (stack-guide, conventions, protocol, preflight)
 - `/forge` absorbs the retired `/cast`, `/mark`, `/fold` trio — their verbs survive as the named internal phases of the cycle: **mark** (inspect drift, build PLAN table) → **cast** (pour forge → membrane) → **fold** (layer membrane → forge).
 - Skills are self-contained packages — reference docs live inside the owning skill directory
-- `skills/` is the git-tracked shared reference; `~/.claude/skills/` is the deployment target
+- `core/skills/` is the git-tracked shared reference; the harness's per-tool skill dir (`~/.claude/skills/` for Claude Code) is the deployment target
 
 ### Bootstrap (2026-03-17, updated 2026-04-23)
-- `.claude/skills/forge/SKILL.md` is the bootstrap copy — full `/forge` logic mirrored here so fresh clones can run the cycle before skills are deployed
+- `.claude/skills/forge/SKILL.md` is the Claude-Code bootstrap copy — full `/forge` logic mirrored here so fresh clones can run the cycle before skills are deployed (Generic Forge v2 follow-up: migrate to `.agents/skills/forge/` for cross-tool discoverability)
 - On fresh clone, Claude Code discovers this bootstrap → user runs `/forge` → full setup (skills + learnings + memory + project scan)
 - No `install.sh` needed — `/forge` handles fresh-machine setup and ongoing sync in the same flow
 - Full mirror (not thin) avoids symlinks (OS-dependent) and drift between bootstrap and deployed copy

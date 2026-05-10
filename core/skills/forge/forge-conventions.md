@@ -1,6 +1,6 @@
 # Forge Conventions Checklist
 
-> Distilled from the active adapter's rules reference (e.g., `<forge>/adapters/claude-code/refs/claude-code-rules.md` for Claude Code). Used by `/forge` to verify project compliance.
+> Distilled from the harness's auto-allowed-bash reference (e.g., `<forge>/claude-helpers/refs/auto-allowed-bash.md` for Claude Code; equivalent ref dir for other harnesses). Used by `/forge` to verify project compliance.
 
 ## Required in Every Project
 
@@ -73,7 +73,7 @@ Canonical names:
 - [ ] `dev/kill-zombies.sh` exists (or suggest /srs) — never in `scripts/`
 - [ ] Port layout documented
 
-### 8. Editor / IDE Settings (harness-specific — see the active adapter's notes)
+### 8. Editor / IDE Settings (harness-specific — see `claude-helpers/refs/` for Claude Code, equivalent ref dir for other harnesses)
 
 For Windows users on a bash-based workflow (regardless of harness):
 - Default terminal profile set to Git Bash
