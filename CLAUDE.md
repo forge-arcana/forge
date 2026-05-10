@@ -155,7 +155,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 
-- **Branch**: `main`. 3 commits ahead of origin (Phase C `48b5289` + stale-reference sweep `64f77cb` + this validation capture).
+- **Branch**: `main`. In sync with origin (Phase C + stale-reference sweep + cross-tool validation capture all pushed; this forge cycle adds one more on top).
 - **Active work**: Phase C (membrane goes Generic, `~/.agents/` canonical store + symlink shim from `~/.claude/`) **empirically validated cross-tool against Codex CLI** on 2026-05-10. Live tests in Codex (VS Code): `/eli5` and `/wawa` ran cleanly via Codex's native `~/.agents/skills/` discovery path (no per-vendor symlink, no manual bridging) — proving the Open Agent Skills standard adoption is real and Codex implements it. `/cicd` validated *prose-gating* of the Claude-only token preflight: Codex's GPT silently skipped Step 0 per the "Skip on harnesses without OAuth race issues" hint, then correctly detected the project's Python+uv stack and adapted the kill-zombies path from `dev/` to `scripts/`. `/poke` validated the *subagent fan-out gap*: Codex doesn't have Anthropic's Task tool, so GPT principled-skipped the preflight ("because... I'm not spawning subagents") and ran the audit sequentially — gracefully degraded, transparent self-narration, no hallucinated apprentice work. Two earlier follow-ups still good: `cast-deploy.sh --verify` passes (23 skills + 3 runtime scripts); pre-migration backup at `/tmp/claude-pre-phase-c.bak` (676MB) intact; 12 `claude-helpers/` rename-drift references sealed across 7 SKILL.md / protocol.md files.
 
 ### Outstanding — Generic Forge v2 follow-ups
