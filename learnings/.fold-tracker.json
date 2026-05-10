@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-05-09T00:00:00Z",
+  "lastRun": "2026-05-10T00:00:00Z",
   "processedEntries": [
     "Soul Brief Beats Fielded Brief; Lens Beats Family×Tone",
     "WSL Path Compatibility",
@@ -90,7 +90,10 @@
     "Render previews BEFORE asking the user to pick a direction",
     "Grep Defaults Are Tuned for Humans, Not Token-Metered Agents",
     "/forge Runs From Anywhere",
-    "/prime Artifacts Belong in `opus/`, Not Project Root"
+    "/prime Artifacts Belong in `opus/`, Not Project Root",
+    "AGENTS.md Is the Cross-Tool Standard; Per-Vendor Adapters Are a Soft Lock-In",
+    "AGENTS.md Divorce Holds Only If Memory-Write Discipline Is Codified",
+    "Multi-Sphere Vaults: Per-Sphere AGENTS.md + Per-Sphere memory/ Makes Focus Convention Structural"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
