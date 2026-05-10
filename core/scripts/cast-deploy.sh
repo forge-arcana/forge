@@ -1,31 +1,42 @@
 #!/usr/bin/env bash
-# cast-deploy.sh — Deploy forge skills (and runtime scripts) to membrane ($MEMBRANE/)
-# Handles the cp -r pitfall correctly: always removes dest first, then copies fresh.
+# cast-deploy.sh — Generic Forge v2 membrane deploy.
+#
+# Layout:
+#   $AGENTS_DIR/skills/<name>/       canonical skill store (Open Agent Skills standard)
+#   $AGENTS_DIR/scripts/             canonical runtime scripts (WA-001 helpers)
+#   $MEMBRANE/skills/                symlink → $AGENTS_DIR/skills/  (Claude Code discovers via this)
+#   $MEMBRANE/scripts/               symlink → $AGENTS_DIR/scripts/ (hooks call by absolute path)
+#
+# Why two paths: $AGENTS_DIR is the cross-tool canonical store (Codex, Gemini,
+# Bob, etc. read it natively). $MEMBRANE is the Claude-Code-specific config dir.
+# A directory symlink from $MEMBRANE/skills/ to $AGENTS_DIR/skills/ gives Claude
+# Code discoverability without duplicating content. Single source of truth.
 #
 # Usage:
-#   cast-deploy.sh <skill-name> [<skill-name> ...]   — deploy specific skills
-#   cast-deploy.sh --all                               — deploy all skills + runtime scripts
-#   cast-deploy.sh --verify                            — verify all skills match forge
-#   cast-deploy.sh --scripts                           — deploy runtime scripts to $MEMBRANE/scripts/
-#   cast-deploy.sh --verify-scripts                    — verify runtime scripts match forge
+#   cast-deploy.sh <skill-name> [<skill-name> ...]   deploy specific skills
+#   cast-deploy.sh --all                              deploy all skills + scripts + symlinks
+#   cast-deploy.sh --verify                           verify all skills match forge
+#   cast-deploy.sh --scripts                          deploy runtime scripts only
+#   cast-deploy.sh --verify-scripts                   verify runtime scripts match forge
+#   cast-deploy.sh --bootstrap                        create dirs + symlinks (no skill deploy)
 #
-# Examples:
-#   cast-deploy.sh cast fold mark          # deploy three skills
-#   cast-deploy.sh --all                   # deploy everything (skills + scripts)
-#   cast-deploy.sh --verify                # check for drift/nesting bugs
-#   cast-deploy.sh --scripts               # deploy WA-001 runtime scripts to membrane
+# Environment overrides:
+#   FORGE_PATH       path to forge repo (canonical) — falls back to CLAUDE.md forge-path: line
+#   FORGE_MEMBRANE   harness config dir (default $HOME/.claude)
+#   FORGE_AGENTS_DIR canonical Open Agent Skills dir (default $HOME/.agents)
+
 set -euo pipefail
 
-# Membrane = the harness's per-tool config dir (~/.claude/ for Claude Code, ~/.bob/ for Bob, etc.)
+# --- Resolve paths ---
 MEMBRANE="${FORGE_MEMBRANE:-$HOME/.claude}"
+AGENTS_DIR="${FORGE_AGENTS_DIR:-$HOME/.agents}"
 
 FORGE_PATH="${FORGE_PATH:-}"
-# Backward compat: fall back to CLAUDE.md `forge-path:` line if FORGE_PATH env var unset
 if [[ -z "$FORGE_PATH" && -f "$MEMBRANE/CLAUDE.md" ]]; then
   FORGE_PATH=$(sed -n 's/^forge-path:[[:space:]]*//p' "$MEMBRANE/CLAUDE.md" 2>/dev/null | sed 's/[[:space:]]*$//' || true)
 fi
 if [[ -z "$FORGE_PATH" ]]; then
-  echo "ERROR: forge path not configured. Set FORGE_PATH env var, or add 'forge-path: /path/to/forge' to $MEMBRANE/CLAUDE.md."
+  echo "ERROR: forge path not configured. Set FORGE_PATH env var, or add 'forge-path: /path/to/forge' to $MEMBRANE/CLAUDE.md." >&2
   exit 1
 fi
 
@@ -33,12 +44,12 @@ FORGE_SKILLS="$FORGE_PATH/core/skills"
 # WA-001 scripts are Claude-Code-only (the OAuth race is an Anthropic-SDK bug).
 # Lives in claude-helpers/ (the bug-workaround box, not a vendor adapter).
 FORGE_SCRIPTS="$FORGE_PATH/claude-helpers/scripts"
-MEMBRANE_SKILLS="$MEMBRANE/skills"
-MEMBRANE_SCRIPTS="$MEMBRANE/scripts"
 
-# Runtime scripts to deploy to $MEMBRANE/scripts/ (manifest — explicit, no globbing).
-# These are scripts the user's environment needs (hooks call them by absolute path),
-# not forge-internal helpers. See claude-helpers/WORKAROUNDS.md WA-001.
+AGENTS_SKILLS="$AGENTS_DIR/skills"
+AGENTS_SCRIPTS="$AGENTS_DIR/scripts"
+MEMBRANE_SKILLS_LINK="$MEMBRANE/skills"
+MEMBRANE_SCRIPTS_LINK="$MEMBRANE/scripts"
+
 SCRIPTS_MANIFEST=(
   agent-token-warmup.sh
   agent-token-scheduler.sh
@@ -46,34 +57,80 @@ SCRIPTS_MANIFEST=(
 )
 
 if [[ ! -d "$FORGE_SKILLS" ]]; then
-  echo "ERROR: Forge skills not found at $FORGE_SKILLS"
+  echo "ERROR: Forge skills not found at $FORGE_SKILLS" >&2
   exit 1
 fi
 
-mkdir -p "$MEMBRANE_SKILLS" "$MEMBRANE_SCRIPTS"
+# --- bootstrap_layout: idempotently create $AGENTS_DIR + symlinks ---
+bootstrap_layout() {
+  mkdir -p "$AGENTS_SKILLS" "$AGENTS_SCRIPTS" "$MEMBRANE"
+
+  # Migrate existing $MEMBRANE/skills/ if it's a real directory (one-time conversion).
+  # This is the path most users will hit — pre-pivot membrane has $MEMBRANE/skills/
+  # as a regular dir; we move its contents into $AGENTS_SKILLS, then symlink.
+  if [[ -d "$MEMBRANE_SKILLS_LINK" && ! -L "$MEMBRANE_SKILLS_LINK" ]]; then
+    echo "  ↻ Migrating existing $MEMBRANE_SKILLS_LINK → $AGENTS_SKILLS"
+    # rsync would be ideal but may not be present; use cp -r per-item to handle existing files in $AGENTS_SKILLS
+    for entry in "$MEMBRANE_SKILLS_LINK"/*; do
+      [[ -e "$entry" ]] || continue
+      base=$(basename "$entry")
+      if [[ -e "$AGENTS_SKILLS/$base" ]]; then
+        # Already in canonical store — drop the membrane copy
+        rm -rf "$entry"
+      else
+        mv "$entry" "$AGENTS_SKILLS/"
+      fi
+    done
+    rmdir "$MEMBRANE_SKILLS_LINK" 2>/dev/null || rm -rf "$MEMBRANE_SKILLS_LINK"
+  fi
+
+  # Same migration for scripts/
+  if [[ -d "$MEMBRANE_SCRIPTS_LINK" && ! -L "$MEMBRANE_SCRIPTS_LINK" ]]; then
+    echo "  ↻ Migrating existing $MEMBRANE_SCRIPTS_LINK → $AGENTS_SCRIPTS"
+    for entry in "$MEMBRANE_SCRIPTS_LINK"/*; do
+      [[ -e "$entry" ]] || continue
+      base=$(basename "$entry")
+      if [[ -e "$AGENTS_SCRIPTS/$base" ]]; then
+        rm -rf "$entry"
+      else
+        mv "$entry" "$AGENTS_SCRIPTS/"
+      fi
+    done
+    rmdir "$MEMBRANE_SCRIPTS_LINK" 2>/dev/null || rm -rf "$MEMBRANE_SCRIPTS_LINK"
+  fi
+
+  # Create the symlinks (idempotent — ln -sfn replaces existing symlinks)
+  ln -sfn "$AGENTS_SKILLS" "$MEMBRANE_SKILLS_LINK"
+  ln -sfn "$AGENTS_SCRIPTS" "$MEMBRANE_SCRIPTS_LINK"
+}
 
 # --- Verify mode: check all deployed skills for correctness ---
 if [[ "${1:-}" == "--verify" ]]; then
   echo "## Deployment Verification"
   echo ""
   errors=0
+  # Check the symlink shape first
+  if [[ ! -L "$MEMBRANE_SKILLS_LINK" ]]; then
+    echo "| symlink | MISSING | $MEMBRANE_SKILLS_LINK is not a symlink |"
+    errors=$((errors + 1))
+  elif [[ "$(readlink -f "$MEMBRANE_SKILLS_LINK")" != "$(readlink -f "$AGENTS_SKILLS" 2>/dev/null || echo "$AGENTS_SKILLS")" ]]; then
+    echo "| symlink | WRONG-TARGET | $MEMBRANE_SKILLS_LINK → $(readlink "$MEMBRANE_SKILLS_LINK") (expected $AGENTS_SKILLS) |"
+    errors=$((errors + 1))
+  fi
   for skill_dir in "$FORGE_SKILLS"/*/; do
     skill=$(basename "$skill_dir")
-    # Skip directories without a SKILL.md (not a deployable skill)
     [[ ! -f "$skill_dir/SKILL.md" ]] && continue
-    dest="$MEMBRANE_SKILLS/$skill"
+    dest="$AGENTS_SKILLS/$skill"
     if [[ ! -d "$dest" ]]; then
       echo "| $skill | MISSING | Not deployed |"
       errors=$((errors + 1))
       continue
     fi
-    # Check for nested directory bug (skill/skill/ exists)
     if [[ -d "$dest/$skill" ]]; then
       echo "| $skill | NESTED BUG | Found $skill/$skill/ — redeploy needed |"
       errors=$((errors + 1))
       continue
     fi
-    # Check content matches
     diff_output=$(diff -rq "$skill_dir" "$dest" 2>&1 || true)
     if [[ -n "$diff_output" ]]; then
       echo "| $skill | DIFFERS | $diff_output |"
@@ -91,13 +148,13 @@ if [[ "${1:-}" == "--verify" ]]; then
   exit $errors
 fi
 
-# --- Scripts mode: deploy runtime scripts to $MEMBRANE/scripts/ ---
+# --- Scripts deploy/verify ---
 deploy_scripts() {
-  echo "## Deploying ${#SCRIPTS_MANIFEST[@]} runtime script(s) to $MEMBRANE_SCRIPTS"
+  echo "## Deploying ${#SCRIPTS_MANIFEST[@]} runtime script(s) to $AGENTS_SCRIPTS"
   echo ""
   for s in "${SCRIPTS_MANIFEST[@]}"; do
     src="$FORGE_SCRIPTS/$s"
-    dest="$MEMBRANE_SCRIPTS/$s"
+    dest="$AGENTS_SCRIPTS/$s"
     if [[ ! -f "$src" ]]; then
       echo "| $s | SKIP | Not found in forge |"
       continue
@@ -116,7 +173,7 @@ verify_scripts() {
   errors=0
   for s in "${SCRIPTS_MANIFEST[@]}"; do
     src="$FORGE_SCRIPTS/$s"
-    dest="$MEMBRANE_SCRIPTS/$s"
+    dest="$AGENTS_SCRIPTS/$s"
     if [[ ! -f "$src" ]]; then
       echo "| $s | MISSING-SOURCE | Not in forge — manifest stale |"
       errors=$((errors + 1))
@@ -143,7 +200,17 @@ verify_scripts() {
   exit $errors
 }
 
+if [[ "${1:-}" == "--bootstrap" ]]; then
+  bootstrap_layout
+  echo "Bootstrap complete."
+  echo "  Canonical store: $AGENTS_DIR"
+  echo "  Membrane symlinks: $MEMBRANE_SKILLS_LINK → $AGENTS_SKILLS"
+  echo "                     $MEMBRANE_SCRIPTS_LINK → $AGENTS_SCRIPTS"
+  exit 0
+fi
+
 if [[ "${1:-}" == "--scripts" ]]; then
+  bootstrap_layout
   deploy_scripts
   exit 0
 fi
@@ -165,33 +232,33 @@ else
 fi
 
 if [[ ${#skills[@]} -eq 0 ]]; then
-  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts"
+  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --bootstrap" >&2
   exit 1
 fi
 
+# Always ensure layout is bootstrapped before deploying
+bootstrap_layout
+
 # --- Deploy each skill ---
-echo "## Deploying ${#skills[@]} skill(s)"
+echo "## Deploying ${#skills[@]} skill(s) to $AGENTS_SKILLS"
 echo ""
 for skill in "${skills[@]}"; do
   src="$FORGE_SKILLS/$skill"
-  dest="$MEMBRANE_SKILLS/$skill"
+  dest="$AGENTS_SKILLS/$skill"
 
   if [[ ! -d "$src" ]]; then
     echo "| $skill | SKIP | Not found in forge |"
     continue
   fi
 
-  # CRITICAL: Remove destination first to prevent cp -r nesting bug
   if [[ -d "$dest" ]]; then
     rm -rf "$dest"
   fi
 
-  # Copy fresh from forge
   cp -r "$src" "$dest"
 
-  # Verify no nesting occurred
   if [[ -d "$dest/$skill" ]]; then
-    echo "| $skill | ERROR | Nesting bug detected after copy! |"
+    echo "| $skill | ERROR | Nesting bug detected after copy! |" >&2
     exit 1
   fi
 

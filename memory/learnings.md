@@ -38,7 +38,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - `core/skills/forge/` holds both the `/forge` cycle SKILL.md AND reference docs (stack-guide, conventions, protocol, preflight)
 - `/forge` absorbs the retired `/cast`, `/mark`, `/fold` trio — their verbs survive as the named internal phases of the cycle: **mark** (inspect drift, build PLAN table) → **cast** (pour forge → membrane) → **fold** (layer membrane → forge).
 - Skills are self-contained packages — reference docs live inside the owning skill directory
-- `core/skills/` is the git-tracked shared reference; the harness's per-tool skill dir (`~/.claude/skills/` for Claude Code) is the deployment target
+- `core/skills/` is the git-tracked source; `$AGENTS_DIR/skills/` (default `~/.agents/skills/`) is the **canonical deployment target** per the Open Agent Skills standard. The harness's per-tool dir (`~/.claude/skills/` for Claude Code) is a directory symlink to the canonical store — Claude Code discovers skills there transparently while non-Claude tools (Codex CLI, Gemini CLI) read `~/.agents/skills/` natively. Single source of truth, no duplication.
 
 ### Bootstrap (2026-03-17, updated 2026-04-23)
 - `.claude/skills/forge/SKILL.md` is the Claude-Code bootstrap copy — full `/forge` logic mirrored here so fresh clones can run the cycle before skills are deployed (Generic Forge v2 follow-up: migrate to `.agents/skills/forge/` for cross-tool discoverability)

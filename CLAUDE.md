@@ -162,8 +162,22 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 - **Forge dogfoods AGENTS.md** — migrate forge's own `CLAUDE.md` to a 1-line `@AGENTS.md` and move current rules content into `core/rules/` or `AGENTS.md`. The forge repo itself is currently the only consumer of forge tooling that doesn't use the AGENTS.md pattern.
 - **Bootstrap migration** — move `.claude/skills/forge/` → `.agents/skills/forge/` so `/forge` is discoverable across tools on a fresh clone (decide whether to ungitignore that path).
-- **Cross-tool end-to-end validation** — confirm the same `AGENTS.md` + `.agents/skills/` payload runs end-to-end on a non-Claude harness (Codex CLI / Gemini CLI / DeepSeek TUI). The Codex CLI cross-vendor test caught the wawa YAML bug (a773f36) — partial signal, not a full run.
+- **Cross-tool end-to-end validation** — confirm the same `AGENTS.md` + `.agents/skills/` payload runs end-to-end on a non-Claude harness (Codex CLI / Gemini CLI / DeepSeek TUI). The Codex CLI cross-vendor test caught the wawa YAML bug (a773f36) — partial signal, not a full run. Codex/Gemini/DeepSeek not yet installed locally; manual validation deferred to whenever the user installs one.
 - **Presentation refresh** — update `presentation/index.html` to describe Generic Forge v2 (single AGENTS.md + `.agents/skills/`, retirement of per-vendor adapters, the `claude-helpers/` honest-rename).
+- **Membrane-side AGENTS.md split** — the user's personal `~/.claude/CLAUDE.md` still carries forge-managed rules (HARD RULES, art auto-invocation, forge-path) mixed with personal preferences. Phase C migrated *skills + scripts* to `~/.agents/` but left CLAUDE.md content untouched. Future pass: extract forge-managed rules to a `~/.agents/AGENTS.md` populated by `bin/forge-build`, leave `~/.claude/CLAUDE.md` as personal-only with a 1-line `@../.agents/AGENTS.md` import.
+
+### Phase C — Membrane Goes Generic (2026-05-10, complete)
+
+The membrane skill + script storage moved from Claude-Code-specific paths to the cross-tool canonical store:
+
+| Layer | Pre-Phase-C | Post-Phase-C |
+|---|---|---|
+| Skill canonical store | `~/.claude/skills/<name>/` | `~/.agents/skills/<name>/` |
+| Script canonical store | `~/.claude/scripts/` | `~/.agents/scripts/` |
+| Claude Code discovery path | `~/.claude/skills/` (real dir) | `~/.claude/skills/` (symlink → `~/.agents/skills/`) |
+| Hook script call path | `~/.claude/scripts/` (real dir) | `~/.claude/scripts/` (symlink → `~/.agents/scripts/`) |
+
+`core/scripts/cast-deploy.sh` rewritten to handle the new layout end-to-end: bootstraps `$AGENTS_DIR`, migrates any pre-existing `$MEMBRANE/skills/` content into the canonical store on first run, and lays a directory symlink. Three retired skills (`cast`, `mark`, `fold`) pruned from the canonical store. Validated with all 23 forge skills discovered through the symlinked path; the SessionStart hook continues to reach `user-agent-preflight.sh` at the same `$HOME/.claude/scripts/...` path it always used (symlink resolves transparently). Pre-migration backup at `/tmp/claude-pre-phase-c.bak` (676MB).
 
 ### Earlier de-Claude pivot phases (pre-Generic Forge v2)
 
