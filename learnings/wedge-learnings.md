@@ -61,4 +61,22 @@ These are universal aesthetic principles that survive across projects — not pr
 
 **Forge-worthy**: yes — universal principle for any council/fan-out skill where a fixed commission grammar risks cross-invocation convergence. The mechanism (prose brief + per-invocation derived commissions + post-fan-out convergence audit) generalizes beyond aesthetic councils to any divergence-required parallel-apprentice pattern.
 
+## Dual-Accent Structural Systems Need Explicit Normative Documentation
+
+**Principle**: Some design directions use two accent colors where both are *structurally required*, not a "dominant + secondary" hierarchy. In the Bajrangi Touchstone, sindoor rust (`#7A3B1E`) and midnight ink (`#1C3A5E`) are both load-bearing — one for the Devanagari world, one for the Latin world. The tension between them is the design. A downstream agent (Smith, Probe, or any code-writing skill) will instinctively treat one as "primary" and the other as decorative, collapsing the structural intent. The DESIGN.md must preempt this.
+
+**Fix**:
+1. Name the system explicitly in the YAML frontmatter: both accents under `colors:` with role descriptions that state their structural purpose — *not* "secondary accent" but "sindoor rust — the Devanagari world."
+2. Add a Do in the Do's and Don'ts: "Do let `{colors.deva-accent}` and `{colors.latin-accent}` appear on the same surface simultaneously — their tension is structural, not a contrast problem."
+3. Add a Don't: "Don't use `{colors.latin-accent}` on interactive elements — it belongs to the Latin-world text voice only."
+4. Note the WCAG contrast ratios for both accents against the surface color, so Smith doesn't swap them for a "safer" single accent.
+
+**Why**: YAML token systems don't carry intent — only values. A single `accent` key with one value is unambiguous. Two accent keys with opaque names invite a future agent to pick the "main" one and demote the other. Naming the structural role in the description field and in the prose sections is the only way the intent survives downstream consumption.
+
+**How to apply**: Any Touchstone whose chosen direction uses N accent colors where N > 1 for structural rather than decorative reasons — verify the DESIGN.md prose calls out the multiplicity explicitly, with a rationale and a guardrail in Do's and Don'ts.
+
+**Corollary — layout-as-translation risk**: Bilateral two-column layouts (like the Threshold direction) carry an inherent risk: they look like "original | translation" to any reader familiar with multilingual publishing. The Do's and Don'ts must explicitly name this risk and prohibit the labeling that would trigger it ("don't label one side 'Original' and the other 'Translation'"). The disambiguation belongs in the spec, not in the implementation.
+
+**Forge-worthy**: yes — generalizes to any multi-voice structural system where more than one token carries the same visual category (accent, surface, heading) and where the plurality is intentional. The principle is: *N tokens of the same class requires N explicit roles in prose, or a downstream agent will reduce them to 1.*
+
 **Companion principle — councils search, they don't single-shot**: Even with a sharp Soul Brief and divergent lenses, the council can produce N directions where none lands. The user's eye for *the* direction is the gate the council is trying to clear; sometimes the council misses, and the right move is not "pick the least bad" but "regenerate with feedback." The verdict heat must therefore expose a branch alongside pick-one and hybridize: **Regenerate the council**. The Regenerate branch captures structured feedback (was the rejection at the lens level or the execution level? which Forbidden Defaults did the council reach for that should now be named as binding? is any prose section thin?), revises the brief (re-derives the lenses if lens-level; tightens the prose if transmission-level), re-runs the fan-out and assembly with the revised brief, and returns with a versioned new preview. Cap at two regenerate cycles per skill run; a third indicates the upstream source may be misaligned and the skill should halt with a recommendation to revisit it. Prior previews are preserved as historical record. The principle generalizes beyond aesthetic councils: any divergent-fan-out pattern where the user is the final taste-gate should expose a "regenerate with feedback" branch. Better N council rounds and a lived final artifact than one round and a final artifact the user quietly drifts away from.
