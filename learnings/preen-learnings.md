@@ -4,6 +4,18 @@ Accumulated UI/UX design evaluation learnings. Absorbed from project runs via th
 
 <!-- Add learnings below this line -->
 
+## Font Size Bump for Extra Whitespace Causes Wrapping Regression (2026-06-02)
+**Learning**: Increasing font size when a secondary content section is hidden (e.g. "show larger verse when meaning is hidden") seems like elegant use of space but causes wrapping regression for long-line content. Latin transliteration of long phrases at a larger font size wraps 2-3× more per data line, making content taller than before the section was hidden — the opposite of the intent. Compact scripts (Devanagari, CJK) are more tolerant of bumps. Before implementing "more space → larger font," verify that the longest lines in the content don't regress at the target size.
+**Apply when**: any "more whitespace available → increase font size" UX pattern in a reading/content app — validate that long-line content doesn't overflow at the larger size.
+
+## 3-Zone Portrait Mobile Cover Layout (2026-06-02)
+**Learning**: A portrait mobile cover card with `[image: fixed %][flex-1 justify-center: description + CTA]` creates a dead zone below the CTA button when the description is short — the `flex-1` distributes space evenly leaving large gaps. Fix: three independent zones — image (fixed %), description (flex-1, justify-center), CTA buttons (pinned to bottom with fixed padding). Each zone is self-contained; no single zone can create a dead zone for another.
+**Apply when**: any portrait mobile "cover" or intro card with an image, description text, and CTA button stacked vertically.
+
+## Scroll Fade Overlays Should Sit at Structural Inset Boundaries (2026-06-02)
+**Learning**: When a scroll area uses a structural top/bottom inset (physically bounding content within a safe zone), scroll-direction fade overlays should be positioned at the inset boundary, not at the card edges. Position `top: X%` / `bottom: Y%` to match the inset values — this masks content approaching the boundary from within the content area while leaving the decorative zones visually clean. Round the fade's corners (`border-radius`) to match the card's border-radius so the fade reads as intentional design rather than an overlay artifact.
+**Apply when**: any structurally inset scroll panel with top/bottom scroll-overflow indicator fades.
+
 ## Mobile Auth Path Exposure (2026-03-22)
 **Learning**: Mobile wrappers must expose ALL auth paths the web app supports. A login-only mobile page with a "create your account" subtitle is a broken signifier — the affordance promises what it can't deliver (gulf of execution). When a web app has both login and register flows, the mobile wrapper must surface both.
 **Apply when**: Building mobile wrappers (Capacitor, React Native, Flutter) for web apps with multiple auth flows.

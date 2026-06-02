@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-05-30T13:34:32+00:00",
+  "lastRun": "2026-06-02T00:00:00+00:00",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -175,7 +175,15 @@
     "Fold/Cast Race Condition on Direct Source Edits",
     "Reverse-Sync Must Write to Source, Not Deployed Copies",
     "Forward-Sync Must Not Duplicate Global Config Content",
-    "Auth Library User Table — No Duplicate User-Like Tables"
+    "Auth Library User Table — No Duplicate User-Like Tables",
+    "h-full vs min-h-full in Scroll-Container Chains",
+    "Structural Inset for Decorated Scroll Backgrounds",
+    "CSS Percentage Padding Is Width-Based, Not Height-Based",
+    "Show-Once Flag Must Be Written Inside the Async Callback",
+    "YouTube Per-Video HTTPS Embedding Restriction",
+    "Font Size Bump for Extra Whitespace Causes Wrapping Regression",
+    "3-Zone Portrait Mobile Cover Layout",
+    "Scroll Fade Overlays Should Sit at Structural Inset Boundaries"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

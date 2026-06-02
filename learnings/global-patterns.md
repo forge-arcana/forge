@@ -4,6 +4,22 @@
 
 <!-- Add patterns below this line -->
 
+## h-full vs min-h-full in Scroll-Container Chains (2026-06-02)
+**Learning**: In a flex-column scroll container chain, `min-height: 100%` does NOT establish a height reference for children's `justify-center` — only `height: 100%` does. For cards that must both center short content AND allow expansion for dense content: chain is `overflow-y-auto (fixed height)` → `h-full` wrapper → `min-h-full` content div. The `min-h-full` expands for dense content (overflow handled by scroll container), while `justify-center` still works for short content because the div fills to its min-height.
+**Apply when**: any scrollable card with vertically centered content that can also overflow.
+
+## Structural Inset for Decorated Scroll Backgrounds (2026-06-02)
+**Learning**: When a scroll area's background image has decorative zones (borders, corner ornaments, framing elements), CSS padding-based safe zones fail — scrolled content flows freely through those zones regardless of padding. Only reliable solution: outer div (`overflow-hidden` + background image), inner div (`position: absolute; top: X%; bottom: Y%; overflow-y-auto`). Content is physically bounded within the safe zone. CSS padding, mask-image, and gradient overlays are incomplete substitutes.
+**Apply when**: any scrollable UI panel with a decorated or framed background image where content must not enter the decoration zone.
+
+## CSS Percentage Padding Is Width-Based, Not Height-Based (2026-06-02)
+**Learning**: `padding-top: 8%` (or Tailwind `pt-[8%]`) computes to 8% of the containing block's **width**, not its height. On a tall portrait mobile card (e.g. 360×640px), `pt-[8%]` = 29px — far less than 8% of the 640px height (51px). When using percentage padding for vertical clearance against height-relative zones (e.g. image ornaments covering 10% of card height), always verify the absolute pixel equivalent. Consider using `vh`-based or fixed-pixel values for height-sensitive vertical clearances.
+**Apply when**: any vertical safe-zone or clearance calculation using percentage padding on portrait/mobile layouts.
+
+## Show-Once Flag Must Be Written Inside the Async Callback (2026-06-02)
+**Learning**: Writing a "seen" flag to localStorage BEFORE a setTimeout (or any async callback) fires permanently marks the event as triggered before it happens. If the user navigates away during the delay, the milestone/modal/notification is permanently suppressed. Pattern: write the flag INSIDE the callback with a re-check guard: `setTimeout(() => { if (!localStorage.getItem(key)) { localStorage.setItem(key, "1"); show(); } })`. The re-check also prevents double-firing when the same component is mounted twice (e.g. layout + page both render the same component).
+**Apply when**: any "show once" modal, tooltip, or notification triggered by a timer, scroll event, or async callback using localStorage as the deduplication mechanism.
+
 ## WSL Path Compatibility (2026-03-15)
 **Learning**: When running across Windows + WSL2, tool configuration that references directories must include all 3 path formats: Windows (`D:\`), WSL-mount (`/mnt/d/`), native Linux (`/root/dev/`). Without all three, permission prompts re-appear depending on which environment the session runs from.
 **Apply when**: Setting up any tool that uses directory allow-lists on a WSL2 machine.

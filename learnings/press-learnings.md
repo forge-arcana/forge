@@ -4,6 +4,10 @@
 
 <!-- Add learnings below this line -->
 
+## YouTube Per-Video HTTPS Embedding Restriction (2026-06-02)
+**Learning**: YouTube video owners can restrict their video to HTTPS-only embeds via YouTube Studio settings. The video shows "unavailable" inside an iframe on `http://` local dev but works fine on HTTPS production — this is not a CSP, browser, or code issue. Diagnose by opening `youtube.com/watch?v=<id>` directly on the target device: if it plays there but not in the iframe, the cause is the HTTP origin. Other videos from different uploaders may not have this flag. Cannot be fixed without a different video or a valid HTTPS origin.
+**Apply when**: debugging iframe embed failures where local HTTP dev shows "video unavailable" but HTTPS production works fine.
+
 ## Configure Pino Redact at Initialization (2026-03-15)
 **Learning**: Always configure Pino's `redact` option at logger initialization for sensitive field paths (`*.password`, `*.token`, `*.email`, `*.apiKey`, `*.secret`, `*.authorization`, `*.cookie`). Manual per-call masking functions are fragile and incomplete — one forgotten call leaks PII. The built-in redact option catches all paths across all log output automatically.
 **Apply when**: Setting up structured logging with Pino in any Node.js project handling user data.
