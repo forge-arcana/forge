@@ -183,7 +183,9 @@
     "YouTube Per-Video HTTPS Embedding Restriction",
     "Font Size Bump for Extra Whitespace Causes Wrapping Regression",
     "3-Zone Portrait Mobile Cover Layout",
-    "Scroll Fade Overlays Should Sit at Structural Inset Boundaries"
+    "Scroll Fade Overlays Should Sit at Structural Inset Boundaries",
+    "Diffusion LLMs Are a Speed/Infill Tier, Not a Drop-In Swap",
+    "MoE VRAM Tracks Total Params, Not Active — Probe the Real GPU First"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
@@ -192,6 +194,8 @@
     "Three-layer architecture as cost control",
     "Offline-first is non-negotiable for capture apps",
     "Trust ladder onboarding for sensitive features",
-    "Modes as a volume dial, not separate machines"
+    "Modes as a volume dial, not separate machines",
+    "Diffusion LLMs Are a Speed/Infill Tier, Not a Drop-In Swap",
+    "MoE VRAM Tracks Total Params, Not Active — Probe the Real GPU First"
   ]
 }
