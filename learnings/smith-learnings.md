@@ -5,8 +5,6 @@
 
 <!-- Add learnings below this line -->
 
-<!-- The OAuth token-race learning that previously lived here moved to learnings/global-patterns.md
-     on 2026-04-26 — the pattern applies to every subagent-spawning workflow, not just smith. -->
 
 ## A Locked Platform Decision Covers Its Implementation Details (2026-05-16)
 **Learning**: When the user's brief locks a platform/service decision, treat the platform's actual API shape as covered by that decision — the integration mechanics are implementation details, not a fresh decision point. Don't re-interview when discovering that the platform exposes a different protocol than the existing code expects (e.g., the platform wraps an upstream service behind its own queue API rather than passing through native endpoints). The decision was "use platform X"; building the adapter for X's actual API is part of executing that decision, not a new "should we use X" question. Distinguish "what platform/service" (user decision) from "how to integrate with the platform's actual API shape" (engineering detail).

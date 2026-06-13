@@ -43,7 +43,6 @@ contract:
     - subagent_spawning            # parallel apprentice spawn; Claude has Task, Bob may have Orchestrator
     - memory_dir                   # persistent memory between sessions
     - mcp_server_registry          # how to register MCP servers
-    - workarounds                  # adapter-specific scripts/hooks (e.g., Claude WA-001 OAuth race)
 
 # How the 'ask user a multi-choice question' primitive lowers per adapter.
 # Skill bodies use the neutral phrasing 'ask the user with a multi-choice prompt'.

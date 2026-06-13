@@ -3,7 +3,7 @@
 #
 # Layout:
 #   $AGENTS_DIR/skills/<name>/       canonical skill store (Open Agent Skills standard)
-#   $AGENTS_DIR/scripts/             canonical runtime scripts (WA-001 helpers)
+#   $AGENTS_DIR/scripts/             canonical runtime scripts (none at present)
 #   $MEMBRANE/skills/                symlink → $AGENTS_DIR/skills/  (Claude Code discovers via this)
 #   $MEMBRANE/scripts/               symlink → $AGENTS_DIR/scripts/ (hooks call by absolute path)
 #
@@ -41,8 +41,6 @@ if [[ -z "$FORGE_PATH" ]]; then
 fi
 
 FORGE_SKILLS="$FORGE_PATH/core/skills"
-# WA-001 scripts are Claude-Code-only (the OAuth race is an Anthropic-SDK bug).
-# Lives in claude-helpers/ (the bug-workaround box, not a vendor adapter).
 FORGE_SCRIPTS="$FORGE_PATH/claude-helpers/scripts"
 
 AGENTS_SKILLS="$AGENTS_DIR/skills"
@@ -50,11 +48,11 @@ AGENTS_SCRIPTS="$AGENTS_DIR/scripts"
 MEMBRANE_SKILLS_LINK="$MEMBRANE/skills"
 MEMBRANE_SCRIPTS_LINK="$MEMBRANE/scripts"
 
-SCRIPTS_MANIFEST=(
-  agent-token-warmup.sh
-  agent-token-scheduler.sh
-  user-agent-preflight.sh
-)
+# No runtime scripts are deployed to the membrane at present. The WA-001 OAuth-race
+# token scripts that previously lived here were retired once the upstream bug was
+# fixed (Claude Code v2.1.136). Any membrane that still has the old copies should
+# delete them manually — see CLAUDE.md's WA-001 retirement note.
+SCRIPTS_MANIFEST=()
 
 if [[ ! -d "$FORGE_SKILLS" ]]; then
   echo "ERROR: Forge skills not found at $FORGE_SKILLS" >&2

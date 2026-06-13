@@ -38,22 +38,6 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
 
 ## Step 0: Preflight
 
-### 0a. Token Warmup (Claude Code only — workaround for upstream OAuth race; see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001)
-
-Before any apprentice spawns on Claude Code, run the universal token preflight:
-
-```bash
-bash <forge>/claude-helpers/scripts/agent-preflight.sh $$
-```
-
-Idempotent. Refreshes the OAuth token if <30 min remaining and spawns a background keeper for this smith session. The keeper auto-exits when smith dies (parent-PID watchdog, ~5 min granularity). No explicit teardown needed.
-
-Logs to `<membrane>/.smith-token.log`.
-
-Skip this step on harnesses without OAuth race issues (Bob, Cursor, etc.).
-
-### 0b. Standard preflight
-
 1. **Resolve forge path** from your harness's global rules file (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent file for other harnesses)
 2. **Launch all reads in parallel** (all independent — sequential if your harness lacks parallel tool calls):
    - Read the Blueprint file **and the paired Pattern file** (if present), plan file, or extract work spec from conversation context (per Input Resolution)
@@ -470,4 +454,3 @@ Two files persist smith state:
 6. **ALWAYS** persist the ledger before any milestone or potential interruption point.
 7. **ALWAYS** follow the stack guide conventions when building. The blueprint defines *what*, the stack guide defines *how*.
 8. **ALWAYS** include the no-chaining rule in every apprentice prompt verbatim.
-9. **On Claude Code**: ALWAYS run `bash <forge>/claude-helpers/scripts/agent-preflight.sh $$` in Step 0a. The OAuth token-race workaround is mandatory for every smith run on Claude Code. See [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001. On other harnesses without OAuth race issues, this step is silently skipped.

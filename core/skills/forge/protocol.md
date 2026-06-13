@@ -25,12 +25,6 @@ The learnings filename tells the protocol which file to read during pre-flight a
 
 ## Pre-Flight (every art runs these before starting)
 
-0. **Token preflight (Claude Code only)** — workaround for the upstream Claude Code OAuth race (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
-   ```bash
-   bash <forge>/claude-helpers/scripts/agent-preflight.sh $$
-   ```
-   Idempotent. Refreshes the OAuth token if <30 min remaining and spawns a background keeper for this session if one isn't already running. Required on Claude Code before any subagent fan-out — otherwise multi-agent skills race on token refresh and crash with `invalid_grant`. The keeper auto-exits when the calling skill's process dies; no teardown needed. Skip this step on harnesses without OAuth race issues.
-
 1. **Resolve forge path** from the harness's global rules file (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses, managed by `/forge`)
 2. **Launch steps 2-6 in parallel** (all independent after forge path is resolved):
    - **Read accumulated learnings**: `<forge>/learnings/<learnings-file>` — skip if file doesn't exist yet (first run)

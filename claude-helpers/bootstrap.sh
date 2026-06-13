@@ -6,21 +6,16 @@
 # TUI, Bob, etc. read those artifacts natively — no bootstrap needed.
 #
 # Claude Code does not yet auto-load AGENTS.md (tracked at
-# anthropics/claude-code#6235 and #34235). This script applies the two opt-in
-# bridges Claude users typically want:
+# anthropics/claude-code#6235 and #34235). This script applies the opt-in bridge
+# Claude users typically want:
 #
-#   1. A 1-line CLAUDE.md containing `@AGENTS.md` — uses Claude's officially
-#      documented @-import mechanism (recursive up to 5 hops). Cross-platform
-#      (no symlink fragility on Windows). Anthropic-recommended for this exact
-#      "forge already uses AGENTS.md" scenario.
-#
-#   2. (optional, opt-in via INSTALL_WA001=yes) WA-001 SessionStart hook that
-#      proactively refreshes the OAuth token to mitigate the long-known
-#      Claude-Code refresh-token race (see <forge>/claude-helpers/WORKAROUNDS.md WA-001).
+#   A 1-line CLAUDE.md containing `@AGENTS.md` — uses Claude's officially
+#   documented @-import mechanism (recursive up to 5 hops). Cross-platform
+#   (no symlink fragility on Windows). Anthropic-recommended for this exact
+#   "forge already uses AGENTS.md" scenario.
 #
 # Usage:
 #   bash claude-helpers/bootstrap.sh <project-path>
-#   INSTALL_WA001=yes bash claude-helpers/bootstrap.sh <project-path>
 #
 # Idempotent. Safe to re-run.
 
@@ -34,7 +29,6 @@ if [[ ! -d "$PROJECT" ]]; then
 fi
 
 PROJECT_ABS=$(cd "$PROJECT" && pwd)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # --- 1. CLAUDE.md → @AGENTS.md import ---
 CLAUDE_MD="$PROJECT_ABS/CLAUDE.md"
@@ -51,19 +45,6 @@ if [[ -f "$CLAUDE_MD" ]]; then
 else
   echo "$EXPECTED_CONTENT" > "$CLAUDE_MD"
   echo "✓ Created $CLAUDE_MD with @-import to AGENTS.md."
-fi
-
-# --- 2. (optional) WA-001 SessionStart hook ---
-if [[ "${INSTALL_WA001:-no}" == "yes" ]]; then
-  HOOK_INSTALLER="$SCRIPT_DIR/scripts/install-token-hook.sh"
-  if [[ -x "$HOOK_INSTALLER" ]]; then
-    echo "Installing WA-001 SessionStart hook..."
-    bash "$HOOK_INSTALLER"
-  else
-    echo "WARN: WA-001 installer not found or not executable at $HOOK_INSTALLER" >&2
-  fi
-else
-  echo "(WA-001 hook not installed — set INSTALL_WA001=yes to enable.)"
 fi
 
 echo ""

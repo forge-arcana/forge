@@ -17,12 +17,6 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 
 ## Step 0: Setup
 
-0. **Token preflight (Claude Code only)** — workaround for OAuth race when running parallel subagents (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
-   ```bash
-   bash <forge>/claude-helpers/scripts/agent-preflight.sh $$
-   ```
-   Required on Claude Code before the parallel poke + press fan-out below — without it, multiple subagents racing on token refresh can crash mid-pass. Skip this step on harnesses that don't have OAuth race issues (e.g., Bob, Cursor).
-
 1. **Resolve forge path** from your harness's global config (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses), managed by `/forge`
 2. **Determine project path**: from `$ARGUMENTS` or current working directory
 3. **Determine pass count**: from `$ARGUMENTS` or default to 3

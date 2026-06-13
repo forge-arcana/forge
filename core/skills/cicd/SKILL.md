@@ -35,11 +35,6 @@ For monorepos, detect package dependency order and run CI bottom-up: shared → 
 
 Before running the pipeline:
 
-0. **Token preflight (Claude Code only)** — workaround for OAuth race; cicd may escalate failures to /pry which spawns subagents (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
-   ```bash
-   bash <forge>/claude-helpers/scripts/agent-preflight.sh $$
-   ```
-   Skip this step on harnesses that don't have OAuth race issues.
 1. **Kill zombies**: Run `dev/kill-zombies.sh` if it exists (or kill processes on known ports)
 2. **Check DB**: If project has a database package, verify DB is reachable
 3. **Fresh state**: If schema changed since last build, rebuild/push schema first

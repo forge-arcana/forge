@@ -69,12 +69,6 @@ Below is the flow for `/forge`, `/forge <path>`, `/forge --dry`, `/forge --dry <
 
 ## Phase 0: Preflight
 
-0. **Token preflight (Claude Code only)** — workaround for the Claude Code OAuth race when `/forge` spawns subagents in 3f (see [claude-helpers/WORKAROUNDS.md](../../../claude-helpers/WORKAROUNDS.md) WA-001):
-   ```bash
-   bash <forge>/claude-helpers/scripts/agent-preflight.sh $$
-   ```
-   Skip this step on harnesses without OAuth race issues (Bob, Cursor, etc.).
-
 > Execute [Forge Preflight](preflight.md) in **pull** mode (or **fetch** mode if `--dry`).
 
 Run `<forge>/core/scripts/forge-status.sh --pull` (or `--fetch` for `--dry`).
@@ -85,43 +79,7 @@ This resolves the forge path, syncs the remote (pull in active mode, fetch in dr
 
 ## Phase 1: Mark — Build the PLAN Table
 
-### 1a. Workaround status banner (always shown)
-
-Run `bash <forge>/core/scripts/forge-workarounds-check.sh` before rendering the PLAN table. It emits one status line per active workaround listed in `<forge>/claude-helpers/WORKAROUNDS.md`. The actual GitHub API check is time-gated to once per 7 days per workaround; cached status is used otherwise.
-
-Print the output verbatim as a banner above the PLAN table. It always appears — healthy or alerting — so the workaround state stays visible on every cycle.
-
-If any line contains "READY FOR REMOVAL", surface it prominently (the script formats those lines to stand out) and remind the user: "Workaround can be retired — see `claude-helpers/WORKAROUNDS.md` removal procedure."
-
-If the script has no output (no claude-helpers/WORKAROUNDS.md or empty file), print nothing.
-
-### 1b. Workaround side-effect sync (rows in INCOMING section)
-
-Run `bash <forge>/claude-helpers/scripts/sync-workaround-side-effects.sh`. It parses each WA's `Side effects` block in `claude-helpers/WORKAROUNDS.md` and emits one line per declared artifact:
-
-```
-ACTION  TYPE     WA-ID   SOURCE                                  TARGET                                          PLATFORM
-INSTALL script   WA-001  /forge/scripts/agent-token-warmup.sh    <membrane>/scripts/agent-token-warmup.sh        -
-UPDATE  script   WA-001  /forge/scripts/agent-token-scheduler.sh <membrane>/scripts/agent-token-scheduler.sh     -
-INSTALL hook     WA-001  -                                       $HOME/.claude/scripts/user-agent-preflight.sh   WSL2
-OK      script   WA-001  ...                                     ...                                              -
-SKIP    hook     WA-001  -                                       ...                                              WSL2 (not on WSL2)
-```
-
-Add INSTALL / UPDATE rows (anything not `OK` or `SKIP`) to the **INCOMING** section of the PLAN table as `side-effect` typed rows:
-
-```
-  [ ] 7  side-effect  WA-001 script: agent-token-warmup.sh    INSTALL
-         → Refresh action with flock; called by both Layer 1 and Layer 2 schedulers
-  [ ] 8  side-effect  WA-001 hook: SessionStart → user-agent-preflight.sh  INSTALL
-         → Layer 2 OAuth race protection (WSL2 only)
-```
-
-**Platform gate**: lines tagged `SKIP ... (not on WSL2)` are not surfaced as rows on non-WSL2 machines. Keeps Mac/Linux-native users' PLAN tables clean.
-
-**Adapter gate**: workaround side effects only apply to harnesses where the workaround is relevant. WA-001 is a Claude-Code-only workaround (the upstream OAuth race is Anthropic-SDK-specific) — adapters that don't bind WA-001 in their manifest skip this section entirely.
-
-### 1c. PLAN table
+### PLAN table
 
 From the preflight output, build a single triage table with three sections. Each row shows **the essence of what will change** — not the filename, but the rule, principle, or knowledge that will land.
 
@@ -195,6 +153,12 @@ In `--dry` mode: skip the selection prompt. Print the table and exit.
 
 Skip this phase entirely if `--dry`. Run BEFORE outgoing absorption so the latest ruleset is in place when the absorption logic runs.
 
+> **Transient — WA-001 retirement cleanup.** Before applying rows, run
+> `bash <forge>/claude-helpers/retire-wa001.sh`. It removes the retired
+> WA-001 OAuth-workaround artifacts (deployed token scripts + SessionStart hook)
+> from this membrane. Idempotent and silent once clean. **Remove this step and
+> the script once the team has migrated** — see CLAUDE.md Outstanding.
+
 For each approved incoming row (and each conflict row where user chose `[↓]`):
 
 ### Skills
@@ -210,16 +174,6 @@ For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry i
 
 ### Memory
 For each approved memory row: copy `<forge>/memory/<file>.md` into `<membrane>/memory/<file>.md`.
-
-### Workaround side-effects
-For each approved `side-effect` row from Phase 1b:
-
-- **script INSTALL or UPDATE**: copy the source script to the target (use `cast-deploy.sh --scripts` for whole-manifest deploys, or per-file `cp` + `chmod +x` for one-offs).
-- **hook INSTALL** (Claude Code only): invoke `bash <forge>/claude-helpers/scripts/install-token-hook.sh` (idempotent, flocks `<membrane>/.settings.lock`).
-- **script REMOVE** (workaround retirement): `rm -f <target>`.
-- **hook REMOVE** (workaround retirement, Claude Code only): `bash <forge>/claude-helpers/scripts/install-token-hook.sh --uninstall`.
-
-After applying, verify: `bash <forge>/core/scripts/cast-deploy.sh --verify-scripts`.
 
 ### Record baseline
 After all incoming is applied (before starting outgoing), write `<membrane>/.last-cast.json`:

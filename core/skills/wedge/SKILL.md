@@ -90,16 +90,6 @@ If no arguments and no Opus/Vow exist in cwd, output:
 
 ## Pre-Flight
 
-### 1. Token warmup (Claude Code only)
-
-```bash
-bash <forge>/claude-helpers/scripts/agent-preflight.sh $$
-```
-
-Idempotent. Refreshes the OAuth token if <30 min remaining and spawns a background keeper. Required on Claude Code before the council fan-out (parallel apprentice spawn). Skip on harnesses without OAuth race issues.
-
-### 2. Standard pre-flight
-
 Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then read in parallel (sequentially if your harness lacks parallel reads):
 
 - `[PROJECT]_01_Opus_V1.0.md` — the manuscript. **Required.**
