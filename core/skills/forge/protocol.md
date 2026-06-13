@@ -148,7 +148,7 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 | `/preen` | UI/UX evaluator (Don Norman's design principles) | Evaluative | Design |
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
-| `/pitch` | VC partner / business strategist | Evaluative | Business |
+| `/pitch` | The founder's other voice (VC partner on `--critique`) | Generative | Synthesis |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
 | `/praise` | The feedback router (closes the build-ship-learn loop) | Orchestrative | — |
 
@@ -164,7 +164,7 @@ The trifecta escalates in intensity and broadens in scope:
 
 **`/preen`** runs parallel to the trifecta — UI/UX design quality, triggered by interface changes rather than intensity escalation. Covers affordances, feedback, mapping, accessibility, platform conventions. The design eye.
 
-**`/pitch`** runs orthogonal to the trifecta — business model viability, invocable at any lifecycle stage. Validate the business model before committing build resources (pre-build gate), and re-validate before ship (final gate) when the product has monetization. The investor's eye.
+**`/pitch`** runs orthogonal to the trifecta — synthesis-and-alignment in the founder's voice, invocable at any lifecycle stage. Fuses Opus + Vow + Touchstone into the seven-section Pitch that aligns founder, cofounder, and investor. Run after a Touchstone is forged (before /probe, /preen, /smith); `--critique` adds the VC-partner review pass when external persuasion needs stress-testing.
 
 **`/praise`** closes the loop — takes real-world feedback (users, QA, testing) and routes it through the right arts. Routes UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a blueprint delta and a change brief for `/smith`. Run after every feedback cycle.
 

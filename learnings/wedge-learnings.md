@@ -63,19 +63,19 @@ These are universal aesthetic principles that survive across projects — not pr
 
 ## Dual-Accent Structural Systems Need Explicit Normative Documentation
 
-**Principle**: Some design directions use two accent colors where both are *structurally required*, not a "dominant + secondary" hierarchy. In the Bajrangi Touchstone, sindoor rust (`#7A3B1E`) and midnight ink (`#1C3A5E`) are both load-bearing — one for the Devanagari world, one for the Latin world. The tension between them is the design. A downstream agent (Smith, Probe, or any code-writing skill) will instinctively treat one as "primary" and the other as decorative, collapsing the structural intent. The DESIGN.md must preempt this.
+**Principle**: Some design directions use two accent colors where both are *structurally required*, not a "dominant + secondary" hierarchy. Example: a bilingual product whose two scripts each get their own load-bearing accent — one accent per script-world, the tension between them being the design itself. A downstream agent (Smith, Probe, or any code-writing skill) will instinctively treat one as "primary" and the other as decorative, collapsing the structural intent. The DESIGN.md must preempt this.
 
 **Fix**:
-1. Name the system explicitly in the YAML frontmatter: both accents under `colors:` with role descriptions that state their structural purpose — *not* "secondary accent" but "sindoor rust — the Devanagari world."
-2. Add a Do in the Do's and Don'ts: "Do let `{colors.deva-accent}` and `{colors.latin-accent}` appear on the same surface simultaneously — their tension is structural, not a contrast problem."
-3. Add a Don't: "Don't use `{colors.latin-accent}` on interactive elements — it belongs to the Latin-world text voice only."
+1. Name the system explicitly in the YAML frontmatter: both accents under `colors:` with role descriptions that state their structural purpose — *not* "secondary accent" but a role-named description like "primary-script accent — the first script-world."
+2. Add a Do in the Do's and Don'ts: "Do let `{colors.script-a-accent}` and `{colors.script-b-accent}` appear on the same surface simultaneously — their tension is structural, not a contrast problem."
+3. Add a Don't: "Don't use `{colors.script-b-accent}` on interactive elements — it belongs to the second-script text voice only."
 4. Note the WCAG contrast ratios for both accents against the surface color, so Smith doesn't swap them for a "safer" single accent.
 
 **Why**: YAML token systems don't carry intent — only values. A single `accent` key with one value is unambiguous. Two accent keys with opaque names invite a future agent to pick the "main" one and demote the other. Naming the structural role in the description field and in the prose sections is the only way the intent survives downstream consumption.
 
 **How to apply**: Any Touchstone whose chosen direction uses N accent colors where N > 1 for structural rather than decorative reasons — verify the DESIGN.md prose calls out the multiplicity explicitly, with a rationale and a guardrail in Do's and Don'ts.
 
-**Corollary — layout-as-translation risk**: Bilateral two-column layouts (like the Threshold direction) carry an inherent risk: they look like "original | translation" to any reader familiar with multilingual publishing. The Do's and Don'ts must explicitly name this risk and prohibit the labeling that would trigger it ("don't label one side 'Original' and the other 'Translation'"). The disambiguation belongs in the spec, not in the implementation.
+**Corollary — layout-as-translation risk**: Bilateral two-column layouts carry an inherent risk: they look like "original | translation" to any reader familiar with multilingual publishing. The Do's and Don'ts must explicitly name this risk and prohibit the labeling that would trigger it ("don't label one side 'Original' and the other 'Translation'"). The disambiguation belongs in the spec, not in the implementation.
 
 **Forge-worthy**: yes — generalizes to any multi-voice structural system where more than one token carries the same visual category (accent, surface, heading) and where the plurality is intentional. The principle is: *N tokens of the same class requires N explicit roles in prose, or a downstream agent will reduce them to 1.*
 

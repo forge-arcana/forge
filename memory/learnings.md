@@ -34,7 +34,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
   - `/purge` — The Warden, Master Tender. Forge-internal four-dimension cleanse (Knowledge Purity, Memory Hygiene, Skill Fitness, Reference Integrity). Lives only at `.claude/skills/purge/`.
 - Arts (9 deployed): prime, probe, poke, preen, press, pound, pitch, pry, praise — specialist agent skills with self-improving loops. (Note: protocol.md previously listed /purge under arts; canonical position is now Master not Art.)
 - Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design), pitch (business model), and praise (feedback routing) run orthogonal — triggered by domain, not intensity. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, praise after every feedback cycle.
-- Task skills (12): forge, wawa, wrap, qt, srs, cicd, vsix, ponci, monci, dig, temper, eli5
+- Task skills: see CLAUDE.md's Task Skills table (authoritative) — forge, wawa, wrap, qt, srs, cicd, vsix, ponci, monci, dig, temper, eli5
 - `core/skills/forge/` holds both the `/forge` cycle SKILL.md AND reference docs (stack-guide, conventions, protocol, preflight)
 - `/forge` absorbs the retired `/cast`, `/mark`, `/fold` trio — their verbs survive as the named internal phases of the cycle: **mark** (inspect drift, build PLAN table) → **cast** (pour forge → membrane) → **fold** (layer membrane → forge).
 - Skills are self-contained packages — reference docs live inside the owning skill directory

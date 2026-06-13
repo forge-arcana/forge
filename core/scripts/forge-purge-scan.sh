@@ -169,7 +169,7 @@ for art in prime probe poke preen press pound pitch pry praise; do
   if [[ -f "$skill_file" ]]; then
     lines=$(wc -l < "$skill_file")
     chars=$(wc -c < "$skill_file")
-    has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$skill_file" 2>/dev/null || echo "0")
+    has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$skill_file" 2>/dev/null | head -1)
     proto_status="YES"
     [[ "$has_protocol" -eq 0 ]] && proto_status="**MISSING**"
     echo "| $art | $lines | $chars | $proto_status |"
@@ -182,7 +182,7 @@ purge_file="$FORGE_PATH/.claude/skills/purge/SKILL.md"
 if [[ -f "$purge_file" ]]; then
   lines=$(wc -l < "$purge_file")
   chars=$(wc -c < "$purge_file")
-  has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$purge_file" 2>/dev/null || echo "0")
+  has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$purge_file" 2>/dev/null | head -1)
   proto_status="YES"
   [[ "$has_protocol" -eq 0 ]] && proto_status="**MISSING**"
   echo "| purge (forge-internal) | $lines | $chars | $proto_status |"
@@ -242,9 +242,9 @@ echo "|-----|------|-------------|----------------|"
 for art in prime probe poke preen press pound pitch pry praise; do
   skill_file="$FORGE_PATH/core/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
-    has_name=$(grep -c '^name:' "$skill_file" 2>/dev/null || echo "0")
-    has_desc=$(grep -c '^description:' "$skill_file" 2>/dev/null || echo "0")
-    has_ui=$(grep -c '^user-invocable:' "$skill_file" 2>/dev/null || echo "0")
+    has_name=$(grep -c '^name:' "$skill_file" 2>/dev/null | head -1)
+    has_desc=$(grep -c '^description:' "$skill_file" 2>/dev/null | head -1)
+    has_ui=$(grep -c '^user-invocable:' "$skill_file" 2>/dev/null | head -1)
     echo "| $art | $([[ $has_name -gt 0 ]] && echo YES || echo MISSING) | $([[ $has_desc -gt 0 ]] && echo YES || echo MISSING) | $([[ $has_ui -gt 0 ]] && echo YES || echo MISSING) |"
   fi
 done

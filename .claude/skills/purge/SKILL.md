@@ -58,8 +58,6 @@ Use the script's output as your evidence base for the parallel dimension analysi
 
 The four dimensions are independent — each analyzes a distinct slice of forge state with no shared mutable dependencies. Following the protocol's evidence-then-fan-out pattern (see `<forge>/core/skills/forge/protocol.md`), launch four subagents in parallel — one per dimension — each receiving the full scan evidence and the dimension-specific rules from the sections below.
 
-**Token preflight is mandatory** before this fan-out — already handled by the protocol Pre-Flight step 0.
-
 ### Subagent prompt template
 
 ```
@@ -169,7 +167,7 @@ Use the scan script's section-level breakdown. Flag any skill where:
 Scan reference docs for internal consistency:
 
 - **stack-guide.md**: are the technology choices current? Any deprecated libraries? Web-search for major version changes.
-- **claude-code-rules.md** (now at `<forge>/adapters/claude-code/refs/claude-code-rules.md`): does it match `~/.claude/CLAUDE.md`? Any drift?
+- **auto-allowed-bash.md** (`<forge>/claude-helpers/refs/auto-allowed-bash.md`): does it match `~/.claude/CLAUDE.md`? Any drift?
 - **CLAUDE.md (forge)**: is the Current Context section accurate? Arts table correct? Skill counts right?
 
 ## Consolidation
