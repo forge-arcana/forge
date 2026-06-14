@@ -169,6 +169,7 @@ Scan reference docs for internal consistency:
 - **stack-guide.md**: are the technology choices current? Any deprecated libraries? Web-search for major version changes.
 - **auto-allowed-bash.md** (`<forge>/claude-helpers/refs/auto-allowed-bash.md`): does it match `~/.claude/CLAUDE.md`? Any drift?
 - **CLAUDE.md (forge)**: is the Current Context section accurate? Arts table correct? Skill counts right?
+- **CLAUDE.md (forge) — size/currency**: `wc -c <forge>/CLAUDE.md`. If it exceeds **~25k chars**, the rules file has overgrown its cache-churn budget (a fat CLAUDE.md reloads into every cached prompt → Cache-Write spend every session). Flag an `UPDATE` finding: archive the **oldest** `- **Recent**:` bullets to `<forge>/memory/recent-history.md` (keep only the newest ~2 inline), and update the `- **Earlier history**` pointer line to match. This is forge-internal compaction — `/purge` owns it, NOT `/wrap` (which is for projects). Note: this is the ONE compaction `/purge` performs; it does NOT touch the append-only `.fold-tracker.json` (see the HARD RULE above — that prohibition is about the tracker, not CLAUDE.md history).
 
 ## Consolidation
 
