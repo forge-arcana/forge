@@ -29,6 +29,15 @@ if command -v rg &>/dev/null; then
   USE_RG=true
 fi
 
+# --- Lean output (Path B): compress sample-match blocks before they fan out to
+# subagents (/poke, /press, /pound). Counts are computed separately and stay
+# exact; only the displayed samples are de-noised. Source the Tier-1 compressor. ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lean.sh
+source "$SCRIPT_DIR/lean.sh"
+# Dedup identical matches, strip the repeated absolute project path, cap width.
+lean_samples() { lean_filter 160 "$PROJECT" on; }
+
 echo "## Forge Scan Report"
 echo "**Type**: $SCAN_TYPE | **Project**: \`$PROJECT\`"
 echo "**Search tool**: $(if $USE_RG; then echo "ripgrep"; else echo "grep (fallback)"; fi)"
@@ -74,7 +83,7 @@ scan_pattern() {
 
     if [[ "$count" -gt 0 ]]; then
       echo '```'
-      rg "${rg_args[@]}" -n "$pattern" "$PROJECT" 2>/dev/null | head -20 || true
+      rg "${rg_args[@]}" -n "$pattern" "$PROJECT" 2>/dev/null | lean_samples | head -20 || true
       echo '```'
       if [[ "$count" -gt 20 ]]; then
         echo "*($count total matches, showing first 20)*"
@@ -104,7 +113,7 @@ scan_pattern() {
 
     if [[ "$count" -gt 0 ]]; then
       echo '```'
-      grep "${grep_args[@]}" "$pattern" "$PROJECT" 2>/dev/null | head -20 || true
+      grep "${grep_args[@]}" "$pattern" "$PROJECT" 2>/dev/null | lean_samples | head -20 || true
       echo '```'
       if [[ "$count" -gt 20 ]]; then
         echo "*($count total matches, showing first 20)*"
