@@ -102,6 +102,46 @@ bootstrap_layout() {
   ln -sfn "$AGENTS_SCRIPTS" "$MEMBRANE_SCRIPTS_LINK"
 }
 
+# --- inject_model_frontmatter: translate the neutral `<!-- model: <tier> -->`
+#     comment in a deployed skill into a real `model:` frontmatter field that
+#     Claude Code honours. Only haiku/sonnet are injected (genuine downgrades);
+#     `inherit` and unhinted skills ride the session model untouched. The neutral
+#     comment stays in the body, so the source in core/ and the forge-build
+#     distributable remain 100% vendor-neutral. Per the Open Agent Skills spec,
+#     other tools (Codex/Gemini) ignore the unknown `model:` key — the value is
+#     never interpreted, so this is invisible to non-Claude harnesses. ---
+inject_model_frontmatter() {
+  local file="$1"
+  [[ -f "$file" ]] || return 0
+  local tier
+  tier=$(grep -m1 -oE '<!--[[:space:]]*model:[[:space:]]*[a-zA-Z]+' "$file" 2>/dev/null | grep -oE '[a-zA-Z]+$' || true)
+  awk -v tier="$tier" '
+    BEGIN { n = 0 }
+    /^---[[:space:]]*$/ {
+      n++
+      if (n == 2 && (tier == "haiku" || tier == "sonnet")) print "model: " tier
+      print
+      next
+    }
+    (n == 1 && /^model:[[:space:]]/) { next }   # drop any stale injected line inside frontmatter
+    { print }
+  ' "$file" > "$file.tmp"
+  mv "$file.tmp" "$file"
+}
+
+# --- skill_diff: compare a forge source skill dir against its deployed copy,
+#     ignoring the Claude-only `model:` frontmatter line injected above. Echoes
+#     the diff (empty == equivalent). Keeps --verify from flagging every skill. ---
+skill_diff() {
+  local src="$1" dst="$2"
+  diff -rq --strip-trailing-cr --exclude=SKILL.md "$src" "$dst" 2>/dev/null || true
+  if [[ -f "$src/SKILL.md" && -f "$dst/SKILL.md" ]]; then
+    diff --strip-trailing-cr \
+      <(grep -v '^model:[[:space:]]' "$src/SKILL.md" 2>/dev/null) \
+      <(grep -v '^model:[[:space:]]' "$dst/SKILL.md" 2>/dev/null) 2>/dev/null || true
+  fi
+}
+
 # --- Verify mode: check all deployed skills for correctness ---
 if [[ "${1:-}" == "--verify" ]]; then
   echo "## Deployment Verification"
@@ -129,7 +169,7 @@ if [[ "${1:-}" == "--verify" ]]; then
       errors=$((errors + 1))
       continue
     fi
-    diff_output=$(diff -rq "$skill_dir" "$dest" 2>&1 || true)
+    diff_output=$(skill_diff "$skill_dir" "$dest")
     if [[ -n "$diff_output" ]]; then
       echo "| $skill | DIFFERS | $diff_output |"
       errors=$((errors + 1))
@@ -259,6 +299,9 @@ for skill in "${skills[@]}"; do
     echo "| $skill | ERROR | Nesting bug detected after copy! |" >&2
     exit 1
   fi
+
+  # Translate the neutral model-hint comment into a real Claude-honoured frontmatter field
+  inject_model_frontmatter "$dest/SKILL.md"
 
   echo "| $skill | DEPLOYED | $(find "$src" -type f | wc -l) file(s) |"
 done

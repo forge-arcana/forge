@@ -2,6 +2,7 @@
 name: forge
 description: The forge cycle — unified bidirectional sync between the forge repo and your membrane. Triages drift, presents a PLAN table, applies approved changes in both directions (incoming skills/learnings/memory, outgoing absorption), commits and pushes. `/forge --dry` for read-only inspection. `/forge on|off` toggles session skills. Replaces the retired /cast, /mark, /fold trio.
 ---
+<!-- model: sonnet | escalation: learning triage → opus subagent -->
 
 # /forge — The Forge Cycle
 

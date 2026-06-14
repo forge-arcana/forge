@@ -2,6 +2,7 @@
 name: wrap
 description: Pre-commit ritual. Lints, stages, saves context, updates docs, compacts, commits. Use when the user types "wrap" or wants to commit with full context.
 ---
+<!-- model: sonnet -->
 
 # /wrap — Pre-Commit Ritual
 
@@ -51,13 +52,14 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
 
 **If no docs directory is found** (neither in-repo nor external), skip this step.
 
-## Step 5: Compact
-- Check the size of the project's rules file (`CLAUDE.md`/`AGENTS.md`)
-- If it exceeds ~20k characters:
-  - Move verbose history, phase notes, and detailed learnings to `memory/` files
-  - Keep the rules file lean: rules + compact current state + summary learnings only
-  - Link moved content from `MEMORY.md` index
-- Check `memory/` files for redundant or stale entries — deduplicate and prune
+## Step 5: Compact (gated — skip entirely in the common case)
+- Check the size of the project's rules file (`CLAUDE.md`/`AGENTS.md`) — a cheap `wc -c`.
+- **If it is under ~20k characters, skip this entire step.** Do NOT read or scan `memory/` files just to confirm they're fine. This is the common case and the single biggest cost lever in `/wrap` — an unconditional memory dedup re-reasons over the whole corpus on every commit.
+- **Only if the rules file exceeds ~20k characters:**
+  - Move verbose history, phase notes, and detailed learnings to `memory/` files.
+  - Keep the rules file lean: rules + compact current state + summary learnings only.
+  - Link moved content from `MEMORY.md` index.
+  - Deduplicate **only the memory files you touched this session** — not the whole `memory/` corpus. Full memory hygiene is a separate, deliberate tending pass, not part of a routine commit.
 
 ## Step 6: Commit
 - Draft a concise commit message (1-2 sentences) focusing on the "why" not the "what"

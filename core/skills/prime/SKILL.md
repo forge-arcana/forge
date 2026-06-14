@@ -2,6 +2,7 @@
 name: prime
 description: "The first summoning. Takes raw ideas and gives them form — Opus (manuscript), Vow (pledge + viability), Touchstone (aesthetic via /wedge), Pitch (always — the seven-section synthesis with ballpark numbers, in the founder's voice, rendered through Touchstone), Blueprint (scope), Pattern (architecture + UX). One conversation, one continuous flow. TRIGGER when: user has a raw idea, product concept, or wants to create an Opus, Vow, Touchstone, Pitch, Blueprint, or Pattern from scratch."
 ---
+<!-- model: inherit | generative core — rides session -->
 
 # /prime — The Originator
 

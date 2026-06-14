@@ -2,6 +2,7 @@
 name: poke
 description: "Staff-engineer code review — code quality (Uncle Bob's tenets), tech debt, framework misuse, and logging hygiene. Produces an actionable report. Self-improving. TRIGGER when: user asks for code review, code quality audit, tech debt check, or 'review this code.'"
 ---
+<!-- model: sonnet | escalation: review fan-out → opus subagents -->
 
 # /poke — Code Quality & Tech Debt Review
 

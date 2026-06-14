@@ -2,6 +2,7 @@
 name: cicd
 description: "Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures, escalates to /pry if stuck. No GitHub Actions needed for solo dev. TRIGGER when: user wants to run tests and deploy, or asks 'is this ready to deploy?'"
 ---
+<!-- model: sonnet -->
 
 # /cicd — Local CI/CD Pipeline
 

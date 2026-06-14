@@ -2,6 +2,7 @@
 name: pound
 description: "Deep QA analysis using 21 adversarial personas. Generates tests, finds edge cases, audits security/accessibility/compliance. Self-improving. TRIGGER when: user wants thorough QA, comprehensive testing, edge case analysis, or 'break this.'"
 ---
+<!-- model: sonnet | escalation: 21-persona fan-out → opus subagents -->
 
 # /pound — Deep Testing & Analysis
 

@@ -163,7 +163,17 @@ HEADER
   cat <<MODELHINT
 ## Model selection
 
-Skills marked with \`<!-- model: opus -->\` benefit from a deep-reasoning model. On Codex CLI / DeepSeek TUI / Gemini CLI, switch via \`/model\` before invoking these skills.
+Each skill carries a neutral \`<!-- model: <tier> -->\` hint declaring the cognitive weight of its work. The tier is tool-agnostic; map it to your harness's nearest model:
+
+| Hint | Meaning | Suggested model |
+|---|---|---|
+| \`model: haiku\` | Mechanical — scripts, polling, formatting | Your fastest / cheapest model |
+| \`model: sonnet\` | Structured reasoning — evaluation against a rubric | A mid-tier balanced model |
+| \`model: inherit\` | Generative core — ideation, synthesis, orchestration | Your strongest reasoning model |
+
+An \`escalation:\` note (e.g. \`escalation: review fan-out → opus subagents\`) means the skill runs its bulk on the cheaper tier but spawns a stronger model for the named kernel — honour it by switching up only for that sub-step.
+
+On Codex CLI / DeepSeek TUI / Gemini CLI, switch via \`/model\` before invoking a skill whose tier differs from your current model. (Claude Code applies the tier automatically — the hint is injected as real \`model:\` frontmatter at deploy time.)
 
 MODELHINT
 

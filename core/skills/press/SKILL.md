@@ -2,6 +2,7 @@
 name: press
 description: "Assess go-live readiness across security, scalability, operations, compliance, observability, deployment, and documentation. Self-improving. TRIGGER when: user asks about deployment readiness, go-live checklist, or 'are we ready to ship?'"
 ---
+<!-- model: sonnet | escalation: dimension fan-out → opus subagents -->
 
 # /press — Go-Live Readiness Assessment
 

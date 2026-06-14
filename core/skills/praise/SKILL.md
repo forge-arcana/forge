@@ -2,6 +2,7 @@
 name: praise
 description: "Feedback-driven improvement loop — ingests user feedback, testing findings, or bug reports, routes them through evaluative arts (probe, preen, poke), assesses blueprint impact, and hands off to smith with a prioritized change brief. TRIGGER when: user has feedback to process, wants to close the loop on testing results, end-user reports, or QA findings."
 ---
+<!-- model: sonnet -->
 
 # /praise — The Feedback Loop
 

@@ -2,6 +2,7 @@
 name: pitch
 description: "The Pitch — one synthesis artifact in seven sections (The Bet, The Wound, The Inversion, The Field, The Stake, The Signal, The Stand) that fuses Opus + Vow + Touchstone into a wall-pinnable read in the founder's voice, with ballpark numbers grounding viability. The same pitch serves the founder, the cofounder, and the investor; the only thing that differs is the room it's read in. Renders as paired markdown source + HTML through Touchstone tokens. Optional --critique flag runs a seven-dimension VC-style review pass on the pitch as feedback (not a separate artifact). Self-improving. TRIGGER when: a Touchstone has just been forged and the founder needs synthesis-and-alignment before /probe, /preen, /smith — or when external persuasion (investors, partners, customers) is needed and the same pitch must be stress-tested."
 ---
+<!-- model: inherit | generative core — rides session -->
 
 # /pitch — One Pitch, Seven Sections, In the Founder's Voice
 

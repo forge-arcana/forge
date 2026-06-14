@@ -118,6 +118,21 @@ REMOVED=0
 CHANGED_SKILLS=()
 ADDED_SKILLS=()
 
+# skill_diff: compare a forge source (or baseline) skill dir against its deployed
+# copy, ignoring the Claude-only `model:` frontmatter line that cast-deploy injects
+# at deploy time (translated from the neutral `<!-- model: -->` comment). Without
+# this, every deployed skill would read as DEPLOYED-DIFFERS. Echoes the diff
+# (empty == equivalent).
+skill_diff() {
+  local src="$1" dst="$2"
+  diff -rq --strip-trailing-cr --exclude=SKILL.md "$src" "$dst" 2>/dev/null || true
+  if [[ -f "$src/SKILL.md" && -f "$dst/SKILL.md" ]]; then
+    diff --strip-trailing-cr \
+      <(grep -v '^model:[[:space:]]' "$src/SKILL.md" 2>/dev/null) \
+      <(grep -v '^model:[[:space:]]' "$dst/SKILL.md" 2>/dev/null) 2>/dev/null || true
+  fi
+}
+
 # Scan forge skills
 for skill_dir in "$FORGE_PATH"/core/skills/*/; do
   skill=$(basename "$skill_dir")
@@ -132,7 +147,7 @@ for skill_dir in "$FORGE_PATH"/core/skills/*/; do
     continue
   fi
 
-  diff_output=$(diff -rq --strip-trailing-cr "$FORGE_PATH/core/skills/$skill" "$deployed" 2>/dev/null || true)
+  diff_output=$(skill_diff "$FORGE_PATH/core/skills/$skill" "$deployed")
 
   if [[ -z "$diff_output" ]]; then
     echo "| $skill | IDENTICAL | -- |"
@@ -173,8 +188,7 @@ for skill_dir in "$FORGE_PATH"/core/skills/*/; do
           tmp_baseline=$(mktemp -d)
           git -C "$FORGE_PATH" archive --format=tar "$LAST_CAST_SHA" "core/skills/$skill/" 2>/dev/null \
             | tar -x -C "$tmp_baseline" 2>/dev/null || true
-          deployed_vs_baseline=$(diff -rq --strip-trailing-cr \
-            "$tmp_baseline/skills/$skill" "$deployed" 2>/dev/null || true)
+          deployed_vs_baseline=$(skill_diff "$tmp_baseline/skills/$skill" "$deployed")
           rm -rf "$tmp_baseline"
 
           if [[ -z "$deployed_vs_baseline" ]]; then
@@ -230,7 +244,7 @@ if [[ ${#CHANGED_SKILLS[@]} -gt 0 && -n "$LAST_CAST_SHA" ]]; then
     else
       # Deployed differs but no forge commits — membrane was edited
       # Wrap diff in || true so pipefail doesn't append "0" after grep's count
-      diff_stat=$( (diff --strip-trailing-cr "$FORGE_PATH/core/skills/$skill/SKILL.md" "$deployed/SKILL.md" 2>/dev/null || true) | grep -c '^[<>]' || echo "0")
+      diff_stat=$( (diff --strip-trailing-cr <(grep -v '^model:[[:space:]]' "$FORGE_PATH/core/skills/$skill/SKILL.md") <(grep -v '^model:[[:space:]]' "$deployed/SKILL.md") 2>/dev/null || true) | grep -c '^[<>]' || echo "0")
       if [[ "$diff_stat" -gt 0 ]]; then
         echo "**$skill** (deployed copy modified):"
         echo "  - $diff_stat lines changed in deployed copy"
