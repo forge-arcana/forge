@@ -2,15 +2,19 @@
 # cast-deploy.sh — Generic Forge v2 membrane deploy.
 #
 # Layout:
-#   $AGENTS_DIR/skills/<name>/       canonical skill store (Open Agent Skills standard)
+#   $AGENTS_DIR/skills/<name>/       neutral cross-tool skill store (Open Agent Skills standard, comment-only)
 #   $AGENTS_DIR/scripts/             canonical runtime scripts (none at present)
-#   $MEMBRANE/skills/                symlink → $AGENTS_DIR/skills/  (Claude Code discovers via this)
+#   $MEMBRANE/skills/                REAL dir — Claude copies WITH injected `model:` frontmatter
 #   $MEMBRANE/scripts/               symlink → $AGENTS_DIR/scripts/ (hooks call by absolute path)
 #
-# Why two paths: $AGENTS_DIR is the cross-tool canonical store (Codex, Gemini,
-# Bob, etc. read it natively). $MEMBRANE is the Claude-Code-specific config dir.
-# A directory symlink from $MEMBRANE/skills/ to $AGENTS_DIR/skills/ gives Claude
-# Code discoverability without duplicating content. Single source of truth.
+# Why skills are NOT symlinked: $AGENTS_DIR/skills is read natively by other tools
+# (Codex, Gemini) and must stay vendor-neutral. The Claude copy needs a real `model:`
+# frontmatter field (translated from each skill's neutral `<!-- model: -->` hint) so
+# Claude Code applies the per-skill model ceiling. Those two requirements conflict in
+# one file, so $MEMBRANE/skills is a real directory holding Claude-flavoured copies.
+# Scripts carry no frontmatter, so they stay symlinked — single source of truth where
+# divergence isn't needed. The Claude copy is a deterministic function of the neutral
+# one (neutral + injected line), regenerated on every cast, so there's no real drift.
 #
 # Usage:
 #   cast-deploy.sh <skill-name> [<skill-name> ...]   deploy specific skills
@@ -45,7 +49,7 @@ FORGE_SCRIPTS="$FORGE_PATH/claude-helpers/scripts"
 
 AGENTS_SKILLS="$AGENTS_DIR/skills"
 AGENTS_SCRIPTS="$AGENTS_DIR/scripts"
-MEMBRANE_SKILLS_LINK="$MEMBRANE/skills"
+MEMBRANE_SKILLS="$MEMBRANE/skills"
 MEMBRANE_SCRIPTS_LINK="$MEMBRANE/scripts"
 
 # No runtime scripts are deployed to the membrane at present. The WA-001 OAuth-race
@@ -63,26 +67,20 @@ fi
 bootstrap_layout() {
   mkdir -p "$AGENTS_SKILLS" "$AGENTS_SCRIPTS" "$MEMBRANE"
 
-  # Migrate existing $MEMBRANE/skills/ if it's a real directory (one-time conversion).
-  # This is the path most users will hit — pre-pivot membrane has $MEMBRANE/skills/
-  # as a regular dir; we move its contents into $AGENTS_SKILLS, then symlink.
-  if [[ -d "$MEMBRANE_SKILLS_LINK" && ! -L "$MEMBRANE_SKILLS_LINK" ]]; then
-    echo "  ↻ Migrating existing $MEMBRANE_SKILLS_LINK → $AGENTS_SKILLS"
-    # rsync would be ideal but may not be present; use cp -r per-item to handle existing files in $AGENTS_SKILLS
-    for entry in "$MEMBRANE_SKILLS_LINK"/*; do
-      [[ -e "$entry" ]] || continue
-      base=$(basename "$entry")
-      if [[ -e "$AGENTS_SKILLS/$base" ]]; then
-        # Already in canonical store — drop the membrane copy
-        rm -rf "$entry"
-      else
-        mv "$entry" "$AGENTS_SKILLS/"
-      fi
-    done
-    rmdir "$MEMBRANE_SKILLS_LINK" 2>/dev/null || rm -rf "$MEMBRANE_SKILLS_LINK"
+  # Skills are deployed to TWO targets that must differ:
+  #   $AGENTS_SKILLS   — neutral cross-tool canonical store (comment-only, no frontmatter)
+  #   $MEMBRANE_SKILLS — Claude discovery dir, real copies WITH injected `model:` frontmatter
+  # Under Phase C, $MEMBRANE/skills was a directory symlink → $AGENTS_SKILLS, so the two
+  # were the same files. Per-tool model frontmatter means they can no longer be: convert
+  # $MEMBRANE/skills back to a real directory. (Scripts have no frontmatter, so they stay
+  # symlinked — single source of truth preserved where divergence isn't needed.)
+  if [[ -L "$MEMBRANE_SKILLS" ]]; then
+    echo "  ↻ Unlinking $MEMBRANE_SKILLS (was symlink → $AGENTS_SKILLS); becomes a real Claude-flavoured dir"
+    rm -f "$MEMBRANE_SKILLS"
   fi
+  mkdir -p "$MEMBRANE_SKILLS"
 
-  # Same migration for scripts/
+  # Migrate scripts/ if it's a real directory (one-time conversion), then symlink.
   if [[ -d "$MEMBRANE_SCRIPTS_LINK" && ! -L "$MEMBRANE_SCRIPTS_LINK" ]]; then
     echo "  ↻ Migrating existing $MEMBRANE_SCRIPTS_LINK → $AGENTS_SCRIPTS"
     for entry in "$MEMBRANE_SCRIPTS_LINK"/*; do
@@ -97,8 +95,7 @@ bootstrap_layout() {
     rmdir "$MEMBRANE_SCRIPTS_LINK" 2>/dev/null || rm -rf "$MEMBRANE_SCRIPTS_LINK"
   fi
 
-  # Create the symlinks (idempotent — ln -sfn replaces existing symlinks)
-  ln -sfn "$AGENTS_SKILLS" "$MEMBRANE_SKILLS_LINK"
+  # Scripts stay symlinked (no per-tool divergence); skills do NOT (Claude copy differs).
   ln -sfn "$AGENTS_SCRIPTS" "$MEMBRANE_SCRIPTS_LINK"
 }
 
@@ -147,30 +144,36 @@ if [[ "${1:-}" == "--verify" ]]; then
   echo "## Deployment Verification"
   echo ""
   errors=0
-  # Check the symlink shape first
-  if [[ ! -L "$MEMBRANE_SKILLS_LINK" ]]; then
-    echo "| symlink | MISSING | $MEMBRANE_SKILLS_LINK is not a symlink |"
+  # Skills are no longer symlinked — $MEMBRANE_SKILLS must be a REAL directory now.
+  if [[ -L "$MEMBRANE_SKILLS" ]]; then
+    echo "| layout | STALE-SYMLINK | $MEMBRANE_SKILLS is still a symlink — redeploy to convert to a real dir |"
     errors=$((errors + 1))
-  elif [[ "$(readlink -f "$MEMBRANE_SKILLS_LINK")" != "$(readlink -f "$AGENTS_SKILLS" 2>/dev/null || echo "$AGENTS_SKILLS")" ]]; then
-    echo "| symlink | WRONG-TARGET | $MEMBRANE_SKILLS_LINK → $(readlink "$MEMBRANE_SKILLS_LINK") (expected $AGENTS_SKILLS) |"
+  elif [[ ! -d "$MEMBRANE_SKILLS" ]]; then
+    echo "| layout | MISSING | $MEMBRANE_SKILLS does not exist |"
     errors=$((errors + 1))
   fi
   for skill_dir in "$FORGE_SKILLS"/*/; do
     skill=$(basename "$skill_dir")
     [[ ! -f "$skill_dir/SKILL.md" ]] && continue
-    dest="$AGENTS_SKILLS/$skill"
-    if [[ ! -d "$dest" ]]; then
-      echo "| $skill | MISSING | Not deployed |"
+    neutral="$AGENTS_SKILLS/$skill"   # cross-tool copy — must stay comment-only
+    claude="$MEMBRANE_SKILLS/$skill"  # Claude copy — carries injected frontmatter
+    if [[ ! -d "$claude" || ! -d "$neutral" ]]; then
+      echo "| $skill | MISSING | Not deployed to both stores |"
       errors=$((errors + 1))
       continue
     fi
-    if [[ -d "$dest/$skill" ]]; then
+    if [[ -d "$claude/$skill" || -d "$neutral/$skill" ]]; then
       echo "| $skill | NESTED BUG | Found $skill/$skill/ — redeploy needed |"
       errors=$((errors + 1))
       continue
     fi
-    diff_output=$(skill_diff "$skill_dir" "$dest")
-    if [[ -n "$diff_output" ]]; then
+    # The Claude copy must match forge modulo the injected model: line.
+    diff_output=$(skill_diff "$skill_dir" "$claude")
+    # The neutral copy must be byte-identical to forge — NO frontmatter leak into the cross-tool store.
+    if grep -q '^model:[[:space:]]' "$neutral/SKILL.md" 2>/dev/null; then
+      echo "| $skill | LEAK | model: frontmatter found in neutral cross-tool store |"
+      errors=$((errors + 1))
+    elif [[ -n "$diff_output" ]]; then
       echo "| $skill | DIFFERS | $diff_output |"
       errors=$((errors + 1))
     else
@@ -241,9 +244,9 @@ verify_scripts() {
 if [[ "${1:-}" == "--bootstrap" ]]; then
   bootstrap_layout
   echo "Bootstrap complete."
-  echo "  Canonical store: $AGENTS_DIR"
-  echo "  Membrane symlinks: $MEMBRANE_SKILLS_LINK → $AGENTS_SKILLS"
-  echo "                     $MEMBRANE_SCRIPTS_LINK → $AGENTS_SCRIPTS"
+  echo "  Neutral cross-tool skill store: $AGENTS_SKILLS (real dir)"
+  echo "  Claude skill dir:               $MEMBRANE_SKILLS (real dir, frontmatter-injected)"
+  echo "  Scripts symlink:                $MEMBRANE_SCRIPTS_LINK → $AGENTS_SCRIPTS"
   exit 0
 fi
 
@@ -277,33 +280,37 @@ fi
 # Always ensure layout is bootstrapped before deploying
 bootstrap_layout
 
-# --- Deploy each skill ---
-echo "## Deploying ${#skills[@]} skill(s) to $AGENTS_SKILLS"
+# --- Deploy each skill to BOTH stores ---
+#   $AGENTS_SKILLS   neutral cross-tool copy (comment-only, untouched)
+#   $MEMBRANE_SKILLS Claude copy (same content + injected `model:` frontmatter)
+echo "## Deploying ${#skills[@]} skill(s): neutral → $AGENTS_SKILLS, Claude → $MEMBRANE_SKILLS"
 echo ""
 for skill in "${skills[@]}"; do
   src="$FORGE_SKILLS/$skill"
-  dest="$AGENTS_SKILLS/$skill"
+  neutral="$AGENTS_SKILLS/$skill"
+  claude="$MEMBRANE_SKILLS/$skill"
 
   if [[ ! -d "$src" ]]; then
     echo "| $skill | SKIP | Not found in forge |"
     continue
   fi
 
-  if [[ -d "$dest" ]]; then
-    rm -rf "$dest"
-  fi
+  # Neutral cross-tool copy — NEVER injected, byte-identical to forge source.
+  rm -rf "$neutral"
+  cp -r "$src" "$neutral"
 
-  cp -r "$src" "$dest"
+  # Claude discovery copy — same content, then translate the model hint into real frontmatter.
+  rm -rf "$claude"
+  cp -r "$src" "$claude"
 
-  if [[ -d "$dest/$skill" ]]; then
+  if [[ -d "$neutral/$skill" || -d "$claude/$skill" ]]; then
     echo "| $skill | ERROR | Nesting bug detected after copy! |" >&2
     exit 1
   fi
 
-  # Translate the neutral model-hint comment into a real Claude-honoured frontmatter field
-  inject_model_frontmatter "$dest/SKILL.md"
+  inject_model_frontmatter "$claude/SKILL.md"
 
-  echo "| $skill | DEPLOYED | $(find "$src" -type f | wc -l) file(s) |"
+  echo "| $skill | DEPLOYED | $(find "$src" -type f | wc -l) file(s) → both stores |"
 done
 echo ""
 echo "**Deploy complete**"
