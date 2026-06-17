@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-04-27T00:00:00Z",
+  "lastRun": "2026-06-18T00:00:00Z",
   "skippedFiles": [
     "audiences.md",
     "brand-voice.md",
@@ -9,6 +9,7 @@
     "2026-03-28-karpathy-assessment.md",
     "feedback_writing_style.md",
     "project_ulit.md",
-    "user_paula.md"
+    "user_paula.md",
+    "poke-learnings.md"
   ]
 }
