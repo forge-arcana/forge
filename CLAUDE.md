@@ -156,7 +156,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 
-- **Branch**: `main`. Up to date with origin (pushed `86e9748` 2026-06-18).
+- **Branch**: `main`. Up to date with origin (pushed `205a55b` 2026-06-20).
 - **Active work**: No active workarounds. Generic Forge v2 Outstanding items tracked below. Phase C complete (2026-05-10); skills symlink retired 2026-06-14 for per-tool model frontmatter — see Phase C table below.
 
 ### Outstanding — Generic Forge v2 follow-ups

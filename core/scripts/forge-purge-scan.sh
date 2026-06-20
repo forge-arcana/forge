@@ -237,15 +237,19 @@ echo ""
 
 echo "### Consistency: frontmatter fields"
 echo ""
-echo "| Art | name | description | user-invocable |"
-echo "|-----|------|-------------|----------------|"
+# Note: `user-invocable:` is intentionally NOT checked — it is a Claude-deploy-only
+# field injected by cast-deploy.sh, never present in the neutral core source, so it
+# would report MISSING for every art (noise). Only neutral-source fields are checked.
+echo "| Art | name | description |"
+echo "|-----|------|-------------|"
 for art in prime probe poke preen press pound pitch pry praise; do
   skill_file="$FORGE_PATH/core/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
-    has_name=$(grep -c '^name:' "$skill_file" 2>/dev/null | head -1)
-    has_desc=$(grep -c '^description:' "$skill_file" 2>/dev/null | head -1)
-    has_ui=$(grep -c '^user-invocable:' "$skill_file" 2>/dev/null | head -1)
-    echo "| $art | $([[ $has_name -gt 0 ]] && echo YES || echo MISSING) | $([[ $has_desc -gt 0 ]] && echo YES || echo MISSING) | $([[ $has_ui -gt 0 ]] && echo YES || echo MISSING) |"
+    # `|| true` neutralizes pipefail when grep -c finds 0 matches (exit 1); grep
+    # still prints "0", so the count stays correct and the script does not abort.
+    has_name=$(grep -c '^name:' "$skill_file" 2>/dev/null | head -1 || true)
+    has_desc=$(grep -c '^description:' "$skill_file" 2>/dev/null | head -1 || true)
+    echo "| $art | $([[ ${has_name:-0} -gt 0 ]] && echo YES || echo MISSING) | $([[ ${has_desc:-0} -gt 0 ]] && echo YES || echo MISSING) |"
   fi
 done
 echo ""
