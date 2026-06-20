@@ -194,3 +194,4 @@ The membrane skill + script storage moved from Claude-Code-specific paths to the
 - **Earlier history** (2026-04-23 → 2026-06-14): see `memory/recent-history.md`.
 - **Recent**: 2026-06-14 — Per-skill model ceilings (24 skills), /burn skill added, lean.sh compressor, target-aware deploy (symlink→real dir, `--verify` LEAK check). See `memory/recent-history.md` for full detail.
 - **Recent**: 2026-06-18 — Forge cycle: 24 skills cast (model ceilings live), /burn deployed, 40 learnings synced (6 files), 5 memory files synced. Baseline → `ca4a459`.
+- **Recent**: 2026-06-20 — Forge cycle: cast `recent-history.md` to membrane; folded 3 `/pry` learnings into `learnings/pry-learnings.md` (runtime-scarcity token re-ranking, vendor model/harness/subscription split, analytics-API metric-deprecation pattern). Cleaned a stranded `/pry` learning from an orphaned `~/.claude/skills/pry/memory/` dir (the false `DEPLOYED-DIFFERS`). Baseline → `d5c9acf`.

@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-06-02T00:00:00+00:00",
+  "lastRun": "2026-06-20T00:00:00+00:00",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -185,7 +185,10 @@
     "3-Zone Portrait Mobile Cover Layout",
     "Scroll Fade Overlays Should Sit at Structural Inset Boundaries",
     "Diffusion LLMs Are a Speed/Infill Tier, Not a Drop-In Swap",
-    "MoE VRAM Tracks Total Params, Not Active — Probe the Real GPU First"
+    "MoE VRAM Tracks Total Params, Not Active — Probe the Real GPU First",
+    "Token-Saving Analyses Are Denominated in the Runtime's Scarcest Resource — Re-Rank When the Runtime Changes (2026-06-19)",
+    "\"Do I Still Need $VENDOR?\" Splits Into Model / Harness / Subscription — Answer Them Separately (2026-06-19)",
+    "Deprecated Analytics-API Metrics Are Not Version-Gated — Don't Chase Older API Versions (2026-06-17)"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
