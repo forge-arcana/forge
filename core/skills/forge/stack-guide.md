@@ -12,12 +12,12 @@ A reference architecture for new projects. Derived from production decisions acr
 |---|---|---|
 | **Language** | TypeScript | Type safety DB-to-UI. AI assistants generate far better TS than JS — catch errors at write time, not runtime. |
 | **Runtime** | Node.js | Stable, mature, universal tooling. Capacitor-compatible. The strongest backend runtime for AI-assisted work. |
-| **Backend** | Hono | ESM-native, 14KB, typed routes, Zod middleware built-in. Express is legacy — Hono uses Web Standard APIs (portable to CF Workers, Deno, Bun). Well-supported by current models. |
+| **Backend** | Hono | ESM-native, 14KB, typed routes, Zod middleware built-in. Express 5 is active, but Hono uses Web Standard APIs (portable to CF Workers, Deno, Bun) — that edge portability is why we default to it. Well-supported by current models. |
 | **ORM** | Drizzle | No codegen, no engine binary (50KB vs Prisma's 2-3MB), SQL-like API, native pgvector support, faster cold starts. Schema-as-code in TypeScript. |
 | **Auth** | Better Auth | Framework-agnostic, Drizzle adapter, signed sessions, refresh rotation, CSRF, plugins for 2FA/passkeys/RBAC/bearer. Replaces hand-rolled auth and NextAuth alike. |
 | **Database** | PostgreSQL | Neon (dev/staging/CI — free tier, serverless), Cloud SQL (production — always-on, VPC peering, SLA). Drizzle abstracts the provider — only the connection string changes. Add pgvector when you need embeddings. |
 | **Real-time** | Ably | Managed pub/sub with guaranteed delivery, automatic reconnection, message history, presence. Eliminates the entire class of Socket.io bugs (dropped connections, room leaks, reconnect storms). |
-| **Frontend** | React 19 + Vite | Component model, hooks (use, useOptimistic, useFormStatus), massive ecosystem. The strongest frontend framework for AI-assisted work by far. Vite for sub-second HMR. |
+| **Frontend** | React 19 + Vite | Component model, hooks (use, useOptimistic, useFormStatus), massive ecosystem. The strongest frontend framework for AI-assisted work by far. Vite 8 (Rolldown — single Rust bundler, 10–30× faster builds) for sub-second HMR. |
 | **Routing** | TanStack Router | Type-safe params + search validation, file-based routing, loaders, pending UI. Better TypeScript story than React Router. |
 | **Server State** | TanStack Query | Caching, background refetch, optimistic updates, request deduplication, pagination. Essential for offline-first (3G users). |
 | **Client State** | useState + React Context | TanStack Query handles server state. No Zustand/Redux needed — useState + context is sufficient for UI state. |
@@ -216,7 +216,7 @@ These are patterns confirmed across multiple projects. Not opinions — battle s
 - Use `getSignedUrl({ action: 'write' })` (XML API) — `createResumableUpload()` (JSON API) ignores bucket CORS
 
 ### Capacitor
-- `@capacitor/preferences` for secure token storage (replaces localStorage)
+- `@capacitor/preferences` is **not encrypted** (plaintext SharedPreferences/UserDefaults) — fine for non-sensitive prefs, but **not** for auth tokens. For tokens use a Keychain/Keystore-backed plugin (Capawesome Secure Preferences or `aparajita/capacitor-secure-storage`), never `@capacitor/preferences` or `localStorage`.
 - `androidScheme: "https"` in capacitor.config.ts — required for cookie auth in Android WebView (without it, cookies are treated as cross-origin)
 - Same-origin dev: set `MOBILE_DIST_PATH` env var → API serves mobile `www/` content, Capacitor `server.url` points at API. Avoids CORS/cookie issues entirely.
 - External API calls (geocoding, maps, etc.) should be proxied through your API server — Android emulator DNS resolution is unreliable for external domains. Better pattern regardless (no CORS/CSP issues, enables caching).
@@ -257,7 +257,7 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 
 **Vite `envDir` in monorepos:** Vite reads `.env` from the package root by default, not the monorepo root. Set `envDir: path.resolve(__dirname, "../..")` in every SPA's vite.config.ts so shared `VITE_*` vars from the root `.env.local` reach all SPAs in local dev. Docker builds are unaffected (use `--build-arg`).
 
-**Android 15 edge-to-edge:** Android 15 (API 35+) enforces edge-to-edge rendering — app content renders behind the status bar by default. `StatusBar.setOverlaysWebView(false)` and CSS `env(safe-area-inset-top)` do NOT work on Android WebView. The fix is `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts`. Do not stack with XML `windowOptOutEdgeToEdgeEnforcement` or Java `WindowCompat.setDecorFitsSystemWindows` — they add padding independently, causing a visible gap.
+**Android edge-to-edge (Capacitor 8 / Android 16):** Edge-to-edge is now mandatory — Android 16 (API 36) disables `windowOptOutEdgeToEdgeEnforcement`, and Google Play requires targetSdk 36 by 2026-08-31. **Capacitor 8 removed the `adjustMarginsForEdgeToEdge` config** in favor of the new **System Bars** core plugin (bundled with `@capacitor/core`), which manages status/nav-bar insets via CSS `env(safe-area-inset-*)` variables; use the `SystemBars` API for fine control. (Capacitor 7 only: the legacy fix was `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts` — do not carry it into Cap 8; `StatusBar.setOverlaysWebView(false)` and bare `env(safe-area-inset-top)` never worked on Android WebView.) Capacitor 8 also targets Android SDK 36 and requires Node 22+.
 
 **Android SDK in WSL:** Gradle needs native Linux binaries — Windows `.exe` tools don't execute under WSL. Install cmdline-tools + build-tools natively (e.g., `/root/android-sdk`). Emulator stays on Windows (needs GPU passthrough) — manage via `powershell.exe` or a Node.js helper script for reliable argument handling.
 
@@ -268,7 +268,7 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 - Landing page controlled by env vars: `VITE_APK_URL` (tester sideload), `VITE_GOOGLE_PLAY_URL`, `VITE_APP_STORE_URL` — empty = hide section
 
 ### pnpm
-- v10 blocks build scripts by default — add `pnpm.onlyBuiltDependencies` to root package.json
+- v10+ blocks dependency build scripts by default — allow them via `pnpm.onlyBuiltDependencies` in root `package.json` (pnpm 10), or the newer `allowBuilds` map (preferred; **required on pnpm 11**, which removed `onlyBuiltDependencies`)
 - `dotenv` in monorepo: `import 'dotenv/config'` looks in CWD, not package root — use explicit path
 
 ### TypeScript

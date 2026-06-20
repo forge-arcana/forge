@@ -54,19 +54,7 @@ Parse all feedback and classify into one or more categories. A single feedback i
 | **Blueprint Gap** | Feature requests, missing workflows, out-of-scope asks, product pivots | Blueprint Delta only |
 | **Performance** | Slow load times, timeouts, memory issues | `/poke` + `/press` |
 
-> Present the classification to the user before proceeding:
->
-> ```
-> ## Feedback Classification
->
-> Found [N] items across [M] categories:
-> - UX / Design: [count] items → will invoke /preen
-> - Architecture: [count] items → will invoke /probe
-> - Code Quality: [count] items → will invoke /poke
-> - Blueprint Gap: [count] items → blueprint delta assessment only
->
-> Proceeding with analysis...
-> ```
+> Present the classification to the user before proceeding: a **Feedback Classification** block headed with the project, listing each detected category with its item count and the art it routes to (e.g. `UX / Design: [count] → /preen`), then "Proceeding with analysis...".
 
 ## Phase 2: Parallel Art Dispatch
 
@@ -165,21 +153,7 @@ For each **Blueprint Gap** feedback item (and cross-checking all other feedback)
 
 ### Blueprint Delta Output
 
-```markdown
-## Blueprint Delta
-
-### Add to Blueprint
-- [item]: [which section + what to add]
-
-### Update in Blueprint
-- [item]: [current text] → [proposed text]
-
-### Out of Scope (defer to Phase N)
-- [item]: [rationale]
-
-### Implementation Gaps (already in blueprint, not yet built)
-- [item]: [blueprint section reference]
-```
+A **Blueprint Delta** block with four sub-sections in this order: **Add to Blueprint** (item → section + what to add), **Update in Blueprint** (item → current text → proposed text), **Out of Scope (defer to Phase N)** (item → rationale), **Implementation Gaps (already in blueprint, not yet built)** (item → blueprint section reference).
 
 ## Phase 4: Consolidation — The Praise Report
 
@@ -187,54 +161,14 @@ After all Phase 2 subagents and Phase 3 complete, merge into a single report.
 
 **Persist the report first** to `memory/YYYY-MM-DD-praise-report.md` before displaying.
 
-```markdown
-# /praise Report — [Project Name]
-Date: [YYYY-MM-DD] | Feedback items: [N] | Arts invoked: [list]
-
----
-
-## Feedback Summary
-
-[1-3 sentence summary of what the feedback reveals about the product]
-
----
-
-## Critical (fix before next ship)
-
-[Consolidated CRITICAL findings from all arts — ordered by user impact]
-- **[Finding Title]** · *[Art that found it]* · File: [path:line or N/A]
-  - Problem: [description]
-  - Fix: [recommendation]
-  - Effort: [S/M/L]
-
----
-
-## Important (fix this sprint)
-
-[IMPORTANT findings]
-
----
-
-## Minor (backlog)
-
-[MINOR findings — brief, one line each]
-
----
-
-## Blueprint Delta
-
-[Output from Phase 3]
-
----
-
-## Praise Verdict
-
-**Arts invoked**: [list]
-**Criticals**: [N] | **Importants**: [N] | **Blueprint changes**: [N]
-**Recommendation**: [one of: SHIP BLOCKED / PATCH NEEDED / POLISH PASS / BLUEPRINT UPDATE / CLEAR]
-
-[2-3 sentence executive summary of what the feedback means and what to do next]
-```
+Structure (markdown, sections in this order):
+- **Title + meta**: `# /praise Report — <project>`, then `Date | Feedback items: N | Arts invoked: <list>`.
+- **Feedback Summary** — 1-3 sentences on what the feedback reveals about the product.
+- **Critical (fix before next ship)** — consolidated CRITICAL findings from all arts, **ordered by user impact**; each as `**<Title>** · *<art>* · File: <path:line or N/A>` with Problem / Fix / Effort (S/M/L) sub-bullets.
+- **Important (fix this sprint)** — IMPORTANT findings, same shape.
+- **Minor (backlog)** — MINOR findings, one line each.
+- **Blueprint Delta** — output from Phase 3.
+- **Praise Verdict** — Arts invoked; counts of Criticals / Importants / Blueprint changes; **Recommendation** (one verdict from the table below); 2-3 sentence executive summary of meaning + next step.
 
 ### Verdict Definitions
 
@@ -271,66 +205,19 @@ Analyze all findings from the Praise Report and decompose them into discrete tas
 
 #### Build Plan Format
 
-Present as a table — **output as console text, never as a multi-choice prompt**:
-
-```markdown
-## Praise Build Plan — [Project Name] | [YYYY-MM-DD]
-
-Total tasks: [N] | Parallelizable: [M] | Sequential: [K]
-Estimated effort: [S/M/L overall]
-
-| # | Task | Scope | Effort | Depends On | Sub-Agent? |
-|---|------|-------|--------|------------|------------|
-| 1 | [task title] | [file/component] | S | — | — |
-| 2 | [task title] | [file/component] | M | — | Yes — parallel with #3 |
-| 3 | [task title] | [file/component] | S | — | Yes — parallel with #2 |
-| 4 | [task title] | [file/component] | L | #2, #3 | — |
-| 5 | Blueprint: update Section 5 | blueprint.md | S | — | — (must go first) |
-
-### Execution waves
-
-Wave 1 (parallel): tasks #2, #3
-Wave 2 (sequential, depends on Wave 1): task #4
-Blueprint update: before Wave 1
-
-### Sub-agent allocation
-
-- Sub-agent A: [task #2 — brief description]
-- Sub-agent B: [task #3 — brief description]
-- Main agent: task #1 (critical path), task #4 (sequential gate)
-```
+**Output as console text, never as a multi-choice prompt.** A **Praise Build Plan** with: header (project + date, then `Total tasks: N | Parallelizable: M | Sequential: K` and overall effort); a task table with columns **# | Task | Scope | Effort | Depends On | Sub-Agent?** (the Sub-Agent? cell names which task it runs parallel with, or `— (must go first)` for a gating task); an **Execution waves** block (which tasks run in which wave + sequential dependencies between waves); and a **Sub-agent allocation** block (which sub-agent takes which task — the main agent keeps the critical path and sequential gates).
 
 #### Blueprint-first gate
 
-If **any** Blueprint Delta items exist, they become **Wave 0** — always sequential and always first. Code changes that depend on blueprint decisions cannot start until Wave 0 completes.
-
-```markdown
-Wave 0 (blueprint updates — must complete before code):
-- [blueprint change 1]
-- [blueprint change 2]
-```
+If **any** Blueprint Delta items exist, they become **Wave 0** — always sequential and always first, labelled "Wave 0 (blueprint updates — must complete before code)" with each blueprint change listed. Code changes that depend on blueprint decisions cannot start until Wave 0 completes.
 
 ### Step 5b: Change Brief
 
-After the Build Plan table, append the **Change Brief** that smith will consume:
-
-```markdown
-## Change Brief for /smith
-
-Based on feedback received [date]:
-
-### Priority 1 — Critical
-- [Finding] → [File:line] → [Fix] | Effort: [S/M/L]
-
-### Priority 2 — Important
-- [Finding] → [File:line] → [Fix] | Effort: [S/M/L]
-
-### Priority 3 — Blueprint updates (Wave 0)
-- [Delta item] → [Section to update]
-
-### Execution plan
-[paste the wave breakdown and sub-agent allocation from Build Plan]
-```
+After the Build Plan table, append the **Change Brief for /smith** (the artifact smith consumes), opening with "Based on feedback received <date>". Sections in priority order:
+- **Priority 1 — Critical**: each as `<Finding> → <File:line> → <Fix> | Effort: S/M/L`.
+- **Priority 2 — Important**: same shape.
+- **Priority 3 — Blueprint updates (Wave 0)**: `<Delta item> → <Section to update>`.
+- **Execution plan**: paste the wave breakdown + sub-agent allocation from the Build Plan.
 
 ### Step 5c: User Confirmation
 
@@ -374,27 +261,5 @@ Learnings marked `Forge-worthy: yes` will be promoted by the `/forge` cycle's fo
 
 ---
 
-## The Feedback Loop
-
-```
-User / QA / Testing → /praise → classify
-                              ↓
-             ┌────────────────┼────────────────┐
-          /preen           /probe           /poke / /press
-          (UX)         (Architecture)     (Code / Ops)
-             └────────────────┼────────────────┘
-                              ↓
-                    Blueprint Delta Assessment
-                              ↓
-                       Praise Report
-                              ↓
-                  Build Plan (waves + sub-agents)
-                    ← user reviews & approves →
-                              ↓
-                  Change Brief + execution plan
-                              ↓
-                            /smith
-                    (sub-agents per wave)
-```
-
-The forge improves through use. Every piece of feedback closes a loop.
+The forge improves through use. Every piece of feedback closes a loop:
+feedback → classify → parallel arts (/preen, /probe, /poke, /press) + Blueprint Delta → Praise Report → Build Plan (waves + sub-agents, user-approved) → Change Brief → /smith.
