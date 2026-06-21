@@ -86,7 +86,7 @@ If no path found: **Confirmed Hard Wall** — list verified assumptions, exhaust
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/pry-learnings.md`.
+Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to the **project's** `memory/pry-learnings.md` — the project-memory store (`~/.claude/projects/<project-slug>/memory/` on Claude Code), NOT `~/.claude/skills/pry/memory/`. `/pry` is frequently run outside a repo, so never resolve `memory/` against this skill's own base directory; if there's no active project, use the harness project-memory store.
 
 Learnings should capture:
 - Assumptions that looked true but were false (common misconceptions)

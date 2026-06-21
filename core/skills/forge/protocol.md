@@ -95,6 +95,7 @@ This ensures the same topic maps to one cache key regardless of when the search 
 ## Post-Flight (every art runs these after producing output)
 
 1. **Write learnings** to the project's `memory/<learnings-file>`:
+   > **Path resolution (HARD):** `memory/` is the *project's* memory directory — the project root's `memory/` when running inside a repo, or the harness project-memory store otherwise (`~/.claude/projects/<project-slug>/memory/` for Claude Code). NEVER resolve `memory/` against the skill's own base directory (e.g. `~/.claude/skills/<art>/memory/`) — that orphans the learning inside the skill package and is invisible to `/forge`. When an art runs **outside any project** (e.g. a standalone `/pry`), write to the harness project-memory store, never the skill folder.
    ```markdown
    ## [Date] — [Short Title]
    - **Learning**: [context and evidence — universal principle, no project names/paths]
