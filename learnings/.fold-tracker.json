@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-06-20T00:00:00+00:00",
+  "lastRun": "2026-06-21T00:00:00+00:00",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -188,7 +188,10 @@
     "MoE VRAM Tracks Total Params, Not Active — Probe the Real GPU First",
     "Token-Saving Analyses Are Denominated in the Runtime's Scarcest Resource — Re-Rank When the Runtime Changes (2026-06-19)",
     "\"Do I Still Need $VENDOR?\" Splits Into Model / Harness / Subscription — Answer Them Separately (2026-06-19)",
-    "Deprecated Analytics-API Metrics Are Not Version-Gated — Don't Chase Older API Versions (2026-06-17)"
+    "Deprecated Analytics-API Metrics Are Not Version-Gated — Don't Chase Older API Versions (2026-06-17)",
+    "OAuth `state` Must Be Browser-Bound, Not Just Signed",
+    "Ephemeral Fallback Signing Secrets Break Silently Across Workers",
+    "Repeated Auth Guards Belong in One Decorator/Middleware, Not Copy-Pasted Per Handler"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
