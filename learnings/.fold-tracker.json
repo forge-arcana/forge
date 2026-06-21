@@ -192,7 +192,8 @@
     "OAuth `state` Must Be Browser-Bound, Not Just Signed",
     "Ephemeral Fallback Signing Secrets Break Silently Across Workers",
     "Repeated Auth Guards Belong in One Decorator/Middleware, Not Copy-Pasted Per Handler",
-    "Refusing an Adequate Alternative — the Wall Is Usually Imported Distrust, Not the Stated Object"
+    "Refusing an Adequate Alternative — the Wall Is Usually Imported Distrust, Not the Stated Object",
+    "Match the Deploy Target to the Workload Class — Existing Team Infra Is a First-Class Deviation Signal"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
@@ -203,6 +204,7 @@
     "Trust ladder onboarding for sensitive features",
     "Modes as a volume dial, not separate machines",
     "Diffusion LLMs Are a Speed/Infill Tier, Not a Drop-In Swap",
-    "MoE VRAM Tracks Total Params, Not Active — Probe the Real GPU First"
+    "MoE VRAM Tracks Total Params, Not Active — Probe the Real GPU First",
+    "Match the Deploy Target to the Workload Class — Existing Team Infra Is a First-Class Deviation Signal"
   ]
 }
