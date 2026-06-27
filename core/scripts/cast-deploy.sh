@@ -22,6 +22,8 @@
 #   cast-deploy.sh --verify                           verify all skills match forge
 #   cast-deploy.sh --scripts                          deploy runtime scripts only
 #   cast-deploy.sh --verify-scripts                   verify runtime scripts match forge
+#   cast-deploy.sh --rules                            deploy forge core/rules → membrane global rules file
+#   cast-deploy.sh --verify-rules                     verify membrane rules block matches forge core/rules
 #   cast-deploy.sh --bootstrap                        create dirs + symlinks (no skill deploy)
 #
 # Environment overrides:
@@ -46,6 +48,8 @@ fi
 
 FORGE_SKILLS="$FORGE_PATH/core/skills"
 FORGE_SCRIPTS="$FORGE_PATH/claude-helpers/scripts"
+FORGE_RULES="$FORGE_PATH/core/rules"
+MEMBRANE_RULES_FILE="$MEMBRANE/CLAUDE.md"   # global rules file; AGENTS.md split will retarget this later
 
 AGENTS_SKILLS="$AGENTS_DIR/skills"
 AGENTS_SCRIPTS="$AGENTS_DIR/scripts"
@@ -139,6 +143,92 @@ skill_diff() {
   fi
 }
 
+# --- Rules deploy: write forge's core/rules/ into the membrane's global rules
+#     file as a single marker-delimited managed block. Idempotent — regenerated
+#     every cast, so editing a rule in forge core/rules/ + re-casting updates the
+#     block in place with no duplication. Personal content outside the markers is
+#     never touched (same contract as the forge-path: line /forge manages). This
+#     is how a HARD RULE authored in forge reaches every teammate's membrane. ---
+RULES_START='<!-- FORGE-RULES:START — managed by /forge; this block is regenerated from forge core/rules/ on every cast. Edit the forge source, not here. -->'
+RULES_END='<!-- FORGE-RULES:END -->'
+
+build_rules_block() {
+  # Emits the full managed block (markers included) to stdout.
+  echo "$RULES_START"
+  echo ""
+  echo "# Forge-Managed HARD RULES"
+  echo ""
+  echo "_Deployed from the forge's \`core/rules/\` on each \`/forge\` cast. To change these, edit the forge source and re-run \`/forge\` — edits between the markers are overwritten._"
+  echo ""
+  for f in "$FORGE_RULES"/*.md; do
+    [[ -f "$f" ]] || continue
+    cat "$f"
+    echo ""
+  done
+  echo "$RULES_END"
+}
+
+deploy_rules() {
+  echo "## Deploying forge core/rules → $MEMBRANE_RULES_FILE"
+  echo ""
+  if [[ ! -d "$FORGE_RULES" ]]; then
+    echo "| rules | SKIP | $FORGE_RULES not found |"
+    return 0
+  fi
+
+  local block tmp
+  block=$(mktemp)
+  build_rules_block > "$block"
+
+  if [[ ! -f "$MEMBRANE_RULES_FILE" ]]; then
+    cat "$block" > "$MEMBRANE_RULES_FILE"
+    echo "| rules | CREATED | wrote managed block to new $MEMBRANE_RULES_FILE |"
+  elif grep -qF 'FORGE-RULES:START' "$MEMBRANE_RULES_FILE"; then
+    tmp=$(mktemp)
+    awk -v blockfile="$block" '
+      index($0, "FORGE-RULES:START") {
+        while ((getline line < blockfile) > 0) print line
+        close(blockfile)
+        skip = 1
+        next
+      }
+      index($0, "FORGE-RULES:END") { skip = 0; next }
+      skip != 1 { print }
+    ' "$MEMBRANE_RULES_FILE" > "$tmp"
+    mv "$tmp" "$MEMBRANE_RULES_FILE"
+    echo "| rules | UPDATED | refreshed managed block in place |"
+  else
+    printf '\n' >> "$MEMBRANE_RULES_FILE"
+    cat "$block" >> "$MEMBRANE_RULES_FILE"
+    echo "| rules | DEPLOYED | appended managed block (personal content preserved) |"
+  fi
+  rm -f "$block"
+  echo ""
+  echo "**Rules deploy complete**"
+}
+
+verify_rules() {
+  echo "## Rules Verification"
+  echo ""
+  if [[ ! -f "$MEMBRANE_RULES_FILE" ]] || ! grep -qF 'FORGE-RULES:START' "$MEMBRANE_RULES_FILE"; then
+    echo "| rules | MISSING | no managed block in $MEMBRANE_RULES_FILE — run cast-deploy.sh --rules |"
+    return 1
+  fi
+  local block current
+  block=$(mktemp); current=$(mktemp)
+  build_rules_block > "$block"
+  awk 'index($0,"FORGE-RULES:START"){f=1} f{print} index($0,"FORGE-RULES:END"){f=0}' "$MEMBRANE_RULES_FILE" > "$current"
+  if diff -q --strip-trailing-cr "$block" "$current" >/dev/null 2>&1; then
+    echo "| rules | OK | membrane block matches forge core/rules/ |"
+    rm -f "$block" "$current"
+    return 0
+  else
+    echo "| rules | DRIFT | membrane block differs from forge core/rules/ — run cast-deploy.sh --rules |"
+    rm -f "$block" "$current"
+    return 1
+  fi
+}
+
 # --- Verify mode: check all deployed skills for correctness ---
 if [[ "${1:-}" == "--verify" ]]; then
   echo "## Deployment Verification"
@@ -181,10 +271,12 @@ if [[ "${1:-}" == "--verify" ]]; then
     fi
   done
   echo ""
+  verify_rules || errors=$((errors + 1))
+  echo ""
   if [[ $errors -eq 0 ]]; then
-    echo "**All skills verified OK**"
+    echo "**All skills + rules verified OK**"
   else
-    echo "**$errors skill(s) need attention**"
+    echo "**$errors item(s) need attention**"
   fi
   exit $errors
 fi
@@ -241,6 +333,16 @@ verify_scripts() {
   exit $errors
 }
 
+if [[ "${1:-}" == "--rules" ]]; then
+  deploy_rules
+  exit 0
+fi
+
+if [[ "${1:-}" == "--verify-rules" ]]; then
+  verify_rules
+  exit $?
+fi
+
 if [[ "${1:-}" == "--bootstrap" ]]; then
   bootstrap_layout
   echo "Bootstrap complete."
@@ -273,7 +375,7 @@ else
 fi
 
 if [[ ${#skills[@]} -eq 0 ]]; then
-  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --bootstrap" >&2
+  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --rules | --verify-rules | --bootstrap" >&2
   exit 1
 fi
 
@@ -315,8 +417,10 @@ done
 echo ""
 echo "**Deploy complete**"
 
-# --all also deploys runtime scripts
+# --all also deploys runtime scripts and the forge rules block
 if [[ "${1:-}" == "--all" ]]; then
   echo ""
   deploy_scripts
+  echo ""
+  deploy_rules
 fi

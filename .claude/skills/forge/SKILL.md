@@ -171,6 +171,10 @@ For each approved incoming row (and each conflict row where user chose `[↓]`):
 
 Fresh machine (no deployed skills): create `<membrane>/learnings/`, `<membrane>/memory/`, then deploy ALL with `cast-deploy.sh --all`.
 
+### Global rules
+
+Always run `bash <forge>/core/scripts/cast-deploy.sh --rules` (every cast, no PLAN row needed). This regenerates the forge-owned HARD RULES block (from `<forge>/core/rules/`) in the membrane global rules file, between `FORGE-RULES` markers — same forge-owned contract as the `forge-path:` line. Personal content outside the markers is never touched. This is how a HARD RULE authored in `core/rules/` reaches every teammate's membrane on their next `/forge`. Verify with `cast-deploy.sh --verify-rules`.
+
 ### Learnings
 For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry into `<membrane>/learnings/<file>.md`.
 

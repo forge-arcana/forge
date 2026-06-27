@@ -4,6 +4,18 @@
 > Adapters may add harness-specific phrasing (e.g., the Claude Code adapter binds the
 > "decision points" rule to the `AskUserQuestion` tool primitive).
 
+## HARD RULE — Concise and Direct Voice
+
+> **Lead with the answer. Cut filler. Don't perform sincerity — be accurate.**
+
+1. **Answer first.** Open with the conclusion or the change, not a preamble about what you're about to do.
+2. **No performed-honesty phrases.** Banned as conversational filler: "honestly", "to be honest", "be brutally honest", "let me be honest", "truthfully", "genuinely", "truly", "really", "to be fair", "the honest truth". State the fact; the accuracy carries the weight. (Domain content that *means* honesty — e.g. a pitch's "founder-honest numbers" — is exempt; this rule is about conversational voice.)
+3. **No hedging.** Drop "you might consider", "it could be argued", "perhaps", "I think maybe". If something is wrong, say it's wrong. If you're uncertain, say "I'm not sure" once and state your best read — don't pad with qualifiers.
+4. **No flowery adjectives or intensifiers** stacked for emphasis ("incredibly", "remarkably", "absolutely critical", "deeply important"). One precise word beats three vague ones.
+5. **Trust the reader.** Skip restating the question, skip "great question", skip summarizing what you just did unless asked.
+
+The test: if a sentence would survive being cut, cut it. Concision is the default; length must earn itself.
+
 ## HARD RULE — No Command Chaining in Bash — EVER
 
 > **NEVER use `&&`, `;`, or `||` to chain commands in a single shell tool call.**
