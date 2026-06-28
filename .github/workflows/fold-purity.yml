@@ -1,0 +1,36 @@
+name: Fold Purity
+
+# Server-side enforcement of the "No Project Names in Forge" HARD RULE.
+# Contributors run fold against their own fork; fold runs fold-purity-check.sh
+# locally — but we cannot trust that it ran. This re-runs the same gate on every
+# PR so leaks (project names, contributor names, local currency, schema field
+# names) are caught regardless of whether the contributor folded honestly.
+#
+# Scans ONLY the lines added in the PR (--diff mode), mirroring the local fold
+# gate's --staged behaviour — a contributor is never failed on pre-existing
+# content they did not touch.
+
+on:
+  pull_request:
+    paths:
+      - 'learnings/**'
+      - 'memory/**'
+
+permissions:
+  contents: read
+
+jobs:
+  purity:
+    name: Scan changed learnings/memory for leaks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run fold purity check on added lines
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash core/scripts/fold-purity-check.sh --diff "$BASE_SHA" "$HEAD_SHA"

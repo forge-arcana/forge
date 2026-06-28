@@ -8,6 +8,7 @@
 # Usage:
 #   bash fold-purity-check.sh <file> [<file> ...]    # scan specific files
 #   bash fold-purity-check.sh --staged               # scan all staged files in forge
+#   bash fold-purity-check.sh --diff <base> <head>   # scan added lines across a diff range (CI/PR)
 #   bash fold-purity-check.sh --commit-msg <text>    # scan a commit message string
 #
 # Exit codes:
@@ -211,6 +212,32 @@ elif [[ "$1" == "--staged" ]]; then
     [[ -z "$added_lines" ]] && continue
     scan_file_or_text "$f (staged additions)" "$added_lines"
   done <<< "$STAGED_FILES"
+
+elif [[ "$1" == "--diff" ]]; then
+  # CI/PR mode: scan only the lines ADDED between <base> and <head> for changed
+  # learnings/ and memory/ files. Mirrors --staged semantics (additions only) so
+  # a contributor is never failed on pre-existing content they didn't touch.
+  shift
+  if [[ $# -ne 2 ]]; then
+    echo "ERROR: --diff requires exactly two refs: --diff <base> <head>" >&2
+    exit 2
+  fi
+  BASE_REF="$1"
+  HEAD_REF="$2"
+  # FORGE_DIR is core/ (this script lives in core/scripts/). learnings/ and
+  # memory/ live at the repo root, so anchor pathspecs to the git top-level.
+  REPO_ROOT="$(git -C "$FORGE_DIR" rev-parse --show-toplevel)"
+  CHANGED_FILES=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACM "$BASE_REF" "$HEAD_REF" -- learnings/ memory/ \
+                  | grep -vE '/\.[^/]+$' || true)
+  if [[ -z "$CHANGED_FILES" ]]; then
+    exit 0  # no relevant content changed in this range
+  fi
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    added_lines=$(git -C "$REPO_ROOT" diff "$BASE_REF" "$HEAD_REF" -- "$f" | grep -E '^\+' | grep -vE '^\+\+\+' | sed 's/^+//')
+    [[ -z "$added_lines" ]] && continue
+    scan_file_or_text "$f (added lines)" "$added_lines"
+  done <<< "$CHANGED_FILES"
 
 else
   for f in "$@"; do
