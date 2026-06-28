@@ -4,6 +4,56 @@ A shared tooling repo for AI-guided skills, conventions, and accumulated team wi
 
 ---
 
+## Quick Start
+
+**New idea?**
+```
+/prime MyProject    → Opus → Vow → Touchstone HTML+MD (via /wedge) → Pitch (rendered through Touchstone) → Blueprint → Pattern → Smith
+                      (Touchstone produces both .html for vision and .md for the typed token contract.)
+/wedge              → drive the wedge into Touchstone (auto-invoked from /prime; explicit also)
+/probe              → polished Pattern (architecture)
+/smith              → Pattern + Touchstone → running product (the full forge)
+```
+
+**Fresh machine?**
+```
+git clone <forge-repo>
+cd forge
+/forge              → deploys all skills globally, sets up ~/.claude/
+```
+
+**New project?**
+```
+/forge              → apply forge conventions + sync membrane
+/srs                → setup restart.sh
+```
+
+**During development?**
+```
+/forge              → run the cycle (incoming + outgoing in one pass)
+/forge --dry        → inspect without applying
+/qt                 → verify your fix
+/dig                → think deeper about this
+/poke               → tech debt scan
+/preen              → UI/UX design review
+/wawa               → where am I?
+/wrap               → commit with full context
+```
+
+**Stuck on something "impossible"?**
+```
+/pry                → crack the blocker
+```
+
+**Before go-live?**
+```
+/temper             → hardened evaluation (poke + press × 3)
+/press              → readiness scorecard
+/pound "auth flow"  → deep QA on specific area
+```
+
+---
+
 ## The Masters — Hearts of the Forge
 
 At the center of the forge stand three masters. Distinct domains, complementary roles. The Smith builds the work. The Wedge gives it a face. The Warden tends the forge that does the building.
@@ -215,54 +265,4 @@ forge/
 │   ├── forge/             # Bootstrap (so /forge is discoverable on fresh clone)
 │   └── purge/             # The Warden — master tender (forge-internal, never deployed)
 └── CLAUDE.md
-```
-
----
-
-## Quick Start
-
-**New idea?**
-```
-/prime MyProject    → Opus → Vow → Touchstone HTML+MD (via /wedge) → Pitch (rendered through Touchstone) → Blueprint → Pattern → Smith
-                      (Touchstone produces both .html for vision and .md for the typed token contract.)
-/wedge              → drive the wedge into Touchstone (auto-invoked from /prime; explicit also)
-/probe              → polished Pattern (architecture)
-/smith              → Pattern + Touchstone → running product (the full forge)
-```
-
-**Fresh machine?**
-```
-git clone <forge-repo>
-cd forge
-/forge              → deploys all skills globally, sets up ~/.claude/
-```
-
-**New project?**
-```
-/forge              → apply forge conventions + sync membrane
-/srs                → setup restart.sh
-```
-
-**During development?**
-```
-/forge              → run the cycle (incoming + outgoing in one pass)
-/forge --dry        → inspect without applying
-/qt                 → verify your fix
-/dig                → think deeper about this
-/poke               → tech debt scan
-/preen              → UI/UX design review
-/wawa               → where am I?
-/wrap               → commit with full context
-```
-
-**Stuck on something "impossible"?**
-```
-/pry                → crack the blocker
-```
-
-**Before go-live?**
-```
-/temper             → hardened evaluation (poke + press × 3)
-/press              → readiness scorecard
-/pound "auth flow"  → deep QA on specific area
 ```
