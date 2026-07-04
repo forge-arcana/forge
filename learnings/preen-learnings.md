@@ -91,3 +91,9 @@ Accumulated UI/UX design evaluation learnings. Absorbed from project runs via th
 ## Diacritic-Heavy Scripts Require Dedicated Line-Height (2026-05-29)
 **Learning**: Devanagari script requires ~1.9 line-height minimum (vs ~1.5 for Latin). Without explicit override, standard Tailwind `leading-relaxed` (1.625) causes diacriticals (mātrā, anusvāra, virāma) to overlap on adjacent lines, especially at larger font scale. Always define separate `leading` values for Devanagari/Arabic text blocks; never rely on global line-height.
 **Apply when**: Any app with Devanagari, Arabic, or other diacritic-heavy script support.
+
+## Muted Ramp Steps Fail as Text on Tinted Surfaces — Batch-Compute Every Pair (2026-07-04)
+
+**Learning**: A warm-neutral "faint" ink step on a tinted paper surface reads plausibly quiet to the eye but can measure ~2.2:1 — a hard WCAG AA failure — and it creeps into the worst places (9px chart axis labels, empty-state copy, footnotes) because one token is reused by many components. On tinted surfaces the quietest legal text step tends to land around 6:1; the faint step survives only as strokes/borders/disabled decoration, and the design contract should say so explicitly. Procedure: compute contrast for EVERY text/surface token pair in one scripted batch (a node one-liner) rather than spot-checking suspicious pairs — the failing token hid in six components and only the batch caught them all. Same review pattern: styled spans posing as headings give screen readers zero structure (headings are semantics wearing tokens), and dense-register controls drift under the 24px WCAG 2.2 target floor — density is a look, not a hit-area.
+
+**Apply when**: Reviewing any design system with a muted text ramp on non-white surfaces; always batch-compute all pairs, demote failing steps to decoration-only in the contract, and check semantic headings + target sizes in the same pass.
