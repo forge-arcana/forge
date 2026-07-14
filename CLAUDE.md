@@ -158,6 +158,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 - **Branch**: `main`. Pending push (contribution infra + README reorder, 2026-06-28).
 - **Active work**: No active workarounds. Generic Forge v2 Outstanding items tracked below. Phase C complete (2026-05-10); skills symlink retired 2026-06-14 for per-tool model frontmatter — see Phase C table below.
+- **Last cycle (2026-07-14)**: absorbed 6 learnings (4 platform/config + 1 status-classification + 1 shared-infra defect-propagation). First learning review fired (global-patterns.md >50): 64 → 61 — one entry folded into its successor, two relocated to the skill files they belonged to (`pry`, `poke`). `CLAUDE.md` is now **>20k chars** and due a compact/overflow pass — folds naturally into the "Forge dogfoods AGENTS.md" item below.
 
 ### Outstanding — Generic Forge v2 follow-ups
 
