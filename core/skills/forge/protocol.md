@@ -39,12 +39,44 @@ After pre-flight, proceed to the art's own `## Process` or `## Dimensions` secti
 
 > **HARD RULE**: Independent work MUST run in parallel when the harness supports it. Never block on sequential execution when tasks have no dependencies and parallel sub-agent spawning is available.
 
-- **Fan-out**: When multiple analyses, dimensions, sections, or web searches are independent, spawn them as parallel subagents or parallel tool calls in a single message. If your harness lacks parallel sub-agent spawning, walk them sequentially.
+- **Fan-out**: When multiple analyses, dimensions, sections, or web searches are independent, spawn them as parallel subagents or parallel tool calls in a single message. If your harness lacks parallel sub-agent spawning or per-spawn model selection, walk them sequentially at your session model.
 - **Sync point**: Only wait when a downstream step depends on upstream results. State the sync point explicitly: "After all parallel tasks complete, proceed to..."
 - **Batch web searches**: When multiple web searches are needed (e.g., one per section/dimension), launch all uncached searches in a single parallel batch.
 - **Evidence-then-fan-out pattern**: Many arts collect evidence once (script or reads), then analyze across multiple dimensions. The analysis phase is the parallelization target — spawn one subagent per dimension/section/persona.
 
 This principle applies to ALL arts and skills. When in doubt, ask: "Does this step depend on the previous step's output?" If no, run them in parallel (when supported).
+
+## Model Tiers
+
+Fan-out is not just *where* work splits — it's *what strength of model* each leg runs on. The tier names `opus`, `sonnet`, `haiku`, and `script` are the neutral vocabulary: flow text says "spawn each dimension as a sonnet-tier subagent" or "run the merge at opus tier", and each harness maps tiers to its own models.
+
+### Tier semantics
+
+| Tier | Work class |
+|------|-----------|
+| `opus` | High-judgment work — orchestration decisions, creative generation, synthesis, final verdicts, reviewing sonnet output |
+| `sonnet` | Implementation-to-spec and structured rubric-evaluation legwork |
+| `haiku` | Mechanical LLM work — collation, formatting, template filling |
+| `script` | Deterministic work that leaves the LLM entirely — a shell/CLI step, not a model |
+
+### Class → tier map
+
+- **Evaluative legwork** (dimensions, personas, passes) → sonnet, with security carve-outs at opus and the merge/verdict step wired at opus
+- **Merge / consolidation / final verdict** → opus
+- **Creative generation** (ideation, identity, synthesis) → opus
+- **Implementation-to-spec** → sonnet, with a named opus review gate
+- **Mechanical** → haiku
+- **Deterministic** → script
+
+### Rules
+
+1. **Every fan-out instruction names the tier per spawned agent**, in tool-neutral wording ("sonnet-tier subagent", "at opus tier"). A tier that isn't named in the flow text at the spawn step doesn't bind.
+2. **Every sonnet leg names its review gate.** Three gate classes qualify:
+   - (a) an **opus merge/consolidation step** that dedups, challenges unevidenced findings, and owns the final verdict
+   - (b) an **existing evaluative art pass** that covers the leg's output
+   - (c) a **user-review gate** — only for low-stakes, fully-user-visible output, and only when the flow keeps that output fully visible to the user before it takes effect
+3. **Sequential fallback**: every fan-out skill carries this sentence — "If your harness lacks parallel subagent spawning or per-spawn model selection, run these steps sequentially at your session model."
+4. **Defer, don't downgrade**: when a conditional opus gate (a review that only fires sometimes) can't run at opus tier, defer the gated action and surface it to the user — never run the gate at a weaker tier and proceed.
 
 ## Execution (art-specific)
 

@@ -10,7 +10,7 @@
 # Why skills are NOT symlinked: $AGENTS_DIR/skills is read natively by other tools
 # (Codex, Gemini) and must stay vendor-neutral. The Claude copy needs a real `model:`
 # frontmatter field (translated from each skill's neutral `<!-- model: -->` hint) so
-# Claude Code applies the per-skill model ceiling. Those two requirements conflict in
+# Claude Code applies the per-skill model tier (haiku/sonnet/opus). Those two requirements conflict in
 # one file, so $MEMBRANE/skills is a real directory holding Claude-flavoured copies.
 # Scripts carry no frontmatter, so they stay symlinked — single source of truth where
 # divergence isn't needed. The Claude copy is a deterministic function of the neutral
@@ -105,8 +105,9 @@ bootstrap_layout() {
 
 # --- inject_model_frontmatter: translate the neutral `<!-- model: <tier> -->`
 #     comment in a deployed skill into a real `model:` frontmatter field that
-#     Claude Code honours. Only haiku/sonnet are injected (genuine downgrades);
-#     `inherit` and unhinted skills ride the session model untouched. The neutral
+#     Claude Code honours. haiku/sonnet/opus are injected; `inherit` and
+#     unhinted skills ride the session model untouched; any other tier value
+#     WARNs to stderr and injects nothing (rides the session model). The neutral
 #     comment stays in the body, so the source in core/ and the forge-build
 #     distributable remain 100% vendor-neutral. Per the Open Agent Skills spec,
 #     other tools (Codex/Gemini) ignore the unknown `model:` key — the value is
@@ -116,11 +117,15 @@ inject_model_frontmatter() {
   [[ -f "$file" ]] || return 0
   local tier
   tier=$(grep -m1 -oE '<!--[[:space:]]*model:[[:space:]]*[a-zA-Z]+' "$file" 2>/dev/null | grep -oE '[a-zA-Z]+$' || true)
+  case "$tier" in
+    ""|haiku|sonnet|opus|inherit) ;;
+    *) echo "WARN: unknown model tier '$tier' in $file — no frontmatter injected; skill rides the session model" >&2 ;;
+  esac
   awk -v tier="$tier" '
     BEGIN { n = 0 }
     /^---[[:space:]]*$/ {
       n++
-      if (n == 2 && (tier == "haiku" || tier == "sonnet")) print "model: " tier
+      if (n == 2 && (tier == "haiku" || tier == "sonnet" || tier == "opus")) print "model: " tier
       print
       next
     }
@@ -259,12 +264,17 @@ if [[ "${1:-}" == "--verify" ]]; then
     fi
     # The Claude copy must match forge modulo the injected model: line.
     diff_output=$(skill_diff "$skill_dir" "$claude")
+    # If the neutral hint names an injectable tier, the Claude copy must carry the matching frontmatter.
+    hint_tier=$(grep -m1 -oE '<!--[[:space:]]*model:[[:space:]]*[a-zA-Z]+' "$neutral/SKILL.md" 2>/dev/null | grep -oE '[a-zA-Z]+$' || true)
     # The neutral copy must be byte-identical to forge — NO frontmatter leak into the cross-tool store.
     if grep -q '^model:[[:space:]]' "$neutral/SKILL.md" 2>/dev/null; then
       echo "| $skill | LEAK | model: frontmatter found in neutral cross-tool store |"
       errors=$((errors + 1))
     elif [[ -n "$diff_output" ]]; then
       echo "| $skill | DIFFERS | $diff_output |"
+      errors=$((errors + 1))
+    elif [[ "$hint_tier" == "haiku" || "$hint_tier" == "sonnet" || "$hint_tier" == "opus" ]] && ! grep -q "^model:[[:space:]]*${hint_tier}[[:space:]]*$" "$claude/SKILL.md" 2>/dev/null; then
+      echo "| $skill | NO-INJECT | hint says $hint_tier but Claude copy lacks model: $hint_tier frontmatter — redeploy |"
       errors=$((errors + 1))
     else
       echo "| $skill | OK | In sync |"

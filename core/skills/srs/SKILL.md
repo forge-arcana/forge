@@ -2,7 +2,7 @@
 name: srs
 description: Setup or update restart.sh to bring up the entire local dev stack. Proposes ports, kills zombies, checks DB, verifies port health. Use when user needs a local dev startup script.
 ---
-<!-- model: haiku -->
+<!-- model: sonnet | bash codegen, user reviews before run; no fan-out -->
 
 # /srs — Setup Restart Script
 
@@ -94,5 +94,6 @@ A standalone cleanup script for use outside restart — dev servers (Vite, tsx, 
 
 - Run `bash -n restart.sh` to syntax-check (project root)
 - Run `bash -n kill-zombies.sh` to syntax-check (project root)
-- Show the user the generated scripts and port layout
+- Enumerate every kill/cleanup pattern in both scripts against the process names actually found in the Pre-Flight scans — an over-broad `pkill` pattern that matches unrelated processes is the hazard; tighten any that could
+- Show the user the generated scripts (in full) and port layout — the user's review is the gate before anything runs
 - Do NOT run the script automatically — let the user decide when to start

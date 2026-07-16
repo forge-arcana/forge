@@ -2,7 +2,7 @@
 name: probe
 description: "Challenge architecture decisions against current best practices. On Blueprint targets, writes the Architecture section of the Pattern ([PROJECT]_06_Pattern_V1.0.md). On plans/conversations, returns inline review. Self-improving. TRIGGER when: user asks for architecture review, design validation, or 'is this the right approach?' on a technical decision."
 ---
-<!-- model: sonnet | escalation: architecture verdict → opus subagent -->
+<!-- model: inherit | fan-out: section reviewers → sonnet (Tech Architecture, Auth/Security → opus); verdicts + Pattern synthesis at top level -->
 
 # /probe — Architecture Challenger
 
@@ -29,7 +29,7 @@ Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), 
 
 ## Process
 
-**Spawn parallel subagents** — one per technical section (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD). **Pass the stack-guide path (`<forge>/core/skills/forge/stack-guide.md`) into every subagent prompt** so each one anchors its review to the forge stack before consulting the web. If your harness does not support parallel sub-agent spawning, walk the sections sequentially with the same anchoring rule. Each subagent independently:
+**Spawn parallel subagents** — one per technical section (Sections 13-19: Tech Architecture, Real-Time, Auth & Security, Data Model, Onboarding UX, Testing, CI/CD). Spawn each section reviewer as a sonnet-tier subagent, **except Section 13 (Tech Architecture) and Section 15 (Auth & Security), which spawn at opus tier** — those two carry the language-fit and security-architecture judgment. **Pass the stack-guide path (`<forge>/core/skills/forge/stack-guide.md`) into every subagent prompt** so each one anchors its review to the forge stack before consulting the web. If your harness lacks parallel sub-agent spawning or per-spawn model selection, walk the sections sequentially at your session model with the same anchoring rule. Each subagent independently:
 
 1. **Anchors to the stack-guide** — read the relevant rows of `<forge>/core/skills/forge/stack-guide.md` for this section. The stack-guide entry is the default recommendation. Web research informs *deviation analysis*, not the baseline.
 2. **Analyzes** the current Blueprint recommendation against the stack-guide:
@@ -63,7 +63,7 @@ Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), 
 >
 > When recommending a deviation, the Pattern entry must include a `**Deviation signal**:` line naming the project signal that justifies it. Absent a signal, recommend the stack-guide default.
 
-**Run the additional checks as a parallel subagent** (or sequentially if parallel spawning is unavailable) alongside the section reviews:
+**Run the additional checks as a parallel sonnet-tier subagent** (or sequentially at your session model if parallel spawning or per-spawn model selection is unavailable) alongside the section reviews:
 
 Additionally, verify the blueprint includes:
 - **Logging strategy** aligned with `<forge>/core/skills/forge/stack-guide.md` Logging Convention (structured logging, dev vs prod verbosity, browser console forwarding). If absent, flag it.
@@ -72,6 +72,8 @@ Additionally, verify the blueprint includes:
 - **Testing strategy**: Section 18 must go beyond tool names — it must specify (1) which layers get which test types and why, (2) the critical user flows requiring E2E coverage, and (3) how test data is provisioned. If purely declarative (just naming tools without architectural decisions), flag as IMPORTANT.
 
 ## Output
+
+**Synthesis gate** — before writing, re-judge the sonnet legs: re-validate each confirmed/enhanced verdict and every `**Deviation signal**:` line from the sonnet-tier sections (and the additional-checks flags in the Risks merge) against the stack-guide and the project's signals before accepting it — do not rubber-stamp. The two opus-tier sections (Tech Architecture, Auth & Security) merge as delivered.
 
 Adapt output format to the probe target:
 

@@ -2,7 +2,7 @@
 name: vsix
 description: Publish a VS Code extension — bump version, update changelog, build VSIX, push tag, create GitHub release with VSIX attached, remind user to upload to marketplace. Use when user says "vsix" or wants to release a new VSIX version.
 ---
-<!-- model: haiku -->
+<!-- model: haiku | mechanical release chain; no fan-out -->
 
 # /vsix — VS Code Extension Publish
 

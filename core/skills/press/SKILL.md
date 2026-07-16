@@ -2,7 +2,7 @@
 name: press
 description: "Assess go-live readiness across security, scalability, operations, compliance, observability, deployment, and documentation. Self-improving. TRIGGER when: user asks about deployment readiness, go-live checklist, or 'are we ready to ship?'"
 ---
-<!-- model: sonnet | escalation: dimension fan-out → opus subagents -->
+<!-- model: inherit | fan-out: dimensions → sonnet (Security, Compliance → opus); merge + verdict at opus -->
 
 # /press — Go-Live Readiness Assessment
 
@@ -20,7 +20,7 @@ Run `<forge>/core/scripts/forge-scan.sh press <project-path>` to collect mechani
 
 Use the script's output as your evidence base for scoring each dimension below. The script finds patterns — you score severity, identify gaps, and produce the readiness verdict.
 
-**After evidence is collected, score all 7 dimensions in parallel via subagents.** Each dimension's scoring is independent — spawn one subagent per dimension with the shared evidence. Batch all uncached web searches in parallel across dimensions. Merge scores into the final readiness scorecard. If your harness does not support parallel sub-agent spawning, walk the dimensions sequentially.
+**After evidence is collected, score all 7 dimensions in parallel via subagents.** Each dimension's scoring is independent — spawn one sonnet-tier subagent per dimension with the shared evidence, except Security and Compliance, which spawn at opus tier. Batch all uncached web searches in parallel across dimensions. Merge scores into the final readiness scorecard at opus tier: actively challenge any score not backed by forge-scan evidence, and re-score a dimension yourself if its report doesn't hold up, before issuing the READY / NOT READY verdict. If your harness does not support parallel sub-agent spawning or per-spawn model selection, walk the dimensions sequentially at your session model.
 
 ## Dimensions (7 total)
 

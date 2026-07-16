@@ -2,7 +2,7 @@
 name: ponci
 description: Push to remote and monitor CI — pushes current branch, then invokes /monci to watch GitHub Actions. Use when user says "ponci" or wants to push and watch CI.
 ---
-<!-- model: haiku -->
+<!-- model: haiku | push + handoff to /monci; no fan-out -->
 
 # /ponci — Push & Monitor CI
 

@@ -2,7 +2,7 @@
 name: dig
 description: Think deeper — reframe agent as staff engineer for current discussion. Sharpens analysis, removes hedging, surfaces non-obvious risks. Use when user says "dig" or wants a more critical take on the current topic.
 ---
-<!-- model: inherit | generative core — rides session -->
+<!-- model: inherit | persona persists across turns — never pin; no fan-out -->
 
 # /dig — Think Deeper
 

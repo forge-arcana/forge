@@ -2,7 +2,7 @@
 name: pry
 description: "Relentless solution-finder — challenges 'can't be done' claims by decomposing blockers, scouring for alternatives, and reframing problems until a path forward emerges. Self-improving. TRIGGER when: user is stuck, blocked, or says something can't be done and needs alternative approaches."
 ---
-<!-- model: sonnet | escalation: creative reframe → opus subagent -->
+<!-- model: inherit | fan-out: assumption verification → sonnet; lateral paths → opus -->
 
 # /pry — The Lever
 
@@ -42,7 +42,7 @@ Build a Decomposition table (columns: # / Assumption / Verified? / Evidence) —
 
 ### Phase 2: Challenge Each Assumption
 
-For every unverified assumption, in parallel where possible:
+For every unverified assumption, spawn a sonnet-tier subagent to challenge it, in parallel where possible (or sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection):
 
 1. **Search the web** aggressively — official docs, GitHub issues, Stack Overflow, blog posts, release notes. Check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache). **Batch all uncached searches in parallel.**
 2. **Check version recency** — "can't" claims often reference outdated versions. Is there a newer release that added the capability?
@@ -55,9 +55,11 @@ Mark each assumption as:
 - **TRUE but bypassable** — the constraint is real but there's a workaround.
 - **TRUE and hard** — the constraint is real with no known workaround. (Move to Phase 3.)
 
+The top level re-judges each returned verdict against its evidence when assembling the final Decomposition table and Recommendation — subagent verdicts are inputs, not conclusions.
+
 ### Phase 3: Lateral Approaches
 
-For assumptions that survive Phase 2, **investigate all lateral paths in parallel per assumption** — each path is independent. Spawn parallel subagents (or walk the paths sequentially if your harness lacks parallel sub-agent spawning):
+For assumptions that survive Phase 2, **investigate all lateral paths in parallel per assumption** — each path is independent. Spawn parallel opus-tier subagents — creative exploration, one per surviving assumption covering all five paths — or walk the paths sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection:
 
 1. **Adjacent tools** — different library, different service, different protocol that achieves the same outcome
 2. **Composition** — can two simpler capabilities be combined to achieve the blocked capability?

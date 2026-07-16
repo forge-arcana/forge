@@ -2,7 +2,7 @@
 name: cicd
 description: "Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures, escalates to /pry if stuck. No GitHub Actions needed for solo dev. TRIGGER when: user wants to run tests and deploy, or asks 'is this ready to deploy?'"
 ---
-<!-- model: sonnet -->
+<!-- model: sonnet | escalate: stuck failures → /pry at opus; pre-deploy auto-fix review → opus -->
 
 # /cicd — Local CI/CD Pipeline
 
@@ -61,7 +61,7 @@ When a step fails:
    - Test failures: read the failure output, fix the test or the code
    - Build errors: read the error, fix the issue
 2. **Re-run the failed step only** (not the entire pipeline)
-3. **If still failing**: invoke `/pry` on the specific failure
+3. **If still failing**: invoke `/pry` on the specific failure via an opus-tier subagent — a blocker that survived a fix attempt needs the stronger tier
    - `/pry` decomposes the blocker, searches for alternatives, reframes the problem
    - If `/pry` resolves it: re-run the **entire pipeline from Step 1** (full CI — a fix may break earlier steps)
 4. **If `/pry` can't resolve**: stop and report to user with full context
@@ -87,6 +87,10 @@ After CI completes (pass or fail), output:
 If `--ci` flag: stop here. Do not deploy.
 
 ## Step 3: Deploy
+
+### Auto-Fix Review Gate
+
+If the auto-fix loop changed any code, spawn an opus-tier subagent to review the accumulated auto-fix diff before deploying — the deterministic re-run proves the steps pass, not that each fix is legitimate (a weakened test assertion passes silently). If your harness can't spawn a subagent at a chosen tier, present the accumulated diff to the user for approval before deploying — defer the review, don't downgrade it.
 
 ### Environment Gate
 

@@ -2,7 +2,7 @@
 name: eli5
 description: Explain Like I'm 5 — distill the current topic into the simplest possible explanation. No jargon, no assumptions.
 ---
-<!-- model: haiku -->
+<!-- model: sonnet | faithful simplification needs comprehension; no fan-out -->
 
 # /eli5 — Explain Like I'm 5
 

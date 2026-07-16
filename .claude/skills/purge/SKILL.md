@@ -3,7 +3,7 @@ name: purge
 description: Cleanser of the forge — burns away stale knowledge, deduplication, and drift across all learnings, memory, skills, and reference docs. Restores the forge to its purest form. Self-improving.
 user-invocable: true
 ---
-<!-- model: sonnet | escalation: four-dimension fan-out → opus subagents -->
+<!-- model: inherit | fan-out: dimension reviewers → opus -->
 
 # /purge — Cleanse the Forge
 
@@ -56,7 +56,7 @@ Use the script's output as your evidence base for the parallel dimension analysi
 
 ## Dimension Fan-Out (parallel subagents)
 
-The four dimensions are independent — each analyzes a distinct slice of forge state with no shared mutable dependencies. Following the protocol's evidence-then-fan-out pattern (see `<forge>/core/skills/forge/protocol.md`), launch four subagents in parallel — one per dimension — each receiving the full scan evidence and the dimension-specific rules from the sections below.
+The four dimensions are independent — each analyzes a distinct slice of forge state with no shared mutable dependencies. Following the protocol's evidence-then-fan-out pattern (see `<forge>/core/skills/forge/protocol.md`), launch four opus-tier subagents in parallel — one per dimension — each receiving the full scan evidence and the dimension-specific rules from the sections below. Dimension reviewers run at opus tier because their findings carry generated AFTER text that is applied verbatim to the forge's permanent knowledge base.
 
 ### Subagent prompt template
 
@@ -92,7 +92,7 @@ FINDING_END
 Output ONLY findings. No preamble, no summary, no commentary.
 ```
 
-Launch all four subagents in a single parallel batch. After all complete, the master proceeds to Consolidation.
+Launch all four opus-tier subagents in a single parallel batch. If your harness lacks parallel subagent spawning or per-spawn model selection, run the four dimensions sequentially at your session model. After all complete, the master proceeds to Consolidation.
 
 ## Dimension 1: Knowledge Purity
 

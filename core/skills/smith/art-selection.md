@@ -15,7 +15,7 @@
 ## Detection Rules for Triggered Arts
 
 - **/preen trigger**: Heat creates or modifies files matching `*.tsx`, `*.vue`, `*.svelte` with JSX/template content, or files in `components/`, `pages/`, `views/`, `layouts/` directories
-- **/press trigger on security-critical**: Heat touches auth, payment, encryption, session management, or files matching `*auth*`, `*pay*`, `*crypt*`, `*session*`, `*token*`
+- **/press trigger on security-critical**: Heat touches auth, payment, encryption, session management, or files matching `*auth*`, `*pay*`, `*crypt*`, `*session*`, `*token*`. This trigger is non-optional — a security-critical heat's gate MUST include `/press`; smith may not waive it.
 - **/pound trigger on security areas**: Heat modifies input validation, rate limiting, CORS, CSP, or any OWASP-relevant surface
 
 ## Escalation Ladder

@@ -2,7 +2,7 @@
 name: pitch
 description: "The Pitch — one synthesis artifact in seven sections (The Bet, The Wound, The Inversion, The Field, The Stake, The Signal, The Stand) that fuses Opus + Vow + Touchstone into a wall-pinnable read in the founder's voice, with ballpark numbers grounding viability. The same pitch serves the founder, the cofounder, and the investor; the only thing that differs is the room it's read in. Renders as paired markdown source + HTML through Touchstone tokens. Optional --critique flag runs a seven-dimension VC-style review pass on the pitch as feedback (not a separate artifact). Self-improving. TRIGGER when: a Touchstone has just been forged and the founder needs synthesis-and-alignment before /probe, /preen, /smith — or when external persuasion (investors, partners, customers) is needed and the same pitch must be stress-tested."
 ---
-<!-- model: inherit | generative core — rides session -->
+<!-- model: inherit | fan-out: --critique dimensions → sonnet (Execution Risk, Revenue Model → opus); merge re-scores at opus; HTML render → sonnet (opus reviews vs Touchstone) -->
 
 # /pitch — One Pitch, Seven Sections, In the Founder's Voice
 
@@ -137,6 +137,8 @@ The HTML structure is seven full-viewport (or near-viewport) sections in order: 
 
 The HTML must respect the Soul Brief's *Forbidden Defaults* if a Soul Brief exists — same constraints that bound the Touchstone bind the Pitch.
 
+Delegate the render to a **sonnet-tier subagent**, handed a render brief you write alongside the MD: name the load-bearing word carrying the Inversion's emphasis, the backdrop treatment per section, and the ledger-vs-panel choice for The Stake — the Touchstone constrains tokens, not composition, so the brief carries the taste calls. Before Hand-Off, review the rendered HTML at opus tier against the Touchstone contract's tokens, the seven-section structure above, the Forbidden Defaults, and founder-voice fidelity of the transcribed prose — the render does not reach Hand-Off unreviewed. If your harness lacks subagent spawning or per-spawn model selection, render the HTML inline at your session model; the review pass still applies.
+
 ## Hand-Off
 
 After the Pitch is written, output:
@@ -174,7 +176,7 @@ Runs the seven-dimension VC-style review pass on the existing Pitch. **This is f
 
 ### Process
 
-**Spawn parallel subagents** — one per dimension (or walk dimensions sequentially if your harness lacks parallel sub-agent spawning). Each subagent independently:
+**Spawn parallel subagents** — one per dimension, each at **sonnet tier**, except **Execution Risk** and **Revenue Model**, which spawn at **opus tier** (or walk dimensions sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection). Each subagent independently:
 
 1. **Analyzes** the corresponding section of the Pitch through its dimension's lens
 2. **Searches the web** for market benchmarks and current best practices — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache). **Batch all uncached web searches in parallel.**
@@ -184,7 +186,7 @@ Runs the seven-dimension VC-style review pass on the existing Pitch. **This is f
    - What kill condition does this expose that The Stake missed?
 4. **Scores** the dimension 1–5 with specific findings
 
-**After all parallel dimension subagents complete, merge into the output scorecard.**
+**After all parallel dimension subagents complete, the merge runs at opus tier as an authoritative review, not a collation: validate each dimension's findings, re-score any dimension whose evidence does not support its score, add kill conditions the dimension legs missed, and compute the verdict from the opus-revised scores.**
 
 ### Dimensions (7 total — one per Pitch section)
 

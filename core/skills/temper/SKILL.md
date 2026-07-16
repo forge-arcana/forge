@@ -2,7 +2,7 @@
 name: temper
 description: Repeated evaluative passes (poke + press) with confidence-weighted consolidation. Runs each art 3x via subagents, deduplicates findings, and produces a single hardened report.
 ---
-<!-- model: sonnet | escalation: poke+press passes → opus subagents -->
+<!-- model: inherit | fan-out: poke+press passes → sonnet (ship-gate runs → opus); consolidation + Temper Verdict at opus -->
 
 # /temper — Hardened Evaluation
 
@@ -41,7 +41,7 @@ Save the outputs as `POKE_EVIDENCE` and `PRESS_EVIDENCE` respectively.
 
 ## Step 2: Parallel Analysis Passes
 
-Launch subagents to perform independent analyses (or sequential passes if your harness lacks parallel sub-agent spawning). Each subagent gets the same evidence but analyzes independently — the LLM reasoning is where variance occurs.
+Launch subagents to perform independent analyses (or sequential passes at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection). Each subagent gets the same evidence but analyzes independently — the LLM reasoning is where variance occurs.
 
 ### Finding Format (shared by both poke and press prompts)
 
@@ -63,7 +63,7 @@ FINDING_END
 
 ### Shared subagent prompt template
 
-Spawn N subagents per art (poke + press) in a single parallel batch. Each subagent receives the same scaffold with five variant slots:
+Spawn N sonnet-tier subagents per art (poke + press) in a single parallel batch. Ship-gate branch: when `/temper` is invoked at a ship gate (final gate, hardening gate, or an explicitly hardened run such as `/temper 5` pre-ship), spawn the passes at opus tier instead. Each subagent receives the same scaffold with five variant slots:
 
 ```
 You are {{PERSONA}}. Analyze the following project evidence
@@ -105,6 +105,8 @@ Output ONLY findings. No preamble, no summary, no commentary.
 
 ## Step 3: Consolidation
 
+Consolidation runs at opus tier — together with the Step 4 Temper Verdict it is the review gate over the sonnet passes: challenge findings whose evidence doesn't hold up before counting them, and adjudicate fuzzy-title merges on defect identity rather than wording (a wrong merge corrupts the confidence counts).
+
 Parse all subagent outputs. For each unique finding (match by TITLE + FILE, fuzzy-match similar titles):
 
 ### Confidence Scoring
@@ -138,7 +140,7 @@ Produce a markdown report with these sections in order:
 5. **Confirmed Findings** (fix these): Each finding with Confidence, Dimension, File, Problem, Fix, Effort. Ordered by severity.
 6. **Likely Findings** (review these): Same format.
 7. **Possible Findings** (may be noise): Brief, one line each.
-8. **Temper Verdict**: Confirmed criticals count, confirmed importants count, ship-ready verdict (YES / NO / WITH CONDITIONS), 2-3 sentence executive summary.
+8. **Temper Verdict** (opus tier — owned by the orchestrator, never a pass subagent): Confirmed criticals count, confirmed importants count, ship-ready verdict (YES / NO / WITH CONDITIONS), 2-3 sentence executive summary.
 
 ## Step 5: Next Steps
 

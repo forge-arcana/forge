@@ -2,7 +2,7 @@
 name: praise
 description: "Feedback-driven improvement loop — ingests user feedback, testing findings, or bug reports, routes them through evaluative arts (probe, preen, poke), assesses blueprint impact, and hands off to smith with a prioritized change brief. TRIGGER when: user has feedback to process, wants to close the loop on testing results, end-user reports, or QA findings."
 ---
-<!-- model: sonnet -->
+<!-- model: inherit | fan-out: probe/poke legs → opus; press/preen legs → sonnet; Phase 4 consolidation at opus -->
 
 # /praise — The Feedback Loop
 
@@ -58,13 +58,15 @@ Parse all feedback and classify into one or more categories. A single feedback i
 
 ## Phase 2: Parallel Art Dispatch
 
-Spawn one subagent per active category — **all in parallel** (independent analyses). If your harness does not support parallel sub-agent spawning, run the categories sequentially.
+Spawn one subagent per active category — **all in parallel** (independent analyses). Spawn the /probe and /poke legs as opus-tier subagents (their diagnoses have no downstream verification gate); spawn the /preen and /press legs as sonnet-tier subagents — Phase 4 consolidation runs at opus tier, re-grades their findings, and owns the verdicts (including SHIP BLOCKED). If your harness does not support parallel sub-agent spawning or per-spawn model selection, run the categories sequentially at your session model.
 
 ### Routing Rules
 
 **Only invoke arts with relevant feedback** — never invoke an art with empty input.
 
 #### /preen Subagent (if UX / Design feedback present)
+
+Spawn as a sonnet-tier subagent — Phase 4 consolidation (opus) re-grades these findings.
 
 ```
 You are running /preen on behalf of /praise.
@@ -83,6 +85,8 @@ Output structured findings: Critical / Improvements / Reduce / Polish.
 ```
 
 #### /probe Subagent (if Architecture / Tech feedback present)
+
+Spawn as an opus-tier subagent — its architectural judgments have no downstream verification gate.
 
 ```
 You are running /probe on behalf of /praise.
@@ -105,6 +109,8 @@ Severity: CRITICAL / IMPORTANT / MINOR.
 
 #### /poke Subagent (if Code Quality or Performance feedback present)
 
+Spawn as an opus-tier subagent — its root-cause diagnoses are never re-verified against code downstream.
+
 ```
 You are running /poke on behalf of /praise.
 Focus ONLY on the following feedback — do not do a full code audit.
@@ -122,6 +128,8 @@ Output structured findings with FILE, PROBLEM, FIX, EFFORT.
 ```
 
 #### /press Subagent (if Readiness / Operations feedback present)
+
+Spawn as a sonnet-tier subagent — Phase 4 consolidation (opus) re-grades these findings.
 
 ```
 You are running /press on behalf of /praise.
@@ -157,7 +165,7 @@ A **Blueprint Delta** block with four sub-sections in this order: **Add to Bluep
 
 ## Phase 4: Consolidation — The Praise Report
 
-After all Phase 2 subagents and Phase 3 complete, merge into a single report.
+After all Phase 2 subagents and Phase 3 complete, merge into a single report. Run the consolidation at opus tier: it is the review gate over the sonnet legs (/preen, /press) — re-grade their findings rather than merging them as-is — and it owns the final verdict, including SHIP BLOCKED.
 
 **Persist the report first** to `memory/YYYY-MM-DD-praise-report.md` before displaying.
 

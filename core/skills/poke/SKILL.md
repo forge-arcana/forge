@@ -2,7 +2,7 @@
 name: poke
 description: "Staff-engineer code review — code quality (Uncle Bob's tenets), tech debt, framework misuse, and logging hygiene. Produces an actionable report. Self-improving. TRIGGER when: user asks for code review, code quality audit, tech debt check, or 'review this code.'"
 ---
-<!-- model: sonnet | escalation: review fan-out → opus subagents -->
+<!-- model: inherit | fan-out: dimensions → sonnet (dimension 2 security → opus); merge + Gadfly Verdict at opus -->
 
 # /poke — Code Quality & Tech Debt Review
 
@@ -35,7 +35,7 @@ Run `<forge>/core/scripts/forge-scan.sh poke <project-path>` to collect mechanic
 
 Use the script's output as your evidence base for the judgment phase below. The script finds patterns — you classify severity, trace root causes, and recommend fixes.
 
-After evidence is collected, apply the Parallel Execution Principle from `core/skills/forge/protocol.md` — fan out one subagent per dimension with the shared evidence, then merge results into the final report. If your harness does not support parallel sub-agent spawning, run the dimensions sequentially.
+After evidence is collected, apply the Parallel Execution Principle from `core/skills/forge/protocol.md` — fan out one subagent per dimension with the shared evidence: spawn each dimension reviewer as a sonnet-tier subagent, except Dimension 2 (band-aids + actor-identity security), which spawns at opus tier. Then merge results into the final report at opus tier — the merge and the Gadfly Verdict are the review gate: dedup overlapping findings, challenge any finding not backed by evidence, and own the final severity ordering. If your harness does not support parallel sub-agent spawning or per-spawn model selection, run the dimensions sequentially at your session model.
 
 ## Dimension 1: SOLID & Strategy Patterns
 

@@ -2,7 +2,7 @@
 name: burn
 description: 'Token Burn — per-session token + cost report read from the harness''s own transcripts. Use when the user types "burn", asks "how many tokens did this cost?", or wants to measure token spend before/after an optimization.'
 ---
-<!-- model: haiku -->
+<!-- model: haiku | burn-status.sh does the work; no fan-out -->
 
 # /burn — Token Burn
 

@@ -2,7 +2,7 @@
 name: preen
 description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft. Pattern-aware (writes UX section of [PROJECT]_06_Pattern_V1.0.md when present). Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review."
 ---
-<!-- model: sonnet -->
+<!-- model: inherit | fan-out: dimensions 1-4 → sonnet; dimension 5 (emotional design) → opus; synthesis at opus -->
 
 # /preen — UI/UX Design Evaluation
 
@@ -59,7 +59,7 @@ After the Norman Questions, apply these reductive tests:
 4. **Do the unseen details matter?** Transitions, spacing, alignment, the feel of a scroll — craft lives in what users sense but can't articulate.
 5. **Is there quiet confidence?** The design communicates through restraint, not decoration. If it needs to shout, it isn't working.
 
-> **Parallel execution**: Evaluate all 5 dimensions in parallel via subagents. Each dimension's analysis is independent — spawn one subagent per dimension, merge results into the final report. If your harness does not support parallel sub-agent spawning, walk the dimensions sequentially.
+> **Parallel execution**: Evaluate all 5 dimensions in parallel via subagents. Each dimension's analysis is independent — spawn dimensions 1-4 as sonnet-tier subagents and dimension 5 (Emotional Design & Craft) as an opus-tier subagent, then merge results into the final report through the opus-tier synthesis in Output. If your harness does not support parallel sub-agent spawning or per-spawn model selection, walk the dimensions sequentially at your session model.
 
 ## Dimension 1: Interaction Design
 
@@ -131,6 +131,8 @@ Don Norman's three levels, refined through Ive's lens:
 Flag interfaces that nail behavioral but neglect visceral (ugly but functional), vice versa (beautiful but confusing), or that achieve both but through accumulation rather than reduction (feature-complete but cluttered).
 
 ## Output
+
+Synthesis runs at opus tier and is the review gate over the sonnet dimension legs: merge the dimension findings, deduplicate overlaps, challenge any finding that lacks evidence (drop or downgrade it), discard critiques that contradict the Touchstone's locked frame, and own the final severity buckets.
 
 Adapt output to whether a Pattern file exists (from /probe).
 

@@ -2,7 +2,7 @@
 name: forge
 description: The forge cycle — unified bidirectional sync between the forge repo and your membrane. Triages drift, presents a PLAN table, applies approved changes in both directions (incoming skills/learnings/memory, outgoing absorption), commits and pushes. `/forge --dry` for read-only inspection. `/forge on|off` toggles session skills. Replaces the retired /cast, /mark, /fold trio.
 ---
-<!-- model: sonnet | escalation: learning triage → opus subagent -->
+<!-- model: sonnet | fan-out: 3c knowledge review → opus; 3f presentation refresh → sonnet -->
 
 # /forge — The Forge Cycle
 
@@ -213,7 +213,7 @@ Protected skills (`forge`, `purge`) are already excluded at PLAN table level —
 | Any `<forge>/learnings/*.md` > 50 entries | Learning review |
 | `<forge>/memory/` has > 20 files | Memory review |
 
-Run `<forge>/core/scripts/fold-evidence.sh` to collect evidence. Classify each entry: **CURRENT** / **STALE** / **MERGED** / **EVOLVED** / **PROMOTED**. Present review sub-table, apply after user confirms.
+Run `<forge>/core/scripts/fold-evidence.sh` to collect evidence, then hand the evidence to an opus-tier subagent to classify each entry: **CURRENT** / **STALE** / **MERGED** / **EVOLVED** / **PROMOTED** — curation verdicts over the shared knowledge base need the strongest judgment, and the subagent keeps the bulky evidence dump out of the main context. Present its review sub-table, apply after user confirms — the user's confirmation is the gate for every prune or merge. If your harness lacks subagent spawning or per-spawn model selection, run the classification inline at your session model.
 
 If no triggers fire, skip entirely.
 
@@ -271,7 +271,7 @@ Runs after 3e if at least one skill learning file was modified. For each modifie
 
 Skills describe themselves in two places: the `description:` frontmatter and the `TRIGGER when:` line. As learnings accumulate, these can drift — a skill that has learned to handle edge cases it didn't originally anticipate, or that now covers more triggers than it declared.
 
-Launch one subagent per skill (in parallel — or sequentially if your harness lacks parallel sub-agent spawning):
+Launch one sonnet-tier subagent per skill (in parallel — or sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection):
 
 ```
 You are reviewing whether the description and trigger conditions for /<skill>
@@ -294,7 +294,7 @@ Rules:
 
 **Protected skills — skip unconditionally**: `forge`, `purge`.
 
-Add presentation changes as rows in the DONE report. If no changes needed: omit presentation rows (no noise).
+Review each subagent proposal against the presentation-only HARD RULE below, then add presentation changes as rows in the DONE report — nothing is applied until the user approves those rows. If no changes needed: omit presentation rows (no noise).
 
 For each approved change:
 1. Update `description:` in `<forge>/core/skills/<skill>/SKILL.md`

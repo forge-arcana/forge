@@ -2,7 +2,7 @@
 name: smith
 description: "Master of the forge — consumes a Blueprint + Pattern + Touchstone (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern + Touchstone, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 ---
-<!-- model: inherit | generative core — rides session -->
+<!-- model: inherit | fan-out: build/fix apprentices → sonnet (gated by per-heat opus art passes); art/evaluation + pry subagents → opus; verify/checkpoint → script (follow-up) -->
 
 # /smith — The Master Builder
 
@@ -196,7 +196,7 @@ Each heat follows: **Plan → Build → Verify → Evaluate → Fix → Checkpoi
 - Read the current heat's target from the ledger
 - Identify relevant source (blueprint sections or workspec steps) to implement
 - List files to create/modify
-- Check dependency graph — if independent heats exist, spawn apprentices (see Apprentice System)
+- Check dependency graph — if independent heats exist, spawn apprentices as sonnet-tier subagents (see Apprentice System)
 
 ### 2b: Build
 
@@ -228,7 +228,7 @@ If verify fails, smith fixes before invoking arts — no point evaluating broken
 Select art(s) per the Escalation Ladder, then:
 
 1. **Collect evidence** — run `<forge>/core/scripts/forge-scan.sh <art> <project-path>` for /poke and /press evaluations
-2. **Invoke art(s) via subagents** — each art runs in a subagent with pre-loaded evidence and context. Multiple arts on the same heat run in parallel where the harness supports it (evaluate fan-out).
+2. **Invoke art(s) via subagents** — each art runs in an opus-tier subagent with pre-loaded evidence and context; these passes ARE the review gate for sonnet-built code. Per-heat art invocations run single-agent scoped — commission them with "focus only on this heat's diff; skip pre-flight; no internal fan-out"; full fan-out art runs are reserved for phase and final gates. Heats smith built inline may instead take a sonnet-tier scoped pass, gated by smith's own findings synthesis. Multiple arts on the same heat run in parallel where the harness supports it (evaluate fan-out).
 3. **Collect findings** — parse subagent outputs for CRITICAL / IMPORTANT / MINOR classifications
 
 ### 2e: Fix
@@ -241,7 +241,7 @@ Address findings by severity:
 | IMPORTANT | Fix in batch | Yes — re-run after all IMPORTANT fixes |
 | MINOR | Log to deferred findings in ledger | No — proceed |
 
-**Circuit breaker**: If the same finding persists after 3 fix-evaluate cycles, smith invokes `/pry` with the specific blocker. If `/pry` finds a path, apply it. If `/pry` confirms a hard wall, smith adapts the approach autonomously — only escalating to a multi-choice user prompt if the arts themselves conflict on the resolution.
+**Circuit breaker**: If the same finding persists after 3 fix-evaluate cycles, smith invokes `/pry` as an opus-tier subagent with the specific blocker. If `/pry` finds a path, apply it. If `/pry` confirms a hard wall, smith adapts the approach autonomously — only escalating to a multi-choice user prompt if the arts themselves conflict on the resolution.
 
 ### 2f: Checkpoint
 
@@ -276,6 +276,8 @@ Phase gates are escalated evaluations at unit and phase boundaries.
 | **Final Gate** | `/temper` + `/pound` + `/pitch`* | Yes — `/wrap` |
 
 *`/pitch` only if product has monetization — re-validates the business model against what was actually built.
+
+Gate arts spawn at opus tier and run with their full fan-out — the single-agent scoping applied to per-heat passes does not apply at gates.
 
 ### Phase Gate Commits
 
@@ -316,6 +318,8 @@ MAX REACHED (5 cycles without convergence):
      Options: "Accept + ship with deferred" / "More cycles (set new cap)" / "Rollback to [last gate]"
 ```
 
+**Cycle scoping**: the first cycle runs `/temper` + `/pound` in full. Subsequent cycles re-run only the personas and dimensions with still-open findings. The final pre-ship pass runs one full `/temper` + `/pound` regardless.
+
 The smith keeps hammering until the blade rings clean. Only MINOR findings are accepted as-is. The 5-cycle cap prevents infinite loops — but the user can always raise it.
 
 After convergence: invoke `/wrap` with full context.
@@ -324,7 +328,7 @@ After convergence: invoke `/wrap` with full context.
 
 When smith encounters a wall — a dependency that doesn't exist, an API that doesn't support what the blueprint requires, conflicting requirements between sections:
 
-1. **Invoke `/pry`** with the specific blocker claim
+1. **Invoke `/pry`** — spawned at opus tier — with the specific blocker claim
 2. `/pry` decomposes assumptions, searches for alternatives, proposes paths
 3. If `/pry` finds a path → smith applies it and continues
 4. If `/pry` confirms a hard wall → smith reframes the problem and adjusts the build plan
@@ -374,13 +378,13 @@ For plan/conversation mode: compare the workspec hash from `memory/smith-workspe
 
 > Full details: [apprentice-system.md](apprentice-system.md) — fan-out patterns, waste principle, rules.
 
-**Core principle**: Sequential execution of independent work is waste — when the harness supports parallel sub-agent spawning. Before each heat, smith scans the dependency graph and spawns apprentices for all satisfied inputs (or executes them sequentially when parallel spawning isn't available). Cap: 3-4 concurrent. Timeout: 3 minutes without progress.
+**Core principle**: Sequential execution of independent work is waste — when the harness supports parallel sub-agent spawning. Before each heat, smith scans the dependency graph and spawns sonnet-tier apprentices for all satisfied inputs (or executes them sequentially at the session model when the harness lacks parallel subagent spawning or per-spawn model selection). Cap: 3-4 concurrent. Timeout: 3 minutes without progress.
 
 ## Art Selection & Escalation
 
 > Full details: [art-selection.md](art-selection.md) — selection matrix, detection rules, escalation ladder.
 
-**Five rungs**: Light (/poke) → Light+Design (+/preen) → Medium (+/press) → Heavy (/temper) → Convergence (/temper+/pound loop). Intensity never decreases. UI heats trigger /preen. Security-critical heats trigger /press or /pound.
+**Five rungs**: Light (/poke) → Light+Design (+/preen) → Medium (+/press) → Heavy (/temper) → Convergence (/temper+/pound loop). Intensity never decreases. UI heats trigger /preen. Security-critical heats (auth, payments, session) MUST add /press — this detection rule is non-optional; heats touching OWASP-relevant surfaces escalate to /pound.
 
 ## The Learning Membrane
 

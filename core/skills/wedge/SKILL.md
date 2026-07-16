@@ -2,7 +2,7 @@
 name: wedge
 description: "Master of aesthetic. Drives a single decisive thrust that splits the project's identity from generic AI slop. Reads Opus + Vow, extracts a prose Soul Brief (what the product IS, ISN'T, examples-from-life, forbidden defaults), then summons three design-apprentices on essence-lenses derived from the Soul Brief, and forges the Touchstone — paired artifacts (HTML vision + MD typed contract per DESIGN.md spec) that persist as the visual constitution every downstream artifact conforms to. TRIGGER when: user has an Opus and Vow and wants the project to have a soul-bearing visual face before scope or architecture lock."
 ---
-<!-- model: inherit | generative core — rides session -->
+<!-- model: inherit | fan-out: council apprentices → opus; Heat 6 codification → sonnet (opus reviews MD before Heat 8); audit + assembly at top level -->
 
 # /wedge — The Master of Aesthetic
 
@@ -232,7 +232,7 @@ The Scoped HTML Fragment requirements:
 
 The three Direction Cards land in `[PROJECT]_03b_DirectionCards_V1.0.md` (concatenated for the user to compare). The three scoped fragments are passed to the anti-convergence audit, then Heat 3.
 
-If your harness does not support parallel sub-agent spawning, walk the three lenses sequentially — each apprentice round still produces a Direction Card + scoped HTML fragment; Heat 3 assembles them just the same.
+If your harness does not support parallel sub-agent spawning or per-spawn model selection, walk the three lenses sequentially at your session model — each apprentice round still produces a Direction Card + scoped HTML fragment; Heat 3 assembles them just the same.
 
 #### Anti-convergence audit (mechanical, before Heat 3)
 
@@ -247,7 +247,7 @@ Reject and respawn if any of the following rhymes are present across two or more
 - **Banned Defaults violation** — any direction uses Inter / Roboto / glassmorphism / etc. (the universal HARD RULE).
 - **Vocabulary collapse** — all three directions name the same Family × Tone pairing on the optional shelf, signaling the apprentices ignored their distinct lenses and converged to the shelf's gravity.
 
-When a rhyme is detected, respawn the **single apprentice** whose direction is closest to the rhyme cluster (the most "generic" of the converging pair/trio), with the rhyme called out explicitly:
+When a rhyme is detected, respawn the **single apprentice** whose direction is closest to the rhyme cluster (the most "generic" of the converging pair/trio) — again at opus tier; a corrective spawn needs more divergence capability, not less — with the rhyme called out explicitly:
 
 > "Direction X visually rhymes with Direction Y in [hero structure / backdrop / color temperature / vocabulary]. Redo through your assigned lens [LENS] with explicit divergence on [aspect]. Re-read the Soul Brief's What it ISN'T and Forbidden Defaults sections; the rhyme suggests you reached for a default the soul rejects."
 
@@ -291,7 +291,7 @@ When the user picks **Regenerate**, capture *why* before re-spawning. Use a mult
 The Wedge then:
 
 1. **Revises the Soul Brief.** If feedback indicates lens-level mismatch, re-derive the *Three Lenses* section against the soul (and against the founder's articulated dissatisfaction). If feedback indicates transmission failure, tighten or expand the relevant prose section. If feedback names new Forbidden Defaults the previous council reached for, add them as binding. Save as `[PROJECT]_03a_SoulBrief_V1.1.md` (increment the minor version per regenerate cycle).
-2. **Re-runs Heat 2** with the new lens trio. Apprentices receive the revised Soul Brief, the new lenses, AND a brief of what the prior council missed (so they actively avoid the same gravity wells). Maximum **two regenerate cycles per /wedge run**; a third would indicate the upstream Opus/Vow may be thin or misaligned, and the Wedge halts and surfaces this to the user with a recommendation to revisit `/prime` rather than continue spinning.
+2. **Re-runs Heat 2** with the new lens trio (apprentices spawn at opus tier, as in the first council). Apprentices receive the revised Soul Brief, the new lenses, AND a brief of what the prior council missed (so they actively avoid the same gravity wells). Maximum **two regenerate cycles per /wedge run**; a third would indicate the upstream Opus/Vow may be thin or misaligned, and the Wedge halts and surfaces this to the user with a recommendation to revisit `/prime` rather than continue spinning.
 3. **Re-runs the anti-convergence audit** on the new fragments.
 4. **Assembles a new Preview HTML** versioned with the regenerate cycle: `[PROJECT]_03c_PreviewTouchstone_V1.1.html`, `_V1.2.html`, etc. Prior previews are NOT deleted — they remain alongside as historical record of the council's evolution.
 5. **Returns to Heat 4** with the new preview opened, and asks again: pick A/B/C, hybridize, or regenerate.
@@ -320,6 +320,8 @@ The Touchstone is **not** a multi-page demo. It is one page that breathes the en
 The HTML carries the soul. The MD carries the contract. Smith, Probe, Preen, Pitch, and any future tooling (Tailwind theme generator, Figma plugin, tokens.json export) must consume the Touchstone *programmatically* — not by grepping CSS variables out of HTML.
 
 Produce `[PROJECT]_03e_Touchstone_V1.0.md` adjacent to the HTML, following the **DESIGN.md spec**. Load [`<forge>/core/skills/wedge/touchstone-md-scaffold.md`](touchstone-md-scaffold.md) for the typed-token YAML schema, the eight prose section templates (Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts), and the five generation rules (tokens normative, prose contextual, no invented sections, `{path.to.token}` reference syntax, Do's/Don'ts derived from Chosen Direction).
+
+This heat may run as a **sonnet-tier subagent leg** — the scaffold fully specifies the schema, section list, and generation rules, making it implementation-to-spec — only with this gate wired: before Heat 8, the orchestrator (opus tier) reviews the Touchstone.md token values against the HTML's computed styles and the prose sections against the Soul Brief + Chosen Direction. If that review is not run, Heat 6 stays inline at the orchestrator.
 
 After this heat the project has both Touchstone forms — vision (HTML) and contract (MD) — and the contract is normative for tokens.
 
@@ -375,7 +377,7 @@ Smith conforms.
 
 ## Council Apprentice Brief Template
 
-When spawning each of the 3 council apprentices via your harness's sub-agent primitive, use this prompt template:
+When spawning each of the 3 council apprentices via your harness's sub-agent primitive, spawn each as an opus-tier subagent (creative identity work — the council is never downgraded), using this prompt template:
 
 ```
 You are a master designer summoned to the council of the forge.
@@ -422,7 +424,7 @@ Your direction must serve the Soul Brief — including the Memorable Signature f
 Return BOTH artifacts. Direction Card first, then a fenced `<!-- FRAGMENT -->` block with the scoped HTML, then a fenced `<!-- FONTS -->` block with the `<link>` tags. No preamble. No alternatives. One direction, committed.
 ```
 
-Spawn three apprentices in **parallel** (single message, multiple sub-agent calls) where the harness supports it; otherwise walk them sequentially. Each gets a distinct LENS from the Soul Brief's Three Lenses section AND a distinct container letter (A, B, C). Each returns a Direction Card + scoped HTML fragment + fonts. Concatenate cards into `[PROJECT]_03b_DirectionCards_V1.0.md`; run the anti-convergence audit; respawn if rhymes detected; then pass fragments and fonts to Heat 3 for assembly into the unified preview HTML.
+Spawn three apprentices in **parallel** as opus-tier subagents (single message, multiple sub-agent calls) where the harness supports it; otherwise walk them sequentially at your session model. Each gets a distinct LENS from the Soul Brief's Three Lenses section AND a distinct container letter (A, B, C). Each returns a Direction Card + scoped HTML fragment + fonts. Concatenate cards into `[PROJECT]_03b_DirectionCards_V1.0.md`; run the anti-convergence audit; respawn if rhymes detected; then pass fragments and fonts to Heat 3 for assembly into the unified preview HTML.
 
 ## Self-Improvement Loop
 

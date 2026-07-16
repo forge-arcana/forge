@@ -168,6 +168,20 @@ Replay the entire flow as each of these users. For each persona, note what break
     - The core question for every field: does the system check that this value makes sense in reality, or does it only check the format?
 
 19. **Radical inclusion auditor** — You scrutinise every word, form field, default, and assumption for inherent bias, exclusion, or cultural insensitivity. Nothing gets a pass. Probe for:
+    - Gender fields: is it binary-only? Is "prefer not to say" an option? Is gender even necessary for this flow?
+    - Name fields: do they assume Western naming conventions? Some cultures have one name, some have four. "First name / Last name" excludes mononymous users and misorders cultures where family name comes first
+    - Title/honorific: is a non-gendered option available (Mx)? Is title mandatory when it shouldn't be?
+    - Language and copy: gendered pronouns in UI text ("he/she" instead of "they"), assumptions like "Dear Sir/Madam" in auto-generated emails
+    - Profile photos and avatars: are default avatars skin-tone neutral? Do illustration styles represent diverse body types, ages, and abilities?
+    - Address and identity assumptions: requiring a "Christian name", assuming everyone has a middle name, assuming a fixed residential address (excludes homeless users, travellers, military)
+    - Phone number as mandatory: excludes users without personal phones (elderly, low-income, children with parental accounts)
+    - Accessibility as inclusion: are error messages, onboarding, and help content available in plain language? Is reading level appropriate for the broadest audience?
+    - Cultural assumptions in defaults: is the default country, language, currency, or date format biased towards one region? Are holidays or "business days" calculated assuming a Western calendar?
+    - Content moderation bias: would the platform's filters disproportionately flag names, cultural terms, or places from certain backgrounds as inappropriate? (e.g., "Scunthorpe problem")
+    - Imagery and examples: do sample data, placeholder text, example names, and stock imagery represent diverse demographics, or default to one group?
+    - Payment and economic assumptions: does the platform assume a credit card? Bank account? Stable income? Are alternative payment methods available for underbanked users?
+    - Disability beyond screen readers: cognitive accessibility (clear instructions, forgiving input), motor accessibility (large targets, no precision required), neurodivergent users (no flashing, no time pressure, predictable navigation)
+    - The core question for every design decision: who does this exclude, and was that exclusion a conscious choice or an oversight?
 
 20. **Testing strategist** — You don't run tests — you audit whether the testing strategy itself is sound. Evaluate:
     - Test pyramid balance — is there an inverted pyramid with too many slow e2e tests and not enough unit tests, or vice versa?
@@ -193,20 +207,6 @@ Replay the entire flow as each of these users. For each persona, note what break
     - Churn risk points — which flows are frustrating enough to make a paying user cancel? Where does perceived value drop?
     - Competitor comparison — if a user is evaluating you against alternatives, does the flow make your differentiators obvious within the first 60 seconds?
     - The core question: at every step, are you removing reasons for the user to leave, or accidentally creating them?
-    - Gender fields: is it binary-only? Is "prefer not to say" an option? Is gender even necessary for this flow?
-    - Name fields: do they assume Western naming conventions? Some cultures have one name, some have four. "First name / Last name" excludes mononymous users and misorders cultures where family name comes first
-    - Title/honorific: is a non-gendered option available (Mx)? Is title mandatory when it shouldn't be?
-    - Language and copy: gendered pronouns in UI text ("he/she" instead of "they"), assumptions like "Dear Sir/Madam" in auto-generated emails
-    - Profile photos and avatars: are default avatars skin-tone neutral? Do illustration styles represent diverse body types, ages, and abilities?
-    - Address and identity assumptions: requiring a "Christian name", assuming everyone has a middle name, assuming a fixed residential address (excludes homeless users, travellers, military)
-    - Phone number as mandatory: excludes users without personal phones (elderly, low-income, children with parental accounts)
-    - Accessibility as inclusion: are error messages, onboarding, and help content available in plain language? Is reading level appropriate for the broadest audience?
-    - Cultural assumptions in defaults: is the default country, language, currency, or date format biased towards one region? Are holidays or "business days" calculated assuming a Western calendar?
-    - Content moderation bias: would the platform's filters disproportionately flag names, cultural terms, or places from certain backgrounds as inappropriate? (e.g., "Scunthorpe problem")
-    - Imagery and examples: do sample data, placeholder text, example names, and stock imagery represent diverse demographics, or default to one group?
-    - Payment and economic assumptions: does the platform assume a credit card? Bank account? Stable income? Are alternative payment methods available for underbanked users?
-    - Disability beyond screen readers: cognitive accessibility (clear instructions, forgiving input), motor accessibility (large targets, no precision required), neurodivergent users (no flashing, no time pressure, predictable navigation)
-    - The core question for every design decision: who does this exclude, and was that exclusion a conscious choice or an oversight?
 
 ---
 

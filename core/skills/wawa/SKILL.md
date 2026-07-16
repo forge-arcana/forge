@@ -2,7 +2,7 @@
 name: wawa
 description: 'Where Are We At? — concise status snapshot. Use when user types "wawa" or asks about project status.'
 ---
-<!-- model: haiku -->
+<!-- model: haiku | collation via wawa-status.sh; no fan-out -->
 
 # /wawa — Where Are We At?
 

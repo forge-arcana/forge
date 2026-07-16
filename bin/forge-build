@@ -169,9 +169,12 @@ Each skill carries a neutral \`<!-- model: <tier> -->\` hint declaring the cogni
 |---|---|---|
 | \`model: haiku\` | Mechanical — scripts, polling, formatting | Your fastest / cheapest model |
 | \`model: sonnet\` | Structured reasoning — evaluation against a rubric | A mid-tier balanced model |
-| \`model: inherit\` | Generative core — ideation, synthesis, orchestration | Your strongest reasoning model |
+| \`model: opus\` | High-judgment — orchestration, creative generation, synthesis, verdicts, reviewing sonnet output | Your strongest reasoning model |
+| \`model: inherit\` | Rides the session — the skill runs at whatever model drives the conversation | Your current session model |
 
-An \`escalation:\` note (e.g. \`escalation: review fan-out → opus subagents\`) means the skill runs its bulk on the cheaper tier but spawns a stronger model for the named kernel — honour it by switching up only for that sub-step.
+The full hint grammar is \`<!-- model: <tier> | fan-out: <leg> → <tier>; <leg> → <tier> -->\`. A \`fan-out:\` clause names the tier for each spawned leg; \`escalate:\` replaces it for conditional spawns — the stronger tier fires only when the named condition hits; single-agent skills end with \`| no fan-out\`. A fan-out note binds only where the skill's flow text names the tier at the spawn step — the hint is the summary, the flow text is the contract.
+
+If your harness lacks parallel subagent spawning or per-spawn model selection, run the legs sequentially at your session model.
 
 On Codex CLI / DeepSeek TUI / Gemini CLI, switch via \`/model\` before invoking a skill whose tier differs from your current model. (Claude Code applies the tier automatically — the hint is injected as real \`model:\` frontmatter at deploy time.)
 

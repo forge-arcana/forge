@@ -2,7 +2,7 @@
 name: qt
 description: Quick Test — verify a fix actually works before the user manually tests. Replaces the old "dd" debug dev command. Use when user says "qt" or wants to verify a fix.
 ---
-<!-- model: haiku -->
+<!-- model: sonnet | evidence-backed verdicts; no fan-out -->
 
 # /qt — Quick Test
 
@@ -60,6 +60,8 @@ FAIL — [what was expected vs what happened]
 Evidence: [actual output]
 Next step: [what to investigate]
 ```
+
+**Evidence contract (hard)**: no PASS without the raw artifact embedded in the report — the screenshot path, command output, or response body itself. Absence of evidence = automatic FAIL. The full report, evidence included, goes straight to the user — their read of the evidence is the review gate; a verdict takes effect only after they've seen the proof.
 
 ## Step 4: Restart Advisory (ALWAYS)
 

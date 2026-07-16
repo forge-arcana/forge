@@ -2,7 +2,7 @@
 name: pound
 description: "Deep QA analysis using 21 adversarial personas. Generates tests, finds edge cases, audits security/accessibility/compliance. Self-improving. TRIGGER when: user wants thorough QA, comprehensive testing, edge case analysis, or 'break this.'"
 ---
-<!-- model: sonnet | escalation: 21-persona fan-out → opus subagents -->
+<!-- model: inherit | fan-out: personas 6,7,9,17 → opus; other personas + Part 3 inputs → sonnet; consolidation at opus -->
 
 # /pound — Deep Testing & Analysis
 
@@ -22,11 +22,11 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 3. **Execute the framework's three parts**:
    - **Part 1**: Practical QA review — runs first to establish baseline context.
-   - **After Part 1, launch Parts 2 + 3 in parallel** as parallel subagents (or sequentially if your harness lacks parallel sub-agent spawning):
-     - **Part 2**: Persona-based simulation — spawn parallel subagents across the 21 personas defined in `qa-framework.md`. Each persona's review is independent.
-     - **Part 3**: Adversarial input generation — craft malicious/edge-case inputs.
+   - **After Part 1, launch Parts 2 + 3 in parallel** as parallel subagents (or sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection):
+     - **Part 2**: Persona-based simulation — spawn parallel subagents across the 21 personas defined in `qa-framework.md`. Spawn personas 6, 7, 9, and 17 (lawyer, security expert, fraudster, architect) as opus-tier subagents — their adversarial reasoning is open-ended, the rubrics only seed it. Spawn the other 17 personas as sonnet-tier subagents — each carries an explicit rubric in the framework. Each persona's review is independent.
+     - **Part 3**: Adversarial input generation — craft malicious/edge-case inputs, as a sonnet-tier subagent.
 
-4. **Output findings** grouped by severity:
+4. **Consolidate at opus tier and output findings** grouped by severity — this consolidation is the review gate for the sonnet-tier legs: dedup overlapping findings across personas, challenge any finding lacking evidence, reconcile severity disagreements, and own the final severity verdicts:
 
 ```markdown
 # QA Deep Dive — [FEATURE_SCOPE]
