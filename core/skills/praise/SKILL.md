@@ -27,7 +27,7 @@ description: "Feedback-driven improvement loop — ingests user feedback, testin
    - Read `<forge>/core/skills/forge/stack-guide.md` for tech reference
    - Scan cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions)
    - Read `<forge>/learnings/praise-learnings.md` if it exists (routing wisdom from prior runs)
-   - Read `memory/.web-cache.json` if it exists
+   - Read `memory/.web-cache.json` if it exists (per-query lookups/writes during the run go through `<forge>/core/scripts/web-cache.sh` per the [Forge Protocol](../forge/protocol.md#web-research-cache))
 
 ## Phase 1: Feedback Ingestion & Classification
 

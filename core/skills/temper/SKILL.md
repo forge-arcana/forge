@@ -103,11 +103,24 @@ Output ONLY findings. No preamble, no summary, no commentary.
 
 **Important**: Launch ALL subagents (poke + press) in a single parallel batch. Do not wait for poke to finish before starting press.
 
+**Persist each pass**: save every subagent's raw output verbatim to `memory/.temper-passes/<art>-pass-<i>.txt` (clear that directory at the start of the run) — Step 3's consolidation script parses these files. Verbatim means byte-for-byte: no reformatting, no dedup, no commentary.
+
 ## Step 3: Consolidation
 
-Consolidation runs at opus tier — together with the Step 4 Temper Verdict it is the review gate over the sonnet passes: challenge findings whose evidence doesn't hold up before counting them, and adjudicate fuzzy-title merges on defect identity rather than wording (a wrong merge corrupts the confidence counts).
+The arithmetic half is script tier — run:
 
-Parse all subagent outputs. For each unique finding (match by TITLE + FILE, fuzzy-match similar titles):
+```bash
+<forge>/core/scripts/temper-consolidate.sh memory/.temper-passes <N>
+```
+
+It parses the FINDING blocks, groups by normalized TITLE+FILE, computes the confidence buckets / severity promotion / press score averages below, and emits the pre-rendered report tables plus a NEAR_DUPLICATES section (each group lists its contributing passes).
+
+The judgment half runs at opus tier — together with the Step 4 Temper Verdict it is the review gate over the sonnet passes:
+
+1. **Adjudicate every NEAR_DUPLICATES pair** on defect identity rather than wording (a wrong merge corrupts the confidence counts). On merge, recompute confidence from the UNION of the two groups' pass lists against the legend thresholds.
+2. **Challenge findings whose evidence doesn't hold up** before counting them — drop them from the tables and say so in the report.
+
+If your harness lacks the script, apply the same rules manually — parse all pass outputs, match by TITLE + FILE, fuzzy-match similar titles:
 
 ### Confidence Scoring
 

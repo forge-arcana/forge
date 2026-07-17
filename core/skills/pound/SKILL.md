@@ -16,14 +16,14 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 ## Process
 
-1. **Pre-flight** — parallel reads: `qa-framework.md` in this skill's directory + Forge Protocol pre-flight (learnings, stack guide, project rules file). If no `$ARGUMENTS`, also run `git log --oneline -10` for scope.
+1. **Pre-flight** — parallel reads: `qa-framework.md` in this skill's directory + Forge Protocol pre-flight (learnings, stack guide, project rules file). If no `$ARGUMENTS`, also run `git log --oneline -10` for scope. **Collect shared evidence once** (script tier): run `<forge>/core/scripts/forge-scan.sh poke <project-path>` and `... press <project-path>` in parallel, save the combined output as `POUND_EVIDENCE` — without it, each of the 21 persona subagents re-explores the codebase independently, the single largest avoidable token cost in the forge. (forge-scan is TypeScript-tuned and under-reports Python projects — degrade gracefully, don't block.)
 
 2. **Scope detection** — `$ARGUMENTS` if provided, else git log + project rules file. Identify `[PRODUCT_NAME]`, `[TECH_STACK]`, `[FEATURE_SCOPE]`, `[JURISDICTION]` (ask user for jurisdiction if not obvious) and fill them into the framework.
 
 3. **Execute the framework's three parts**:
    - **Part 1**: Practical QA review — runs first to establish baseline context.
    - **After Part 1, launch Parts 2 + 3 in parallel** as parallel subagents (or sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection):
-     - **Part 2**: Persona-based simulation — spawn parallel subagents across the 21 personas defined in `qa-framework.md`. Spawn personas 6, 7, 9, and 17 (lawyer, security expert, fraudster, architect) as opus-tier subagents — their adversarial reasoning is open-ended, the rubrics only seed it. Spawn the other 17 personas as sonnet-tier subagents — each carries an explicit rubric in the framework. Each persona's review is independent.
+     - **Part 2**: Persona-based simulation — spawn parallel subagents across the 21 personas defined in `qa-framework.md`. Spawn personas 6, 7, 9, and 17 (lawyer, security expert, fraudster, architect) as opus-tier subagents — their adversarial reasoning is open-ended, the rubrics only seed it. Spawn the other 17 personas as sonnet-tier subagents — each carries an explicit rubric in the framework. Each persona's review is independent. **Assemble each spawn prompt** (script tier) as: `<forge>/core/scripts/pound-persona.sh <framework-path> <N>` output (shared preamble + that persona's block only — never the full ~20KB framework) + the filled context variables + `POUND_EVIDENCE` + "Do NOT run forge-scan.sh — evidence is provided" + "NEVER use && or ; to chain bash commands". If your harness lacks the script, fall back to pasting the framework with the other personas' sections removed by hand.
      - **Part 3**: Adversarial input generation — craft malicious/edge-case inputs, as a sonnet-tier subagent.
 
 4. **Consolidate at opus tier and output findings** grouped by severity — this consolidation is the review gate for the sonnet-tier legs: dedup overlapping findings across personas, challenge any finding lacking evidence, reconcile severity disagreements, and own the final severity verdicts:

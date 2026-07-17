@@ -15,6 +15,8 @@
 #   burn-status.sh [project-path]            # all sessions for a project (default: cwd)
 #   burn-status.sh [project-path] --today    # only sessions touched today
 #   burn-status.sh [project-path] --session latest   # detail one session (uuid|latest)
+#   burn-status.sh [project-path] --compare <a> <b>  # before/after delta between two
+#                                            # sessions (uuid prefix | latest)
 #   burn-status.sh --all                     # every project under the membrane
 #
 # Requires: jq, awk. bash >=3.2.
@@ -33,6 +35,7 @@ while [[ $# -gt 0 ]]; do
     --all)     SCOPE="all"; shift ;;
     --today)   MODE="today"; shift ;;
     --session) MODE="session"; SESSION="${2:-latest}"; shift 2 ;;
+    --compare) MODE="compare"; CMP_A="${2:?--compare needs two session ids}"; CMP_B="${3:?--compare needs two session ids}"; shift 3 ;;
     -*)        echo "burn-status.sh: unknown option '$1'" >&2; exit 2 ;;
     *)         PROJECT="$1"; shift ;;
   esac
@@ -100,12 +103,68 @@ else
   DIRS+=("$PROJECTS_DIR/$(encode_path "$ABS")/")
 fi
 
+# --- --compare: before/after delta between two sessions of one project ---
+resolve_session() { # dir selector → single .jsonl path (errors if ambiguous/absent)
+  local dir="$1" sel="$2"
+  if [[ "$sel" == "latest" ]]; then
+    ls -t "$dir"*.jsonl 2>/dev/null | head -1
+    return
+  fi
+  local matches=("$dir$sel"*.jsonl)
+  if [[ ${#matches[@]} -ne 1 || ! -f "${matches[0]}" ]]; then
+    echo "ERROR: session '$sel' matches ${#matches[@]} transcript(s) in $dir — need exactly 1." >&2
+    return 1
+  fi
+  echo "${matches[0]}"
+}
+
+if [[ "$MODE" == "compare" ]]; then
+  DIR="${DIRS[0]}"
+  [[ -d "$DIR" ]] || { echo "No transcript dir found for this project ($DIR)."; exit 1; }
+  shopt -s nullglob
+  FA=$(resolve_session "$DIR" "$CMP_A") || exit 1
+  FB=$(resolve_session "$DIR" "$CMP_B") || exit 1
+  shopt -u nullglob
+  [[ -n "$FA" && -n "$FB" ]] || { echo "ERROR: could not resolve both sessions." >&2; exit 1; }
+  IFS=$'\t' read -r am ai ao acr acc an <<<"$(aggregate_session "$FA")"
+  IFS=$'\t' read -r bm bi bo bcr bcc bn <<<"$(aggregate_session "$FB")"
+  ACOST=$(cost_of "$am" "$ai" "$ao" "$acr" "$acc")
+  BCOST=$(cost_of "$bm" "$bi" "$bo" "$bcr" "$bcc")
+  echo "## Token Burn — Before/After"
+  echo "**A (before)**: \`$(basename "$FA" .jsonl | cut -c1-8)\` ($an turns, ${am#claude-}) | **B (after)**: \`$(basename "$FB" .jsonl | cut -c1-8)\` ($bn turns, ${bm#claude-})"
+  echo ""
+  echo "| Metric | A | B | Δ | Δ% |"
+  echo "|--------|---|---|----|----|"
+  row() { # label a b
+    awk -v L="$1" -v a="$2" -v b="$3" 'BEGIN{
+      d = b - a
+      pct = (a == 0) ? "n/a" : sprintf("%+.1f%%", d / a * 100)
+      hum = ""; n = (d < 0 ? -d : d)
+      if (n >= 1e6) hum = sprintf("%.1fM", n/1e6); else if (n >= 1e3) hum = sprintf("%.1fk", n/1e3); else hum = sprintf("%d", n)
+      printf "| %s | %s | %s | %s%s | %s |\n", L, a, b, (d < 0 ? "-" : "+"), hum, pct
+    }'
+  }
+  row "Output tokens" "$ao" "$bo"
+  row "Input tokens" "$ai" "$bi"
+  row "Cache write" "$acc" "$bcc"
+  row "Cache read" "$acr" "$bcr"
+  awk -v a="$ACOST" -v b="$BCOST" 'BEGIN{
+    d = b - a
+    pct = (a == 0) ? "n/a" : sprintf("%+.1f%%", d / a * 100)
+    printf "| Est cost | $%.2f | $%.2f | %+.2f | %s |\n", a, b, d, pct
+  }'
+  echo ""
+  echo "_Output tokens are the honest spend signal; cache-read deltas flatter the numbers._"
+  exit 0
+fi
+
 echo "## Token Burn Report"
 echo "**Membrane**: \`$MEMBRANE\` | **Scope**: $SCOPE | **Mode**: $MODE"
 echo "**Pricing**: estimate only (see price_for in burn-status.sh)"
 echo ""
 
 GT_I=0; GT_O=0; GT_CR=0; GT_CC=0; GT_COST=0; FOUND=0
+GT_OC=0; GT_WC=0; GT_RC=0   # per-column est-cost accumulators (output / cache-write / cache-read)
 
 for DIR in "${DIRS[@]}"; do
   [[ -d "$DIR" ]] || continue
@@ -149,6 +208,10 @@ for DIR in "${DIRS[@]}"; do
     echo "| \`$sid\` | $dt | $n | $(humanize "$i") | $(humanize "$o") | $(humanize "$cr") | $(humanize "$cc") | \$$cost | ${model#claude-} |"
     GT_I=$((GT_I+i)); GT_O=$((GT_O+o)); GT_CR=$((GT_CR+cr)); GT_CC=$((GT_CC+cc))
     GT_COST=$(awk -v a="$GT_COST" -v b="$cost" 'BEGIN{printf "%.2f", a+b}')
+    read -r pin pout pcw pcr <<<"$(price_for "$model")"
+    GT_OC=$(awk -v a="$GT_OC" -v o="$o" -v p="$pout" 'BEGIN{printf "%.4f", a + o*p/1e6}')
+    GT_WC=$(awk -v a="$GT_WC" -v c="$cc" -v p="$pcw" 'BEGIN{printf "%.4f", a + c*p/1e6}')
+    GT_RC=$(awk -v a="$GT_RC" -v c="$cr" -v p="$pcr" 'BEGIN{printf "%.4f", a + c*p/1e6}')
   done
   echo ""
 done
@@ -163,5 +226,18 @@ echo ""
 echo "| Sessions | Input | Output | Cache R | Cache W | Est \$ |"
 echo "|----------|-------|--------|---------|---------|--------|"
 echo "| $FOUND | $(humanize "$GT_I") | $(humanize "$GT_O") | $(humanize "$GT_CR") | $(humanize "$GT_CC") | \$$GT_COST |"
+echo ""
+# Dominant-column burn profile (cost-weighted) + the canned lever line — deterministic,
+# so /burn's step-2 read is emitted here instead of asking the model to compare numbers.
+awk -v oc="$GT_OC" -v wc="$GT_WC" -v rc="$GT_RC" -v tot="$GT_COST" 'BEGIN{
+  lbl = "Output-dominated"; dom = oc
+  lever = "leaner prompts / fewer fan-out subagents"
+  if (wc > dom) { lbl = "Cache-Write-dominated"; dom = wc
+    lever = "steadier context — avoid churn that invalidates the prompt cache" }
+  if (rc > dom) { lbl = "Cache-Read-dominated"; dom = rc
+    lever = "cheap; usually fine — big raw numbers here are mostly low-cost" }
+  share = (tot > 0) ? sprintf(" (%.0f%% of est cost)", dom / tot * 100) : ""
+  printf "**Profile**: %s%s — lever: %s.\n", lbl, share, lever
+}'
 echo ""
 echo "_Output tokens are the real spend lever; cache-read is cheap. Burn dominated by Cache W → context is being rebuilt; by Output → generation-heavy work._"

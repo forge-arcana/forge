@@ -112,17 +112,13 @@ Evaluative arts search the web for current best practices. To avoid redundant qu
 
 ### Workflow
 
-1. **Before web search**: normalize the query to a key (lowercase, strip year, hyphenate). Check if a matching entry exists in cache with `cached_at + ttl_days > today`. If yes, use the cached summary instead of searching.
-2. **After web search**: write the result to cache — summary of findings, source URLs, timestamp, and TTL (default 30 days).
-3. **Expired entries**: if an entry exists but is past TTL, re-search and overwrite.
+Cache bookkeeping is script-tier work — `<forge>/core/scripts/web-cache.sh` implements this contract; call it instead of re-deriving keys or TTL arithmetic in-context:
 
-### Key Normalization
+1. **Before web search**: `web-cache.sh get "<raw query>"` — on HIT it prints the cached entry (use the summary instead of searching); on `MISS`/`EXPIRED` (exit 1), search.
+2. **After web search**: `web-cache.sh put "<raw query>" --summary "<2-3 sentence findings>" --source <url> [--source <url>...]` — TTL defaults to 30 days (`--ttl` to override). Expired entries are overwritten by the same call.
+3. Both subcommands take `--project <path>` when running outside the project root. Fan-out legs call the script directly — do not re-implement the lookup in spawn prompts.
 
-Strip the year, lowercase, replace spaces with hyphens:
-- `"Drizzle ORM best practices 2025"` → `drizzle-orm-best-practices`
-- `"Hono middleware patterns 2026"` → `hono-middleware-patterns`
-
-This ensures the same topic maps to one cache key regardless of when the search runs.
+**Fallback** (harness without the script): apply the same contract manually — normalize the query to a key (lowercase, strip year, hyphenate: `"Drizzle ORM best practices 2025"` → `drizzle-orm-best-practices`), use a cached entry only while `cached_at + ttl_days > today`, and write summary + sources + timestamp + TTL after each search. The normalization ensures the same topic maps to one cache key regardless of when the search runs.
 
 ## Post-Flight (every art runs these after producing output)
 

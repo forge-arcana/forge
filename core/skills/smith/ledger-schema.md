@@ -48,7 +48,7 @@
 - **`pattern`** — only present in blueprint mode when the Pattern file exists. Hash lets smith detect post-build Pattern updates (e.g., /preen appending UX section mid-build). `null` in plan/conversation modes.
 - **`workspec`** — only present in plan/conversation modes. Points to `memory/smith-workspec.md` with hash for change detection on resume. `null` in blueprint mode.
 - **`decisions`** — per-heat decision rationale. Survives context compaction. "Heat 5: chose WebSocket over SSE because blueprint Section 14 specifies bidirectional."
-- **`checkpointSha`** — git commit SHA at each heat completion. Phase gates also snapshot the full ledger to `memory/smith-ledger-checkpoint-<gate>.json`.
+- **`checkpointSha`** — git commit SHA at each heat completion. Phase gates also snapshot the full ledger to `memory/smith-ledger-checkpoint-<gate>.json`. Stamped only by `<forge>/core/scripts/smith-checkpoint.sh` (`--heat N` / `--gate name`) — never hand-edited; `smith-rollback.sh` consumes these SHAs for rollback.
 - **`cycleHistory`** — final gate convergence tracking. Used for stall detection: if findings don't decrease for 2 consecutive cycles, smith triggers user review.
 - **`deferredFindings`** — MINOR findings accepted as-is, carried forward for future cleanup.
 

@@ -18,12 +18,9 @@ No prose preamble — just run the script and present the table.
    - `burn-status.sh <project-path> --session latest` — the current/most-recent session
    - `burn-status.sh --all` — every project under the membrane
 
-2. **Present the table verbatim**, then add a one-line read of the burn profile:
-   - **Output-dominated** → generation-heavy work; the lever is leaner prompts / fewer fan-out subagents.
-   - **Cache-Write-dominated** → context keeps getting rebuilt; the lever is steadier context (avoid churn that invalidates the prompt cache).
-   - **Cache-Read-dominated** → cheap; usually fine. Big raw numbers here are mostly low-cost.
+2. **Present the table verbatim** — including its `**Profile**:` line. The script computes the dominant-cost-column read (Output- / Cache-Write- / Cache-Read-dominated) and the matching lever itself; do not re-derive or re-compare the numbers, just relay it.
 
-3. **If the user is comparing before/after** an optimization (Path B lean scripts, Tier-1 `lean.sh`, etc.): capture the relevant session's totals from both runs and report the absolute + % delta in output tokens and est. cost. Output tokens are the honest spend signal; cache-read deltas flatter the numbers.
+3. **If the user is comparing before/after** an optimization (Path B lean scripts, Tier-1 `lean.sh`, etc.): run `burn-status.sh <project-path> --compare <before-session> <after-session>` (session = uuid prefix or `latest`) and present its delta table verbatim — the arithmetic is script tier. Output tokens are the honest spend signal; cache-read deltas flatter the numbers.
 
 ## Notes & Caveats
 

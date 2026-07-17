@@ -2,7 +2,7 @@
 name: smith
 description: "Master of the forge — consumes a Blueprint + Pattern + Touchstone (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern + Touchstone, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 ---
-<!-- model: inherit | fan-out: build/fix apprentices → sonnet (gated by per-heat opus art passes); art/evaluation + pry subagents → opus; verify/checkpoint → script (follow-up) -->
+<!-- model: inherit | fan-out: build/fix apprentices → sonnet (gated by per-heat opus art passes); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) -->
 
 # /smith — The Master Builder
 
@@ -247,9 +247,9 @@ Address findings by severity:
 
 After each heat completes (findings clean or deferred):
 
-1. **Update `memory/smith-ledger.json`** — heat status, evaluation results, timing
+1. **Update `memory/smith-ledger.json`** — heat status, evaluation results, timing (judgment fields only — SHA/timestamp stamps belong to the script in step 3)
 2. **Update `memory/smith-progress.md`** — human-readable progress
-3. **Record checkpoint SHA** — `git rev-parse HEAD` stored in ledger for this heat. At phase gates, also snapshot the ledger itself to `memory/smith-ledger-checkpoint-<gate>.json`.
+3. **Record checkpoint SHA** — run `<forge>/core/scripts/smith-checkpoint.sh <project-path> --heat <N>` (stamps the heat's `checkpointSha` + `completedAt` atomically). At phase gates, run `... --gate <name>` instead — it stamps the gate and snapshots the ledger to `memory/smith-ledger-checkpoint-<gate>.json`. Script tier — never stamp SHAs or timestamps by hand-editing the JSON.
 4. **Capture learnings** — if smith learned something about orchestration (Layer 1) or apprentice effectiveness (Layer 3), write it
 5. **Check for milestone**: if this heat completes a unit or phase gate, trigger the appropriate gate evaluation, then commit (see Phase Gate Commits below)
 
@@ -257,11 +257,9 @@ After each heat completes (findings clean or deferred):
 
 When a later heat breaks earlier work, or the user requests a rollback:
 
-1. Identify the target checkpoint (unit boundary or phase gate) from the ledger's recorded SHAs
-2. `git revert --no-commit` all commits since the checkpoint SHA
-3. Restore the ledger snapshot from `memory/smith-ledger-checkpoint-<gate>.json`
-4. Re-plan forward from the checkpoint, incorporating what was learned from the failed path
-5. Learnings from the rolled-back heats are preserved — observations survive rollback, state doesn't
+1. Run `<forge>/core/scripts/smith-rollback.sh <project-path> <gate-name|heat-number>` — script tier; it resolves the checkpoint SHA from the ledger, `git revert --no-commit`s everything since it (working tree left uncommitted for inspection), and for gate targets restores the ledger snapshot from `memory/smith-ledger-checkpoint-<gate>.json` (previous ledger kept at `memory/smith-ledger.pre-rollback.json`). It refuses to run over uncommitted tracked changes — commit or stash first.
+2. Re-plan forward from the checkpoint, incorporating what was learned from the failed path
+3. Learnings from the rolled-back heats are preserved — observations survive rollback, state doesn't
 
 ## Step 3: Phase Gates
 
@@ -368,11 +366,11 @@ Last completed: Heat [X] — [title]
 Next: Heat [Y] — [title]
 ```
 
-4. Continue from where it left off. No re-planning unless the blueprint has changed (compare hash).
+4. Continue from where it left off. No re-planning unless the source has changed — check with `<forge>/core/scripts/smith-checkpoint.sh <project-path> --hash-check blueprint` (script tier; prints `UNCHANGED`/`CHANGED` against the ledger's recorded hash).
 
-If the blueprint hash differs from the ledger's recorded hash: re-run Step 1 (decomposition) with the updated blueprint, preserving completed heats where possible.
+If it reports `CHANGED`: re-run Step 1 (decomposition) with the updated blueprint, preserving completed heats where possible.
 
-For plan/conversation mode: compare the workspec hash from `memory/smith-workspec.md` against the ledger's recorded hash. If the source plan file changed or the workspec was updated, re-run decomposition.
+For plan/conversation mode: run `--hash-check workspec` instead (and `--hash-check pattern` when a Pattern exists). If the source plan file changed or the workspec was updated, re-run decomposition.
 
 ## The Apprentice System
 
