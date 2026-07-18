@@ -158,9 +158,9 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 
-- **Branch**: `main`. Pending push (contribution infra + README reorder 2026-06-28; tier wiring 2026-07-16; model-remap script follow-ups 2026-07-17).
+- **Branch**: `main`. Pushed through `13ab1fb` (2026-07-18: `/plot` tenth art + post-`/plot` purge cleanse; earlier contribution infra, tier wiring, and model-remap follow-ups all included in the push).
 - **Active work**: No active workarounds. Generic Forge v2 Outstanding items tracked below. Model-remap follow-ups mostly closed 2026-07-17 (5 new/extended `core/scripts/` helpers + skill wiring — see the follow-ups bullet); remaining: forge PLAN-mechanics scripts, wedge preview-assemble + parity check.
-- **Last cycle (2026-07-14)**: absorbed 6 learnings (4 platform/config + 1 status-classification + 1 shared-infra defect-propagation). First learning review fired (global-patterns.md >50): 64 → 61 — one entry folded into its successor, two relocated to the skill files they belonged to (`pry`, `poke`). `CLAUDE.md` compacted below 20k on 2026-07-16 (Recent bullets + Phase C detail → `memory/recent-history.md`); the full AGENTS.md dogfood migration remains open below.
+- **Last cycle (2026-07-18)**: `/plot` (tenth art — the Atlas) built + cast to the membrane; `/purge` cross-reference cleanse (memory docs + scan roster nine→ten, two project-name leaks scrubbed); `/forge` absorbed 1 learning (local pre-commit gate must be command-identical to the deploy build) into `global-patterns.md` (61→62). The `>50` learning-review trigger was **deferred** — the Warden reviewed `global-patterns` for staleness/dup the same day, so a re-review would be redundant.
 
 ### Outstanding — Generic Forge v2 follow-ups
 
