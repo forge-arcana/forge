@@ -46,7 +46,7 @@ Invocation forms:
 | `/forge --dry` | Read-only inspection (replaces the old `/mark`) |
 | `/forge on` / `/forge off` | Session toggle — enable/disable all forge skills |
 
-## Arts (Nine P's deployed + /purge forge-internal)
+## Arts (Ten P's deployed + /purge forge-internal)
 Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `core/skills/forge/protocol.md`.
 
 | Art | Persona | Mode |
@@ -58,6 +58,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/press` | Staff engineer (go-live readiness) | Evaluative — medium |
 | `/pound` | 21 adversarial QA personas | Evaluative — heavy |
 | `/pitch` | The founder's other voice (and a VC partner on `--critique`) | Generative — synthesis (with optional review pass) |
+| `/plot` | Principal infra/platform architect (draws the Atlas) | Generative — landscape (planned + as-built casts) |
 | `/pry` | The Lever (relentless solution-finder) | Investigative |
 | `/praise` | The Listener (user feedback → routed art) | Investigative — feedback |
 
@@ -66,6 +67,7 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 **For UI/UX** — `/preen` to evaluate interfaces through Don Norman's lens.
 **For alignment + business model** — `/pitch` is mandatory after Touchstone (generates the seven-section Pitch — Bet / Wound / Inversion / Field / Stake / Signal / Stand — in the founder's voice with ballpark numbers, rendered through Touchstone). Same Pitch serves founder, cofounder, and investor; what differs is the room. Run `/pitch --critique` for the seven-dimension VC review pass when external persuasion needs stress-testing.
 **After user feedback** — `/praise` to route feedback to the right arts and close the build-ship-learn loop.
+**Near go-live** — `/plot` to draw the Atlas: a bird's-eye map of the production landscape (deployable units, data stores, external integrations, trust boundaries). Opt-in as a *planned* baseline early (from Blueprint/Pattern); prompted as the *as-built* map at go-live, where its headline is the drift from the plan. Prompted by `/press` and `/smith` convergence.
 
 *`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift. Lives only at `.claude/skills/purge/` (never deployed to user membranes).*
 
@@ -105,7 +107,7 @@ Three Masters of the forge — distinct domains, complementary roles. Two deploy
 Every transfer (either direction) runs through `/forge`'s single PLAN table. No back doors.
 
 ## Self-Improving Loop
-Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/praise`) and Masters (`/smith`, `/wedge`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/forge` fold phase scans project memories for `Forge-worthy: yes` entries, genericizes, promotes to `~/.claude/learnings/general.md`, and absorbs into `<forge>/learnings/` → next art/master run reads global learnings in pre-flight.
+Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/plot`, `/pry`, `/praise`) and Masters (`/smith`, `/wedge`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/forge` fold phase scans project memories for `Forge-worthy: yes` entries, genericizes, promotes to `~/.claude/learnings/general.md`, and absorbs into `<forge>/learnings/` → next art/master run reads global learnings in pre-flight.
 
 ## HARD RULE — Only /forge Writes to Forge
 > **No project, no skill, no manual edit touches forge repo files directly.**
@@ -162,6 +164,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ### Outstanding — Generic Forge v2 follow-ups
 
+- **`plot-scan.sh` evidence script (deferred, 2026-07-18)** — the new `/plot` art (tenth art, draws the Atlas) references `<forge>/core/scripts/plot-scan.sh` as its preferred deterministic topology-evidence leg (globs deploy manifests, parses dependency files, extracts `.env.example` keys, lists route/handler entry points). The script is NOT yet written; `/plot`'s SKILL.md carries a full inline-reads fallback so the art works today without it. Write the script to move the evidence leg to script tier (mirrors `forge-scan.sh`); watch for the same Python-under-reporting gap noted below.
 - **Remove the transient WA-001 cleanup** — once the team has each run `/forge` at least once after 2026-06-13 (so every membrane is cleaned), delete `claude-helpers/retire-wa001.sh` and its invocation in the Phase 2 cast step of `core/skills/forge/SKILL.md` + `.claude/skills/forge/SKILL.md`. It's idempotent/harmless to leave, but it's throwaway migration code.
 - **Forge dogfoods AGENTS.md** — migrate forge's own `CLAUDE.md` to a 1-line `@AGENTS.md` and move current rules content into `core/rules/` or `AGENTS.md`. The forge repo itself is currently the only consumer of forge tooling that doesn't use the AGENTS.md pattern.
 - **Bootstrap migration** — move `.claude/skills/forge/` → `.agents/skills/forge/` so `/forge` is discoverable across tools on a fresh clone (decide whether to ungitignore that path).
@@ -185,3 +188,4 @@ Skill/script storage moved to the cross-tool canonical store (`~/.agents/skills/
 - **Recent** (2026-06-14, 2026-06-18 — model ceilings, /burn, lean.sh, target-aware deploy, forge cycle): see `memory/recent-history.md`.
 - **Recent** (2026-06-20 → 2026-06-28 — forge cycles, /purge passes, Concise-Voice HARD RULE + rules propagation, contribution infra): see `memory/recent-history.md`.
 - **Recent**: 2026-07-16 — **Model-tier remap (opus-brain doctrine)**: full audit + rewire of all 25 skills against the doctrine *opus = orchestration/creative/verdicts/review, sonnet = implementation-to-spec + rubric legwork (security carve-outs stay opus), haiku = mechanical, script = deterministic*. Key finding: all 7 old `escalation: → opus subagents` comment hints were 100% unwired (no body text ever named a tier at a spawn point — fan-outs silently rode the session model); purge's old `sonnet` hint was inert (never processed by cast-deploy). Landed: standardized hint grammar (`fan-out:`/`escalate:`/`no fan-out`) across 25 skills + forge bootstrap copy; tier wiring in every fan-out flow sentence (tool-neutral tier vocabulary, sequential-fallback sentences extended with the per-spawn model clause, defer-don't-downgrade for wrap/cicd conditional opus gates); new protocol.md **Model Tiers** section (class→tier map, three gate classes incl. user-review gate); injector hardening (`cast-deploy.sh`: opus in whitelist, WARN on unknown tiers, `--verify` injection assertion); forge-build MODELHINT opus row + new grammar; qa-framework persona 19/21 rubric fix; eli5/qt/srs haiku→sonnet; evaluative arts sonnet→inherit top-level (forge stays sonnet until PLAN-mechanics scripts land). Closes the sequential-fallback-contract outstanding item; follow-ups tracked above.
+- **Recent**: 2026-07-18 — **`/plot` (tenth art) — the Atlas**: new generative art drawing a bird's-eye map of the production landscape (deployable units, data stores, external integrations, trust boundaries) at C4-container altitude. Context-sensitive two-cast design like `/probe`: PLANNED cast (opt-in, from Blueprint/Pattern — offered in `/prime`'s closing menu) and AS-BUILT cast (prompted by `/press` post-flight + `/smith` Step 5 convergence), whose headline is the drift from plan. Touchstone used-if-present, not required (deliberate divergence from `/pitch` — infra products need the map most, least likely to have a Touchstone). Outputs `[PROJECT]_07_Atlas_{Planned,AsBuilt}_V1.0.{md,html}` (Mermaid C4 + drift ledger). Registered across `protocol.md` (Ten Arts table + cadence), `CLAUDE.md`, `prime`; build auto-picks-up dynamically (25 skills). Model `inherit` (facets→sonnet, synthesis/diagram/drift→opus, render→sonnet w/ opus review). Deferred: `plot-scan.sh` evidence script (inline-reads fallback ships).

@@ -144,6 +144,8 @@ If yes:
 
 Do not ask permission before auto-invoking `/probe` (and `/preen` when applicable) — it's a standard quality gate. The user can interrupt to skip.
 
+**Optional — offer the Planned Atlas.** Once the Pattern exists, offer (do not auto-invoke) `/plot --planned` for founders who think visually: *"Want a bird's-eye map of the intended production landscape now — services, stores, integrations, trust boundaries? It's optional, but drawing it now gives you a baseline the as-built Atlas will diff against at go-live, so you see exactly where the build drifted."* Lead with the default flow; this is a value-add for visual/advanced founders, not a step everyone runs. The convention stays Blueprint → Pattern → /smith; the Planned Atlas is an opt-in detour.
+
 If no, end here. The Opus and Vow are enough for now. The Blueprint and Pattern can come later — `/probe` and `/preen` remain available to frame the Pattern whenever the user is ready.
 
 ## Key Rules
@@ -177,8 +179,9 @@ Depending on how far the conversation goes, Prime produces one or more of these.
 | `[PROJECT]_04_Pitch_V1.0.html` + `.md` | Phase 2 — always, after Touchstone | Seven-section synthesis (founder voice + ballpark numbers), rendered HTML through Touchstone | **The bet** — the wall-pinnable artifact the founder + cofounder align on; the same artifact persuades external readers when needed |
 | `[PROJECT]_05_Blueprint_V1.0.md` | Phase 3 — if user wants depth | Standalone document | **The skeleton** — execution scope |
 | `[PROJECT]_06_Pattern_V1.0.md` | Phase 3 — post-Blueprint, auto via /probe (+ /preen if UI-facing) | Standalone document | **The form** — architecture + UX decisions /smith consumes |
+| `[PROJECT]_07_Atlas_Planned_V1.0.html` + `.md` | Phase 3 — **opt-in**, post-Pattern via `/plot --planned` | Mermaid topology + boundary map | **The map (baseline)** — bird's-eye of the *intended* production landscape; the drift baseline the as-built Atlas diffs against at go-live |
 
-> **Lineage**: Opus → Vow (+viability) → **Touchstone (via /wedge)** → **Pitch (via /pitch)** → Blueprint → Pattern → /smith forges → Product.
+> **Lineage**: Opus → Vow (+viability) → **Touchstone (via /wedge)** → **Pitch (via /pitch)** → Blueprint → Pattern → *(opt-in: Planned Atlas via /plot)* → /smith forges → *(go-live: As-Built Atlas via /plot)* → Product.
 > *"My Magnum Opus"* is the sum of it all. When the user returns months later and asks "what was this really about?" — they open the Opus, not the Pitch.
 
 Offer PDF generation for any document: `npx md-to-pdf [filename]`
@@ -187,7 +190,7 @@ After delivering any artifact, suggest next steps based on content:
 - **After Opus + Vow**: auto-invoke `/wedge` for the Touchstone (Phase 2 continues).
 - **After Vow + Touchstone + Pitch**: Phase 3 to frame Blueprint and Pattern when the user is ready (alignment is locked first; scope and architecture follow).
 - **After Blueprint**: auto-invoke `/probe` (and `/preen` if UI-facing) to produce the Pattern, with the Touchstone now available as visual context.
-- **After Pattern**: `/smith` to begin forging — Smith's pre-flight reads Pattern + Touchstone together.
+- **After Pattern**: `/smith` to begin forging — Smith's pre-flight reads Pattern + Touchstone together. Optionally offer `/plot --planned` first (opt-in) to draw the intended production landscape as an early baseline.
 - **If Vow lacks viability confidence** (or no Pitch exists and external audience matters): suggest `/pitch` art for deeper business-model critique. The Pitch is rendered HTML through the Touchstone.
 
 ## Post-Flight

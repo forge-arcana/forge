@@ -351,6 +351,8 @@ Arts wielded: [list with invocation counts]
 Time at the anvil: [duration]
 ```
 
+5. **Prompt the Atlas.** The blade is forged — this is the as-built moment. Offer, via the harness's multi-choice prompt, to run `/plot` (As-Built cast): *"The build has converged. Want the Atlas — a bird's-eye map of what you actually built (services, stores, integrations, trust boundaries), with the drift from the Pattern/Planned-Atlas surfaced before go-live?"* This is an offer, not a gate — completion stands whether or not the founder takes it. When a Planned Atlas or Pattern Architecture exists, the As-Built Atlas shows exactly where the heats deviated from the plan.
+
 ## Session Resume
 
 Smith persists state to survive session breaks. On startup, if `memory/smith-ledger.json` exists:

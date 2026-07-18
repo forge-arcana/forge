@@ -167,7 +167,7 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 
 `/forge` is not an art and not a master — it's a task skill with no persona and no learning loop. It is the gate through which arts and all other knowledge flow between forge and membrane. The Masters use the cycle; the cycle does not act on its own behalf.
 
-## The Nine Arts
+## The Ten Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
@@ -178,6 +178,7 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
 | `/pitch` | The founder's other voice (VC partner on `--critique`) | Generative | Synthesis |
+| `/plot` | Principal infra/platform architect (the Atlas) | Generative | Landscape |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
 | `/praise` | The feedback router (closes the build-ship-learn loop) | Orchestrative | — |
 
@@ -197,7 +198,9 @@ The trifecta escalates in intensity and broadens in scope:
 
 **`/praise`** closes the loop — takes real-world feedback (users, QA, testing) and routes it through the right arts. Routes UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a blueprint delta and a change brief for `/smith`. Run after every feedback cycle.
 
-**Cadence**: poke often, preen on UI changes, pitch before building and before shipping, press before milestones, pound before ship, praise after every feedback cycle. `/purge` stands apart — it tends the forge itself, not projects.
+**`/plot`** runs at the two ends of the build — synthesis-of-topology, invocable as a *planned* baseline early (opt-in, from Blueprint/Pattern) and as the *as-built* landscape near go-live (prompted by `/press` and `/smith` convergence). It draws the Atlas: the deployable-unit map of the production landscape, boundaries and all, with the as-built cast surfacing where the build drifted from the plan. Context-sensitive like `/probe`; renders through the Touchstone when one exists but does not require it.
+
+**Cadence**: poke often, preen on UI changes, pitch before building and before shipping, press before milestones, pound before ship, plot for the early baseline and again at go-live, praise after every feedback cycle. `/purge` stands apart — it tends the forge itself, not projects.
 
 ## Learning Cycle
 

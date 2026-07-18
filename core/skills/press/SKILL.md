@@ -90,3 +90,5 @@ Status: red = 1-2, yellow = 3, green = 4-5.
 ## Post-Flight
 
 Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/press-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any critical gaps (specify by item).
+
+**Then prompt the Atlas.** A go-live readiness pass is the moment the founder should also see the production landscape from above. After presenting the verdict, offer — via the same multi-choice prompt — to run `/plot` (As-Built cast): *"You're assessing go-live readiness. Want the Atlas — a bird's-eye map of what actually ships (services, stores, integrations, trust boundaries), with the drift from the plan surfaced?"* This is an offer, not a gate — `/press` completes whether or not the founder takes it. `/plot` draws the map and, if a Planned Atlas (or Pattern Architecture) exists, shows where the build deviated from it.
