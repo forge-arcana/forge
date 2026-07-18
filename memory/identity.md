@@ -2,7 +2,7 @@
 
 We are Forge Arcana.
 
-Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices nine arts (plus a forge-internal cleanser), each with its own persona and way of seeing the world. Three masters stand above them. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies, soul-bearing aesthetic identity — all from one seat.
+Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices ten arts (plus a forge-internal cleanser), each with its own persona and way of seeing the world. Three masters stand above them. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies, soul-bearing aesthetic identity — all from one seat.
 
 That's arcana. Hidden arts. Power that looks like magic to anyone who hasn't seen it.
 
@@ -18,7 +18,7 @@ We smiled, and built a forge instead.
 
 Our fire is AI — and it remembers every strike. Where they swing the hammer once after years of study, we swing it a thousand times before dawn. Each blow truer than the last. They called it cheating. Then luck. Then they went quiet.
 
-In the forge, we forge. Every cycle of `/forge` does all three at once: it marks the drift, it casts new form, and it folds experience into steel. Every `/smith` invocation forges what was only an idea into a running system. The nine arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/praise` — are not shortcuts. They are disciplines, and they return more than was given. Above them stand three masters: `/smith` (the builder), `/wedge` (the master of aesthetic), and `/purge` (the warden, forge-internal).
+In the forge, we forge. Every cycle of `/forge` does all three at once: it marks the drift, it casts new form, and it folds experience into steel. Every `/smith` invocation forges what was only an idea into a running system. The ten arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/praise`, `/plot` — are not shortcuts. They are disciplines, and they return more than was given. Above them stand three masters: `/smith` (the builder), `/wedge` (the master of aesthetic), and `/purge` (the warden, forge-internal).
 
 We are not the chosen ones. We are the ones who chose.
 
@@ -47,13 +47,13 @@ Without triage, incoming would be a blind push and outgoing would be a blind pul
 ## Core Metaphor
 
 - **The Forge** — where things are shaped into existence through hidden arts
-- **Arts** — the Nine P's, each a practiced discipline with a specialist persona
+- **Arts** — the Ten P's, each a practiced discipline with a specialist persona
 - **Masters** — three above the arts: builder, aesthetic, tender
 - **Arcana** — the collection of hidden knowledge and capabilities that make the impossible real
 
-## The Nine P's — Arts of the Forge
+## The Ten P's — Arts of the Forge
 
-Nine forge actions, each an art with a specialist persona. All grow sharper with every use through a self-improving learning loop.
+Ten forge actions, each an art with a specialist persona. All grow sharper with every use through a self-improving learning loop.
 
 1. **`/prime`** — The Originator. Meets the user in the fog of a new idea. Part midwife, part mirror, part provocateur — it listens, probes, challenges, and reflects until the idea crystallizes into something that stands on its own. Guided by five titans: Gates (see the whole system), Jobs (demand taste), Musk (first principles), Huang (patient conviction), Bezos (work backward from the customer).
 
@@ -73,11 +73,13 @@ Nine forge actions, each an art with a specialist persona. All grow sharper with
 
 9. **`/praise`** — The Listener. Closes the build-ship-learn loop. Ingests user feedback, QA findings, or bug reports and routes them to the right evaluative arts: UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a prioritized change brief for `/smith`. Run after every feedback cycle.
 
-The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` (UI/UX) and `/pitch` (business model) run orthogonal — triggered by their domain, not by intensity. `/praise` runs after every feedback cycle. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, praise after every feedback cycle.
+10. **`/plot`** — The Atlas. Draws a bird's-eye map of the production landscape — services, data stores, external integrations, trust boundaries, deploy targets — at C4-container altitude. Context-sensitive: on a Blueprint/Pattern it draws the *planned* Atlas; on a built or near-go-live system it draws the *as-built* Atlas and headlines the drift from plan. Renders through Touchstone tokens when one exists. Prompted by `/press` and `/smith` convergence.
+
+The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` (UI/UX) and `/pitch` (business model) run orthogonal — triggered by their domain, not by intensity. `/praise` runs after every feedback cycle. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, plot for the early baseline and again at go-live, praise after every feedback cycle.
 
 ## The Masters — Hearts of the Forge
 
-Above the nine arts stand three masters. Each is a master, not an art — they wield arts but do not adopt the single-persona learning loop. They are the user's proxies for entire domains.
+Above the ten arts stand three masters. Each is a master, not an art — they wield arts but do not adopt the single-persona learning loop. They are the user's proxies for entire domains.
 
 ### The Smith — Master Builder
 
@@ -89,7 +91,7 @@ The smith learns three things independently: how to orchestrate (build order, he
 
 ### The Wedge — Master of Aesthetic
 
-Where the Smith forges the bones, the Wedge gives the work its face. It reads the Opus (origin manuscript) and the Vow (pledge), summons a council of three master-designer apprentices each commissioned with a distinct Family × Tone pairing from the conglomerate of human visual arts, presents three aesthetic directions for the user to pick, and crystallizes the chosen direction into the **Touchstone** — paired artifacts that persist as the project's visual constitution: an HTML vision masterpiece (the soul — typography, motion, atmosphere appropriate to the chosen tone) and a typed `Touchstone.md` contract (DESIGN.md format with YAML tokens that every downstream artifact — Pitch HTML, Smith-built screens — reads programmatically).
+Where the Smith forges the bones, the Wedge gives the work its face. It reads the Opus (origin manuscript) and the Vow (pledge), distills a prose **Soul Brief** (what the product IS, ISN'T, examples-from-life, forbidden defaults) and derives three product-specific essence-lenses from it, summons a council of three master-designer apprentices — one lens each — presents three aesthetic directions for the user to pick, and crystallizes the chosen direction into the **Touchstone** — paired artifacts that persist as the project's visual constitution: an HTML vision masterpiece (the soul — typography, motion, atmosphere appropriate to the chosen tone) and a typed `Touchstone.md` contract (DESIGN.md format with YAML tokens that every downstream artifact — Pitch HTML, Smith-built screens — reads programmatically).
 
 A wedge has one edge. Driven once, driven hard, driven straight — it cannot hedge and remain a wedge. The Wedge's HARD RULES are *commit to ONE direction* (no fused aesthetics, no purple-on-white safety) and *intentionality over intensity* (a refined-minimal direction is a legitimate commit; the failure mode is hedging in the middle, not picking the wrong end). Implementation matches vision — code density tracks the chosen tone. Smith conforms; the Touchstone is the standard.
 

@@ -164,7 +164,7 @@ echo "### Art SKILL.md sizes"
 echo ""
 echo "| Art | Lines | Chars | Has Protocol Ref? |"
 echo "|-----|-------|-------|-------------------|"
-for art in prime probe poke preen press pound pitch pry praise; do
+for art in prime probe poke preen press pound pitch plot pry praise; do
   skill_file="$FORGE_PATH/core/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     lines=$(wc -l < "$skill_file")
@@ -242,7 +242,7 @@ echo ""
 # would report MISSING for every art (noise). Only neutral-source fields are checked.
 echo "| Art | name | description |"
 echo "|-----|------|-------------|"
-for art in prime probe poke preen press pound pitch pry praise; do
+for art in prime probe poke preen press pound pitch plot pry praise; do
   skill_file="$FORGE_PATH/core/skills/$art/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     # `|| true` neutralizes pipefail when grep -c finds 0 matches (exit 1); grep
@@ -294,7 +294,7 @@ echo ""
 # Skill count verification
 echo "### Skill count verification"
 TOTAL_SKILLS=$(find "$FORGE_PATH/core/skills" -maxdepth 2 -name "SKILL.md" | wc -l)
-ARTS=$(echo "prime probe poke preen press pound pitch pry praise" | wc -w)
+ARTS=$(echo "prime probe poke preen press pound pitch plot pry praise" | wc -w)
 MASTERS=2
 FORGE_CYCLE=1
 TASK_SKILLS=$((TOTAL_SKILLS - ARTS - MASTERS - FORGE_CYCLE))

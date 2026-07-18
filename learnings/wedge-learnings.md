@@ -27,9 +27,6 @@ These are universal aesthetic principles that survive across projects — not pr
 - Discarded directions stay inside the preview HTML behind unselected tabs as historical record. No separate cleanup, no lost residue.
 
 **Trade-off accepted**: Apprentice deliverable expands from spec-only → spec + scoped HTML fragment (~1.5× cost per apprentice), in exchange for a visual decision over an imagined one for the project's defining aesthetic constitution. Cost is small; value is decisive.
-
-**Forge-worthy**: yes — universal principle. Applies wherever a council/multi-option pattern asks a user to commit to an aesthetic direction. The principle "visual decisions need visual artifacts" is independent of any specific project, family, or tone; the refinement "one selector beats N files" is independent of how many directions the council surfaces.
-
 ## Soul Brief Beats Fielded Brief; Lens Beats Family×Tone
 
 **Principle**: When an aesthetic council uses a *fielded* brief (structured fields like "audience posture: contemplative", "memorable signature: a slow fade") plus a *fixed-menu commission grammar* (e.g., Family × Tone drawn from an N×M archetype shelf), three failure modes compound:
@@ -58,9 +55,6 @@ These are universal aesthetic principles that survive across projects — not pr
 - Run a mechanical convergence audit before assembling the user-facing preview.
 
 **Trade-off accepted**: The brief-authoring heat expands (pure prose plus lens derivation, longer than a fielded brief) and apprentice prompts grow (full Soul Brief + lens, not a one-line pairing). Apprentice cost increases marginally; rendered-direction divergence increases substantially. Net cost is small; value is the difference between "three projects look the same" and "three projects look like themselves."
-
-**Forge-worthy**: yes — universal principle for any council/fan-out skill where a fixed commission grammar risks cross-invocation convergence. The mechanism (prose brief + per-invocation derived commissions + post-fan-out convergence audit) generalizes beyond aesthetic councils to any divergence-required parallel-apprentice pattern.
-
 ## Dual-Accent Structural Systems Need Explicit Normative Documentation
 
 **Principle**: Some design directions use two accent colors where both are *structurally required*, not a "dominant + secondary" hierarchy. Example: a bilingual product whose two scripts each get their own load-bearing accent — one accent per script-world, the tension between them being the design itself. A downstream agent (Smith, Probe, or any code-writing skill) will instinctively treat one as "primary" and the other as decorative, collapsing the structural intent. The DESIGN.md must preempt this.
@@ -76,9 +70,6 @@ These are universal aesthetic principles that survive across projects — not pr
 **How to apply**: Any Touchstone whose chosen direction uses N accent colors where N > 1 for structural rather than decorative reasons — verify the DESIGN.md prose calls out the multiplicity explicitly, with a rationale and a guardrail in Do's and Don'ts.
 
 **Corollary — layout-as-translation risk**: Bilateral two-column layouts carry an inherent risk: they look like "original | translation" to any reader familiar with multilingual publishing. The Do's and Don'ts must explicitly name this risk and prohibit the labeling that would trigger it ("don't label one side 'Original' and the other 'Translation'"). The disambiguation belongs in the spec, not in the implementation.
-
-**Forge-worthy**: yes — generalizes to any multi-voice structural system where more than one token carries the same visual category (accent, surface, heading) and where the plurality is intentional. The principle is: *N tokens of the same class requires N explicit roles in prose, or a downstream agent will reduce them to 1.*
-
 **Companion principle — councils search, they don't single-shot**: Even with a sharp Soul Brief and divergent lenses, the council can produce N directions where none lands. The user's eye for *the* direction is the gate the council is trying to clear; sometimes the council misses, and the right move is not "pick the least bad" but "regenerate with feedback." The verdict heat must therefore expose a branch alongside pick-one and hybridize: **Regenerate the council**. The Regenerate branch captures structured feedback (was the rejection at the lens level or the execution level? which Forbidden Defaults did the council reach for that should now be named as binding? is any prose section thin?), revises the brief (re-derives the lenses if lens-level; tightens the prose if transmission-level), re-runs the fan-out and assembly with the revised brief, and returns with a versioned new preview. Cap at two regenerate cycles per skill run; a third indicates the upstream source may be misaligned and the skill should halt with a recommendation to revisit it. Prior previews are preserved as historical record. The principle generalizes beyond aesthetic councils: any divergent-fan-out pattern where the user is the final taste-gate should expose a "regenerate with feedback" branch. Better N council rounds and a lived final artifact than one round and a final artifact the user quietly drifts away from.
 
 ## Tool-Register Products Need Tool-Register Touchstones — and Touchstones Carry Two Faces (2026-07-04)
