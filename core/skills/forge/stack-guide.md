@@ -106,9 +106,22 @@ Single deployment, no CORS headaches. API and frontend share the same origin. Th
 
 ---
 
+## Day-1 Topology (dogfood phase)
+
+Every new project **starts here**, regardless of its eventual hosting pick: one small VPS running the whole stack in Docker Compose behind a Cloudflare tunnel — the tunnel as sole ingress, no inbound ports except SSH, app + data tiers on a private Docker bridge, billing/compliance-vendor/GPU integrations stubbed. The Hosting Decision Framework below is the **public-launch phase**, entered at a named trigger (real concurrency, open signup, live billing) recorded in the Blueprint. Planning the managed platform from day one guarantees drift — the as-built audit reads as one long "deferred" column — and builds infra before it earns its keep. The single box also ships a *tighter* boundary posture than most managed platforms: nothing listens on the internet, TLS terminates at the edge, the clear-text hop never leaves the private bridge.
+
+**Two mandatory guardrails** — the only non-benign risks the single box introduces; ship them with it, not as afterthoughts:
+
+1. **Offsite backup + a tested restore, from day one.** A `pg_dump` living on the same box as the data is not a backup — wire an offsite copy (object storage, e.g. R2) and run one restore drill before real user data is at stake.
+2. **The single-instance constraint is load-bearing** while generation/background work runs in-process. Document "run exactly one API instance"; gate horizontal scale behind a job queue + shared store (e.g. Redis) first — an in-memory rate limiter silently leaks to N× its ceiling the moment a second instance appears.
+
+During dogfood, the DR/Residency line item reduces to guardrail 1; the full posture is a public-launch-trigger item.
+
+---
+
 ## Hosting Decision Framework
 
-There is no single hosting default. The stack is **container-first** (Cloud Run + Cloudflare Containers as co-equal defaults); the brain picks per project by scale and needs, with an agentic-operability tie-bias. This mirrors the Language Decision Framework: if no signal points elsewhere, ship the container default.
+**This is the public-launch phase** — projects arrive here from the Day-1 Topology at their named trigger, not on day one. There is no single hosting default. The stack is **container-first** (Cloud Run + Cloudflare Containers as co-equal defaults); the brain picks per project by scale and needs, with an agentic-operability tie-bias. This mirrors the Language Decision Framework: if no signal points elsewhere, ship the container default.
 
 | Signal | Choice | Why |
 |--------|--------|-----|

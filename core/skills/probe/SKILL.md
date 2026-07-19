@@ -61,6 +61,8 @@ Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), 
 >
 > **Hosting/DB selection**, by contrast, *should* move freely across the framework's peers (Cloud Run / CF Containers / Fly / Railway; Neon / Cloud SQL / PlanetScale) when a **scale/needs signal** points there. Selecting Hetzner for cost/egress, Runpod for GPU, Cloud SQL for region-DR, or Workers-edge for a stateless latency slice is *following* the Hosting Decision Framework, not deviating from it.
 >
+> **A dogfood-phase single-box deploy** (stack-guide → Day-1 Topology: VPS + Docker Compose + Cloudflare tunnel) is likewise **compliant, not a deviation** — it is the prescribed day-1 shape. Flag it only if a guardrail is missing (no offsite backup/restore drill; horizontal scale without a job queue + shared store) or if a named public-launch trigger (real concurrency, open signup, live billing) has passed without the migration.
+>
 > Valid signals include: (a) a hard constraint (data residency, regulatory, existing team skill, mandated provider), (b) a scale/latency/cost requirement the default doesn't fit, (c) a workload mismatch (ML/GPU serving, CLI tool, embedded), (d) a DR/compliance requirement (region-survivability, HIPAA/BAA), (e) the founder explicitly requested it in /prime.
 >
 > "It's trending on Twitter" / "more popular per npm downloads" / "the Vercel + Neon combo is common in tutorials" are **not** valid signals.
