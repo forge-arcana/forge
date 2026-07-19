@@ -24,7 +24,7 @@ Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), 
    - If the conversation has a clear architectural topic (plan, design, RFC) → probe that (inline review)
    - **If ambiguous** → ask: "What should I probe? A Blueprint, the current plan, or something else?"
 3. Read/review the full probe target before proceeding. **Also read `[PROJECT]_06_Pattern_V1.0.md`** if it exists — preserve and update its Architecture section rather than overwriting; leave the UX section untouched (that belongs to /preen).
-4. **Read `<forge>/core/skills/forge/stack-guide.md` in full.** This is the prescribed forge stack — Cloud Run + Cloud SQL/Neon + Hono + Drizzle + React/Vite + TanStack + Better Auth + Pino/Sentry, etc. Treat it as the **default baseline** for every architecture decision, not one option among many. Web search results that surface trendy combos (e.g., Vercel + Neon, Next.js on Vercel, Supabase) do **not** override the stack-guide unless a project-specific signal demands it (see "Deviation rule" below).
+4. **Read `<forge>/core/skills/forge/stack-guide.md` in full.** The **framework layer** (Hono + Drizzle + Better Auth + React/Vite + TanStack + Tailwind + Pino/Sentry+OTLP) is the hard default baseline — not one option among many. **Hosting and data are *selected*, not pinned:** the stack-guide's **Hosting Decision Framework** picks container-first (Cloud Run / CF Containers as co-defaults; Fly/Railway peers; Hetzner / Runpod / Workers-edge as signal-driven escalations), and **Neon is the default prod DB** (Cloud SQL / PlanetScale on escalation, with an explicit DR line item). Web results that surface trendy combos (Next.js on Vercel, Supabase-over-Better-Auth) do **not** override the framework-layer defaults; hosting/DB picks must follow the Decision Framework's **scale/needs** signals — not popularity (see "Deviation rule" below).
 5. **Read the Touchstone pair if it exists** — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter for tokens, prose Overview + Do's-and-Don'ts for posture) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: visual context). The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. Architecture decisions that fight the Touchstone's contract or posture (e.g., a chosen framework that cannot deliver the locked motion philosophy, or a state-management pattern that contradicts the interaction tempo declared in the MD's Components section) should be flagged. Probe is not the aesthetic art — it does not override Touchstone choices — but it should surface architecture-aesthetic conflicts as part of its critique.
 
 ## Process
@@ -55,9 +55,13 @@ Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), 
 
 ### Deviation rule (HARD)
 
-> The forge stack-guide is the **default**. Subagents must not swap a stack-guide choice for a web-popular alternative (e.g., recommending Vercel over Cloud Run, Supabase over Better Auth + Drizzle, Next.js over React + Vite + TanStack) **unless** a concrete project signal demands it.
+> The forge stack-guide is the **default**, but for **hosting and data it is a decision framework, not a single pin**. The discipline is anti-*trend*, not anti-movement.
 >
-> Valid signals for deviation include: (a) a hard constraint (data residency, regulatory, existing team skill, mandated provider), (b) a scale/latency requirement the default cannot meet, (c) a workload mismatch (ML serving, CLI tool, embedded), (d) the founder explicitly requested it in /prime.
+> **Framework-layer defaults** (Hono, Drizzle, Better Auth, React + Vite + TanStack, Tailwind) must not be swapped for a web-popular alternative (Supabase over Better Auth + Drizzle, Next.js over React + Vite + TanStack, an edge-first rewrite because it's fashionable) **unless** a concrete project signal demands it.
+>
+> **Hosting/DB selection**, by contrast, *should* move freely across the framework's peers (Cloud Run / CF Containers / Fly / Railway; Neon / Cloud SQL / PlanetScale) when a **scale/needs signal** points there. Selecting Hetzner for cost/egress, Runpod for GPU, Cloud SQL for region-DR, or Workers-edge for a stateless latency slice is *following* the Hosting Decision Framework, not deviating from it.
+>
+> Valid signals include: (a) a hard constraint (data residency, regulatory, existing team skill, mandated provider), (b) a scale/latency/cost requirement the default doesn't fit, (c) a workload mismatch (ML/GPU serving, CLI tool, embedded), (d) a DR/compliance requirement (region-survivability, HIPAA/BAA), (e) the founder explicitly requested it in /prime.
 >
 > "It's trending on Twitter" / "more popular per npm downloads" / "the Vercel + Neon combo is common in tutorials" are **not** valid signals.
 >

@@ -4,6 +4,8 @@ A reference architecture for new projects. Derived from production decisions acr
 
 **Core bias:** We favor technologies that AI coding assistants have deep familiarity with — maximizing AI-assisted development velocity. We will not sacrifice solution quality for this, but when two options are comparable, we pick the one most major models know best.
 
+**Infrastructure bias (agentic era):** For hosting, data, and deploy we no longer optimize for *ease of human console management* — that criterion has faded now that agents drive day-2 ops via MCP servers, scoped tokens, and agent-operable CLIs. We optimize instead, in weighted order, for: **portability (container-first, no lock-in)** · **scale-to-zero / idle cost** · **egress economics at 10×/100×** · then **agentic-operability** as a tie-filter (now table-stakes — even GCP ships a Cloud Run MCP server, so it disqualifies laggards rather than breaking ties) · **credential safety** · **DR / residency / compliance** (an explicit line item, not an implicit DB property). GCP is no longer the mandatory default: Cloud Run is now one of two co-equal container defaults (with Cloudflare Containers), re-justified on merit. There is no single hosting winner — the **Hosting Decision Framework** below picks per project by scale and needs. The guardrail is container-first: capturing the agentic wins tempts proprietary primitives (Durable Objects, Vectorize) that are *tighter* lock-in than a portable container, so "more portable" only holds if we stay container-first. (Hyperdrive is lighter — a pass-through accelerator for standard Postgres; exit = repoint the connection string.)
+
 ---
 
 ## Stack Table
@@ -15,7 +17,7 @@ A reference architecture for new projects. Derived from production decisions acr
 | **Backend** | Hono | ESM-native, 14KB, typed routes, Zod middleware built-in. Express 5 is active, but Hono uses Web Standard APIs (portable to CF Workers, Deno, Bun) — that edge portability is why we default to it. Well-supported by current models. |
 | **ORM** | Drizzle | No codegen, no engine binary (50KB vs Prisma's 2-3MB), SQL-like API, native pgvector support, faster cold starts. Schema-as-code in TypeScript. |
 | **Auth** | Better Auth | Framework-agnostic, Drizzle adapter, signed sessions, refresh rotation, CSRF, plugins for 2FA/passkeys/RBAC/bearer. Replaces hand-rolled auth and NextAuth alike. |
-| **Database** | PostgreSQL | Neon (dev/staging/CI — free tier, serverless), Cloud SQL (production — always-on, VPC peering, SLA). Drizzle abstracts the provider — only the connection string changes. Add pgvector when you need embeddings. |
+| **Database** | PostgreSQL — Neon (default) | Neon for **all environments including production** — serverless, scale-to-zero, copy-on-write branch-per-PR (an agent runs migrations on a temp branch, then promotes — arguably safer than the human-console path), native pgvector. Cloud SQL and PlanetScale are situational escalations (see Database Strategy + DR/Residency). Drizzle abstracts the provider — only the connection string changes. |
 | **Real-time** | Ably | Managed pub/sub with guaranteed delivery, automatic reconnection, message history, presence. Eliminates the entire class of Socket.io bugs (dropped connections, room leaks, reconnect storms). |
 | **Frontend** | React 19 + Vite | Component model, hooks (use, useOptimistic, useFormStatus), massive ecosystem. The strongest frontend framework for AI-assisted work by far. Vite 8 (Rolldown — single Rust bundler, 10–30× faster builds) for sub-second HMR. |
 | **Routing** | TanStack Router | Type-safe params + search validation, file-based routing, loaders, pending UI. Better TypeScript story than React Router. |
@@ -26,14 +28,15 @@ A reference architecture for new projects. Derived from production decisions acr
 | **UI Components** | shadcn/ui | Copy-paste components (not a dependency), accessible, Tailwind-based. Buttons, modals, sheets, tables, forms — all pre-built. |
 | **i18n** | Paraglide | Compile-time, zero runtime cost, fully typed (`m.key()` not `t('key')`). Typos caught by TypeScript. Ideal for 2-5 languages. |
 | **Email** | Resend | Simple API, React Email templates, good deliverability. Transactional only (receipts, notifications, disputes). |
-| **File Storage** | GCS (signed URLs) | Secure uploads via signed PUT URLs (XML API, honors CORS). Private bucket + presigned read URLs for admin review. |
-| **Monitoring** | Sentry + Pino | Sentry for error tracking, performance traces, source maps, native crash reporting. Pino for structured server-side logging (JSON, fast, child loggers). |
+| **File Storage** | Cloudflare R2 (signed URLs) | S3-compatible presigned PUT/GET (SigV4, ≤7-day expiry; presigns work on the S3 API domain only, not custom domains) — a near-drop-in for the existing signed-URL flow, with **$0 internet egress** (the single biggest flat-scale lever; note Infrequent Access adds $0.01/GB retrieval, so hot/public objects stay on Standard). GCS stays valid only when compute is on Cloud Run *and* egress is low. |
+| **Monitoring** | Sentry + Pino + OTLP backend | Sentry for error tracking, traces, source maps (`@sentry/cloudflare` exports to the edge too). Pino for structured logging **on Node only** — it breaks on workerd/edge, so it is a Node convenience, *not* the portability layer. The real portable seam is a vendor-neutral **OTLP backend** (Grafana Cloud / Honeycomb / Axiom): instrument once, export anywhere — and the most agent-operated layer in the stack. |
 | **Mobile** | Capacitor | Native iOS/Android from React codebase. Camera, GPS, push notifications, haptics, secure storage — all via plugins. No React Native context-switching. |
 | **PWA** | vite-plugin-pwa | Service worker + manifest generation. Works inside Capacitor WebView too. Network-first caching for 3G resilience. |
 | **Package Manager** | pnpm | Faster, stricter (no phantom deps), disk-efficient. Monorepo workspaces built-in. |
 | **Testing** | Vitest + Playwright | Vitest for unit + integration (fast, ESM-native, same config as Vite). Playwright for E2E (cross-browser, reliable). |
-| **Hosting** | GCP Cloud Run | Single deployment serves API + static build (no CORS). Pick the region closest to your users. Split to CDN later if needed. |
-| **CI/CD** | GitHub Actions | Tests, Docker build, push to Artifact Registry, canary deploy to Cloud Run, smoke test, promote. WIF for keyless GCP auth. |
+| **Hosting** | Container-first — Cloud Run / CF Containers (co-default) | One Node image serves API + static build (no CORS), portable across **Cloud Run, Cloudflare Containers, Fly, Railway** — the image ports cleanly; migration cost is config + platform glue, not an app rewrite. CF Containers (GA Apr 2026) needs a thin Worker + Durable Object shim in front (no direct HTTP ingress) and caps at 4 vCPU / 12 GiB per instance — fine for this stack's containers; Cloud Run scales larger per instance. **Hetzner** (cost / always-on / egress-heavy / EU residency), **Runpod** (GPU / self-hosted models), and **Workers-edge** (stateless latency-critical routes) are signal-driven escalations — see Hosting Decision Framework. |
+| **CI/CD** | GitHub Actions | Tests, Docker build, **target-agnostic deploy leg** (parameterized registry + deploy step → Cloud Run / Fly / Railway / CF Containers), smoke test, promote. Keyless auth is the gold standard: GCP WIF, npm OIDC trusted publishing, per-run ~5-min OIDC tokens. |
+| **Runtime Secrets** | Infisical | One source of truth for the ~10 long-lived runtime secrets (DB URL, Resend, Ably, Sentry DSN, Better Auth secret); open-core (MIT except enterprise `ee/`), official MCP server, native Secret Syncs to **CF Workers, GCP Secret Manager, GitHub, Fly.io, and Railway** — every hosting peer this guide names. App reads the native binding at runtime. Multi-provider multiplies native vaults — this keeps them in sync. WIF/OIDC trims the keyless subset; the residue (third-party SaaS keys) has no federation exchange and stays here. |
 
 ---
 
@@ -71,11 +74,12 @@ packages/
 | Environment | Provider | Why |
 |---|---|---|
 | **Development** | Local Docker PG | Fast, free, no cold starts, offline capable |
-| **CI/CD** | Neon (free tier) | Serverless, no Docker in CI |
-| **Staging** | Neon (free tier) | Good enough, saves cost |
-| **Production** | GCP Cloud SQL | Always-on, auto backups, VPC peering, SLA |
+| **CI/CD** | Neon (free tier) | Serverless, no Docker in CI; ephemeral branch per run |
+| **Staging** | Neon (branch of prod) | Copy-on-write branch — real prod shape, near-zero cost |
+| **Production** | **Neon (default)** | Scale-to-zero, instant branch restore ("dropped a table at 3am" → branch back online while prod stays up), native pgvector, one MCP + one branching model dev→prod. Floor for prod = **Launch plan (7-day PITR)** — Free's 6h window is disqualifying. |
+| **Production (escalation)** | Cloud SQL / PlanetScale | **Cloud SQL** when you need region-survivable DR (promotable cross-region replicas — promotion is a deliberate manual step, not auto-failover), HIPAA/BAA, or hard data residency. **PlanetScale** (Postgres GA Sept 2025; Metal = NVMe-attached I/O) when sustained throughput / horizontal scale matters more than scale-to-zero — it is deliberately always-on (the anti-Neon), with an official hosted MCP (OAuth, ephemeral creds). Caveat: its branches are backup-restore copies, **not** Neon-style copy-on-write — don't expect instant branch-per-PR. |
 
-Drizzle abstracts the provider — only the connection string changes between environments.
+Drizzle abstracts the provider — only the connection string changes between environments. Collapsing the old Neon-dev / Cloud-SQL-prod split to one provider is the highest-leverage, lowest-risk move in the stack: it kills Cloud SQL's 24/7 idle bill and unifies the branching model — and it needs no agentic argument to justify.
 
 ---
 
@@ -86,19 +90,47 @@ Browser / Capacitor App
         |
         | All requests (static + API)
         v
-  Cloud Run (Hono)
+  Container (Hono)  — Cloud Run / CF Containers / Fly / Railway
   - Serves static Vite build
   - Hono API routes (/api/*)
   - Better Auth (/api/auth/*)
   - Drizzle ORM → PostgreSQL
   - Services layer (business logic)
-  - External: Ably, Resend, GCS, payment gateway
+  - External: Ably, Resend, R2 (signed URLs), payment gateway
         |
         v
-  PostgreSQL (Neon or Cloud SQL)
+  PostgreSQL (Neon default; Cloud SQL / PlanetScale on escalation)
 ```
 
-Single deployment, no CORS headaches. API and frontend share the same origin.
+Single deployment, no CORS headaches. API and frontend share the same origin. The same Node image runs on any of the four container hosts — Hono is the portability insurance, so an agent can re-point the deploy target without an app rewrite.
+
+---
+
+## Hosting Decision Framework
+
+There is no single hosting default. The stack is **container-first** (Cloud Run + Cloudflare Containers as co-equal defaults); the brain picks per project by scale and needs, with an agentic-operability tie-bias. This mirrors the Language Decision Framework: if no signal points elsewhere, ship the container default.
+
+| Signal | Choice | Why |
+|--------|--------|-----|
+| Most projects (default) | **Cloud Run *or* CF Containers** (co-equal); Fly / Railway are peers | One Node image, near-zero migration between them. Both are agent-operable (Cloud Run MCP GA; CF Containers GA Apr 2026) and scale to zero. Portable container = the deploy target stays swappable. |
+| Cost-dominant / always-on / egress-heavy / EU residency | **Hetzner** (via Kamal 2) | ~10× compute-per-dollar and near-$0 egress vs hyperscalers; EU residency; dedicated + GPU boxes. Kamal 2 (text-only CLI over SSH, auto-TLS) makes an IaaS box genuinely agent-operable. Cost: no scale-to-zero, you own the DB + patching + backups, and its API tokens are **coarse project-scoped bearers (no OIDC / no short-lived)** — the weakest credential model here, so rotate hard and isolate blast radius by per-env projects. |
+| GPU / self-hosted open-weight models / embeddings at scale / fine-tuning | **Runpod** | The GPU / self-hosted-model tier that hosts the Python ML sidecar (see Language Decision Framework's ML/AI row). Serverless GPU scales to zero, per-second billing, official MCP + scoped keys. **Not a general app host** — the TS+Hono+Postgres core stays put. A hosted inference API (Anthropic/OpenAI/Together/Fireworks) is the more-agentic, less-ops default for low/bursty volume; reach for Runpod when you own a fixed open-weight model at sustained volume. A leaked full-scope key is radioactive — the default spend limit is an $80/**hour** rate cap, not a budget cap, so sustained abuse still compounds to ~$1.9k/day; mint endpoint-scoped, least-privilege keys. |
+| Latency-critical **stateless** routes | Cloudflare Workers (edge) | A documented, **taxed** option — not a default. Edge is not a lateral move from a container; agentic-ops does *not* lower the tax (an agent hits these code-level breakages exactly as a human would): the `neon-http` driver has no interactive transactions and Better Auth signup needs them (better-auth#4747), so edge Postgres must be Hyperdrive+pg or neon-serverless-over-WebSocket, never neon-http; Pino dies on workerd (Node build unsupported — use `console.log`-JSON → OTLP there); Better Auth's scrypt formerly blew the Worker CPU budget (better-auth#8860 — fixed Apr 2026 via native `node:crypto` fallback; verify you're on a post-fix version). Keep Hono as portability insurance and peel *stateless* latency slices onto Workers later — do not go edge-first. |
+| Region-survivable DR / HIPAA-BAA / GCP-committed | Cloud Run + Cloud SQL | GCP is a re-justified peer (now agent-operable), not the default. It wins when managed cross-region DR, compliance gating, or an existing GCP commitment genuinely tips the balance. |
+
+**The guardrail again:** going all-in on any one provider's proprietary primitives (CF Durable Objects/Vectorize; GCP-native everything) is *tighter* lock-in than a portable container. (Hyperdrive doesn't count — it's a pass-through for standard Postgres; exit is repointing the connection string.) Stay container-first; adopt proprietary features only when a signal demands it, the same discipline the Language Framework applies to languages.
+
+---
+
+## DR / Residency (explicit line item)
+
+Making Neon the default prod DB trades one managed property for a DIY one that must be **owned, not buried**: Neon has **no cross-region replication at any tier** — a region-wide outage means unbounded RTO (you wait for the cloud provider). Cloud SQL offers promotable cross-region replicas as a managed checkbox. This is architectural, not a plan knob.
+
+Rules:
+
+- **Every Neon prod** ships on **Launch plan or above (7-day PITR)** *and* a scheduled **cross-region `pg_dump` → object storage** job for an off-region cold copy. Free-tier 6h PITR is disqualifying for production.
+- **Region-survivable DR, HIPAA/BAA, or hard data residency** → escalate the DB to **Cloud SQL** (name it in the Blueprint; don't discover the gap at go-live). Neon Inc. is a US CLOUD-Act entity and HIPAA/BAA is Scale-plan-only.
+- DR posture is a **first-class Blueprint decision**, not an implicit consequence of the DB choice. `/press` verifies it at go-live.
 
 ---
 

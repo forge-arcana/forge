@@ -103,7 +103,7 @@ Before deploying, confirm the target:
 
 ### Auto-Detect Deploy Target
 
-Scan for deploy configuration in this order:
+Scan for deploy configuration (container-first — Cloud Run and Cloudflare Containers are co-equal defaults; match by whichever signals are present, don't privilege the first row):
 
 | Signal | Platform | Deploy Command |
 |--------|----------|----------------|
@@ -112,6 +112,9 @@ Scan for deploy configuration in this order:
 | `vercel.json` or `.vercel/` | Vercel | `vercel deploy` / `vercel --prod` |
 | `netlify.toml` or `.netlify/` | Netlify | `netlify deploy` / `netlify deploy --prod` |
 | `fly.toml` | Fly.io | `fly deploy` |
+| `wrangler.toml` / `wrangler.jsonc` | Cloudflare (Workers / Containers) | `wrangler deploy` |
+| `railway.json` / `railway.toml` | Railway | `railway up` (or git push) |
+| `config/deploy.yml` + `.kamal/` | Kamal self-host (e.g. Hetzner) | `kamal deploy` |
 | `render.yaml` | Render | `render deploy` (or git push) |
 | `appspec.yml` | AWS | Platform-specific |
 | `firebase.json` | Firebase | `firebase deploy` |

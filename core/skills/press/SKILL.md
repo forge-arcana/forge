@@ -36,7 +36,8 @@ Standard N+1, connection pooling, caching, indexing, load-testing readiness. Pro
 
 ### 3. Operations
 Standard error tracking, health checks, backups, rollback, graceful shutdown. Project-specific lens:
-- **Structured logging** — must match `<forge>/core/skills/forge/stack-guide.md` Logging Convention (Pino, JSON, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`).
+- **Structured logging** — must match `<forge>/core/skills/forge/stack-guide.md` Logging Convention (Pino on Node — JSON, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`). If compute is on the edge (Workers), Pino is replaced by `console.log`-JSON → an OTLP backend; verify telemetry still lands single-pane.
+- **DR posture** (stack-guide makes this an explicit line item) — if prod is on Neon (no cross-region replication), verify the floor: Launch-plan PITR + a scheduled cross-region `pg_dump`. If the product needs region-survivable DR or HIPAA/BAA, verify it's on the Cloud SQL escalation — don't discover the gap here.
 - **Local dev tooling** — `restart.sh` + `kill-zombies.sh` exist per `<forge>/core/skills/forge/forge-conventions.md` items 6-7; suggest `/srs` if missing.
 
 ### 4. Compliance
@@ -49,6 +50,8 @@ Standard structured logging on all routes, tracing, metrics, alerts, dashboards.
 ### 6. Deployment
 Standard CI/CD completeness, env parity, feature flags, migration up/down, zero-downtime, SSL/TLS. Project-specific lens:
 - Non-production bot protection wired into the deploy pipeline (not applied manually) — see Dimension 1 split.
+- **Egress-cost exposure** — flag layers where growth is pure egress (public buckets, media, APK distribution); the stack-guide default is R2 ($0 egress). GCS/hyperscaler egress on a viral path is an unbounded bill.
+- **Multi-provider blast radius** — if the app spans providers, verify each agent/CI credential is least-privilege and scoped (a brokered agent across N providers has a larger blast radius than one on a single cloud); confirm spend caps wherever a leaked key means runaway cost (e.g. Runpod GPU).
 
 ### 7. Documentation
 Standard API docs, runbooks, ADRs, onboarding, README. (No project-specific lens — assess as-is.)

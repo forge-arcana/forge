@@ -83,9 +83,9 @@ Decide Planned vs As-Built from the arguments and the project state (per **Argum
 
 The topology scan is deterministic, script-tier work. Prefer `<forge>/core/scripts/plot-scan.sh <project-path>` when it exists (it globs deploy manifests, parses dependency files, extracts `.env.example` keys, and lists route/handler entry points). **Fallback** (script absent): collect the same evidence inline —
 
-- **Deploy targets & runtime**: Dockerfile(s), `docker-compose*.yml`, `cloudbuild.yaml`, `vercel.json`, `fly.toml`, `render.yaml`, `Procfile`, k8s manifests, Terraform/Pulumi — what runs where.
+- **Deploy targets & runtime**: Dockerfile(s), `docker-compose*.yml`, `cloudbuild.yaml`, `wrangler.toml`/`wrangler.jsonc` (Cloudflare), `vercel.json`, `fly.toml`, `railway.json`/`railway.toml`, `render.yaml`, `config/deploy.yml`+`.kamal/` (Kamal/Hetzner), `Procfile`, k8s manifests, Terraform/Pulumi — what runs where.
 - **Deployable units**: entry points and long-running processes — web server, API, background workers, cron/scheduled jobs, queue consumers.
-- **Data stores**: databases, caches, object storage, search indexes — from connection strings, ORM configs, and client libraries in the dependency manifest.
+- **Data stores**: databases (serverless PG — Neon / PlanetScale / Cloud SQL), caches, object storage (R2 / GCS / S3), search indexes — from connection strings, ORM configs, and client libraries in the dependency manifest.
 - **Message infrastructure**: queues, brokers, pub/sub, event buses.
 - **External integrations**: from `.env.example` keys and dependency manifest — payment, auth, email/SMS, LLM/AI APIs, analytics, third-party APIs. Each secret-shaped env key usually names an external dependency.
 - **Trust boundaries**: which units are public (`--allow-unauthenticated`, public routes) vs IAM-gated/internal (see `/press` Dimension 1's bot/crawler split); where the VPC / private network edges fall.

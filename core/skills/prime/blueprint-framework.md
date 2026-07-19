@@ -298,14 +298,16 @@ Only after the founder confirms (or redirects), proceed to Q31. Language choice 
     - "Which combination makes sense for your users?"
 
 33. **"Where should this be hosted?"**
-    - **Default (recommend unless a signal points elsewhere):** **GCP Cloud Run** for the app + **Cloud SQL** for production Postgres + **Neon** for dev/staging/CI. This is the forge stack-guide default — single deployment serves API + static build (no CORS), region-pinned, scales to zero, pay-per-request, WIF-based keyless GCP auth. Drizzle abstracts the DB so the dev/staging/prod split is just a connection string change.
-    - Lead the founder with: *"Unless you have a strong reason otherwise, I'd put this on Cloud Run + Cloud SQL with Neon for dev/staging — that's the default forge stack and it covers the vast majority of projects."*
-    - **Only deviate from the default if a concrete signal demands it:**
-      - **Data residency / sovereignty** (must run in a specific region/cloud) → may force AWS/Azure/Hetzner.
-      - **Existing team expertise** ("we already run on AWS") → respect the sunk cost.
-      - **Workload mismatch** (edge functions globally, static-only marketing site) → Vercel/Netlify *may* fit; flag the trade-off (limited backend, vendor lock-in).
-      - **Hard budget constraint with no GCP credits** → Railway/Render/Fly.io as a middle ground.
-    - **Do not present Vercel/Railway/Cloud Run as equal options.** The default is Cloud Run + Cloud SQL + Neon. Alternatives exist; they are not peers.
+    - **Container-first, no single default.** The app ships as one Node image (serves API + static build, no CORS) portable across **Cloud Run, Cloudflare Containers, Fly, Railway** — pick per the stack-guide's **Hosting Decision Framework** by scale and needs, with an agentic-operability tie-bias. **Production Postgres defaults to Neon** (scale-to-zero, branch-per-PR, one MCP dev→prod); Drizzle abstracts the DB so environment = a connection-string change.
+    - Lead the founder with: *"By default I'll ship this as a portable container — Cloud Run or Cloudflare Containers, the same image runs on either — with Neon as the database. That covers most projects and keeps you un-locked-in. If your scale or needs point elsewhere, we escalate deliberately."*
+    - **Walk the escalation signals (following these IS the framework, not deviating from it):**
+      - **Cost-dominant / always-on / egress-heavy / EU residency** → **Hetzner** (via Kamal 2; ~10× cheaper, near-$0 egress — you own ops + DB durability, and its tokens are coarse bearers).
+      - **GPU / self-hosted open-weight models / embeddings at scale** → **Runpod** hosts the Python ML sidecar (not the general app host).
+      - **Region-survivable DR / HIPAA-BAA / hard data residency / existing GCP commitment** → **Cloud Run + Cloud SQL** (GCP is a re-justified peer, chosen on merit).
+      - **Sustained throughput / horizontal scale over scale-to-zero** → **PlanetScale** for the DB.
+      - **Stateless latency-critical routes** → peel onto **Cloudflare Workers** (edge) — a taxed option, container stays the default.
+    - **Capture the DR posture explicitly.** Neon has no cross-region replication — for any prod, note the floor (Launch plan + a scheduled cross-region `pg_dump`), and if the product needs region-survivable DR or HIPAA/BAA, name **Cloud SQL** as the DB in the Blueprint now, not at go-live.
+    - **The discipline is anti-*trend*, not anti-movement.** Move freely across the framework's peers when a scale/needs signal points there; never swap on popularity alone. "It's trending" is not a signal — a concrete cost/scale/latency/DR/residency requirement is.
 
 34. **"How important is testing and CI/CD from day one?"**
     - Some founders want "just ship it." Others want production-grade from the start.
