@@ -34,9 +34,10 @@ Concise status snapshot. No prose preamble — just the header and table.
    - Completed phases (anything marked DONE)
    - Historical audit summaries with all items resolved
 
-5. **Output format** — a one-line header (Branch / Last commit / Dirty count) followed by a markdown table grouped by section header rows (`Active Work`, `Outstanding`).
+5. **Output format** — a one-line header (Branch / Last commit / Dirty count) followed by a markdown table grouped by section header rows (`Active Work`, `Outstanding`, `Parked`).
    - Columns: `# | Task | Status | Notes`
    - Active items: `in-progress` / `blocked` / `next`. Cap at 5. If none, single row `Slate clean`.
    - Outstanding items: `outstanding`. Sources: rules-file `### Deferred`, incomplete plan items, `project_*.md` memory files with unresolved work. Omit items marked "Do NOT surface in status updates" or fully resolved. If none, omit the Outstanding section entirely.
+   - Parked items: `parked`. Source: items the rules file explicitly marks parked/deferred-indefinitely (e.g. a "Parked:" line or list). Copy verbatim as rows — these are intentional non-blockers, not backlog. If none, omit the Parked section entirely.
 
 6. No narrative. No invented rows.
