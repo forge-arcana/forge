@@ -185,7 +185,5 @@ Skill/script storage moved to the cross-tool canonical store (`~/.agents/skills/
 - **Trackers**: `learnings/.fold-tracker.json` (processedEntries + promotedEntries), `memory/.memory-tracker.json` (skippedFiles)
 - **Baseline**: `~/.claude/.last-cast.json` — last-cast commit SHA for three-way drift detection
 - **Earlier history** (2026-04-23 → 2026-06-14): see `memory/recent-history.md`.
-- **Recent** (2026-06-14, 2026-06-18 — model ceilings, /burn, lean.sh, target-aware deploy, forge cycle): see `memory/recent-history.md`.
-- **Recent** (2026-06-20 → 2026-06-28 — forge cycles, /purge passes, Concise-Voice HARD RULE + rules propagation, contribution infra): see `memory/recent-history.md`.
-- **Recent** (2026-07-16 — model-tier remap / opus-brain doctrine across 25 skills; 2026-07-18 — `/plot` tenth art + purge cleanse + 1 learning absorbed): see `memory/recent-history.md`.
-- **Recent**: 2026-07-19 — **Stack-guide agentic-era pivot** (see Last session above).
+- **Recent** (2026-06-14 → 2026-07-18 — model ceilings, /burn, target-aware deploy, forge cycles, /purge passes, Concise-Voice HARD RULE, contribution infra, model-tier remap, `/plot` tenth art): see `memory/recent-history.md`.
+- **Recent**: 2026-07-19 — **Stack-guide agentic-era pivot** (see Last session above). Same-day `/forge` cycle: pivot cast to membrane (6 skills + rules + learning + memory); absorbed dogfood-first single-box default topology learning (managed platform = named public-launch phase → `global-patterns.md` 62→63); `>50` review trigger deferred (Warden reviewed 2026-07-18).

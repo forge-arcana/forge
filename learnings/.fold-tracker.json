@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-07-18",
+  "lastRun": "2026-07-19",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -216,7 +216,8 @@
     "2026-07-04 — Wedge: Tool-Register Products Need Tool-Register Touchstones (functionality over presentation)",
     "2026-07-04 — Wedge: Choice Artifacts Must Be Clickable Variants, Not Prose Menus",
     "A Fix Recorded in One Consumer of Shared Infra Doesn't Reach the Others",
-    "2026-07-18 — /wrap's gate must equal the strictest pipeline gate (format:check + workspace-wide build, not eslint + spot typecheck)"
+    "2026-07-18 — /wrap's gate must equal the strictest pipeline gate (format:check + workspace-wide build, not eslint + spot typecheck)",
+    "2026-07-18 — Default the stack reco to dogfood-first single-box (VPS + Docker Compose + Cloudflare tunnel); make the managed-platform architecture an explicit LATER phase"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
