@@ -93,3 +93,9 @@
 **Learning**: The hybrid storage pattern — raw external payloads in jsonb (schemas differ, fields deprecate), comparables promoted to typed NULLABLE columns — is load-bearing wherever aggregation happens: Postgres keeps no planner statistics on jsonb internals, percentile/median functions need typed columns, and nullable columns encode "not available ≠ zero" for free. For self-tuning loops fed by such metrics: record outcomes at fixed maturity horizons (e.g., 48h and 7d, horizon stored on the row) rather than "next day," compute baselines over rolling windows, and gate any automated rebalancing on a minimum sample count — medians over tiny samples thrash the system they steer.
 
 **Apply when**: Reviewing metrics ingestion from external platforms or any learn/optimization loop; promote the group-by axes to columns and check horizon + sample-size discipline.
+
+## Serverless-Postgres-by-Default Inverts for Always-On Workloads (2026-07-19)
+
+**Learning**: "Default to serverless/scale-to-zero Postgres" assumes bursty traffic where sleeping pays. It inverts when any component is always-on (a per-minute cron or queue consumer): the instance never sleeps, serverless pricing loses to a small flat-rate managed instance, and free-tier compute hours burn out in days. Pick a flat-price provider in the required region and keep the exit cheap: use the DB as plain vanilla Postgres (no provider-specific features), reach it through a connection-string indirection layer, and keep nightly logical dumps restore-drilled — then a provider swap is ~30 minutes and "too late to switch" never happens.
+
+**Apply when**: choosing a Postgres host for a stack with an always-on consumer; re-checking any "serverless DB by default" recommendation.

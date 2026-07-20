@@ -228,6 +228,16 @@ logger.error({ err, userId, orderId }, 'order_placement_failed');
 
 These are patterns confirmed across multiple projects. Not opinions — battle scars.
 
+### Cloudflare Workers (porting a Node/Hono/Drizzle/Better-Auth app)
+Verified on workerd at runtime across multiple ports — not theory:
+- **Postgres drivers cannot open raw TCP on Workers.** Use a **Hyperdrive binding**; the connection string arrives **per-request** on `env.HYPERDRIVE.connectionString`, never at module-load. (Neon's HTTP/WS drivers are the only connection-string-at-init option; `neon-http` lacks interactive transactions — use the WS flavor if you go that way.)
+- **Module singletons break.** A DB client or auth instance created at import works for the request that created it, then throws `Cannot perform I/O on behalf of a different request`. DB + auth must be **request-scoped**: an `AsyncLocalStorage` holding the per-request client, with a bound Proxy (or scope-aware getter) so existing call sites stay unchanged; a middleware ordered FIRST binds the scope. Create a fresh client per request (Hyperdrive pools the real connections) and close it off the response path.
+- **`process.env` is empty at module-eval on workerd** unless populated: `nodejs_compat` + `compatibility_date >= 2025-04-01` mirrors vars/secrets into it at startup. Bindings (Hyperdrive, R2) are never in `process.env`.
+- **Pino does not run on workerd** (Node internals). Swap in a console JSON-lines logger at runtime; alias the statically-imported pino away from the bundle.
+- **R2: prefer the native binding over S3 clients** for Workers-first apps — no credentials, no signed-URL plumbing, no egress; keep an S3-compatible client (aws4fetch, not the AWS SDK) only for code that must run identically on Node.
+- **Better Auth needs `globalThis.AsyncLocalStorage`** — its dynamic `import("node:async_hooks")` doesn't surface the constructor on workerd. Shim first, before the app: `globalThis.AsyncLocalStorage ??= AsyncLocalStorage`.
+- **Debug method:** `wrangler deploy --dry-run` proves the bundle compiles; for module-eval crashes bisect with a trivial `export default {fetch(){}}` to split runtime vs import-graph. `localConnectionString` on the Hyperdrive config exercises the real DB path locally with no CF account.
+
 ### Drizzle
 - `drizzle-kit` can't resolve `.js` extensions in TS files — use extensionless imports in schema files
 - No native `upsert()` — use `onConflictDoUpdate` or manual find-then-update-or-insert
