@@ -392,8 +392,14 @@ const newInForge = [...forgeFileT].filter(t => !userT.has(t)).sort();
 console.log(JSON.stringify({newInUser, newInForge}));
 " 2>/dev/null || echo '{"newInUser":[],"newInForge":[]}')
 
-    new_in_user=$("$NODE_BIN" -e "console.log(JSON.parse('$comparison').newInUser.length)" 2>/dev/null || echo "0")
-    new_in_forge=$("$NODE_BIN" -e "console.log(JSON.parse('$comparison').newInForge.length)" 2>/dev/null || echo "0")
+    # process.stdout.write(String(n)) -- NOT console.log(n). console.log applies
+    # inspect-style colouring to a bare NUMBER, and both node and bun do it when
+    # colour is forced in the environment even though stdout is a pipe. The ANSI
+    # codes then reach the [[ -eq ]] tests below as "\033[33m0\033[39m", which
+    # aborts every comparison with "syntax error: operand expected" and silently
+    # drops the new-entry counts for every skill-specific learning file.
+    new_in_user=$("$NODE_BIN" -e "process.stdout.write(String(JSON.parse('$comparison').newInUser.length))" 2>/dev/null || echo "0")
+    new_in_forge=$("$NODE_BIN" -e "process.stdout.write(String(JSON.parse('$comparison').newInForge.length))" 2>/dev/null || echo "0")
 
     if [[ "$new_in_user" -eq 0 && "$new_in_forge" -eq 0 ]]; then
       content_diff=$(diff --strip-trailing-cr "$user_file" "$forge_file" 2>/dev/null || true)
