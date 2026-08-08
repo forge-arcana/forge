@@ -99,3 +99,7 @@
 **Learning**: "Default to serverless/scale-to-zero Postgres" assumes bursty traffic where sleeping pays. It inverts when any component is always-on (a per-minute cron or queue consumer): the instance never sleeps, serverless pricing loses to a small flat-rate managed instance, and free-tier compute hours burn out in days. Pick a flat-price provider in the required region and keep the exit cheap: use the DB as plain vanilla Postgres (no provider-specific features), reach it through a connection-string indirection layer, and keep nightly logical dumps restore-drilled — then a provider swap is ~30 minutes and "too late to switch" never happens.
 
 **Apply when**: choosing a Postgres host for a stack with an always-on consumer; re-checking any "serverless DB by default" recommendation.
+
+## LLM Cost Capture: the Usage Object Is Four-Dimensional (2026-07-04)
+**Learning**: Per-call cost computed as input×rate + output×rate misprices every cached call: cache reads bill ~0.1× and cache writes ~1.25× of the input rate, and the input count excludes the cached prefix. A spend ledger fed by LLM calls must price all four usage fields at their distinct rates, store the model ID and a rate-effective-date per entry (pricing windows and model turnover corrupt history otherwise), and verify caching actually engages (cache reads > 0) — prefixes below the minimum cacheable length silently don't cache.
+**Apply when**: Any product metering LLM spend per tenant or feature.

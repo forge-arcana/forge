@@ -85,3 +85,35 @@ Concrete instance — a **403 from Cloudflare or similar bot-protection**, run i
 4. **Reframe before investing in bypass** (the Reframer hat). Search for alternative unprotected sources for the same content. Most "only on site X" claims are false; content usually exists on a mirror, aggregator, or secondary publisher. The reframe ships faster and stays cheaper than maintaining bypass tooling.
 5. **Treat bypass tools as 6-month assets.** Stealth-patched browsers / Chromium-fingerprint patches periodically lose effectiveness when Cloudflare ships a new challenge tier. Before integrating, confirm a public report of success against the *current* challenge tier (last ~30 days), and budget for replacement. Specific tool names belong in a stack guide with a "verified" date, not in this evergreen learning.
 **Apply when**: Any blocker investigation, any time a direct fix has been exhausted (run the Three Hats, ask the Reframer question explicitly). For a 403 from Cloudflare or similar, run the five playbook steps in order before declaring a hard wall.
+
+## No-Native-Scheduling Platforms: the Due-Poll IS the Timer (2026-06-21)
+**Learning**: Where a platform's publish API has no scheduling parameter (containers that expire in ~24h, immediate-publish-only endpoints), third-party "schedule via API" claims mean *their own* timers wrapping immediate publish. The right-size build is a persisted pending-queue drained by a due-poll (utc ≤ now) every ~15 min — a poll catches up after host downtime (posts late, not never), where exact-time cron lines silently miss. Note the asymmetry it creates: natively-scheduled platforms are fire-and-forget even if your box dies; poll-published platforms require your box alive at the window.
+**Apply when**: Adding scheduled publishing to any platform without a native schedule parameter.
+
+## Platform Rejects First-Party Tools → Route Through an Approved Intermediary (2026-06-23)
+**Learning**: When a platform's API audit explicitly blocks first-party/self-serve tools, check whether an audited multi-client intermediary exposes the same capability via its own API — their approval covers you, first accounts are often free, and the adapter interface stays identical (swap internals only). The intermediary is a publish *transport*, not a creative brain — it does not violate a "no SaaS scheduler" rule if the calendar/content logic stays in your codebase. Also: rejection presentation matters — a branded account + real product page meaningfully changes manual-review odds; run the intermediary immediately AND resubmit with better positioning in parallel.
+**Apply when**: Any platform gates API access to approved tech providers and rejects your first-party app.
+
+## Documented Exclusions Decay Into Assumptions — Date Every "Platform X Doesn't Work" (2026-08-07)
+**Learning**: An exclusion justified by a platform's observed behaviour (zero distribution on a cold-start account) was correct, well-reasoned and well-commented — which is precisely what made it invisible when the world moved: weeks later that platform carried 90% of all engagement while the learn loop still steered against it, because the two channel groups disagreed in direction. A documented decision decays into an assumption the moment reality shifts. Put an explicit re-check date on any behaviour-based exclusion, and re-read it against the platform's CURRENT numbers, not the note that created it.
+**Apply when**: Writing any data-driven exclusion, downgrade, or "this channel is dead" decision into code or config.
+
+## Rapid-Fire Media-Container Bursts Trip Action Blocks; Space the Calls (2026-07-09)
+**Learning**: A platform "action blocked / request limit" error on one media type while others sail through is usually burst-rate throttling on consecutive container-creation calls, not an account block or daily quota — multi-item posts fire N back-to-back creates plus needless per-child polls, while single video posts self-space via processing time. Diagnose by splitting the data by media type before concluding "the account is blocked", and check the platform's own quota endpoint before blaming a daily cap. Fix: sleep a few seconds between successive container calls and drop per-child polls that return instantly. The block resets on its own clock (~24h) and cannot be forced; retry loops re-firing the burst make it worse.
+**Apply when**: A publish path with multi-call container/album construction starts failing while simpler shapes still work.
+
+## A Transport Error Is Not a Publish Failure — Verify Against the Account (2026-07-23)
+**Learning**: A read-timeout on a publish call can fire *after* the platform accepted the job; every retry then trips the provider's dedup ("already scheduled/posted") while the post is actually LIVE — logging failures and missing the ledger for a successful publish. On any publish lane, treat a transport error or a dedup rejection as unknown-outcome, not failure: query the account for recent matching content before returning an error, and only then retry.
+**Apply when**: Handling errors on any external publish/side-effect call, especially behind an intermediary API.
+
+## DB Provider Assumptions Expire Fast: A 5-Point Pattern (2026-06-29)
+**Learning**: DB provider assessments go stale in 12–18 months in ways that flip the recommendation: (1) acquisitions change product identity, not just ownership; (2) "serverless" often has hard compute floors that make it wrong for spiky/dev workloads; (3) bundle economics invert head-to-head pricing — compare the stack, not the service; (4) niche providers become category winners on specific patterns (per-tenant DB sharding); (5) major price drops are acquisition- or competition-triggered — never anchor to a price researched more than 12 months ago.
+**Apply when**: Any infrastructure-layer provider assessment older than a year, or inherited from a previous project.
+
+## AI-Agent Workloads Create a New DB Selection Axis (2026-06-29)
+**Learning**: Ephemeral isolation — fork-from-seed, operate, discard, per agent session — is now a first-class DB selection criterion. It requires sub-second cold starts, near-instant branching, and sane cost at thousands of ephemeral DBs/day; conventional provisioned and serverless Postgres were designed for human-provisioned databases and fail all three.
+**Apply when**: The workload includes agents creating/forking/discarding databases programmatically.
+
+## pgvector Is Table Stakes; the Differentiator Has Moved (2026-06-29)
+**Learning**: Every major managed Postgres offers pgvector — its presence is a minimum bar, not a differentiator. Under ~10M vectors, add pgvector to the existing provider; above that, or when vector search IS the workload, evaluate dedicated vector DBs; for agentic isolation, evaluate branching/cold-start, not extension lists. Never recommend a provider change solely on "it has pgvector."
+**Apply when**: Any AI/LLM stack evaluation touching vector storage.
