@@ -22,6 +22,8 @@ Use the script's output as your evidence base for scoring each dimension below. 
 
 **After evidence is collected, score all 7 dimensions in parallel via subagents.** Each dimension's scoring is independent — spawn one sonnet-tier subagent per dimension with the shared evidence, except Security and Compliance, which spawn at opus tier. Batch all uncached web searches in parallel across dimensions. Merge scores into the final readiness scorecard at opus tier: actively challenge any score not backed by forge-scan evidence, and re-score a dimension yourself if its report doesn't hold up, before issuing the READY / NOT READY verdict. If your harness does not support parallel sub-agent spawning or per-spawn model selection, walk the dimensions sequentially at your session model.
 
+**Scale the fan-out to the target** (protocol Complexity Triage): the full seven-way fan-out is for whole-product readiness. For a scoped target — one deployable unit, one heat's surface — collapse the non-security dimensions into a single sonnet-tier scorer carrying all their rubrics, keep Security and Compliance at opus tier, and merge at opus as usual. The verdict gate never shrinks; only the legwork width does.
+
 ## Dimensions (7 total)
 
 Each dimension's scope statement scans the codebase AND web (cache first per [Forge Protocol](../forge/protocol.md#web-research-cache)). Generic readiness items (OWASP, N+1, env parity, etc.) the subagent already knows; the bullets below highlight the **project-specific scoring lenses** that often get missed.

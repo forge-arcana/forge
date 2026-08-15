@@ -37,6 +37,8 @@ Use the script's output as your evidence base for the judgment phase below. The 
 
 After evidence is collected, apply the Parallel Execution Principle from `core/skills/forge/protocol.md` — fan out one subagent per dimension with the shared evidence: spawn each dimension reviewer as a sonnet-tier subagent, except Dimension 2 (band-aids + actor-identity security), which spawns at opus tier. Then merge results into the final report at opus tier — the merge and the Gadfly Verdict are the review gate: dedup overlapping findings, challenge any finding not backed by evidence, and own the final severity ordering. If your harness does not support parallel sub-agent spawning or per-spawn model selection, run the dimensions sequentially at your session model.
 
+**Scale the fan-out to the target** (protocol Complexity Triage): the full seven-way fan-out is for project-wide reviews. For a scoped target — one diff, one module, a handful of files — collapse dimensions 1 and 3–7 into a single sonnet-tier reviewer carrying all their rubrics, keep Dimension 2 at opus tier, and merge at opus as usual. The gate never shrinks; only the legwork width does.
+
 ## Dimension 1: SOLID & Strategy Patterns
 
 ### SOLID principles — apply these practical tests:

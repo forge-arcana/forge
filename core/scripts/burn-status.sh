@@ -5,6 +5,12 @@
 # backend, no API key. Every assistant turn records its token usage on disk;
 # this just sums it per session and estimates cost.
 #
+# Sessions are aggregated PER MODEL, not one-model-per-session: a session that
+# spawned sonnet/haiku subagents under an opus orchestrator shows each model's
+# share. That per-model split is the verification signal for tier wiring — a
+# fan-out session whose report shows only one model means the per-spawn tier
+# hints did not bind at runtime.
+#
 # COUPLING NOTE: transcript path + JSON shape below are Claude Code's
 # (~/.claude/projects/<encoded-path>/<uuid>.jsonl, one `message.usage` per
 # turn). Other harnesses store usage differently — on those this degrades
@@ -46,14 +52,17 @@ if ! command -v jq &>/dev/null; then
 fi
 
 # --- Pricing (USD per 1M tokens): input / output / cache-write / cache-read ---
-# ESTIMATE ONLY — edit to match current Claude pricing. Unknown models fall back
-# to the Opus tier (the heaviest), so estimates are conservative-high, never low.
+# ESTIMATE ONLY — verified against Claude API list pricing 2026-08-15
+# (cache write = 1.25x input, cache read = 0.1x input). Edit when pricing moves.
+# Unknown models fall back to the Fable tier (the heaviest), so estimates are
+# conservative-high, never low.
 price_for() {
   case "$1" in
-    *opus*)   echo "15 75 18.75 1.50" ;;
-    *sonnet*) echo "3 15 3.75 0.30" ;;
-    *haiku*)  echo "1 5 1.25 0.10" ;;
-    *)        echo "15 75 18.75 1.50" ;;   # default → Opus tier
+    *fable*|*mythos*) echo "10 50 12.50 1.00" ;;
+    *opus*)           echo "5 25 6.25 0.50" ;;
+    *sonnet*)         echo "3 15 3.75 0.30" ;;
+    *haiku*)          echo "1 5 1.25 0.10" ;;
+    *)                echo "10 50 12.50 1.00" ;;   # default → Fable tier
   esac
 }
 
@@ -69,14 +78,15 @@ humanize() { # bytes-ish integer → 1.6M / 23.9k / 412
   }'
 }
 
-# Aggregate one .jsonl into a TSV row: model\ti\to\tcr\tcc\tn
+# Aggregate one .jsonl into one TSV row PER MODEL: model\ti\to\tcr\tcc\tn
 # Dedupes streaming-duplicate records by (message.id|requestId|timestamp).
-aggregate_session() {
+aggregate_by_model() {
   jq -rs '
     [ .[] | select(.message.usage and .message.role=="assistant") ]
     | unique_by((.message.id // "") + "|" + (.requestId // "") + "|" + (.timestamp // ""))
+    | group_by(.message.model // "unknown")[]
     | {
-        model: ((map(.message.model) | map(select(.)) | last) // "unknown"),
+        model: (.[0].message.model // "unknown"),
         i:  (map(.message.usage.input_tokens // 0)               | add // 0),
         o:  (map(.message.usage.output_tokens // 0)              | add // 0),
         cr: (map(.message.usage.cache_read_input_tokens // 0)    | add // 0),
@@ -84,7 +94,7 @@ aggregate_session() {
         n:  length
       }
     | "\(.model)\t\(.i)\t\(.o)\t\(.cr)\t\(.cc)\t\(.n)"
-  ' "$1" 2>/dev/null || echo "unknown	0	0	0	0	0"
+  ' "$1" 2>/dev/null || true
 }
 
 cost_of() { # model i o cr cc → USD (awk float)
@@ -92,6 +102,20 @@ cost_of() { # model i o cr cc → USD (awk float)
   awk -v i="$2" -v o="$3" -v cr="$4" -v cc="$5" \
       -v pin="$pin" -v pout="$pout" -v pcw="$pcw" -v pcr="$pcr" \
       'BEGIN{ printf "%.2f", (i*pin + o*pout + cc*pcw + cr*pcr)/1e6 }'
+}
+
+# Session-level rollup across models. Sets S_I S_O S_CR S_CC S_N S_COST S_MIX;
+# cost is the sum of per-model costs, mix reads like "opus-5:12t sonnet-5:34t".
+session_stats() {
+  S_I=0; S_O=0; S_CR=0; S_CC=0; S_N=0; S_COST=0; S_MIX=""
+  local m i o cr cc n c
+  while IFS=$'\t' read -r m i o cr cc n; do
+    [[ -n "$m" && "${n:-0}" -gt 0 ]] || continue
+    S_I=$((S_I+i)); S_O=$((S_O+o)); S_CR=$((S_CR+cr)); S_CC=$((S_CC+cc)); S_N=$((S_N+n))
+    c=$(cost_of "$m" "$i" "$o" "$cr" "$cc")
+    S_COST=$(awk -v a="$S_COST" -v b="$c" 'BEGIN{printf "%.2f", a+b}')
+    S_MIX="${S_MIX:+$S_MIX }${m#claude-}:${n}t"
+  done < <(aggregate_by_model "$1")
 }
 
 # --- Resolve which transcript dirs to walk ---
@@ -126,12 +150,10 @@ if [[ "$MODE" == "compare" ]]; then
   FB=$(resolve_session "$DIR" "$CMP_B") || exit 1
   shopt -u nullglob
   [[ -n "$FA" && -n "$FB" ]] || { echo "ERROR: could not resolve both sessions." >&2; exit 1; }
-  IFS=$'\t' read -r am ai ao acr acc an <<<"$(aggregate_session "$FA")"
-  IFS=$'\t' read -r bm bi bo bcr bcc bn <<<"$(aggregate_session "$FB")"
-  ACOST=$(cost_of "$am" "$ai" "$ao" "$acr" "$acc")
-  BCOST=$(cost_of "$bm" "$bi" "$bo" "$bcr" "$bcc")
+  session_stats "$FA"; ai=$S_I; ao=$S_O; acr=$S_CR; acc=$S_CC; an=$S_N; ACOST=$S_COST; AMIX=$S_MIX
+  session_stats "$FB"; bi=$S_I; bo=$S_O; bcr=$S_CR; bcc=$S_CC; bn=$S_N; BCOST=$S_COST; BMIX=$S_MIX
   echo "## Token Burn — Before/After"
-  echo "**A (before)**: \`$(basename "$FA" .jsonl | cut -c1-8)\` ($an turns, ${am#claude-}) | **B (after)**: \`$(basename "$FB" .jsonl | cut -c1-8)\` ($bn turns, ${bm#claude-})"
+  echo "**A (before)**: \`$(basename "$FA" .jsonl | cut -c1-8)\` ($an turns — $AMIX) | **B (after)**: \`$(basename "$FB" .jsonl | cut -c1-8)\` ($bn turns — $BMIX)"
   echo ""
   echo "| Metric | A | B | Δ | Δ% |"
   echo "|--------|---|---|----|----|"
@@ -166,6 +188,17 @@ echo ""
 GT_I=0; GT_O=0; GT_CR=0; GT_CC=0; GT_COST=0; FOUND=0
 GT_OC=0; GT_WC=0; GT_RC=0   # per-column est-cost accumulators (output / cache-write / cache-read)
 
+# Per-model grand totals — parallel indexed arrays for bash 3.2 compat.
+MODEL_NAMES=(); MODEL_I=(); MODEL_O=(); MODEL_CR=(); MODEL_CC=(); MODEL_N=(); MODEL_COST=()
+model_idx() { # sets MIDX for model "$1", registering it if new (no subshell — mutates arrays)
+  local m="$1" k
+  for k in "${!MODEL_NAMES[@]}"; do
+    if [[ "${MODEL_NAMES[$k]}" == "$m" ]]; then MIDX=$k; return; fi
+  done
+  MODEL_NAMES+=("$m"); MODEL_I+=(0); MODEL_O+=(0); MODEL_CR+=(0); MODEL_CC+=(0); MODEL_N+=(0); MODEL_COST+=(0)
+  MIDX=$((${#MODEL_NAMES[@]}-1))
+}
+
 for DIR in "${DIRS[@]}"; do
   [[ -d "$DIR" ]] || continue
   shopt -s nullglob
@@ -194,24 +227,35 @@ for DIR in "${DIRS[@]}"; do
 
   [[ "$SCOPE" == "all" ]] && echo "### $(basename "$DIR")"
   echo ""
-  echo "| Session | Date | Turns | Input | Output | Cache R | Cache W | Est \$ | Model |"
-  echo "|---------|------|-------|-------|--------|---------|---------|--------|-------|"
+  echo "| Session | Date | Turns | Input | Output | Cache R | Cache W | Est \$ | Model mix |"
+  echo "|---------|------|-------|-------|--------|---------|---------|--------|-----------|"
 
   for f in "${FILES[@]}"; do
     [[ -f "$f" ]] || continue
-    IFS=$'\t' read -r model i o cr cc n <<<"$(aggregate_session "$f")"
-    [[ "${n:-0}" -eq 0 ]] && continue
+    s_i=0; s_o=0; s_cr=0; s_cc=0; s_n=0; s_cost=0; s_mix=""
+    while IFS=$'\t' read -r m i o cr cc n; do
+      [[ -n "$m" && "${n:-0}" -gt 0 ]] || continue
+      s_i=$((s_i+i)); s_o=$((s_o+o)); s_cr=$((s_cr+cr)); s_cc=$((s_cc+cc)); s_n=$((s_n+n))
+      c=$(cost_of "$m" "$i" "$o" "$cr" "$cc")
+      s_cost=$(awk -v a="$s_cost" -v b="$c" 'BEGIN{printf "%.2f", a+b}')
+      s_mix="${s_mix:+$s_mix }${m#claude-}:${n}t"
+      model_idx "$m"
+      MODEL_I[$MIDX]=$((MODEL_I[$MIDX]+i)); MODEL_O[$MIDX]=$((MODEL_O[$MIDX]+o))
+      MODEL_CR[$MIDX]=$((MODEL_CR[$MIDX]+cr)); MODEL_CC[$MIDX]=$((MODEL_CC[$MIDX]+cc))
+      MODEL_N[$MIDX]=$((MODEL_N[$MIDX]+n))
+      MODEL_COST[$MIDX]=$(awk -v a="${MODEL_COST[$MIDX]}" -v b="$c" 'BEGIN{printf "%.2f", a+b}')
+      read -r pin pout pcw pcr <<<"$(price_for "$m")"
+      GT_OC=$(awk -v a="$GT_OC" -v o="$o" -v p="$pout" 'BEGIN{printf "%.4f", a + o*p/1e6}')
+      GT_WC=$(awk -v a="$GT_WC" -v cx="$cc" -v p="$pcw" 'BEGIN{printf "%.4f", a + cx*p/1e6}')
+      GT_RC=$(awk -v a="$GT_RC" -v cx="$cr" -v p="$pcr" 'BEGIN{printf "%.4f", a + cx*p/1e6}')
+    done < <(aggregate_by_model "$f")
+    [[ "$s_n" -eq 0 ]] && continue
     FOUND=$((FOUND+1))
-    cost=$(cost_of "$model" "$i" "$o" "$cr" "$cc")
     sid=$(basename "$f" .jsonl); sid="${sid:0:8}"
     dt=$(date -r "$f" +%m-%d 2>/dev/null || echo "??")
-    echo "| \`$sid\` | $dt | $n | $(humanize "$i") | $(humanize "$o") | $(humanize "$cr") | $(humanize "$cc") | \$$cost | ${model#claude-} |"
-    GT_I=$((GT_I+i)); GT_O=$((GT_O+o)); GT_CR=$((GT_CR+cr)); GT_CC=$((GT_CC+cc))
-    GT_COST=$(awk -v a="$GT_COST" -v b="$cost" 'BEGIN{printf "%.2f", a+b}')
-    read -r pin pout pcw pcr <<<"$(price_for "$model")"
-    GT_OC=$(awk -v a="$GT_OC" -v o="$o" -v p="$pout" 'BEGIN{printf "%.4f", a + o*p/1e6}')
-    GT_WC=$(awk -v a="$GT_WC" -v c="$cc" -v p="$pcw" 'BEGIN{printf "%.4f", a + c*p/1e6}')
-    GT_RC=$(awk -v a="$GT_RC" -v c="$cr" -v p="$pcr" 'BEGIN{printf "%.4f", a + c*p/1e6}')
+    echo "| \`$sid\` | $dt | $s_n | $(humanize "$s_i") | $(humanize "$s_o") | $(humanize "$s_cr") | $(humanize "$s_cc") | \$$s_cost | $s_mix |"
+    GT_I=$((GT_I+s_i)); GT_O=$((GT_O+s_o)); GT_CR=$((GT_CR+s_cr)); GT_CC=$((GT_CC+s_cc))
+    GT_COST=$(awk -v a="$GT_COST" -v b="$s_cost" 'BEGIN{printf "%.2f", a+b}')
   done
   echo ""
 done
@@ -226,6 +270,17 @@ echo ""
 echo "| Sessions | Input | Output | Cache R | Cache W | Est \$ |"
 echo "|----------|-------|--------|---------|---------|--------|"
 echo "| $FOUND | $(humanize "$GT_I") | $(humanize "$GT_O") | $(humanize "$GT_CR") | $(humanize "$GT_CC") | \$$GT_COST |"
+echo ""
+echo "### By Model"
+echo ""
+echo "| Model | Turns | Input | Output | Cache R | Cache W | Est \$ | % of cost |"
+echo "|-------|-------|-------|--------|---------|---------|--------|-----------|"
+for k in "${!MODEL_NAMES[@]}"; do
+  pct=$(awk -v c="${MODEL_COST[$k]}" -v t="$GT_COST" 'BEGIN{ printf "%.0f%%", (t > 0) ? c / t * 100 : 0 }')
+  echo "| ${MODEL_NAMES[$k]#claude-} | ${MODEL_N[$k]} | $(humanize "${MODEL_I[$k]}") | $(humanize "${MODEL_O[$k]}") | $(humanize "${MODEL_CR[$k]}") | $(humanize "${MODEL_CC[$k]}") | \$${MODEL_COST[$k]} | $pct |"
+done
+echo ""
+echo "_Tier-binding check: sessions that ran fan-out skills should show sonnet/haiku rows here. A pure single-model breakdown across fan-out sessions means the per-spawn tier hints did not bind._"
 echo ""
 # Dominant-column burn profile (cost-weighted) + the canned lever line — deterministic,
 # so /burn's step-2 read is emitted here instead of asking the model to compare numbers.

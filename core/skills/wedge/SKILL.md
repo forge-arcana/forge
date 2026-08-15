@@ -2,7 +2,7 @@
 name: wedge
 description: "Master of aesthetic. Drives a single decisive thrust that splits the project's identity from generic AI slop. Reads Opus + Vow, extracts a prose Soul Brief (what the product IS, ISN'T, examples-from-life, forbidden defaults), then summons three design-apprentices on essence-lenses derived from the Soul Brief, and forges the Touchstone — paired artifacts (HTML vision + MD typed contract per DESIGN.md spec) that persist as the visual constitution every downstream artifact conforms to. TRIGGER when: user has an Opus and Vow and wants the project to have a soul-bearing visual face before scope or architecture lock."
 ---
-<!-- model: inherit | fan-out: council apprentices → opus; Heat 6 codification → sonnet (opus reviews MD before Heat 8); audit + assembly at top level -->
+<!-- model: inherit | fan-out: council apprentices → opus; Heat 6 codification → sonnet (opus reviews MD before Heat 8); audit at top level; Heat 3 assembly + Heat 7 parity check are script tier (wedge-preview-assemble.sh, wedge-parity-check.sh) -->
 
 # /wedge — The Master of Aesthetic
 
@@ -257,7 +257,21 @@ Maximum two respawn rounds per cycle. If a third round would be needed, halt and
 
 Assemble the three scoped HTML fragments into a single `[PROJECT]_03c_PreviewTouchstone_V1.0.html` with a tab/segment selector at the top. One file. Three directions, comparable side-by-side at the same viewport, same scroll position, same window size — the conditions a side-by-side decision actually needs.
 
-Required structure:
+**Script tier.** This heat is mechanical, not creative — run it as a script rather than writing the shell by hand:
+
+```
+<forge>/core/scripts/wedge-preview-assemble.sh [PROJECT]_03c_PreviewTouchstone_V1.0.html \
+  "[Lens A name]" [path to Direction A fragment] \
+  "[Lens B name]" [path to Direction B fragment] \
+  "[Lens C name]" [path to Direction C fragment]
+```
+
+Each apprentice's `<!-- FRAGMENT -->` block should be written to a temp file before invoking the script. The script isolates each fragment inside its own `<iframe srcdoc="...">` (HTML-escaped, so fragment CSS/JS can never bleed across tabs or into the shell chrome), emits a plain-JS tab selector with `#t0`/`#t1`/`#t2` hash deep-linking, and is deterministic — same fragments in, byte-identical shell out. Because each tab is an isolated document rather than a same-page `<section>`, two of the prose requirements below move INTO the fragment file before you hand it to the script, rather than living in the shell:
+
+- **Fonts** (requirement 4 below) — fold each direction's `<!-- FONTS -->` block (the Google Fonts `<link>` tags) into the top of its own fragment file; the shell's `<head>` can't reach into an iframe's document.
+- **Per-direction header strip** (requirement 5 below) — prepend the caption row (direction letter, lens name, Memorable Signature, 1–2 examples-from-life) to the fragment file's markup, above its `<section>`, so it renders inside that tab's iframe.
+
+If the script is unavailable in your environment, fall back to writing the shell directly. Required structure:
 
 1. **Selector bar** — fixed at top, three buttons (or segmented control) labeled with each direction's lens name (e.g., "The Instrument", "The Archive", "The Dwelling"). Active button is visually distinct. Clicking a button activates that direction's container and hides the others. Default-active = Direction A.
 2. **Three direction containers** — `<section class="direction-a">`, `<section class="direction-b">`, `<section class="direction-c">` — each containing its apprentice's full scoped fragment. Visibility controlled by a wrapper class (e.g., `body.show-a` shows only `.direction-a`).
@@ -323,6 +337,14 @@ Produce `[PROJECT]_03e_Touchstone_V1.0.md` adjacent to the HTML, following the *
 
 This heat may run as a **sonnet-tier subagent leg** — the scaffold fully specifies the schema, section list, and generation rules, making it implementation-to-spec — only with this gate wired: before Heat 8, the orchestrator (opus tier) reviews the Touchstone.md token values against the HTML's computed styles and the prose sections against the Soul Brief + Chosen Direction. If that review is not run, Heat 6 stays inline at the orchestrator.
 
+**Script tier for the mechanical half of that gate.** Run the token-value leg as a script rather than eyeballing the diff:
+
+```
+<forge>/core/scripts/wedge-parity-check.sh [PROJECT]_03e_Touchstone_V1.0.md [PROJECT]_03e_Touchstone_V1.0.html
+```
+
+It extracts every leaf token VALUE from the MD's YAML frontmatter (skipping `{path.to.token}` references, which resolve to another row's value) and checks each is a literal (case-insensitive) substring of the HTML, printing a `| token | value | present-in-HTML |` table plus a PASS/FAIL summary — nonzero exit on FAIL. This is mechanical evidence, not the full review: the orchestrator still reads the prose sections against the Soul Brief + Chosen Direction, and still eyeballs any FAIL row against the HTML's actual computed styles before deciding whether it's real drift or a token that's expressed differently (e.g. via a CSS calc()) than its literal declared value. If the script is unavailable, do the value-by-value check by hand.
+
 After this heat the project has both Touchstone forms — vision (HTML) and contract (MD) — and the contract is normative for tokens.
 
 ### Heat 7: Refinement
@@ -331,7 +353,7 @@ Auto-invoke `/preen` on the rendered Touchstone (HTML). /preen evaluates against
 
 Additionally validate the **Implementation Matches Vision** HARD RULE: if the chosen tone is minimal but the HTML is dense with motion and ornament, /preen flags this as a tone-implementation mismatch and the Touchstone is reworked. Same for the inverse.
 
-Validate **HTML ↔ MD parity**: every CSS variable in the HTML's `<style>` must map to a token in the MD's YAML frontmatter, and vice versa. Drift is a defect.
+Validate **HTML ↔ MD parity**: every CSS variable in the HTML's `<style>` must map to a token in the MD's YAML frontmatter, and vice versa. Drift is a defect. Run `<forge>/core/scripts/wedge-parity-check.sh [PROJECT]_03e_Touchstone_V1.0.md [PROJECT]_03e_Touchstone_V1.0.html` (script tier — same script as the Heat 6 gate) for the token-value half of this check; any FAIL row blocks the lock below until resolved (either the HTML is corrected to match the MD's declared value, or the MD is corrected if the HTML's rendering is actually right).
 
 After /preen passes and parity is verified, the Touchstone is **locked**.
 

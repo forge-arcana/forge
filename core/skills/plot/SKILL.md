@@ -81,7 +81,11 @@ Decide Planned vs As-Built from the arguments and the project state (per **Argum
 
 ### Step 1 — Collect topology evidence
 
-The topology scan is deterministic, script-tier work. Prefer `<forge>/core/scripts/plot-scan.sh <project-path>` when it exists (it globs deploy manifests, parses dependency files, extracts `.env.example` keys, and lists route/handler entry points). **Fallback** (script absent): collect the same evidence inline —
+The topology scan is deterministic, script-tier work. Run `<forge>/core/scripts/plot-scan.sh <project-path>` to collect mechanical evidence across all facets in one pass — it globs deploy manifests, parses dependency files (including workspace/monorepo layout), extracts `.env.example`/`.env.sample`/`.env.template` key *names* (never values), fingerprints vendor SDK dependencies, locates ORM/schema/migration surfaces, and lists route/handler entry points across JS/TS, Python, and Go idioms. This single command replaces the sequential find/grep tool calls below.
+
+Use the script's output as your evidence base for the facet-derivation fan-out in Step 2. The script finds patterns and enumerates files — you (the facet subagents) classify them into nodes, edges, and boundaries.
+
+**Fallback** (script absent — e.g. a non-bash harness): collect the same evidence inline —
 
 - **Deploy targets & runtime**: Dockerfile(s), `docker-compose*.yml`, `cloudbuild.yaml`, `wrangler.toml`/`wrangler.jsonc` (Cloudflare), `vercel.json`, `fly.toml`, `railway.json`/`railway.toml`, `render.yaml`, `config/deploy.yml`+`.kamal/` (Kamal/Hetzner), `Procfile`, k8s manifests, Terraform/Pulumi — what runs where.
 - **Deployable units**: entry points and long-running processes — web server, API, background workers, cron/scheduled jobs, queue consumers.

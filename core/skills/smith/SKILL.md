@@ -2,7 +2,7 @@
 name: smith
 description: "Master of the forge — consumes a Blueprint + Pattern + Touchstone (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern + Touchstone, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 ---
-<!-- model: inherit | fan-out: build/fix apprentices → sonnet (gated by per-heat opus art passes); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) -->
+<!-- model: inherit | fan-out: build/fix apprentices → tier by heat grade (T1 → low-effort sonnet, T2 → sonnet gated by scoped opus art pass, T3 → opus or sonnet + full opus gate); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) -->
 
 # /smith — The Master Builder
 
@@ -165,6 +165,18 @@ Before presenting the plan, smith maps dependencies between heats:
 
 Mark each heat with its dependencies. This graph drives apprentice allocation.
 
+### Grade Each Heat
+
+Grade every heat by complexity per the protocol's Complexity Triage table (`core/skills/forge/protocol.md`) — the grade sets both the build tier and the review-gate depth:
+
+| Grade | Typical heats | Build tier | Per-heat review gate |
+|-------|---------------|------------|----------------------|
+| **T1** | Scaffolding, config, codegen wiring, static pages, boilerplate CRUD with no business rules | Low-effort sonnet-tier apprentice (haiku-tier for pure boilerplate) | Verify (2c) only; art review batched into the next phase gate |
+| **T2** | Ordinary feature slices, UI screens against the Touchstone, straightforward integrations | Sonnet-tier apprentice | Scoped opus-tier art pass (2d) |
+| **T3** | Auth/authz, payments, concurrency, data migrations, security-touching code, novel algorithms, anything the Pattern flags as a risk | Smith builds inline at the session model, or an opus-tier apprentice | Full opus-tier art pass; the security dimension always runs |
+
+Default to T2 when unsure. Security-adjacent heats are always T3 regardless of size. T1 batching defers the review, never trims it — every T1 heat's diff is inside the next phase gate's scope.
+
 ### Present the Plan
 
 Output the full build plan as a table:
@@ -172,13 +184,13 @@ Output the full build plan as a table:
 ```markdown
 ## Build Plan — [Project Name]
 
-| # | Unit | Heat | Source | Dependencies | Parallel? |
-|---|------|------|--------|--------------|-----------|
-| 1 | Foundation | Scaffolding + schema | §13, §16 | — | — |
-| 2 | Foundation | Auth system | §3, §15 | Heat 1 | — |
-| 3 | Foundation | Dev tooling | — | Heat 1 | Yes (with Heat 2) |
-| 4 | Core | User registration | §5.1 | Foundation | — |
-| ...| ... | ... | ... | ... | ... |
+| # | Unit | Heat | Source | Grade | Dependencies | Parallel? |
+|---|------|------|--------|-------|--------------|-----------|
+| 1 | Foundation | Scaffolding + schema | §13, §16 | T1 | — | — |
+| 2 | Foundation | Auth system | §3, §15 | T3 | Heat 1 | — |
+| 3 | Foundation | Dev tooling | — | T1 | Heat 1 | Yes (with Heat 2) |
+| 4 | Core | User registration | §5.1 | T2 | Foundation | — |
+| ...| ... | ... | ... | ... | ... | ... |
 
 Estimated heats: N | Parallelizable: M
 ```
@@ -196,7 +208,7 @@ Each heat follows: **Plan → Build → Verify → Evaluate → Fix → Checkpoi
 - Read the current heat's target from the ledger
 - Identify relevant source (blueprint sections or workspec steps) to implement
 - List files to create/modify
-- Check dependency graph — if independent heats exist, spawn apprentices as sonnet-tier subagents (see Apprentice System)
+- Check dependency graph — if independent heats exist, spawn apprentices at the tier the heat's grade prescribes (T1 → low-effort sonnet, T2 → sonnet, T3 → opus or built inline; see Grade Each Heat and Apprentice System)
 
 ### 2b: Build
 
@@ -228,7 +240,7 @@ If verify fails, smith fixes before invoking arts — no point evaluating broken
 Select art(s) per the Escalation Ladder, then:
 
 1. **Collect evidence** — run `<forge>/core/scripts/forge-scan.sh <art> <project-path>` for /poke and /press evaluations
-2. **Invoke art(s) via subagents** — each art runs in an opus-tier subagent with pre-loaded evidence and context; these passes ARE the review gate for sonnet-built code. Per-heat art invocations run single-agent scoped — commission them with "focus only on this heat's diff; skip pre-flight; no internal fan-out"; full fan-out art runs are reserved for phase and final gates. Heats smith built inline may instead take a sonnet-tier scoped pass, gated by smith's own findings synthesis. Multiple arts on the same heat run in parallel where the harness supports it (evaluate fan-out).
+2. **Invoke art(s) via subagents — gate depth follows the heat's grade.** **T1 heats skip 2d entirely**: verify (2c) is their per-heat gate, and their diffs are reviewed at the next phase gate (batched, never trimmed). **T2 heats** get the standard scoped pass: each art runs in an opus-tier subagent with pre-loaded evidence and context, commissioned with "focus only on this heat's diff; skip pre-flight; no internal fan-out" — these passes ARE the review gate for sonnet-built code. **T3 heats** get a full opus-tier art pass with the security dimension always included; scoping to the heat's diff still applies, but the commission drops "no internal fan-out" so the art may spawn its own security carve-out. Full fan-out art runs remain reserved for phase and final gates. Heats smith built inline may instead take a sonnet-tier scoped pass, gated by smith's own findings synthesis (T2 only — inline T3 heats still take the opus pass). Multiple arts on the same heat run in parallel where the harness supports it (evaluate fan-out).
 3. **Collect findings** — parse subagent outputs for CRITICAL / IMPORTANT / MINOR classifications
 
 ### 2e: Fix
@@ -378,7 +390,7 @@ For plan/conversation mode: run `--hash-check workspec` instead (and `--hash-che
 
 > Full details: [apprentice-system.md](apprentice-system.md) — fan-out patterns, waste principle, rules.
 
-**Core principle**: Sequential execution of independent work is waste — when the harness supports parallel sub-agent spawning. Before each heat, smith scans the dependency graph and spawns sonnet-tier apprentices for all satisfied inputs (or executes them sequentially at the session model when the harness lacks parallel subagent spawning or per-spawn model selection). Cap: 3-4 concurrent. Timeout: 3 minutes without progress.
+**Core principle**: Sequential execution of independent work is waste — when the harness supports parallel sub-agent spawning. Before each heat, smith scans the dependency graph and spawns apprentices for all satisfied inputs at each heat's graded tier — low-effort sonnet for T1, sonnet for T2, opus for T3 (or smith builds T3 inline) — or executes them sequentially at the session model when the harness lacks parallel subagent spawning or per-spawn model selection. Cap: 3-4 concurrent. Timeout: 3 minutes without progress.
 
 ## Art Selection & Escalation
 

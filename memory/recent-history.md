@@ -1,6 +1,10 @@
 # Forge — Recent History (Archive)
 
-> Older "Recent" entries moved from `CLAUDE.md` during the 2026-04-27, 2026-04-30, four 2026-05-04 wraps, the 2026-05-10 wrap, the 2026-06-13 wrap, the 2026-06-14 purge-trim, the 2026-06-18 wrap, the 2026-07-16 wrap, and the 2026-07-19 wrap. Kept inline there: only the most recent 1–2 entries. Anything older lives here.
+> Older "Recent" entries moved from `CLAUDE.md` during the 2026-04-27, 2026-04-30, four 2026-05-04 wraps, the 2026-05-10 wrap, the 2026-06-13 wrap, the 2026-06-14 purge-trim, the 2026-06-18 wrap, the 2026-07-16 wrap, the 2026-07-19 wrap, and the 2026-08-15 wrap. Kept inline there: only the most recent 1–2 entries. Anything older lives here.
+
+## 2026-08-09 — Backlog absorption — moved from CLAUDE.md 2026-08-15
+
+**Backlog absorption** — 43 learnings folded in one cycle: the full never-absorbed orchestration backlog (29 entries: heat cadence, convergence discipline, apprentice delegation patterns, compile-time-guarantee probing, the never-trim-gates-unattended rule), 8 solution-finding patterns (no-native-scheduling due-poll, approved-intermediary routing, dated exclusions, burst throttling, transport-error-is-not-failure, DB-provider assumption decay), 3 ideation patterns, 1 architecture pattern (four-dimensional LLM usage pricing), a new Atlas learnings file (5 entries), and 1 cross-cutting entry (the fresh-clone pipeline gate). 3c review over the 65-entry cross-cutting file: 63 CURRENT, 0 prunes, 2 evolved-by annotations (the CI-gate lineage). 3f presentation check across 5 arts: NO CHANGE — all absorbed learnings refine execution, not scope. Both purity gates clean. Session blocks for 2026-07-26 and 2026-07-19 moved to memory/recent-history.md.
 
 ## 2026-07-26 — Provenance for mirrored state — moved from CLAUDE.md 2026-08-09
 

@@ -2,7 +2,7 @@
 name: forge
 description: The forge cycle — unified bidirectional sync between the forge repo and your membrane. Triages drift, presents a PLAN table, applies approved changes in both directions (incoming skills/learnings/memory, outgoing absorption), commits and pushes. `/forge --dry` for read-only inspection. `/forge on|off` toggles session skills. Replaces the retired /cast, /mark, /fold trio.
 ---
-<!-- model: sonnet | fan-out: 3c knowledge review → opus; 3f presentation refresh → sonnet -->
+<!-- model: inherit | fan-out: 3c knowledge review → opus; 3f presentation refresh → sonnet | Phase 1 PLAN-table mechanics are script tier (forge-plan.sh) — precondition met for raising this skill off a pinned sonnet floor -->
 
 # /forge — The Forge Cycle
 
@@ -80,9 +80,27 @@ This resolves the forge path, syncs the remote (pull in active mode, fetch in dr
 
 ## Phase 1: Mark — Build the PLAN Table
 
-### PLAN table
+### Build the skeleton (script tier)
 
-From the preflight output, build a single triage table with three sections. Each row shows **the essence of what will change** — not the filename, but the rule, principle, or knowledge that will land.
+Run `bash <forge>/core/scripts/forge-plan.sh --pull` (or `--fetch` for `--dry`) — or, to avoid re-running the sync Phase 0 already did, pipe Phase 0's own `forge-status.sh` output into it instead: `bash <forge>/core/scripts/forge-status.sh --pull | bash <forge>/core/scripts/forge-plan.sh --stdin`.
+
+This mechanically parses the Skill Drift Report, Learning Status, and Memory Status sections of the preflight output and emits the PLAN-table SKELETON: every non-`IDENTICAL` / non-in-sync item, pre-routed into ↓ INCOMING / ↑ OUTGOING / ⚠ CONFLICTS per the Direction routing rules below, numbered, with classification and item name filled in. Protected-skill exclusion (`forge`, `purge` never land as a plain outgoing row) is enforced mechanically inside the script — it forces them into ⚠ CONFLICTS with a "protected" note, same as the HARD RULE at the top of this doc requires.
+
+The script does NOT fill judgment: essence lines it can't derive mechanically (a conflict's membrane-side description, a general.md entry's learning body, an unattributed contributor, …) are left as `_model fills_` placeholders. It also emits no config rows — `forge-status.sh` has no config-drift classification yet, so config rows are still built by hand per the Row content rules below.
+
+### Model review (required every run)
+
+Before presenting the skeleton to the user:
+1. Replace every `_model fills_` placeholder — read the source file/diff it points at and write the real essence (the rule/principle that changed, not the commit message).
+2. Add config rows by hand (see Row content rules) — the script can't see these yet.
+3. Sanity-check the mechanical routing against the Direction routing table — the script should never get this wrong, but treat it as a second pair of eyes, not a rubber stamp.
+4. Render the finished table exactly as the skeleton formats it (rows/sections/numbering already match the target format below) and proceed to the Selection UX.
+
+If `forge-plan.sh` is unavailable (harness lacks bash, script missing, or its output looks wrong), fall back to building the table by hand using the rules in this section — they're the same rules the script encodes, just applied manually.
+
+### PLAN table format (target — script skeleton already matches this)
+
+Each row shows **the essence of what will change** — not the filename, but the rule, principle, or knowledge that will land.
 
 ```
 forge @ <sha> ⇄ membrane @ <last-cast-sha>                     N items
@@ -108,7 +126,7 @@ forge @ <sha> ⇄ membrane @ <last-cast-sha>                     N items
   [a]ll  [N] toggle  [v N] view  [ENTER] apply  [q]uit
 ```
 
-### Direction routing
+### Direction routing (fallback — forge-plan.sh applies this mechanically)
 
 Use `forge-status.sh` classifications:
 
@@ -118,14 +136,14 @@ Use `forge-status.sh` classifications:
 | `DEPLOYED-DIFFERS` / `REMOVED` (membrane-side) | ↑ OUTGOING |
 | `CONFLICT` / `CONFLICT (no-baseline)` | ⚠ CONFLICTS |
 
-### Row content rules
+### Row content rules (fallback — forge-plan.sh does the mechanical part; model review still applies the essence/attribution judgment either way)
 
 Every change row must include a sub-row showing the **essence** of the change:
 
 - **Skill row** → the specific rule, step, or behaviour that changed (not the commit message)
 - **Learning row** → the `**Learning**:` body + `**Apply when**:` line
 - **Memory row** → the key principle or convention the file encodes
-- **Config row** → the specific rule or setting being merged
+- **Config row** → the specific rule or setting being merged (always manual — not covered by forge-plan.sh)
 
 Use contributor names from `git blame` on forge files, or the Change Details section of `forge-status.sh` output for skills (format: `hash message (Author Name)`). Never assume a default contributor.
 

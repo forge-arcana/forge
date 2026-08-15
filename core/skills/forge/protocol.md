@@ -78,6 +78,37 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
 3. **Sequential fallback**: every fan-out skill carries this sentence — "If your harness lacks parallel subagent spawning or per-spawn model selection, run these steps sequentially at your session model."
 4. **Defer, don't downgrade**: when a conditional opus gate (a review that only fires sometimes) can't run at opus tier, defer the gated action and surface it to the user — never run the gate at a weaker tier and proceed.
 
+### Effort qualifier (optional second axis)
+
+A tier names *which model* a leg runs on; some harnesses also expose *how hard that model reasons* per spawn (reasoning effort). The tier vocabulary accepts an optional effort qualifier in flow text — "low-effort haiku-tier subagent", "high-effort opus-tier merge" — bound to the harness's per-spawn effort control where one exists and silently ignored where none does. An unqualified tier inherits the harness default.
+
+Guidance by work class:
+
+- **Mechanical legs** (collation, formatting, template filling, evidence relay) → qualify **low-effort**. The model tier already bounds capability; low effort trims reasoning overhead on work with no judgment in it.
+- **Standard legwork** (implementation-to-spec, rubric evaluation) → leave unqualified.
+- **Hardest judgment legs** (final verdicts, security carve-outs, adversarial verification) → **high-effort** where the harness supports it.
+
+Two rules: an effort qualifier never substitutes for a tier (both are named, tier first), and review gates are never qualified below the harness default — defer-don't-downgrade applies to effort exactly as it does to tier.
+
+### Complexity triage (dynamic tier selection)
+
+The class → tier map above is the static default. Skills that plan discrete units of work before executing them (heats, dimensions, sections) grade each unit and let the grade modulate both the spawn tier and the depth of the review gate — a uniform tier over non-uniform work overpays on trivial units and underpays on sensitive ones.
+
+The neutral grade vocabulary:
+
+| Grade | Work | Tier consequence | Gate consequence |
+|-------|------|------------------|------------------|
+| **T1 — trivial** | Mechanical work to an unambiguous spec (config, scaffolding, boilerplate, renames); wrong output is caught by compile/tests | sonnet, low-effort where supported (haiku for pure boilerplate) | Deterministic verify per-unit only; judgment review deferred and **batched** into the next standing gate |
+| **T2 — standard** | Ordinary implementation-to-spec or rubric legwork | sonnet | The skill's named review gate, scoped to the unit |
+| **T3 — complex / sensitive** | High-judgment or high-blast-radius: auth/authz, payments, concurrency, data migrations, security-touching code, novel algorithms | opus build, or sonnet + full-strength opus gate | Full review gate; security carve-outs always apply |
+
+Rules:
+
+1. **Default to T2 when unsure.** T1 is claimed, not assumed — a unit is T1 only when a wrong answer would be caught deterministically.
+2. **Security-adjacent work is always T3**, regardless of size.
+3. **Grades are recorded in the plan artifact** (heat table, dimension list) so the user can override them before execution.
+4. **T1 deferral is batching, not omission.** Every T1 unit's output still passes through a standing gate before the work is called done — deferred gates are never trimmed.
+
 ## Execution (art-specific)
 
 Each art defines its own execution in its SKILL.md:

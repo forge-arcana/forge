@@ -18,15 +18,17 @@ No prose preamble — just run the script and present the table.
    - `burn-status.sh <project-path> --session latest` — the current/most-recent session
    - `burn-status.sh --all` — every project under the membrane
 
-2. **Present the table verbatim** — including its `**Profile**:` line. The script computes the dominant-cost-column read (Output- / Cache-Write- / Cache-Read-dominated) and the matching lever itself; do not re-derive or re-compare the numbers, just relay it.
+2. **Present the tables verbatim** — the per-session table, the **By Model** breakdown, and the `**Profile**:` line. The script computes the dominant-cost-column read (Output- / Cache-Write- / Cache-Read-dominated) and the matching lever itself; do not re-derive or re-compare the numbers, just relay it.
+
+   The **By Model** table is the tier-binding verification signal: sessions that ran fan-out skills (arts, /smith) should show sonnet/haiku rows alongside the session model. If fan-out sessions report a single model, the per-spawn tier hints did not bind at runtime — surface that finding explicitly.
 
 3. **If the user is comparing before/after** an optimization (Path B lean scripts, Tier-1 `lean.sh`, etc.): run `burn-status.sh <project-path> --compare <before-session> <after-session>` (session = uuid prefix or `latest`) and present its delta table verbatim — the arithmetic is script tier. Output tokens are the honest spend signal; cache-read deltas flatter the numbers.
 
 ## Notes & Caveats
 
-- **Cost is an estimate.** The price table lives in `price_for` inside `burn-status.sh`; unknown models fall back to the Opus tier (conservative-high). Correct it when Claude pricing changes.
+- **Cost is an estimate.** The price table lives in `price_for` inside `burn-status.sh`; unknown models fall back to the heaviest tier (conservative-high). Correct it when Claude pricing changes — the table notes the date it was last verified against list pricing.
 - **Coupling.** The script reads Claude Code's transcript layout (`~/.claude/projects/<encoded-path>/<uuid>.jsonl`). On other harnesses it degrades to "no transcripts found" rather than erroring. If forge later validates another harness's transcript format, abstract the locate + jq step rather than forking the skill.
-- **The biggest burn forge can't see here is the fan-out multiplier.** `/burn` measures whole sessions; it does not attribute spend to individual subagents spawned by `/poke`, `/pound`, `/smith`. When a fan-out art runs, expect Output + Cache-Write to spike — that's the multiplier the lean-evidence work (Path B) targets.
+- **Fan-out spend is attributed by model tier, not by subagent.** The By Model table shows how much of a session ran at each tier (the tier-binding check), but it cannot split two sonnet subagents apart. When a fan-out art runs, expect Output + Cache-Write to spike — that's the multiplier the lean-evidence work (Path B) targets.
 
 ## Post-Flight
 
