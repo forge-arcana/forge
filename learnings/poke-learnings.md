@@ -4,6 +4,11 @@
 
 <!-- Add learnings below this line -->
 
+## Animation Package Evaluation: "What Should Migrate?" Not "Should We Add It?" (2026-05-29)
+<!-- relocated from praise-learnings.md by /purge, 2026-08-15 — a dependency-audit + framework-misuse heuristic, which is poke's territory -->
+**Learning**: When a project already has an animation library installed, the right probe question is "what in the codebase should migrate to it?" not "should we add it?" An installed-but-underused dependency is a signal, not a decision point. Also: when a component needs both CSS `transform` for positioning AND an animation library's transforms, all transforms must live inside the animation library's state definitions — never split between className and animated state.
+**Apply when**: Any project with an installed animation library — audit coverage before proposing addition; enforce transform consolidation in code review.
+
 ## Batch-Added Routes Skip Error Path Logging (2026-03-15)
 **Learning**: When routes are added in bulk (e.g., an admin module with many endpoints), validation failure logging (`logger.warn` on `safeParse` rejection, 404, 403) is easy to miss even when the pattern is established in other modules. A route template, code snippet, or custom lint rule that flags `safeParse` failures without a preceding `logger.warn` prevents this class of gap.
 **Apply when**: Adding multiple route handlers at once, especially in admin/CRUD modules.

@@ -108,6 +108,7 @@ Rules:
 2. **Security-adjacent work is always T3**, regardless of size.
 3. **Grades are recorded in the plan artifact** (heat table, dimension list) so the user can override them before execution.
 4. **T1 deferral is batching, not omission.** Every T1 unit's output still passes through a standing gate before the work is called done — deferred gates are never trimmed.
+5. **Grade the target, not just the unit.** When the whole target is narrow (one diff, one screen, one deployable unit), collapse the non-carve-out legs into a single subagent carrying all their rubrics. Carve-out legs (security, emotional design) keep their own spawn and tier, and the merge/verdict gate never shrinks — only legwork width does.
 
 ## Execution (art-specific)
 
@@ -211,7 +212,7 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 | `/pitch` | The founder's other voice (VC partner on `--critique`) | Generative | Synthesis |
 | `/plot` | Principal infra/platform architect (the Atlas) | Generative | Landscape |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
-| `/praise` | The feedback router (closes the build-ship-learn loop) | Orchestrative | — |
+| `/praise` | The Listener (user feedback → routed art) | Investigative | Feedback |
 
 (`/purge` is documented above under "The Warden — Master Tender" — it is a Master, not an art. It uses the same protocol but lives at `.claude/skills/purge/` and is forge-internal.)
 

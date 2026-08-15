@@ -34,11 +34,11 @@ Consolidated current-state learnings. Historical entries that were superseded ha
   - `/purge` — The Warden, Master Tender. Forge-internal four-dimension cleanse (Knowledge Purity, Memory Hygiene, Skill Fitness, Reference Integrity). Lives only at `.claude/skills/purge/`.
 - Arts (10 deployed): prime, probe, poke, preen, press, pound, pitch, pry, praise, plot — specialist agent skills with self-improving loops. (Note: protocol.md previously listed /purge under arts; canonical position is now Master not Art.)
 - Evaluative trifecta: poke (code quality + tech debt) → press (go-live readiness) → pound (adversarial QA) — escalates in intensity. Preen (UI/UX design), pitch (business model), and praise (feedback routing) run orthogonal — triggered by domain, not intensity. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, praise after every feedback cycle.
-- Task skills: see CLAUDE.md's Task Skills table (authoritative) — forge, wawa, wrap, qt, srs, cicd, vsix, ponci, monci, dig, temper, eli5
+- Task skills (12, plus the `/forge` cycle): see CLAUDE.md's Task Skills table (authoritative) — wawa, wrap, qt, srs, cicd, vsix, ponci, monci, dig, temper, eli5, burn
 - `core/skills/forge/` holds both the `/forge` cycle SKILL.md AND reference docs (stack-guide, conventions, protocol, preflight)
 - `/forge` absorbs the retired `/cast`, `/mark`, `/fold` trio — their verbs survive as the named internal phases of the cycle: **mark** (inspect drift, build PLAN table) → **cast** (pour forge → membrane) → **fold** (layer membrane → forge).
 - Skills are self-contained packages — reference docs live inside the owning skill directory
-- `core/skills/` is the git-tracked source; `$AGENTS_DIR/skills/` (default `~/.agents/skills/`) is the **canonical deployment target** per the Open Agent Skills standard. The harness's per-tool dir (`~/.claude/skills/` for Claude Code) is a directory symlink to the canonical store — Claude Code discovers skills there transparently while non-Claude tools (Codex CLI, Gemini CLI) read `~/.agents/skills/` natively. Single source of truth, no duplication.
+- `core/skills/` is the git-tracked source; `$AGENTS_DIR/skills/` (default `~/.agents/skills/`) is the **canonical deployment target** per the Open Agent Skills standard — neutral, frontmatter-free, read natively by non-Claude tools (Codex CLI, Gemini CLI). The harness's per-tool dir (`~/.claude/skills/` for Claude Code) is a **real directory, not a symlink** (the symlink was retired 2026-06-14): `cast-deploy.sh` regenerates it every cast as a deterministic function of the neutral store, with `model:` frontmatter injected — a field that cannot live in the shared copy. Scripts still symlink (`~/.claude/scripts/` → `~/.agents/scripts/`) since they carry no frontmatter.
 
 ### Bootstrap (2026-03-17, updated 2026-04-23)
 - `.claude/skills/forge/SKILL.md` is the Claude-Code bootstrap copy — full `/forge` logic mirrored here so fresh clones can run the cycle before skills are deployed (Generic Forge v2 follow-up: migrate to `.agents/skills/forge/` for cross-tool discoverability)
@@ -46,9 +46,10 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - No `install.sh` needed — `/forge` handles fresh-machine setup and ongoing sync in the same flow
 - Full mirror (not thin) avoids symlinks (OS-dependent) and drift between bootstrap and deployed copy
 
-### Frontmatter (2026-03-15)
-- Valid SKILL.md frontmatter attributes: `name`, `description`, `user-invocable`, `argument-hint`, `compatibility`, `disable-model-invocation`, `license`, `metadata`
-- `allowed-tools` and `context` are NOT valid attributes
+### Frontmatter & Model Tiers (2026-03-15, updated 2026-08-15)
+- Valid SKILL.md frontmatter: `name`, `description`, `user-invocable`, `argument-hint`, `compatibility`, `disable-model-invocation`, `license`, `metadata`, plus `model:` on the deployed Claude copy only.
+- Tier is authored as a neutral `<!-- model: <tier> -->` comment in `core/skills/`; `cast-deploy.sh` injects real `model:` frontmatter into the Claude copy and leaves the neutral store bare. Never hand-write `model:` into a source SKILL.md.
+- Tier vocabulary, the optional per-spawn effort qualifier, and the T1/T2/T3 Complexity Triage that sets both spawn tier and gate depth live in `core/skills/forge/protocol.md` (authoritative) — memory does not restate them.
 
 ### Forge Path Resolution (2026-03-17, updated 2026-04-23)
 - Skills use `<forge>` notation with a one-line `## Forge Path` section

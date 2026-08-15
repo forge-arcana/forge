@@ -2,7 +2,7 @@
 name: smith
 description: "Master of the forge — consumes a Blueprint + Pattern + Touchstone (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern + Touchstone, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 ---
-<!-- model: inherit | fan-out: build/fix apprentices → tier by heat grade (T1 → low-effort sonnet, T2 → sonnet gated by scoped opus art pass, T3 → opus or sonnet + full opus gate); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) -->
+<!-- model: inherit | fan-out: build/fix apprentices → tier by heat grade (T1 → low-effort sonnet, T2 → sonnet gated by scoped opus art pass, T3 → opus apprentice or built inline at the session model, full opus gate either way); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) -->
 
 # /smith — The Master Builder
 
@@ -175,7 +175,7 @@ Grade every heat by complexity per the protocol's Complexity Triage table (`core
 | **T2** | Ordinary feature slices, UI screens against the Touchstone, straightforward integrations | Sonnet-tier apprentice | Scoped opus-tier art pass (2d) |
 | **T3** | Auth/authz, payments, concurrency, data migrations, security-touching code, novel algorithms, anything the Pattern flags as a risk | Smith builds inline at the session model, or an opus-tier apprentice | Full opus-tier art pass; the security dimension always runs |
 
-Default to T2 when unsure. Security-adjacent heats are always T3 regardless of size. T1 batching defers the review, never trims it — every T1 heat's diff is inside the next phase gate's scope.
+The protocol's grading rules apply unchanged; the smith-specific binding is that a T1 heat's diff lands inside the next phase gate's scope.
 
 ### Present the Plan
 

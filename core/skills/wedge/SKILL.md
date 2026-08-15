@@ -227,8 +227,7 @@ The Scoped HTML Fragment requirements:
 
 - **Scoped CSS** — every selector prefixed with the direction's container class (e.g., `.direction-a`). NO `:root` declarations, NO `body { ... }`, NO global resets, NO unscoped element selectors. Tokens declared as scoped custom properties (e.g., `.direction-a { --color-dominant: #...; }`).
 - **Self-contained** — Google Fonts `<link>` tags are returned alongside the fragment so Heat 3 can hoist them into the preview shell's `<head>`. Fragment markup itself contains only the `<section class="direction-a">...</section>` tree.
-- **Required regions** — within the scoped section: hero with display typography at scale + primary task surface drawn from the Vow's audience posture + memorable signature implementation at real scale + token legend in a footer area listing all scoped CSS variables.
-- **No JS interactivity required** — atmospheric CSS animation is fine; complex JS state belongs in the final Touchstone (Heat 5), not the preview fragment.
+- Fragment constraints (scoping, required regions, fonts block, substance-tier density) are specified in full in the Council Apprentice Brief Template below — that text is what the apprentice receives.
 
 The three Direction Cards land in `[PROJECT]_03b_DirectionCards_V1.0.md` (concatenated for the user to compare). The three scoped fragments are passed to the anti-convergence audit, then Heat 3.
 
@@ -271,13 +270,7 @@ Each apprentice's `<!-- FRAGMENT -->` block should be written to a temp file bef
 - **Fonts** (requirement 4 below) — fold each direction's `<!-- FONTS -->` block (the Google Fonts `<link>` tags) into the top of its own fragment file; the shell's `<head>` can't reach into an iframe's document.
 - **Per-direction header strip** (requirement 5 below) — prepend the caption row (direction letter, lens name, Memorable Signature, 1–2 examples-from-life) to the fragment file's markup, above its `<section>`, so it renders inside that tab's iframe.
 
-If the script is unavailable in your environment, fall back to writing the shell directly. Required structure:
-
-1. **Selector bar** — fixed at top, three buttons (or segmented control) labeled with each direction's lens name (e.g., "The Instrument", "The Archive", "The Dwelling"). Active button is visually distinct. Clicking a button activates that direction's container and hides the others. Default-active = Direction A.
-2. **Three direction containers** — `<section class="direction-a">`, `<section class="direction-b">`, `<section class="direction-c">` — each containing its apprentice's full scoped fragment. Visibility controlled by a wrapper class (e.g., `body.show-a` shows only `.direction-a`).
-3. **URL hash deep-linking** — `#a`, `#b`, `#c` route to the matching direction. On load, parse `location.hash` to set the initial active direction. Selector clicks update the hash.
-4. **Hoisted font links** — all Google Fonts `<link>` tags from all three fragments live in the preview shell's `<head>`. All fonts load upfront — acceptable cost for a preview artifact.
-5. **Per-direction header strip** — within each container, a small caption row showing: Direction letter (A/B/C), the lens name (e.g., "The Instrument"), the Memorable Signature sentence, and 1–2 examples-from-life cited on the Direction Card. Anchors what the user is looking at and what soul-references shaped it.
+If the script is unavailable, write the shell directly: a fixed top selector bar (three buttons labeled with each lens name, default-active A), three per-direction containers each holding its apprentice's scoped fragment with the fragment's font `<link>` tags hoisted into the shell `<head>`, hash deep-linking on `#t0`/`#t1`/`#t2`, and a per-direction caption row (letter, lens name, Memorable Signature, 1-2 examples-from-life).
 
 The shell HTML/CSS/JS is mechanical — no creative apprentice work. The Wedge writes it directly. Discarded directions stay inside this file as historical record (collapsed behind unselected tabs); no separate cleanup is needed.
 

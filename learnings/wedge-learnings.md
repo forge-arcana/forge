@@ -6,7 +6,7 @@ These are universal aesthetic principles that survive across projects — not pr
 
 <!-- Add learnings below this line -->
 
-## Visual Decisions Need Visual Artifacts (and prefer one selector to N files)
+## Visual Decisions Need Visual Artifacts (and prefer one selector to N files) (2026-04-30)
 
 **Principle**: When a council asks the user to choose between aesthetic directions, the choice must be made *visually*, not from prose specs. Direction Cards (typography names, hex codes, motion principles) are abstract — they ask the user to *imagine* the Touchstone. Aesthetic decisions only land when set on a real page at real scale. Render every candidate direction at production-grade craft before asking the user to commit.
 
@@ -27,7 +27,8 @@ These are universal aesthetic principles that survive across projects — not pr
 - Discarded directions stay inside the preview HTML behind unselected tabs as historical record. No separate cleanup, no lost residue.
 
 **Trade-off accepted**: Apprentice deliverable expands from spec-only → spec + scoped HTML fragment (~1.5× cost per apprentice), in exchange for a visual decision over an imagined one for the project's defining aesthetic constitution. Cost is small; value is decisive.
-## Soul Brief Beats Fielded Brief; Lens Beats Family×Tone
+
+## Soul Brief Beats Fielded Brief; Lens Beats Family×Tone (2026-05-04)
 
 **Principle**: When an aesthetic council uses a *fielded* brief (structured fields like "audience posture: contemplative", "memorable signature: a slow fade") plus a *fixed-menu commission grammar* (e.g., Family × Tone drawn from an N×M archetype shelf), three failure modes compound:
 
@@ -55,7 +56,8 @@ These are universal aesthetic principles that survive across projects — not pr
 - Run a mechanical convergence audit before assembling the user-facing preview.
 
 **Trade-off accepted**: The brief-authoring heat expands (pure prose plus lens derivation, longer than a fielded brief) and apprentice prompts grow (full Soul Brief + lens, not a one-line pairing). Apprentice cost increases marginally; rendered-direction divergence increases substantially. Net cost is small; value is the difference between "three projects look the same" and "three projects look like themselves."
-## Dual-Accent Structural Systems Need Explicit Normative Documentation
+
+## Dual-Accent Structural Systems Need Explicit Normative Documentation (2026-05-30)
 
 **Principle**: Some design directions use two accent colors where both are *structurally required*, not a "dominant + secondary" hierarchy. Example: a bilingual product whose two scripts each get their own load-bearing accent — one accent per script-world, the tension between them being the design itself. A downstream agent (Smith, Probe, or any code-writing skill) will instinctively treat one as "primary" and the other as decorative, collapsing the structural intent. The DESIGN.md must preempt this.
 
@@ -70,7 +72,6 @@ These are universal aesthetic principles that survive across projects — not pr
 **How to apply**: Any Touchstone whose chosen direction uses N accent colors where N > 1 for structural rather than decorative reasons — verify the DESIGN.md prose calls out the multiplicity explicitly, with a rationale and a guardrail in Do's and Don'ts.
 
 **Corollary — layout-as-translation risk**: Bilateral two-column layouts carry an inherent risk: they look like "original | translation" to any reader familiar with multilingual publishing. The Do's and Don'ts must explicitly name this risk and prohibit the labeling that would trigger it ("don't label one side 'Original' and the other 'Translation'"). The disambiguation belongs in the spec, not in the implementation.
-**Companion principle — councils search, they don't single-shot**: Even with a sharp Soul Brief and divergent lenses, the council can produce N directions where none lands. The user's eye for *the* direction is the gate the council is trying to clear; sometimes the council misses, and the right move is not "pick the least bad" but "regenerate with feedback." The verdict heat must therefore expose a branch alongside pick-one and hybridize: **Regenerate the council**. The Regenerate branch captures structured feedback (was the rejection at the lens level or the execution level? which Forbidden Defaults did the council reach for that should now be named as binding? is any prose section thin?), revises the brief (re-derives the lenses if lens-level; tightens the prose if transmission-level), re-runs the fan-out and assembly with the revised brief, and returns with a versioned new preview. Cap at two regenerate cycles per skill run; a third indicates the upstream source may be misaligned and the skill should halt with a recommendation to revisit it. Prior previews are preserved as historical record. The principle generalizes beyond aesthetic councils: any divergent-fan-out pattern where the user is the final taste-gate should expose a "regenerate with feedback" branch. Better N council rounds and a lived final artifact than one round and a final artifact the user quietly drifts away from.
 
 ## Tool-Register Products Need Tool-Register Touchstones — and Touchstones Carry Two Faces (2026-07-04)
 
@@ -84,8 +85,8 @@ These are universal aesthetic principles that survive across projects — not pr
 
 **Apply when**: Any post-council refinement where palette, type, or layout variants are being chosen; build the toggle preview instead of describing options.
 
-## The Council Never Self-Picks After a Rejection (2026-07-04)
+## Councils Search, They Don't Single-Shot — Expose a Regenerate Branch, Never Self-Pick (2026-07-04)
 
-**Learning**: When the founder rejects all council directions without picking one, the Wedge must not synthesize a committed direction unilaterally to keep momentum — the founder will immediately challenge the unchosen aesthetic ("why did you use X? I did not select this"). Commit-to-ONE governs the ARTIFACT, not the CHOICE: the user is always the taste gate, and after a rejection the next verdict still belongs to them, rendered as clickable options.
+**Learning**: Even with a sharp Soul Brief and divergent lenses, a council can produce N directions where none lands. The user's eye for *the* direction is the gate the council is trying to clear; sometimes the council misses, and the right move is not "pick the least bad" but "regenerate with feedback." When the founder rejects all council directions without picking one, the Wedge must not synthesize a committed direction unilaterally to keep momentum — the founder will immediately challenge the unchosen aesthetic ("why did you use X? I did not select this"). Commit-to-ONE governs the ARTIFACT, not the CHOICE: the user is always the taste gate, and after a rejection the next verdict still belongs to them, rendered as clickable options. The verdict heat must therefore expose a branch alongside pick-one and hybridize: **Regenerate the council**. The Regenerate branch captures structured feedback (was the rejection at the lens level or the execution level? which Forbidden Defaults did the council reach for that should now be named as binding? is any prose section thin?), revises the brief (re-derives the lenses if lens-level; tightens the prose if transmission-level), re-runs the fan-out and assembly with the revised brief, and returns with a versioned new preview, rendered as clickable options — never a silent synthesis. Cap at two regenerate cycles per skill run; a third indicates the upstream source may be misaligned and the skill should halt with a recommendation to revisit it. Prior previews are preserved as historical record. The principle generalizes beyond aesthetic councils: any divergent-fan-out pattern where the user is the final taste-gate should expose a "regenerate with feedback" branch. Better N council rounds and a lived final artifact than one round and a final artifact the user quietly drifts away from.
 
-**Apply when**: Heat 4 regenerate branches and any council-style skill where a full-slate rejection occurs; the recovery step is a new user-facing choice, never a silent synthesis.
+**Apply when**: Heat 4 regenerate branches and any council-style skill where a full-slate rejection occurs; the recovery step is a new user-facing choice, never a silent synthesis. Generalizes to any divergent-fan-out design where the user is the final taste-gate.

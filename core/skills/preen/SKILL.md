@@ -59,9 +59,7 @@ After the Norman Questions, apply these reductive tests:
 4. **Do the unseen details matter?** Transitions, spacing, alignment, the feel of a scroll — craft lives in what users sense but can't articulate.
 5. **Is there quiet confidence?** The design communicates through restraint, not decoration. If it needs to shout, it isn't working.
 
-> **Parallel execution**: Evaluate all 5 dimensions in parallel via subagents. Each dimension's analysis is independent — spawn dimensions 1-4 as sonnet-tier subagents and dimension 5 (Emotional Design & Craft) as an opus-tier subagent, then merge results into the final report through the opus-tier synthesis in Output. If your harness does not support parallel sub-agent spawning or per-spawn model selection, walk the dimensions sequentially at your session model.
->
-> **Scale the fan-out to the target** (protocol Complexity Triage): the five-way fan-out is for whole-product evaluations. For a scoped target — one screen, one flow — collapse dimensions 1-4 into a single sonnet-tier reviewer carrying all four rubrics, keep dimension 5 at opus tier, and synthesize at opus as usual. The synthesis gate never shrinks; only the legwork width does.
+**Parallel execution**: Evaluate all 5 dimensions in parallel via subagents. Each dimension's analysis is independent — spawn dimensions 1-4 as sonnet-tier subagents and dimension 5 (Emotional Design & Craft) as an opus-tier subagent, then merge results into the final report through the opus-tier synthesis in Output. If your harness does not support parallel sub-agent spawning or per-spawn model selection, walk the dimensions sequentially at your session model. For a scoped target (one screen, one flow), collapse the non-carve-out dimensions into a single sonnet-tier reviewer carrying all their rubrics — carve-outs and the merge gate are unchanged (protocol Complexity Triage).
 
 ## Dimension 1: Interaction Design
 

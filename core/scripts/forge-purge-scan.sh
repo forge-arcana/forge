@@ -88,9 +88,15 @@ echo "## 1c: Duplication Detection"
 echo ""
 
 # Extract all ## headings across all learning files and find duplicates
+# Fence-aware: a '## ' line inside a ```/~~~ fenced code block (e.g. an embedded
+# markdown template) is template content, not a real entry heading — skip it.
 echo "### Duplicate entry titles across learning files"
 echo '```'
-grep -rn '^## ' "$FORGE_PATH/learnings/"*.md 2>/dev/null | \
+awk '
+  FNR==1 { fence=0 }
+  /^```/ || /^~~~/ { fence = !fence; next }
+  !fence && /^## / { print FILENAME":"FNR":"$0 }
+' "$FORGE_PATH/learnings/"*.md 2>/dev/null | \
   sed 's/^.*:## //' | \
   sed 's/ ([0-9-]*)$//' | \
   sort | uniq -c | sort -rn | \
@@ -106,7 +112,9 @@ echo "|------|---------|"
 for f in "$FORGE_PATH"/learnings/*.md; do
   [[ ! -f "$f" ]] && continue
   fname=$(basename "$f")
-  count=$(grep -c '^## ' "$f" 2>/dev/null || true)
+  # Fence-aware: don't count '## ' lines inside ```/~~~ fenced code blocks
+  # (e.g. an embedded markdown template's field labels) as real entries.
+  count=$(awk '/^```/ || /^~~~/ {fence=!fence; next} !fence && /^## /{c++} END{print c+0}' "$f" 2>/dev/null || echo 0)
   echo "| $fname | $count |"
 done
 echo ""
@@ -122,11 +130,36 @@ for f in "$FORGE_PATH"/learnings/*.md; do
   fname=$(basename "$f")
   python3 -c "
 import re
+
+def fence_aware_sections(content):
+    # Split on top-level '## ' headings only, ignoring any '## ' that falls
+    # inside a \`\`\`/~~~ fenced code block (e.g. an embedded markdown
+    # template's field labels are not real section/entry headings).
+    fence = False
+    sections = []
+    current = None
+    for line in content.split('\n'):
+        if re.match(r'^(\`\`\`|~~~)', line):
+            fence = not fence
+            if current is not None:
+                current.append(line)
+            continue
+        if not fence and line.startswith('## '):
+            if current is not None:
+                sections.append(current)
+            current = [line[3:]]
+        else:
+            if current is not None:
+                current.append(line)
+    if current is not None:
+        sections.append(current)
+    return sections
+
 with open('$f') as fh:
     content = fh.read()
-entries = re.split(r'^## ', content, flags=re.MULTILINE)[1:]
+entries = fence_aware_sections(content)
 for entry in entries:
-    lines = entry.strip().split('\n')
+    lines = '\n'.join(entry).strip().split('\n')
     title = lines[0].strip()
     if len(lines) > 10:
         print(f'| $fname | {title[:50]} | {len(lines)} |')
@@ -191,20 +224,53 @@ echo ""
 
 echo "### Section-level bloat analysis (all skills)"
 echo ""
+echo "Files at or below the minimum size (60 lines) are omitted — in a short"
+echo "skill the 'main section' legitimately IS most of the file, so a % figure"
+echo "there is not a meaningful bloat signal."
+echo ""
 echo "| Skill | Section | Lines | % of File |"
 echo "|-------|---------|-------|-----------|"
+MIN_FILE_LINES_FOR_BLOAT_PCT=60
 for f in "$FORGE_PATH"/core/skills/*/SKILL.md; do
   [[ ! -f "$f" ]] && continue
   skill_name=$(basename "$(dirname "$f")")
   # no skip needed — loop already filters by SKILL.md presence
   total=$(wc -l < "$f")
+  # Skip small files entirely — percentages over a tiny denominator are noise,
+  # not a bloat signal (see note above).
+  [[ "$total" -le "$MIN_FILE_LINES_FOR_BLOAT_PCT" ]] && continue
   python3 -c "
 import re
+
+def fence_aware_sections(content):
+    # Split on top-level '## ' headings only, ignoring any '## ' that falls
+    # inside a \`\`\`/~~~ fenced code block (e.g. an embedded markdown
+    # template's field labels are not real section headings).
+    fence = False
+    sections = []
+    current = None
+    for line in content.split('\n'):
+        if re.match(r'^(\`\`\`|~~~)', line):
+            fence = not fence
+            if current is not None:
+                current.append(line)
+            continue
+        if not fence and line.startswith('## '):
+            if current is not None:
+                sections.append(current)
+            current = [line[3:]]
+        else:
+            if current is not None:
+                current.append(line)
+    if current is not None:
+        sections.append(current)
+    return sections
+
 with open('$f') as fh:
     content = fh.read()
-sections = re.split(r'^## ', content, flags=re.MULTILINE)
-for section in sections[1:]:
-    lines_list = section.strip().split('\n')
+sections = fence_aware_sections(content)
+for section in sections:
+    lines_list = '\n'.join(section).strip().split('\n')
     title = lines_list[0].strip()[:40]
     count = len(lines_list)
     pct = round(100 * count / $total) if $total > 0 else 0

@@ -1,5 +1,6 @@
 {
-  "lastRun": "2026-06-18T00:00:00Z",
+  "lastRun": "2026-08-15T00:00:00Z",
+  "_note": "skippedFiles records membrane filenames the user chose not to absorb. Filenames are user-authored and can carry project or personal identifiers — never add an entry that names a person or a project. Two such entries were removed 2026-08-15 (see purge-learnings.md); the leak vector was introduced 1ac1382 (2026-03-19) when trackers moved from hashes to human-readable names.",
   "skippedFiles": [
     "audiences.md",
     "brand-voice.md",
@@ -8,8 +9,6 @@
     "2026-03-28-forge-council-response.md",
     "2026-03-28-karpathy-assessment.md",
     "feedback_writing_style.md",
-    "project_ulit.md",
-    "user_paula.md",
     "poke-learnings.md"
   ]
 }

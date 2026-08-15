@@ -20,6 +20,8 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 2. **Scope detection** — `$ARGUMENTS` if provided, else git log + project rules file. Identify `[PRODUCT_NAME]`, `[TECH_STACK]`, `[FEATURE_SCOPE]`, `[JURISDICTION]` (ask user for jurisdiction if not obvious) and fill them into the framework.
 
+**Scale the fan-out to the target** (protocol Complexity Triage): the full 21-persona assault is for whole-product or pre-ship runs. For a scoped target — one flow, one heat's diff — select the personas whose rubric actually touches that surface (always including 6, 7, 9, 17 at opus tier) and collapse the remainder into a single sonnet-tier reviewer carrying their rubrics. The opus consolidation gate never shrinks; only the legwork width does.
+
 3. **Execute the framework's three parts**:
    - **Part 1**: Practical QA review — runs first to establish baseline context.
    - **After Part 1, launch Parts 2 + 3 in parallel** as parallel subagents (or sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection):
@@ -28,31 +30,9 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 4. **Consolidate at opus tier and output findings** grouped by severity — this consolidation is the review gate for the sonnet-tier legs: dedup overlapping findings across personas, challenge any finding lacking evidence, reconcile severity disagreements, and own the final severity verdicts:
 
-```markdown
-# QA Deep Dive — [FEATURE_SCOPE]
-**Date**: [date] | **Product**: [PRODUCT_NAME]
+Output as `# QA Deep Dive — [FEATURE_SCOPE]` with a date/product line, a severity-count summary table (CRITICAL / IMPORTANT / MINOR), then findings ordered by severity and keyed `[SEVERITY-NNN]`. Each finding carries: originating persona, `file:line`, current vs expected behavior, reproduction steps, and the suggested fix.
 
-## Summary
-| Severity | Count |
-|----------|-------|
-| CRITICAL | X |
-| IMPORTANT | X |
-| MINOR | X |
-
-## Findings
-
-### [CRITICAL-001] Title
-- **Persona**: [which persona found this]
-- **Location**: `file:line`
-- **Current behavior**: What happens now
-- **Expected behavior**: What should happen
-- **Steps to reproduce**: 1, 2, 3
-- **Suggested fix**: Brief description
-
-[repeat for each finding]
-```
-
-6. **Optionally generate test files** for critical findings — ask the user if they want test code generated.
+5. **Optionally generate test files** for critical findings — ask the user if they want test code generated.
 
 ## Post-Flight
 
