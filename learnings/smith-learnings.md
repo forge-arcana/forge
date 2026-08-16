@@ -141,3 +141,7 @@
 ## Extract API Contracts From Installed Dependency Source, Not Memory (2026-06-29)
 **Learning**: For a factory/adapter wrapping a fast-moving library, the exact schema/contract lives in node_modules/<pkg>/dist. Grep the installed source for ground truth before authoring the wrapper, and feed the extracted contracts to the gate reviewer so it verifies against reality, not training-data assumptions.
 **Apply when**: Wrapping or adapting any fast-moving dependency.
+
+## Multi-Session Shared-Tree Builds Need Deploy Windows, Not Just Lane Claims (2026-08-15)
+**Learning**: When several agent sessions build concurrently in one working tree and deploys bundle that tree, lane claims (which FILES are whose) are insufficient — the scarce resource is the DEPLOY WINDOW (a moment the whole tree is committed, migrated, and safe to bundle). The working pattern: each session commits its half as it completes; a session needing to deploy asks the in-flight peer for a go signal defined as "migration in prod + server half committed"; migrate-first applies to WHOEVER deploys next, not whoever wrote the migration — a bundle carries every committed line, so the migration its passenger code selects must be in prod before any peer's deploy, and the migration author should apply it before handing over the window.
+**Apply when**: Orchestrating any build where multiple sessions share a working tree that deploys as a bundle.
