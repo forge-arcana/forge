@@ -238,13 +238,25 @@ if [[ ${#CHANGED_SKILLS[@]} -gt 0 && -n "$LAST_CAST_SHA" ]]; then
 
     # Show git log of what changed in this skill since baseline
     changes=$(git -C "$FORGE_PATH" log --format="  - %h %s (%an)" "$LAST_CAST_SHA"..HEAD -- "core/skills/$skill/" 2>/dev/null || true)
+    # Also check for uncommitted forge-side changes to this skill (working tree,
+    # not yet committed) — git log above only sees committed history, so an
+    # uncommitted forge-side edit would otherwise fall through to the
+    # "membrane was edited" branch and misattribute the drift's direction.
+    uncommitted_forge_changes=$(git -C "$FORGE_PATH" status --porcelain -- "core/skills/$skill/" 2>/dev/null || true)
     if [[ -n "$changes" ]]; then
       echo "**$skill**:"
       echo "$changes"
+    elif [[ -n "$uncommitted_forge_changes" ]]; then
+      echo "**$skill**:"
+      echo "  - uncommitted forge changes (not yet committed)"
     else
-      # Deployed differs but no forge commits — membrane was edited
-      # Wrap diff in || true so pipefail doesn't append "0" after grep's count
-      diff_stat=$( (diff --strip-trailing-cr <(grep -v '^model:[[:space:]]' "$FORGE_PATH/core/skills/$skill/SKILL.md") <(grep -v '^model:[[:space:]]' "$deployed/SKILL.md") 2>/dev/null || true) | grep -c '^[<>]' || echo "0")
+      # Deployed differs but no forge commits and no uncommitted forge changes
+      # — membrane was edited.
+      # Wrap diff in || true so pipefail doesn't append a spurious duplicate
+      # "0" after grep's count (grep -c exits 1 on a zero count but still
+      # prints "0", so `|| echo "0"` would double-print it).
+      diff_stat=$( (diff --strip-trailing-cr <(grep -v '^model:[[:space:]]' "$FORGE_PATH/core/skills/$skill/SKILL.md") <(grep -v '^model:[[:space:]]' "$deployed/SKILL.md") 2>/dev/null || true) | grep -c '^[<>]' || true)
+      [[ -z "$diff_stat" ]] && diff_stat=0
       if [[ "$diff_stat" -gt 0 ]]; then
         echo "**$skill** (deployed copy modified):"
         echo "  - $diff_stat lines changed in deployed copy"
