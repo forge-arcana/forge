@@ -2,7 +2,7 @@
 name: probe
 description: "Challenge architecture decisions against current best practices. On Blueprint targets, writes the Architecture section of the Pattern ([PROJECT]_06_Pattern_V1.0.md). On plans/conversations, returns inline review. Self-improving. TRIGGER when: user asks for architecture review, design validation, or 'is this the right approach?' on a technical decision."
 ---
-<!-- model: inherit | fan-out: section reviewers → sonnet (Tech Architecture, Auth/Security → opus); verdicts + Pattern synthesis at top level -->
+<!-- model: opus | fan-out: section reviewers → sonnet (Tech Architecture, Auth/Security → opus); verdicts + Pattern synthesis at top level -->
 
 # /probe — Architecture Challenger
 

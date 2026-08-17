@@ -2,7 +2,7 @@
 name: temper
 description: Repeated evaluative passes (poke + press) with confidence-weighted consolidation. Runs each art 3x via subagents, deduplicates findings, and produces a single hardened report.
 ---
-<!-- model: inherit | fan-out: poke+press passes → sonnet (ship-gate runs → opus); consolidation + Temper Verdict at opus -->
+<!-- model: opus | fan-out: poke+press passes → sonnet (ship-gate runs → opus); consolidation + Temper Verdict at opus -->
 
 # /temper — Hardened Evaluation
 

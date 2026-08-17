@@ -78,9 +78,35 @@ humanize() { # bytes-ish integer → 1.6M / 23.9k / 412
   }'
 }
 
-# Aggregate one .jsonl into one TSV row PER MODEL: model\ti\to\tcr\tcc\tn
+# Subagent transcripts for a session, one path per line (empty if none).
+#
+# Subagent turns are NOT written to the session's own .jsonl — the harness gives
+# each spawned agent its own transcript under a per-session tasks/ directory. A
+# main-transcript-only reading therefore shows zero cheap-tier turns even when
+# every fan-out leg bound its model correctly, which is exactly backwards for a
+# tier audit. Override the search roots with FORGE_TASKS_ROOTS on harnesses that
+# place them elsewhere; finding none is normal and silently yields nothing.
+subagent_transcripts() { # session .jsonl → task transcript paths
+  local f="$1" uuid enc root
+  uuid=$(basename "$f" .jsonl)
+  enc=$(basename "$(dirname "$f")")
+  shopt -s nullglob
+  for root in ${FORGE_TASKS_ROOTS:-/tmp/claude-*}; do
+    [[ -d "$root/$enc/$uuid/tasks" ]] || continue
+    for t in "$root/$enc/$uuid/tasks/"*.output; do echo "$t"; done
+  done
+  shopt -u nullglob
+}
+
+# Aggregate a session into one TSV row PER MODEL: model\ti\to\tcr\tcc\tn
+# Covers the main transcript AND its subagent transcripts — jq -s slurps them
+# into one array, so grouping and dedupe span every model that ran for the
+# session, not just the one the session itself rode.
 # Dedupes streaming-duplicate records by (message.id|requestId|timestamp).
 aggregate_by_model() {
+  local -a all=("$1")
+  local sf
+  while IFS= read -r sf; do [[ -n "$sf" ]] && all+=("$sf"); done < <(subagent_transcripts "$1")
   jq -rs '
     [ .[] | select(.message.usage and .message.role=="assistant") ]
     | unique_by((.message.id // "") + "|" + (.requestId // "") + "|" + (.timestamp // ""))
@@ -94,7 +120,7 @@ aggregate_by_model() {
         n:  length
       }
     | "\(.model)\t\(.i)\t\(.o)\t\(.cr)\t\(.cc)\t\(.n)"
-  ' "$1" 2>/dev/null || true
+  ' "${all[@]}" 2>/dev/null || true
 }
 
 cost_of() { # model i o cr cc → USD (awk float)
@@ -280,7 +306,7 @@ for k in "${!MODEL_NAMES[@]}"; do
   echo "| ${MODEL_NAMES[$k]#claude-} | ${MODEL_N[$k]} | $(humanize "${MODEL_I[$k]}") | $(humanize "${MODEL_O[$k]}") | $(humanize "${MODEL_CR[$k]}") | $(humanize "${MODEL_CC[$k]}") | \$${MODEL_COST[$k]} | $pct |"
 done
 echo ""
-echo "_Tier-binding check: sessions that ran fan-out skills should show sonnet/haiku rows here. A pure single-model breakdown across fan-out sessions means the per-spawn tier hints did not bind._"
+echo "_Tier-binding check: these rows span the main session AND its subagent transcripts, so a fan-out session should show sonnet/haiku rows. If it shows only the session model, either no leg passed a per-spawn model parameter, or the subagent transcripts were not found (set FORGE_TASKS_ROOTS). Note what a session-model-only breakdown does NOT mean: a skill's \`model:\` frontmatter never pulls a session below what it is already running, so inline skill work always reads as the session tier — that is expected, not a binding failure. See protocol.md Model Tiers rule 7._"
 echo ""
 # Dominant-column burn profile (cost-weighted) + the canned lever line — deterministic,
 # so /burn's step-2 read is emitted here instead of asking the model to compare numbers.

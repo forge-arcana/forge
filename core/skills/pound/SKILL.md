@@ -2,7 +2,7 @@
 name: pound
 description: "Deep QA analysis using 21 adversarial personas. Generates tests, finds edge cases, audits security/accessibility/compliance. Self-improving. TRIGGER when: user wants thorough QA, comprehensive testing, edge case analysis, or 'break this.'"
 ---
-<!-- model: inherit | fan-out: personas 6,7,9,17 → opus; other personas + Part 3 inputs → sonnet; consolidation at opus -->
+<!-- model: opus | fan-out: personas 6,7,9,17 → opus; other personas + Part 3 inputs → sonnet; consolidation at opus -->
 
 # /pound — Deep Testing & Analysis
 

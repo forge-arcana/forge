@@ -2,7 +2,7 @@
 name: plot
 description: "The Atlas — a bird's-eye map of the production landscape. /plot derives the deployable-unit topology (services, data stores, external integrations, trust boundaries, deploy targets) and renders it as a C4-container-level diagram the founder can pin to the wall. Context-sensitive: on a Blueprint/Pattern it draws the PLANNED Atlas (opt-in, for founders who think visually early); on a built or near-go-live system it draws the AS-BUILT Atlas and its headline is the drift diff — where the build/test phase deviated from the plan. Renders through Touchstone tokens when a Touchstone exists. Self-improving. TRIGGER when: a founder is near go-live and wants a production landscape map, asks 'what does our production architecture actually look like?', or wants to see where the build drifted from the plan."
 ---
-<!-- model: inherit | fan-out: topology facets → sonnet; synthesis + diagram + drift analysis at opus; HTML render → sonnet (opus reviews vs Touchstone) -->
+<!-- model: opus | fan-out: topology facets → sonnet; synthesis + diagram + drift analysis at opus; HTML render → sonnet (opus reviews vs Touchstone) -->
 
 # /plot — The Atlas, a Bird's-Eye Map of the Production Landscape
 

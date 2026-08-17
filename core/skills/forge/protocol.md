@@ -33,6 +33,19 @@ The learnings filename tells the protocol which file to read during pre-flight a
    - **Scan project structure** to understand the codebase layout
    - **Load web research cache**: read `memory/.web-cache.json` if it exists — use cached results for queries within their TTL (see Web Research Cache below)
 
+### Delegation gate (pre-flight is bulk reading, not judgment)
+
+Step 2's reads are the largest single block of context an art pulls in, and none of it requires the session model: it is *gathering*, and the judgment starts afterwards. When the harness supports per-spawn model selection, delegate the gathering rather than performing it.
+
+Spawn one **low-effort sonnet-tier** subagent (haiku-tier where the harness offers it and the reads are purely mechanical) with the step-2 read list, and have it return a digest: the learnings that bear on this target, the project's stack and conventions, the stack-guide sections the target actually touches, and the structural map. The session model reads the digest and starts the art from there.
+
+Two carve-outs, both deliberate:
+
+- **A digest is not a substitute for evidence.** Where an art's own evidence script exists (`forge-scan.sh`, `plot-scan.sh`, `forge-purge-scan.sh`), that output is correctness-critical and reaches the judging model in full. Never route a script's evidence through a summarising leg — the existing learning against compressing single-agent triage input stands.
+- **If the harness lacks subagents or per-spawn model selection**, read directly at the session model as before. The gate is an optimisation, not a precondition.
+
+The reason this matters more than it looks: forge already knows to compress what feeds a *fan-out* (the multiplier learning). This is the same lever pointed at the orchestrator, whose own context is paid for at the highest tier in the run.
+
 After pre-flight, proceed to the art's own `## Process` or `## Dimensions` section.
 
 ## Parallel Execution Principle
@@ -77,6 +90,26 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
    - (c) a **user-review gate** — only for low-stakes, fully-user-visible output, and only when the flow keeps that output fully visible to the user before it takes effect
 3. **Sequential fallback**: every fan-out skill carries this sentence — "If your harness lacks parallel subagent spawning or per-spawn model selection, run these steps sequentially at your session model."
 4. **Defer, don't downgrade**: when a conditional opus gate (a review that only fires sometimes) can't run at opus tier, defer the gated action and surface it to the user — never run the gate at a weaker tier and proceed.
+5. **Ceiling rule — the top tier's output is a plan, not an artifact.** The class→tier map is a ceiling, not a floor. `inherit` means *the session model orchestrates*, never *the session model performs*: on a session running at the top tier, the session model reads what it needs to understand the problem, designs the solution, and writes the delegation brief — then every unit of implementation goes to a subagent at the tier that work actually needs. What it keeps is the design, the brief, the review of what comes back, and the verdict. What it never keeps is the artifact.
+
+   The practical test is the tool it reaches for: **reading is how a top tier plans; writing is implementation, and implementation is delegated.** A top-tier session editing a file directly has skipped the delegation it exists to perform.
+
+   A tier map with no ceiling silently becomes "whatever the session happens to be" — which is the most expensive model available rather than the right one, applied to work that did not need it.
+6. **Prose names the tier; the parameter binds it.** A sentence like "spawn a sonnet-tier subagent" is tool-neutral documentation — it sets nothing. Wherever the harness exposes a per-spawn model control, the spawn must pass it explicitly (in Claude Code: the Agent tool's `model` parameter). If a flow step names a tier without a binding, the leg rides the session model and the tier is decorative. When auditing whether tiers actually bound, read the transcript's per-turn model, not the skill text.
+7. **Delegation is the reliable lever; frontmatter is not a ceiling.** Two mechanisms are easy to conflate, and they behave differently. Both were measured on 2026-08-16, on a session running a tier above the work:
+
+   - **A spawn's model parameter binds — in both directions, including downward.** Subagents spawned from a top-tier session ran on a bottom-tier model for the whole of their work. This is the mechanism to reach for whenever a leg should run below the session; it is not fragile, and it is not harness-specific in principle (any harness exposing per-spawn model selection behaves this way).
+   - **A skill's `model:` frontmatter does *not* pull a session below what it is already running.** A task skill pinned one tier down was invoked on a higher-tier session, and every turn of that invocation — including the invocation turn — ran at the session model. Frontmatter binds upward and is correct the moment a session sits *below* a skill's needed tier; it is simply not a cap.
+
+   The structural consequence: **a skill that does its work inline in the session runs at the session's tier, whatever its frontmatter says.** Invoking a mechanical task-skill from a top-tier session spends top-tier tokens on mechanical work. This is not a delegation failure — an inline skill invocation is not a delegation at all.
+
+   So a skill that may be invoked from an arbitrary session has exactly two honest options for work below that session's tier: the user lowers the session model first, or **the skill delegates that work to a subagent with an explicit model parameter**. Prefer the second — it needs nothing from the user and is the mechanism proven to bind.
+
+   And because the correction only reaches downward through delegation, **cheap-by-default beats downgrade-on-demand**: set the session model at the tier most work needs and escalate deliberately. A high default plus inline skills is the configuration that quietly spends the most.
+
+   > **Measuring this**: per-spawn tiers cannot be confirmed from the main-session transcript alone — in Claude Code, subagent turns are written to a separate per-task transcript, so a main-session-only reading shows no cheap-tier turns even when every leg bound correctly. Read both before concluding a tier didn't bind (`burn-status.sh` covers both as of 2026-08-17).
+
+   > **Enforcing this**: A top-tier session can be mechanically stopped from writing artifacts inline while delegated writes pass — correcting the earlier assumption that no such enforcement existed. The mechanism: a pre-tool-use hook denying the file-writing tools (Edit/Write/NotebookEdit) while allowing reading tools. The trap: a subagent's hook payload carries the same transcript path as its parent, so deriving the model from it tags both as the parent's tier — a guard built on model detection alone blocks the subagent too, destroying the delegation it exists to force, observed live before the fix. The discriminator: an agent-identifier field present only in the subagent's payload; its presence always allows the call. The honest limit: a shell tool can still write files, so the guard redirects rather than seals — a speed bump, not a sandbox.
 
 ### Effort qualifier (optional second axis)
 
