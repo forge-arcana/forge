@@ -51,3 +51,15 @@
 ## Rate Limit Audits Must Cover All Mutation Endpoints (2026-05-29)
 **Learning**: When rate limiting is added to one public API endpoint, it's easy to overlook sibling endpoints that also accept user input. An unprotected feedback or contact endpoint can exhaust third-party free-tier quotas under bot traffic. Audit all mutation endpoints together when adding rate limiting to any one of them.
 **Apply when**: Any press review that adds or verifies rate limiting — scan all mutation routes, not just the one that triggered the check.
+
+## Verifying a Deploy Through a CDN Can Read Stale on a GOOD Deploy (2026-08-16)
+
+**Learning**: Checking a shipped CSS/JS change by grepping the SERVED asset can false-fail behind a CDN: the HTML often returns a cache HIT still referencing the previous asset hash, so "new rule absent from served CSS" reads exactly like a stale-dist deploy — the very failure the check exists to catch — making the false positive expensive. The discriminating sequence: (1) fetch the NEW asset hash's URL directly — 200 + contains the change proves the deploy landed; (2) re-request the HTML with `Cache-Control: no-cache` to confirm the reference updates. Only when the direct-hash fetch ALSO lacks the change is the deploy actually stale.
+
+**Apply when**: Any post-deploy verification of static assets served through Cloudflare or another CDN; any "my change isn't live" report within minutes of a deploy.
+
+## Deploy Verification Has a Deletion-Shaped Twin (2026-08-16)
+
+**Learning**: Verifying an ADDITION means proving the new thing IS in the served bytes; verifying a REMOVAL means proving the old strings are NOT — because a stale dist deploys as a silent no-op that is indistinguishable from success at the deploy line (the version id increments either way). Grep the deployed bundle for the removed identifiers/copy and require zero hits, with the same CDN caveat: fetch the new asset hash directly, not the possibly-cached HTML reference.
+
+**Apply when**: Any deploy whose change is a removal (dead feature, retired copy, deleted route); pair with the addition-shaped check when a change does both.

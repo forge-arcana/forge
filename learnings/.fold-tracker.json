@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-08-15",
+  "lastRun": "2026-08-19",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -230,7 +230,22 @@
     "A Collapsing Formatter Can Eat Your Regression Test's Control",
     "An Ellipsis That Expands Is a Lying Signifier \u2014 Expose Frequent Actions",
     "A Deterministic Guard That Only Speaks One Language Silently Stops Guarding",
-    "A Uniqueness Check Is Only as Global as Its Lock Key"
+    "A Uniqueness Check Is Only as Global as Its Lock Key",
+    "One Developer App Per SaaS Customer — Credential Pooling Closed on Major Platforms",
+    "BYO App Credentials Ride the Token Seam as a Bundle",
+    "Per-IP Rate Limits and Serverless Edge Shared Egress IPs Don't Mix",
+    "Background Sweeps Against Metered Third-Party APIs Must Be Opt-In When the Meter Is the Customer's",
+    "Verifying a Deploy Through a CDN Can Read Stale on a GOOD Deploy",
+    "Deploy Verification Has a Deletion-Shaped Twin",
+    "A Loader That Enumerates Directories Must Assert the Marker File, Not Just the Directory",
+    "A Plausible API Name Hardens Into a Premise the Moment It Is Written Down",
+    "A Correct-Looking 200 in the Wrong Content Type Defeats Every Standard Check",
+    "Approval Does Not Travel Between Sessions",
+    "Recording a Human's Screen Interaction Needs Xvfb + a Real Window Manager, Not Just a Display",
+    "A GUI App Launched in the Background Needs Its Window Verified, Not Just Its Exit Code",
+    "The Authoritative Row and the Data-Bearing Row Can Be Different Rows",
+    "A Guard Enforced In Every Caller Is a Convention, Not a Property",
+    "A Borrowed Terminal State Carries Semantics You Did Not Ask For"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
