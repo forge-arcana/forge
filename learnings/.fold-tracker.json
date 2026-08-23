@@ -248,7 +248,8 @@
     "A Borrowed Terminal State Carries Semantics You Did Not Ask For",
     "Reverting a File You Accidentally Committed Destroys the Author's Working Copy Too",
     "The Tier-Based Work-Router Belongs In The Forge, Not Just One Membrane",
-    "Delegation Does Not Cover a Session's Own Orchestration Turns"
+    "Delegation Does Not Cover a Session's Own Orchestration Turns",
+    "HARD RULE candidate — Fix/flag inline; never defer issues to an end-of-cycle summary"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
