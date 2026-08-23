@@ -192,6 +192,10 @@ Fresh machine (no deployed skills): create `<membrane>/learnings/`, `<membrane>/
 
 Always run `bash <forge>/core/scripts/cast-deploy.sh --rules` (every cast, no PLAN row needed). This regenerates the forge-owned HARD RULES block (from `<forge>/core/rules/`) in the membrane global rules file, between `FORGE-RULES` markers — same forge-owned contract as the `forge-path:` line. Personal content outside the markers is never touched. This is how a HARD RULE authored in `core/rules/` reaches every teammate's membrane on their next `/forge`. Verify with `cast-deploy.sh --verify-rules`.
 
+### Hooks
+
+Always run `bash <forge>/core/scripts/cast-deploy.sh --hooks` (every cast, no PLAN row needed). This installs the hook bodies from `<forge>/core/hooks/` into `<membrane>/hooks/`. Verify with `cast-deploy.sh --verify-hooks`. Settings wiring (the `hooks` block in `settings.json` that actually invokes them) is per-user and is NEVER auto-edited by forge — see `<forge>/core/hooks/README.md` for the snippets the user adds themselves.
+
 ### Learnings
 For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry into `<membrane>/learnings/<file>.md`.
 

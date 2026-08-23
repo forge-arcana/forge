@@ -24,6 +24,8 @@
 #   cast-deploy.sh --verify-scripts                   verify runtime scripts match forge
 #   cast-deploy.sh --rules                            deploy forge core/rules → membrane global rules file
 #   cast-deploy.sh --verify-rules                     verify membrane rules block matches forge core/rules
+#   cast-deploy.sh --hooks                            deploy forge core/hooks/*.sh → membrane hooks/ (bodies only, never settings.json)
+#   cast-deploy.sh --verify-hooks                     verify membrane hook bodies match forge core/hooks
 #   cast-deploy.sh --bootstrap                        create dirs + symlinks (no skill deploy)
 #
 # Environment overrides:
@@ -50,6 +52,9 @@ FORGE_SKILLS="$FORGE_PATH/core/skills"
 FORGE_SCRIPTS="$FORGE_PATH/claude-helpers/scripts"
 FORGE_RULES="$FORGE_PATH/core/rules"
 MEMBRANE_RULES_FILE="$MEMBRANE/CLAUDE.md"   # global rules file; AGENTS.md split will retarget this later
+FORGE_HOOKS="$FORGE_PATH/core/hooks"
+MEMBRANE_HOOKS="$MEMBRANE/hooks"
+MEMBRANE_SETTINGS_FILE="$MEMBRANE/settings.json"
 
 AGENTS_SKILLS="$AGENTS_DIR/skills"
 AGENTS_SCRIPTS="$AGENTS_DIR/scripts"
@@ -234,6 +239,84 @@ verify_rules() {
   fi
 }
 
+# --- Hooks deploy/verify: copy forge core/hooks/*.sh bodies into the
+#     membrane's hooks/ dir. NEVER touches settings.json — that wiring is
+#     per-user and must be added by hand (see core/hooks/README.md). After
+#     installing, checks whether settings.json already references each hook
+#     filename and reports wired/not-wired per hook, informationally only. ---
+deploy_hooks() {
+  echo "## Deploying forge core/hooks → $MEMBRANE_HOOKS"
+  echo ""
+  if [[ ! -d "$FORGE_HOOKS" ]]; then
+    echo "| hooks | SKIP | $FORGE_HOOKS not found |"
+    return 0
+  fi
+  mkdir -p "$MEMBRANE_HOOKS"
+  local any=0
+  for f in "$FORGE_HOOKS"/*.sh; do
+    [[ -f "$f" ]] || continue
+    any=1
+    local base dest
+    base=$(basename "$f")
+    dest="$MEMBRANE_HOOKS/$base"
+    cp "$f" "$dest"
+    chmod +x "$dest"
+    echo "| $base | DEPLOYED | $(stat -c %s "$f") bytes |"
+    if [[ -f "$MEMBRANE_SETTINGS_FILE" ]] && grep -qF "$base" "$MEMBRANE_SETTINGS_FILE" 2>/dev/null; then
+      echo "| $base | wired | settings.json references this hook |"
+    else
+      echo "| $base | not wired — add the settings.json entry (see core/hooks/README.md) |"
+    fi
+  done
+  if [[ "$any" -eq 0 ]]; then
+    echo "| hooks | SKIP | no *.sh files found in $FORGE_HOOKS |"
+  fi
+  echo ""
+  echo "**Hooks deploy complete — settings.json was NOT modified (per-user wiring)**"
+}
+
+verify_hooks() {
+  echo "## Hooks Verification"
+  echo ""
+  local errors=0
+  if [[ ! -d "$FORGE_HOOKS" ]]; then
+    echo "| hooks | SKIP | $FORGE_HOOKS not found |"
+    return 0
+  fi
+  for f in "$FORGE_HOOKS"/*.sh; do
+    [[ -f "$f" ]] || continue
+    local base dest
+    base=$(basename "$f")
+    dest="$MEMBRANE_HOOKS/$base"
+    if [[ ! -f "$dest" ]]; then
+      echo "| $base | MISSING | Not deployed to $MEMBRANE_HOOKS — run cast-deploy.sh --hooks |"
+      errors=$((errors + 1))
+    elif ! diff -q "$f" "$dest" >/dev/null 2>&1; then
+      echo "| $base | DIFFERS | Drift between forge and membrane — run cast-deploy.sh --hooks |"
+      errors=$((errors + 1))
+    else
+      echo "| $base | OK | In sync |"
+    fi
+  done
+  echo ""
+  if [[ $errors -eq 0 ]]; then
+    echo "**All hooks verified OK**"
+  else
+    echo "**$errors hook(s) need attention**"
+  fi
+  return $errors
+}
+
+if [[ "${1:-}" == "--hooks" ]]; then
+  deploy_hooks
+  exit 0
+fi
+
+if [[ "${1:-}" == "--verify-hooks" ]]; then
+  verify_hooks
+  exit $?
+fi
+
 # --- Verify mode: check all deployed skills for correctness ---
 if [[ "${1:-}" == "--verify" ]]; then
   echo "## Deployment Verification"
@@ -385,7 +468,7 @@ else
 fi
 
 if [[ ${#skills[@]} -eq 0 ]]; then
-  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --rules | --verify-rules | --bootstrap" >&2
+  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --rules | --verify-rules | --hooks | --verify-hooks | --bootstrap" >&2
   exit 1
 fi
 
@@ -427,10 +510,12 @@ done
 echo ""
 echo "**Deploy complete**"
 
-# --all also deploys runtime scripts and the forge rules block
+# --all also deploys runtime scripts, the forge rules block, and hook bodies
 if [[ "${1:-}" == "--all" ]]; then
   echo ""
   deploy_scripts
   echo ""
   deploy_rules
+  echo ""
+  deploy_hooks
 fi

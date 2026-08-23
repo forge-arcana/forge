@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fold-purity-check.sh — Block project-specific leaks from entering the forge
 #
-# Scans staged forge content (learnings/, memory/, core/skills/, core/rules/) for leak patterns that violate
+# Scans staged forge content (learnings/, memory/, core/skills/, core/rules/, core/hooks/) for leak patterns that violate
 # the "No Project Names in Forge" HARD RULE. Designed to be invoked by /forge
 # fold phase (3e, 3g) and the commit gate (3i).
 #
@@ -200,7 +200,7 @@ if [[ "$1" == "--commit-msg" ]]; then
   scan_file_or_text "<commit message>" "$*"
 
 elif [[ "$1" == "--staged" ]]; then
-  STAGED_FILES=$(git -C "$FORGE_DIR" diff --cached --name-only | grep -E '^(learnings/|memory/|core/skills/|core/rules/)' | grep -vE '/\.[^/]+$' || true)
+  STAGED_FILES=$(git -C "$FORGE_DIR" diff --cached --name-only | grep -E '^(learnings/|memory/|core/skills/|core/rules/|core/hooks/)' | grep -vE '/\.[^/]+$' || true)
   if [[ -z "$STAGED_FILES" ]]; then
     exit 0  # nothing relevant staged
   fi
@@ -228,7 +228,7 @@ elif [[ "$1" == "--diff" ]]; then
   # FORGE_DIR is core/ (this script lives in core/scripts/). learnings/ and
   # memory/ live at the repo root, so anchor pathspecs to the git top-level.
   REPO_ROOT="$(git -C "$FORGE_DIR" rev-parse --show-toplevel)"
-  CHANGED_FILES=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACM "$BASE_REF" "$HEAD_REF" -- learnings/ memory/ core/skills/ core/rules/ \
+  CHANGED_FILES=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACM "$BASE_REF" "$HEAD_REF" -- learnings/ memory/ core/skills/ core/rules/ core/hooks/ \
                   | grep -vE '/\.[^/]+$' || true)
   if [[ -z "$CHANGED_FILES" ]]; then
     exit 0  # no relevant content changed in this range
