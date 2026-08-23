@@ -247,7 +247,8 @@
     "A Guard Enforced In Every Caller Is a Convention, Not a Property",
     "A Borrowed Terminal State Carries Semantics You Did Not Ask For",
     "Reverting a File You Accidentally Committed Destroys the Author's Working Copy Too",
-    "The Tier-Based Work-Router Belongs In The Forge, Not Just One Membrane"
+    "The Tier-Based Work-Router Belongs In The Forge, Not Just One Membrane",
+    "Delegation Does Not Cover a Session's Own Orchestration Turns"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
