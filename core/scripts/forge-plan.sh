@@ -223,6 +223,11 @@ done <<< "$GENERAL_BLOCK"
 # 5b: skill-specific learning files — per-entry detail from Learning Details.
 # direction: "new in forge" / "new file"  -> incoming (ADDED)
 #            "new in user"                -> outgoing (REMOVED)
+# CAST_DETAIL_FILES tracks (space-joined, bash-3.2-safe — no assoc arrays) every
+# file that got at least one INC row here, so 5c below can tell a genuine
+# cast-needed-with-detail file apart from a consolidated file whose Learning
+# Details came back empty (pure retire/merge with no surviving new title text).
+CAST_DETAIL_FILES=""
 while IFS="$ROWSEP" read -r file dir title author teaser; do
   [[ -z "$file" ]] && continue
   essence="$teaser"
@@ -231,7 +236,7 @@ while IFS="$ROWSEP" read -r file dir title author teaser; do
   [[ -n "$author" ]] && label="${title} (${author})"
   row="learning${ROWSEP}${label}${ROWSEP}${ROWSEP}${essence}"
   case "$dir" in
-    "new in forge"|"new file") INC+=("$row") ;;
+    "new in forge"|"new file") INC+=("$row"); CAST_DETAIL_FILES="${CAST_DETAIL_FILES} ${file}" ;;
     "new in user") OUT+=("$row") ;;
     *) CONF+=("learning${ROWSEP}${label}${ROWSEP}unrecognized-direction${ROWSEP}_model fills_ — unrecognized direction \"$dir\" for $file") ;;
   esac
@@ -280,6 +285,52 @@ done < <(printf '%s\n' "$LEARNING_DETAILS" | awk '
   }
   END { flush() }
 ')
+
+# 5c: skill-specific learning files — per-file status-table safety net.
+# forge-status.sh's Skill-Specific Learnings table (in LEARNING_SECTION, above
+# Learning Details) is the source of truth for whether a file needs a cast at
+# all. A file whose status contains "cast needed" MUST produce at least one
+# INCOMING row. Most of the time 5b already supplied one (or several) via
+# Learning Details' "(new in forge)" entries. The one case 5b cannot cover is
+# a consolidation/retirement with no surviving new title text — e.g. entries
+# renamed/merged such that the tracker recognizes the old titles as retired
+# but forge-status.sh's title-diff found nothing textually "new" to attach a
+# body to. Without this net, that file's cast-needed status is silently
+# dropped from the PLAN table entirely (the historical bug this fixes).
+#
+# "Content differs but all titles accounted for" and "In sync" are deliberately
+# NOT handled here — the former keeps its existing footer-note-only treatment
+# (Step 8 below), the latter needs no row at all.
+CAST_DETAIL_HAS() {
+  local f="$1"
+  case " $CAST_DETAIL_FILES " in
+    *" $f "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+while IFS='|' read -r _ file user_copy forge_copy status _; do
+  file=$(trim "$file")
+  status=$(trim "$status")
+  [[ -z "$file" || "$file" == "File" || "$file" =~ ^-+$ ]] && continue
+
+  case "$status" in
+    *"PARSE-ERROR"*)
+      CONF+=("learning${ROWSEP}${file}${ROWSEP}CONFLICT (parse-error)${ROWSEP}_model fills_ — forge-status.sh could not parse titles for $file; diff <forge>/learnings/$file vs <membrane>/learnings/$file manually")
+      ;;
+    *"cast needed"*)
+      if ! CAST_DETAIL_HAS "$file"; then
+        # Extract a merged/retired count for the essence line — prefer the
+        # explicit "N merged/retired in forge" figure; fall back to "N new
+        # in forge" when there's no retirement figure to report.
+        n=$(printf '%s' "$status" | grep -oE '[0-9]+ merged/retired in forge' | grep -oE '^[0-9]+' | head -1)
+        [[ -z "$n" ]] && n=$(printf '%s' "$status" | grep -oE '[0-9]+ new in forge' | grep -oE '^[0-9]+' | head -1)
+        [[ -z "$n" ]] && n="?"
+        INC+=("learning${ROWSEP}${file}${ROWSEP}FORGE-UPDATED${ROWSEP}_model fills_ — ${n} entries merged/retired; diff <forge>/learnings/$file vs <membrane>/learnings/$file")
+      fi
+      ;;
+  esac
+done < <(printf '%s\n' "$LEARNING_SECTION" | grep '^| ' | awk -F'|' 'NF==6')
 
 # --- Step 6: memory rows ---
 FORGEONLY_BLOCK=$(sed -n '/^\*\*Forge-only memories\*\*/,/^$/p' <<<"$MEMORY_SECTION")

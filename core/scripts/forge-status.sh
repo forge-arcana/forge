@@ -367,6 +367,22 @@ try {
 for (const t of [...titles].sort()) console.log(t);
 " 2>/dev/null > "$ALL_FORGE_TITLES_FILE" || true
 
+# Build tracker-only title index (processedEntries alone, NOT merged with forge-file
+# titles). Used to detect retiredInForge: a title the tracker says was absorbed at
+# some point, that is present in the user's copy, but no longer appears in the
+# CURRENT forge file -- i.e. it was consolidated/renamed away. Conflating "tracked"
+# with "present in a forge file" (as ALL_FORGE_TITLES_FILE does, by design, for the
+# newInUser check) would hide exactly this case, so it needs its own set.
+TRACKED_TITLES_FILE=$(mktemp)
+"$NODE_BIN" -e "
+const fs = require('fs'), path = require('path');
+const dir = '$W_FORGE/learnings';
+try {
+  const t = JSON.parse(fs.readFileSync(path.join(dir, '.fold-tracker.json'),'utf8'));
+  for (const e of (t.processedEntries || [])) console.log(e);
+} catch(e) {}
+" 2>/dev/null > "$TRACKED_TITLES_FILE" || true
+
 LEARNING_DETAILS_LINES=()
 for forge_file in "$FORGE_PATH"/learnings/*.md; do
   [[ ! -f "$forge_file" ]] && continue
@@ -383,8 +399,20 @@ for forge_file in "$FORGE_PATH"/learnings/*.md; do
     user_count=$(grep -c '^## ' "$user_file" 2>/dev/null || true)
     user_count=${user_count:-0}
 
-    # Title-based comparison: find titles truly new (not in ANY forge file or tracker)
-    comparison=$("$NODE_BIN" -e "
+    # Title-based comparison: find titles truly new (not in ANY forge file or tracker),
+    # AND titles that were consolidated/retired out of this forge file (present in the
+    # user's copy, absent from the current forge file, but known to the tracker --
+    # meaning they were absorbed once and have since been merged/renamed away by a
+    # /purge-style consolidation). Written to a FILE, not a bash variable, and read
+    # back with fs.readFileSync in the extraction step below -- NOT by interpolating
+    # the JSON text into a second "node -e" string literal. A title containing an
+    # apostrophe (e.g. "A Session's Own...") breaks out of that literal, node throws
+    # a SyntaxError, and the old `2>/dev/null || echo "0"` fallback silently turned
+    # that parse failure into a false "0 new / 0 retired" -- exactly the failure mode
+    # that let a consolidation report as benign "all titles accounted for".
+    comparison_file=$(mktemp)
+    comparison_err_file=$(mktemp)
+    "$NODE_BIN" -e "
 const fs = require('fs');
 function getTitles(p) {
   const t = new Set();
@@ -397,39 +425,79 @@ function getTitles(p) {
 const userT = getTitles('$w_user_file');
 const forgeFileT = getTitles('$w_forge_file');
 const allForgeT = new Set(fs.readFileSync('$(winpath "$ALL_FORGE_TITLES_FILE")','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
+const trackedT = new Set(fs.readFileSync('$(winpath "$TRACKED_TITLES_FILE")','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
 // Truly new in user = in user file, not in ANY forge file or tracker
 const newInUser = [...userT].filter(t => !allForgeT.has(t)).sort();
-// New in this forge file = in forge file, not in user file
+// New in this forge file = in forge file, not in user file (includes freshly-merged
+// consolidation titles -- a merged title is by definition new text, so it lands here)
 const newInForge = [...forgeFileT].filter(t => !userT.has(t)).sort();
-console.log(JSON.stringify({newInUser, newInForge}));
-" 2>/dev/null || echo '{"newInUser":[],"newInForge":[]}')
+// Retired in this forge file = user still has it, this forge file no longer does,
+// but the tracker says it was absorbed at some point -- i.e. consolidated away.
+const retiredInForge = [...userT].filter(t => !forgeFileT.has(t) && trackedT.has(t)).sort();
+console.log(JSON.stringify({newInUser, newInForge, retiredInForge}));
+" > "$comparison_file" 2>"$comparison_err_file"
+    comparison_rc=$?
 
-    # process.stdout.write(String(n)) -- NOT console.log(n). console.log applies
-    # inspect-style colouring to a bare NUMBER, and both node and bun do it when
-    # colour is forced in the environment even though stdout is a pipe. The ANSI
-    # codes then reach the [[ -eq ]] tests below as "\033[33m0\033[39m", which
-    # aborts every comparison with "syntax error: operand expected" and silently
-    # drops the new-entry counts for every skill-specific learning file.
-    new_in_user=$("$NODE_BIN" -e "process.stdout.write(String(JSON.parse('$comparison').newInUser.length))" 2>/dev/null || echo "0")
-    new_in_forge=$("$NODE_BIN" -e "process.stdout.write(String(JSON.parse('$comparison').newInForge.length))" 2>/dev/null || echo "0")
+    parse_error=false
+    new_in_user=0
+    new_in_forge=0
+    retired_in_forge=0
+    if [[ $comparison_rc -ne 0 || ! -s "$comparison_file" ]]; then
+      parse_error=true
+    else
+      # process.stdout.write(String(n)) -- NOT console.log(n). console.log applies
+      # inspect-style colouring to a bare NUMBER, and both node and bun do it when
+      # colour is forced in the environment even though stdout is a pipe. The ANSI
+      # codes then reach the [[ -eq ]] tests below as "\033[33m0\033[39m", which
+      # aborts every comparison with "syntax error: operand expected".
+      new_in_user=$("$NODE_BIN" -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('$(winpath "$comparison_file")','utf8')).newInUser.length))" 2>>"$comparison_err_file") || parse_error=true
+      new_in_forge=$("$NODE_BIN" -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('$(winpath "$comparison_file")','utf8')).newInForge.length))" 2>>"$comparison_err_file") || parse_error=true
+      retired_in_forge=$("$NODE_BIN" -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('$(winpath "$comparison_file")','utf8')).retiredInForge.length))" 2>>"$comparison_err_file") || parse_error=true
+      if [[ -z "$new_in_user" || -z "$new_in_forge" || -z "$retired_in_forge" ]]; then
+        parse_error=true
+      fi
+    fi
+    rm -f "$comparison_file" "$comparison_err_file"
 
-    if [[ "$new_in_user" -eq 0 && "$new_in_forge" -eq 0 ]]; then
+    if $parse_error; then
+      # Do NOT fall back to a silent "0/0" -- a parse failure must be visible, not
+      # mistaken for "nothing changed".
+      echo "| $fname | $user_count | $forge_count | PARSE-ERROR -- inspect manually |"
+      new_in_user=0
+      new_in_forge=0
+      retired_in_forge=0
+    elif [[ "$new_in_user" -eq 0 && "$new_in_forge" -eq 0 && "$retired_in_forge" -eq 0 ]]; then
       content_diff=$(diff --strip-trailing-cr "$user_file" "$forge_file" 2>/dev/null || true)
       if [[ -z "$content_diff" ]]; then
         echo "| $fname | $user_count | $forge_count | In sync |"
       else
         echo "| $fname | $user_count | $forge_count | Content differs but all titles accounted for |"
       fi
-    elif [[ "$new_in_user" -gt 0 && "$new_in_forge" -eq 0 ]]; then
-      echo "| $fname | $user_count | $forge_count | $new_in_user new in user -- fold needed |"
-    elif [[ "$new_in_user" -eq 0 && "$new_in_forge" -gt 0 ]]; then
-      echo "| $fname | $user_count | $forge_count | $new_in_forge new in forge -- cast needed |"
     else
-      echo "| $fname | $user_count | $forge_count | $new_in_user new in user, $new_in_forge new in forge |"
+      forge_parts=()
+      [[ "$retired_in_forge" -gt 0 ]] && forge_parts+=("$retired_in_forge merged/retired in forge")
+      [[ "$new_in_forge" -gt 0 ]] && forge_parts+=("$new_in_forge new in forge")
+      forge_desc=""
+      if [[ ${#forge_parts[@]} -gt 0 ]]; then
+        forge_desc=$(printf ", %s" "${forge_parts[@]}")
+        forge_desc="${forge_desc:2}"
+      fi
+
+      if [[ "$new_in_user" -gt 0 && -n "$forge_desc" ]]; then
+        echo "| $fname | $user_count | $forge_count | $new_in_user new in user, $forge_desc -- fold + cast needed |"
+      elif [[ "$new_in_user" -gt 0 ]]; then
+        echo "| $fname | $user_count | $forge_count | $new_in_user new in user -- fold needed |"
+      else
+        echo "| $fname | $user_count | $forge_count | $forge_desc -- cast needed |"
+      fi
     fi
 
-    # Collect detail lines for truly new entries
-    if [[ "$new_in_user" -gt 0 ]]; then
+    # Collect detail lines for truly new entries (skip entirely on parse error --
+    # nothing reliable to report per-entry, the file-level PARSE-ERROR row above
+    # already flags it for manual inspection).
+    if $parse_error; then
+      : # no detail extraction possible
+    elif [[ "$new_in_user" -gt 0 ]]; then
       detail_lines=$("$NODE_BIN" -e "
 const fs = require('fs');
 function getEntries(p) {
@@ -465,7 +533,10 @@ for (const t of newTitles) {
       fi
     fi
 
-    if [[ "$new_in_forge" -gt 0 ]]; then
+    # Fires on either a genuinely new title OR a consolidation (retired_in_forge > 0
+    # with newInForge == 0 is the pure-deletion edge case, in which case newTitles
+    # below comes back empty and forge-plan.sh's file-level safety-net row covers it).
+    if ! $parse_error && [[ "$new_in_forge" -gt 0 || "$retired_in_forge" -gt 0 ]]; then
       detail_lines=$("$NODE_BIN" -e "
 const fs = require('fs');
 const {execSync} = require('child_process');
