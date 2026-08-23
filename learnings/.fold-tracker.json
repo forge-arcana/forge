@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-08-19",
+  "lastRun": "2026-08-23",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -245,7 +245,9 @@
     "A GUI App Launched in the Background Needs Its Window Verified, Not Just Its Exit Code",
     "The Authoritative Row and the Data-Bearing Row Can Be Different Rows",
     "A Guard Enforced In Every Caller Is a Convention, Not a Property",
-    "A Borrowed Terminal State Carries Semantics You Did Not Ask For"
+    "A Borrowed Terminal State Carries Semantics You Did Not Ask For",
+    "Reverting a File You Accidentally Committed Destroys the Author's Working Copy Too",
+    "The Tier-Based Work-Router Belongs In The Forge, Not Just One Membrane"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
