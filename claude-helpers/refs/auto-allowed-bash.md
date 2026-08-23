@@ -1,52 +1,8 @@
-# Claude Code — Global Rules
+# Claude Code — Harness Reference (descriptive)
 
-These are the global instructions configured in `~/.claude/CLAUDE.md` that apply to **every project** Claude Code works on. They define workflow patterns, communication style, debugging discipline, and quality standards.
+This file is **descriptive, not authoritative, and not config-synced**. It records the Claude-Code-specific harness setup: which Bash commands run without prompting, which tools are auto-allowed, WebFetch domains, editor conventions, and the shorthand/auto-invocation behaviour a Claude Code membrane exhibits.
 
----
-
-## HARD RULE — No Command Chaining in Bash — EVER
-
-> **NEVER use `&&`, `;`, or `||` to chain commands in a single Bash tool call.**
-> This applies to the main agent AND all subagents. Zero exceptions. Zero tolerance.
-
-This is the **first rule** because Claude has repeatedly violated it. It must be internalized before any work begins.
-
-- `git -C <path> <cmd>` for git commands in other directories
-- Separate Bash tool calls for everything else
-- When spawning subagents, copy this rule verbatim into the prompt
-
-See [Bash Permissions](#bash-permissions--avoiding-prompts) for details and examples.
-
----
-
-## HARD RULE — No Auto-Commit
-
-> **NEVER commit automatically after completing any sprint, phase, or piece of work.**
-> Use `AskUserQuestion` to prompt: "Ready to wrap up?" with options "Yes, run /wrap" / "Not yet".
-
-This ensures the full pre-commit ritual (learnings, context, docs, lint, compact) always runs before any commit.
-
----
-
-## HARD RULE — No Claude Attribution in Commits
-
-> **NEVER add `Co-Authored-By: Claude` or any AI attribution metadata to commit messages.**
-> Commits should look like normal human commits. No AI fingerprints.
-
----
-
-## HARD RULE — AskUserQuestion for ALL Decision Points
-
-> **NEVER ask the user a decision question as inline text.** Always use the `AskUserQuestion` tool.
-> Inline questions get buried in output and the user misses them. AskUserQuestion creates a visible prompt the user MUST respond to.
-
-This applies to:
-- Next-step choices ("want to test locally or deploy to staging?")
-- Confirmation prompts ("apply these changes?")
-- Scope clarifications ("which module should I focus on?")
-- Any question where you need the user's answer before proceeding
-
-**Exceptions**: Rhetorical questions, status updates, and informational statements that don't require a response.
+**The HARD RULES are not owned here.** They live in `<forge>/core/rules/` (`development-discipline.md` + `forge-governance.md`) and deploy one-way into the marker-delimited `FORGE-RULES` block of `~/.claude/CLAUDE.md` on every `/forge` cast (`cast-deploy.sh --rules`). Read `core/rules/` for the current rule text; any rule quoted below is a convenience copy that may lag.
 
 ---
 
@@ -241,7 +197,9 @@ The following are **excluded** from auto-allow because they are destructive or a
 
 ### WebFetch Domains
 
-Auto-allowed domains: `github.com`, `raw.githubusercontent.com`, `npmjs.com`, `prisma.io`, `xendit.co`, `neon.com`, `capacitorjs.com`, `ionic.io`, `capgo.app`, `localhost`, `better-auth.com`, `hono.dev`, `orm.drizzle.team`, `tanstack.com`, `inlang.com`, `vite.dev`
+Auto-allowed domains: `github.com`, `raw.githubusercontent.com`, `npmjs.com`, `localhost`, `neon.com`, `orm.drizzle.team`, `better-auth.com`, `hono.dev`, `tanstack.com`, `vite.dev`, `tailwindcss.com`, `pnpm.io`, `inlang.com`, `capacitorjs.com`, `ionic.io`, `capgo.app`, `ably.com`, `resend.com`, `developers.cloudflare.com`, `docs.sentry.io`, `infisical.com`
+
+Payment-gateway and other project-specific vendor domains belong in the project's own settings file, not in this shared reference.
 
 ---
 
@@ -263,19 +221,18 @@ If forge is disabled (via `/forge off`), ALL forge skills are suspended except `
 
 ### Skill Model Recommendations
 
-Skills have `<!-- model: opus/sonnet/haiku -->` comments indicating their recommended model tier. These are **ceilings, not overrides**. The user's session model is the authority:
+Skills carry a neutral `<!-- model: opus/sonnet/haiku -->` hint, which `cast-deploy.sh` translates into a real `model:` frontmatter field on the Claude copy at deploy time. Two mechanisms exist and they behave differently (measured 2026-08-16 — see `core/skills/forge/protocol.md` → Model Tiers, rules 6 and 7):
 
-- Session is **Opus** → skill runs at its recommended tier (opus/sonnet/haiku)
-- Session is **Sonnet** → opus-recommended skills run on Sonnet, not Opus
-- Session is **Haiku** → everything runs on Haiku
+- **`model:` frontmatter is an escalation floor, not a ceiling.** It raises a session that sits *below* the skill's needed tier. It does **not** pull a session down: a skill pinned one tier down, invoked inline on a higher-tier session, runs every turn — including the invocation turn — at the session model.
+- **A spawn's model parameter binds in both directions, including downward.** Subagents spawned from a top-tier session run at whatever tier the spawn names, for the whole of their work. This is the only reliable lever for running a leg below the session.
 
-Escalation subagents (e.g., fold spawning opus for triage) follow the same rule — never exceed the session model. A skill recommendation never supersedes what the user selected.
+Consequence: work that should run below the session tier must be **delegated to a subagent with an explicit model parameter** — an inline skill invocation is not a delegation and spends the session's tier. Prefer a cheap session default with deliberate escalation over a high default plus inline skills.
 
 ---
 
 ## HARD RULE — Update Presentation When Skills Change
 
-> **Whenever a new skill or art is added to `skills/`, OR an existing skill/art changes its name, description, or core purpose — `presentation/index.html` MUST be updated in the same commit.**
+> **Whenever a new skill or art is added to `core/skills/`, OR an existing skill/art changes its name, description, or core purpose — `presentation/index.html` MUST be updated in the same commit.**
 
 For a **new art**, ALL of the following slides must be updated:
 

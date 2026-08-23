@@ -16,7 +16,7 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 ## Process
 
-1. **Pre-flight** — parallel reads: `qa-framework.md` in this skill's directory + Forge Protocol pre-flight (learnings, stack guide, project rules file). If no `$ARGUMENTS`, also run `git log --oneline -10` for scope. **Collect shared evidence once** (script tier): run `<forge>/core/scripts/forge-scan.sh poke <project-path>` and `... press <project-path>` in parallel, save the combined output as `POUND_EVIDENCE` — without it, each of the 21 persona subagents re-explores the codebase independently, the single largest avoidable token cost in the forge. (forge-scan is TypeScript-tuned and under-reports Python projects — degrade gracefully, don't block.)
+1. **Pre-flight** — parallel reads: `qa-framework.md` in this skill's directory + [Forge Protocol](../forge/protocol.md) pre-flight (learnings, stack guide, project rules file). If no `$ARGUMENTS`, also run `git log --oneline -10` for scope. **Collect shared evidence once** (script tier): run `<forge>/core/scripts/forge-scan.sh poke <project-path>` and `... press <project-path>` in parallel, save the combined output as `POUND_EVIDENCE` — without it, each of the 21 persona subagents re-explores the codebase independently, the single largest avoidable token cost in the forge. (forge-scan is TypeScript-tuned and under-reports Python projects — degrade gracefully, don't block.)
 
 2. **Scope detection** — `$ARGUMENTS` if provided, else git log + project rules file. Identify `[PRODUCT_NAME]`, `[TECH_STACK]`, `[FEATURE_SCOPE]`, `[JURISDICTION]` (ask user for jurisdiction if not obvious) and fill them into the framework.
 
@@ -36,4 +36,4 @@ Output as `# QA Deep Dive — [FEATURE_SCOPE]` with a date/product line, a sever
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/pound-learnings.md`.
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/pound-learnings.md`.

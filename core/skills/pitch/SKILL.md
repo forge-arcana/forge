@@ -80,9 +80,9 @@ What we are doing that nobody else is — or what everyone else is doing wrong. 
 
 Founder-honest GTM and market sizing — order-of-magnitude correct, not consultant-grade.
 
-- **The first 100** — who specifically. Named segment with lived knowledge (e.g., *"GCash-active office workers in Ortigas who lost EDSA curbside parking in Sep 2025; ~50k–80k commuters by our estimate"*) — not "Philippine drivers."
+- **The first 100** — who specifically. A named segment the founder has lived knowledge of, sized: *the role, the trigger event that made them a buyer, the head-count estimate*. Not a demographic label ("small businesses", "drivers in the region").
 - **Why they switch from status quo** — the specific friction we kill, the specific gain we offer, in a sentence.
-- **The market in our terms** — what we are betting the *real* market is, in the founder's grain (e.g., *"~200k condo residents in BGC + Mandaluyong with second slots earning ₱0/month; if 10% list, that's 20k slots × ₱4k/month wholesale = ₱80M/month gross supply"*) — not "the parking TAM is X billion peso."
+- **The market in our terms** — what we are betting the *real* market is, in the founder's grain: *a countable unit × an attach-rate assumption × a per-unit price, arriving at a monthly figure*. Not a top-down analyst TAM.
 - **The compounding lever** — what makes customers 101–1,000 cheaper to acquire than 1–100 (referrals, supply density, regulatory tailwind, network effects, etc.).
 - **What this is NOT** *(optional)* — the adjacent market we're explicitly not chasing, so cofounder and self both know the boundary.
 
@@ -94,7 +94,7 @@ Kill conditions. What could fail. What assumptions must be true. What would inva
 
 - **Assumption** — the load-bearing belief
 - **What would invalidate it** — concrete, observable, falsifiable
-- **Capital / time exposure if wrong** — *"~₱X burned before we'd know,"* *"~Y months of runway lost"* — ballpark, but specific enough to feel.
+- **Capital / time exposure if wrong** — *"~[amount] burned before we'd know,"* *"~Y months of runway lost"* — ballpark, but specific enough to feel. Use the founder's own operating currency.
 
 If you cannot name what would kill the company in 18 months, you have not thought hard enough; halt and surface this.
 
@@ -104,7 +104,7 @@ What would validate this within 30 / 90 / 180 days. The founder must be able to 
 
 - **30-day signal** — the cheapest possible test; concrete number (e.g., *"5 institutions sign LOIs"* or *"first 100 paid bookings"*).
 - **90-day signal** — early traction (e.g., *"10 active wholesale slots, ≥40% utilization"*).
-- **180-day signal** — durable proof (e.g., *"₱500k MRR, ≤30% churn"*).
+- **180-day signal** — durable proof: a recurring-revenue figure paired with a retention or churn ceiling.
 - **Stop-the-bet signal** — the metric that, if missed, means we honestly stop. The hardest to write; the most important.
 
 ### 7. The Stand (2–3 sentences)
@@ -202,41 +202,16 @@ Runs the seven-dimension VC-style review pass on the existing Pitch. **This is f
 
 ### Output Format
 
-```markdown
-# Pitch Review — [PROJECT]
-**Date**: [date] | **Review by**: /pitch --critique | **Source**: `[PROJECT]_04_Pitch_V1.0.html`
+Report headed `# Pitch Review — [PROJECT]` with a date / review-by / source line, then:
 
-## Scorecard
+- **Scorecard** — one row per dimension from the table above, columns `Dimension | Reviews | Score (1-5) | Key Finding | Signal`, closing with a bolded **Overall** row out of 35.
+- **Verdict** — FUNDABLE / WORTH BUILDING / NEEDS RETHINK / KILL.
+- **Kill Conditions Missing from The Stake** — each with assumption, what would invalidate it, and which Stake bullet should carry it.
+- **Important Concerns** — significant risks the Pitch acknowledges but understates.
+- **Strengthen the Pitch** — specific edits to surface in `/pitch --refine`.
+- **The One Question** — the single question this pitch must answer, phrased so the founder knows whether to refine, revisit `/prime`, or proceed.
 
-| Dimension | Reviews | Score (1-5) | Key Finding | Signal |
-|-----------|---------|-------------|-------------|--------|
-| Problem & Market | The Wound | X/5 | [one-line finding] | red/yellow/green |
-| Value Proposition | The Inversion | X/5 | [one-line finding] | red/yellow/green |
-| Field Economics | The Field | X/5 | [one-line finding] | red/yellow/green |
-| Revenue Model | Field + Signal | X/5 | [one-line finding] | red/yellow/green |
-| Competitive Moat | The Inversion | X/5 | [one-line finding] | red/yellow/green |
-| Go-to-Market | The Field | X/5 | [one-line finding] | red/yellow/green |
-| Execution Risk | Stake + Signal | X/5 | [one-line finding] | red/yellow/green |
-| **Overall** | | **X/35** | | **red/yellow/green** |
-
-**Verdict**: FUNDABLE / WORTH BUILDING / NEEDS RETHINK / KILL
-
-## Kill Conditions Missing from The Stake (the Pitch did not name these — add or refute)
-[list — each with: assumption, what would invalidate it, which Stake bullet should carry it]
-
-## Important Concerns (significant risks the Pitch acknowledges but understates)
-[list]
-
-## Strengthen the Pitch (specific edits to surface in /pitch --refine)
-[list]
-
-## The One Question
-[The single most important question this pitch must answer to succeed — phrased so the founder knows whether to refine, revisit /prime, or proceed]
-```
-
-Scoring: 1 = broken/absent, 2 = weak, 3 = adequate, 4 = strong, 5 = exceptional.
-Signal: red = 1–2, yellow = 3, green = 4–5.
-Verdict thresholds: FUNDABLE = 28–35, WORTH BUILDING = 21–27, NEEDS RETHINK = 14–20, KILL = ≤13.
+Scoring: 1 = broken/absent, 2 = weak, 3 = adequate, 4 = strong, 5 = exceptional. Signal: red = 1–2, yellow = 3, green = 4–5. Verdict thresholds: FUNDABLE = 28–35, WORTH BUILDING = 21–27, NEEDS RETHINK = 14–20, KILL = ≤13.
 
 ### Marker Integration
 

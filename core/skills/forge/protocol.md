@@ -15,13 +15,15 @@ Arts live in `core/skills/` alongside task skills. They deploy via the same `/fo
 
 ## Convention
 
-Arts use minimal skill frontmatter (`name`, `description`). Adapters add harness-specific frontmatter (e.g., `user-invocable` for Claude Code) at build time. The art identity is declared in the SKILL.md body:
+Arts use minimal, spec-layer skill frontmatter (`name`, `description`) — the neutral source never carries harness-specific fields. The model tier is declared as a neutral HTML comment on the line after the frontmatter (`<!-- model: <tier> | <fan-out notes> -->`); `cast-deploy.sh` translates that hint into a real `model:` frontmatter field on the Claude copy at deploy time, while the cross-tool store at `~/.agents/skills/` stays frontmatter-clean (asserted by the `--verify` LEAK check). The art identity is declared in the SKILL.md body:
 
 ```markdown
 > **Art** (learnings: `<name>-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 ```
 
 The learnings filename tells the protocol which file to read during pre-flight and write to during post-flight.
+
+The 150-line guidance for a SKILL.md applies to **arts**. The three orchestration skills (`/forge`, `/smith`, `/wedge`) carry an accepted ceiling of 400 lines post-scaffold-extraction, with the standing rule that any new multi-step payload in them lands as a sibling scaffold file, never inline.
 
 ## Pre-Flight (every art runs these before starting)
 

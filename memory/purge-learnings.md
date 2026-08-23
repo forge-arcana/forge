@@ -108,3 +108,33 @@
 **Learning**: Two trust failures surfaced in one pass, both about believing the instruments. (1) A prior session's record of a "full web-grounded re-verification of all N claims" caused this cycle to narrow its review to a spot-check — which then found five pre-existing errors the recorded pass had missed. A completeness claim with no per-claim evidence is a mirror of verification state, and it decays like any other mirror. When recording a verification pass, record what it MISSED and the blind-spot categories (cost multiples, version-pinned competitor comparisons, package-name references), not just the count corrected — future cycles scope themselves on the strength of that record. (2) The purge's own evidence scanner parsed markdown headings without tracking code fences, inventing a 150-line "section" from a template field label inside a fenced block, and flagging tiny single-purpose files on percentage thresholds — bad evidence that would have had the Warden trimming healthy skills. A dimension reviewer caught it only because it verified the evidence against the file instead of acting on the scan. Rule: evidence-collection scripts are part of the trusted base and get verified like any other claim; when a scan finding drives a destructive edit, open the file first.
 
 **Apply when**: Scoping any review against a prior pass's coverage record; acting on any mechanical scan finding that would remove or trim content.
+
+## A Gate Scoped to a Subset of Its Pillars Is Not a Gate (2026-08-23)
+
+**Learning**: The leak-detection script filtered staged files down to two knowledge directories, so a third pillar — the skill sources — was never scanned. A HARD RULE breach lived there across multiple cleansing passes and every sync cycle, because no mechanical check could reach it. When a rule applies to "all shared content," the scanner's file filter must enumerate every directory that holds shared content, and that filter must be re-checked whenever the repo layout changes.
+
+**Rule**: Verify a newly-widened gate with a red-green proof: confirm it FLAGS the known breach before the fix, and passes clean after. A gate that has only ever been observed passing has not been shown to work.
+
+**Apply when**: Extending or reviewing any leak/purity/lint gate's file-type or directory coverage; whenever a gate is widened, prove it with a red-green cycle rather than trusting the first clean run.
+
+**Forge-worthy**: yes — universal: a mechanical gate's coverage is part of its contract, and an unproven gate widening is indistinguishable from a no-op.
+
+## A Reviewer Can Report Its Own Tool's Artifact as a Defect in the Thing Reviewed (2026-08-23)
+
+**Learning**: A dimension reviewer reported several knowledge entries as truncated mid-sentence, citing exact line numbers. The entries were intact; the reviewer's file reader had truncated the long single-line bodies for display, and it mistook that for the file's content. Had the finding been applied, an implementer would have "repaired" finished sentences by inventing endings — corrupting the knowledge base in the name of cleaning it.
+
+**Rule**: Any finding that claims content damage (truncation, corruption, missing text) must be verified against the raw bytes by the orchestrator before it reaches an applier, because its remedy is generative and therefore destructive when wrong. This is the same failure class the reviewed entry itself often describes: mistaking a proxy for the property.
+
+**Apply when**: Any audit or review finding alleges truncation, corruption, or missing content in a source file — verify with a raw byte/line-length read before routing the finding to an applier.
+
+**Forge-worthy**: yes — universal: a tool's own display truncation can masquerade as a defect in the reviewed content; content-damage claims need raw-file verification before acting.
+
+## An Automated Safety Warning Can Conflate Two Same-Named Files in Different Directories (2026-08-23)
+
+**Learning**: A warning flagged the deletion of a dead one-line stub as the destruction of a much larger file, attributing the size of a same-named file in a sibling directory to the deleted one. The stub's very existence — shadowing a real store of the same name in an adjacent pillar — was the documented reason for removing it, so the warning reproduced the exact confusion the deletion was meant to prevent.
+
+**Rule**: Verify the specific claim (the object's real size, path, and recoverability) before either acting on such a warning or dismissing it. Note that a staged deletion of a tracked file is always recoverable from history, so "irreversible" rarely holds before a commit.
+
+**Apply when**: A safety/deletion warning names a file size, path, or "irreversible" consequence — confirm the claim against the actual object (not a same-named neighbor) before acting on or dismissing it.
+
+**Forge-worthy**: yes — universal: same-named files across directories are a recurring source of misattributed warnings; verify path identity, not just name, before trusting a deletion warning.

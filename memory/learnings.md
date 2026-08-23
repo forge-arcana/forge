@@ -68,11 +68,8 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 
 ### /forge Unified Cycle (2026-03-22, updated 2026-04-23)
 - Five phases: preflight → mark (build PLAN table) → cast (apply incoming) → fold (absorb outgoing) → project scan → DONE report
-- Cast phase runs BEFORE fold so the ruleset is current when absorption logic runs
-- Review & prune of existing forge knowledge invoked from fold phase (3c) via `/purge` triggers (learnings >50, memory >20 files)
-- Membrane compaction runs in fold phase (3h) — tied to absorption lifecycle (compact what the fold phase just confirmed as fully absorbed)
-- Commit & push for forge changes runs at end of fold phase (3i); the cycle owns its own commit flow for the forge side
-- `/forge --dry` skips cast, fold, and commit phases — prints the PLAN table and exits
+- Cast phase runs BEFORE fold so the ruleset is current when absorption logic runs — this ordering is the design invariant worth remembering
+- Review & prune of existing forge knowledge, membrane compaction, and the forge-side commit all hang off the fold phase, so absorption and cleanup share one lifecycle. Exact sub-phase numbering and the prune thresholds live in `core/skills/forge/SKILL.md` (authoritative) — memory does not restate them.
 
 ## Conventions
 
@@ -89,7 +86,7 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 ## Settings & Platform
 
 ### WSL Compatibility (2026-03-15)
-- `~/.claude/settings.json` additionalDirectories must include all 3 path formats: Windows (`D:\`), WSL-mount (`/mnt/d/`), native Linux (`/root/dev/`)
+- On WSL, `additionalDirectories` must list the SAME tree in all three path forms the toolchain may present it as: the Windows drive path (`<DRIVE>:\...`), the WSL mount of that drive (`/mnt/<drive>/...`), and the native Linux path (`/home/<user>/...` or wherever the repo actually lives). Listing only one form leaves access denied depending on which side resolved the path.
 
 ### /ponci + /monci (2026-03-15)
 - `/ponci` = push + invoke `/monci`

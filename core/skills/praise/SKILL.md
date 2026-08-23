@@ -64,87 +64,32 @@ Spawn one subagent per active category — **all in parallel** (independent anal
 
 **Only invoke arts with relevant feedback** — never invoke an art with empty input.
 
-#### /preen Subagent (if UX / Design feedback present)
+#### Subagent brief (one per active category)
 
-Spawn as a sonnet-tier subagent — Phase 4 consolidation (opus) re-grades these findings.
+Spawn each active category with this brief, substituting the art, tier, and closing instruction from the table below:
 
 ```
-You are running /preen on behalf of /praise.
-Focus ONLY on the following specific feedback — do not do a full UI audit.
+You are running /[ART] on behalf of /praise.
+Focus ONLY on the following feedback — do not run a full audit.
 Skip your standard pre-flight (already done by praise).
 
 FEEDBACK TO ANALYZE:
-[UX/Design feedback items]
+[the classified items for this category]
 
 PROJECT CONTEXT:
-[paste project rules file]
+[project rules file; for /probe also paste relevant Blueprint sections]
 
-Apply Don Norman's principles and Ive's Razor to each item.
-For each: identify the specific component/screen/flow affected, the Norman principle violated, and the concrete fix.
-Output structured findings: Critical / Improvements / Reduce / Polish.
+[CLOSING INSTRUCTION]
 ```
 
-#### /probe Subagent (if Architecture / Tech feedback present)
+| Art | Fires on | Tier | Closing instruction |
+|-----|----------|------|---------------------|
+| `/preen` | UX / Design | sonnet | Apply Don Norman's principles and Ive's Razor to each item. For each: the component/screen/flow affected, the principle violated, the concrete fix. Output: Critical / Improvements / Reduce / Polish. |
+| `/probe` | Architecture / Tech | opus | For each item: architectural gap, wrong decision, or scaling concern? Check the web for current best practices on the specific concern. Severity: CRITICAL / IMPORTANT / MINOR. |
+| `/poke` | Code Quality / Performance | opus | For each item: trace the likely code location, diagnose the root cause, propose the fix. Output FILE, PROBLEM, FIX, EFFORT with severity CRITICAL / IMPORTANT / MINOR. |
+| `/press` | Readiness / Operations | sonnet | For each item: name the readiness dimension (Security, Scalability, Operations, Compliance, Observability, Deployment, Documentation), score 1–5, identify the gap, propose the remediation. |
 
-Spawn as an opus-tier subagent — its architectural judgments have no downstream verification gate.
-
-```
-You are running /probe on behalf of /praise.
-Focus ONLY on the following feedback — do not probe the full blueprint.
-Skip your standard pre-flight (already done by praise).
-
-FEEDBACK TO ANALYZE:
-[Architecture/Tech feedback items]
-
-BLUEPRINT (for context):
-[paste relevant blueprint sections if available]
-
-PROJECT CONTEXT:
-[paste project rules file]
-
-For each item: assess whether the feedback reveals an architectural gap, a wrong decision, or a scaling concern.
-Check the web for current best practices relevant to the specific concern.
-Severity: CRITICAL / IMPORTANT / MINOR.
-```
-
-#### /poke Subagent (if Code Quality or Performance feedback present)
-
-Spawn as an opus-tier subagent — its root-cause diagnoses are never re-verified against code downstream.
-
-```
-You are running /poke on behalf of /praise.
-Focus ONLY on the following feedback — do not do a full code audit.
-Skip your standard pre-flight (already done by praise).
-
-FEEDBACK TO ANALYZE:
-[Code Quality / Performance feedback items]
-
-PROJECT CONTEXT:
-[paste project rules file]
-
-For each item: trace the likely code location (file path if guessable from stack context), diagnose the root cause, and propose the fix.
-Severity: CRITICAL / IMPORTANT / MINOR.
-Output structured findings with FILE, PROBLEM, FIX, EFFORT.
-```
-
-#### /press Subagent (if Readiness / Operations feedback present)
-
-Spawn as a sonnet-tier subagent — Phase 4 consolidation (opus) re-grades these findings.
-
-```
-You are running /press on behalf of /praise.
-Focus ONLY on the following operational concerns — do not do a full readiness audit.
-Skip your standard pre-flight (already done by praise).
-
-FEEDBACK TO ANALYZE:
-[Readiness/Operations feedback items]
-
-PROJECT CONTEXT:
-[paste project rules file]
-
-For each item: assess the readiness dimension (Security, Scalability, Operations, Compliance, Observability, Deployment, Documentation).
-Score 1-5, identify the gap, propose the remediation.
-```
+Tier rationale is unchanged: /probe and /poke diagnoses have no downstream verification gate, so they run at opus; /preen and /press findings are re-graded by the opus-tier Phase 4 merge.
 
 ## Phase 3: Blueprint Delta Assessment
 
@@ -251,21 +196,13 @@ If user selects **"Just the criticals"**: rebuild the plan scoped to Priority 1 
 
 ## Post-Flight
 
-Write learnings to `memory/praise-learnings.md`:
-
-```markdown
-## [Date] — [Short Title]
-- **Learning**: [what routing pattern worked, what classification was tricky, what art combination was most effective for this type of feedback]
-- **Forge-worthy**: [yes/no] — [reason]
-```
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/praise-learnings.md`. Praise-specific learning prompts:
 
 **Learnings to capture**:
 - Which feedback categories consistently triggered which arts
 - Feedback formats that were easy vs. hard to classify
 - Cases where a blueprint delta was found vs. implementation gaps
 - Effective change brief formats that smith consumed cleanly
-
-Learnings marked `Forge-worthy: yes` will be promoted by the `/forge` cycle's fold phase.
 
 ---
 

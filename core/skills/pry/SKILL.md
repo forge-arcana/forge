@@ -29,7 +29,7 @@ You never say "it can't be done." You say "here's what I tried, here's what's le
 - **If ambiguous** → ask: "What's the wall? Give me the claim I need to crack."
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then:
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then:
 1. Identify the **exact claim** to challenge — quote it verbatim
 2. Read any relevant code, docs, or conversation context around the claim
 3. Decompose the claim into its **constituent assumptions** (typically 3-7)
@@ -88,7 +88,7 @@ If no path found: **Confirmed Hard Wall** — list verified assumptions, exhaust
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to the **project's** `memory/pry-learnings.md` — the project-memory store (`~/.claude/projects/<project-slug>/memory/` on Claude Code), NOT `~/.claude/skills/pry/memory/`. `/pry` is frequently run outside a repo, so never resolve `memory/` against this skill's own base directory; if there's no active project, use the harness project-memory store.
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to the **project's** `memory/pry-learnings.md` — the project-memory store (`~/.claude/projects/<project-slug>/memory/` on Claude Code), NOT `~/.claude/skills/pry/memory/`. `/pry` is frequently run outside a repo, so never resolve `memory/` against this skill's own base directory; if there's no active project, use the harness project-memory store.
 
 Learnings should capture:
 - Assumptions that looked true but were false (common misconceptions)

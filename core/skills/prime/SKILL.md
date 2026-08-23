@@ -49,7 +49,7 @@ Five visionaries, one tenet each. Apply these throughout every conversation:
 > When market sizing, competitor landscapes, regulatory questions, or domain context come up — **/pry the internet first**. WebSearch, parallel research agents (spawn each as a sonnet-tier subagent), public data, market reports. Synthesize their output at opus tier into a hypothesis with confidence bands. Then present it for the founder to confirm, refine, or correct from their lived experience. If your harness lacks parallel subagent spawning or per-spawn model selection, run these steps sequentially at your session model.
 >
 > **Banned patterns**: "Stop — go talk to 5 customers first", "I need you to do market research before we proceed", "Ask the founder if you're unsure" (about searchable facts).
-> **Allowed patterns**: "Public data suggests TAM ~₱2.4B. Does that match your view?", "Top three local competitors look like X, Y, Z based on web research — anyone I'm missing?", "Regulatory landscape per [source] requires [list]. Anything specific to your operating region I should add?"
+> **Allowed patterns**: "Public data suggests a TAM of roughly [figure] in the founder's operating currency. Does that match your view?", "Top three local competitors look like X, Y, Z based on web research — anyone I'm missing?", "Regulatory landscape per [source] requires [list]. Anything specific to your operating region I should add?"
 >
 > **The principle**: the founder brings *lived insight* (what's broken, who hurts, why now). Prime brings *researched context* (numbers, landscape, precedent). Don't reverse the roles.
 
@@ -78,7 +78,7 @@ The starter skeleton lives at `<forge>/core/skills/prime/opus-scaffold.md`. Copy
 `$ARGUMENTS` — project name or raw idea description (e.g., `/prime MyApp`, `/prime "a tool that..."`)). If not provided, open with an invitation to talk about what they're building.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then:
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then:
 Launch these in parallel (independent operations):
 - **Scan for existing work**: Glob the current directory for `*Opus*`, `*Vow*`, `*Touchstone*`, `*Pitch*`, `*Blueprint*`, `*ProductBlueprint*`, `*Pattern*` — if an Opus manuscript already exists, read it first (that's the authentic voice); then read Vow, Touchstone, Pitch, Blueprint, Pattern in that order. (The `*Pitch*` glob also picks up legacy `PitchForge_*` files. The `*Touchstone*` glob picks up the HTML masterpiece written by `/wedge`.)
 - **Ask about materials**: "Do you have any existing materials — a deck, a one-pager, notes, an application you've submitted?"
@@ -195,4 +195,4 @@ After delivering any artifact, suggest next steps based on content:
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/prime-learnings.md`.
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/prime-learnings.md`.

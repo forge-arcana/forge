@@ -10,7 +10,7 @@
 - [ ] Has Stack section (frameworks, DB, hosting)
 - [ ] Shorthand commands live in the harness's global rules file — do NOT duplicate in the project rules file
 - [ ] Has Current Context section (updated by /wrap)
-- [ ] Under 20k chars (compacted by /wrap)
+- [ ] Under 25k chars — compact at 20k (`/wrap` step 5), hard-flag above 25k. Overflow goes to `memory/recent-history.md` as dated sections, leaving a one-line pointer bullet inline.
 
 ### 2. Harness settings file (only if project-specific overrides needed)
 - [ ] The harness's global settings file handles all standard permissions — no per-project file needed by default
@@ -41,9 +41,10 @@ Canonical names:
 | `04_Pitch` | `[PROJECT]_04_Pitch_V*.md` AND `.html` | `/pitch` — the seven-section synthesis (founder voice + ballpark numbers, rendered through Touchstone) |
 | `05_Blueprint` | `[PROJECT]_05_Blueprint_V*.md` | `/prime` Phase 3 — scope skeleton |
 | `06_Pattern` | `[PROJECT]_06_Pattern_V*.md` | `/probe` writes the Architecture section; `/preen` writes the UX section |
+| `07_Atlas` | `[PROJECT]_07_Atlas_Planned_V*.md` AND `.html` / `[PROJECT]_07_Atlas_AsBuilt_V*.md` AND `.html` | `/plot` — the production landscape map; Planned is the opt-in early baseline, AsBuilt is the go-live cast whose headline is the drift from it |
 
 **Convention rules**:
-- Indices are stable: once assigned, never renumber. Future lineage additions get new indices (e.g., a hypothetical post-Pattern artifact would be `07_X`), not insertions that shift existing numbers.
+- Indices are stable: once assigned, never renumber. Future lineage additions get new indices (the next free index is `08`), not insertions that shift existing numbers.
 - Versioning sits inside the index slot: `_V1.0`, `_V1.1`, `_V2.0` all live under the same index (e.g., `[PROJECT]_03c_PreviewTouchstone_V1.1.html` for a regenerated preview).
 - Skill globs for discovery use the artifact name not the index (`*Opus*`, `*Touchstone*`, `*Pitch*` etc.) — this matches both indexed and legacy un-indexed filenames, so the convention is backward-compatible. New projects emit indexed names; existing projects keep their un-indexed names as historical record.
 - Wedge intermediates are sub-indexed (`03a` → `03e`) because they are heat-ordered sub-artifacts of step 03 (the Touchstone forging). The user only needs to read `03e_Touchstone` to use the Touchstone; the earlier sub-indices are scaffolding preserved for traceability.

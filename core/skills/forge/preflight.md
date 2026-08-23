@@ -31,7 +31,7 @@ After the sync command:
 
 Compare forge source (`<forge>/core/skills/`) against deployed membrane (`<membrane>/skills/`) using diff.
 
-For each skill directory in `<forge>/core/skills/` (excluding `forge/` which is reference docs, not a deployable skill):
+For each skill directory in `<forge>/core/skills/` (`forge/` is included — it is a deployable skill whose directory also holds the shared reference docs `protocol.md`, `preflight.md`, `stack-guide.md`, `forge-conventions.md`; those `.md` files ride along with the skill and are compared with it):
 
 1. Check if deployed copy exists at `<membrane>/skills/<name>/`
 2. If both exist, compare using: `diff -rq --strip-trailing-cr <forge>/core/skills/<name> <membrane>/skills/<name>`
@@ -48,7 +48,7 @@ For each skill directory in `<forge>/core/skills/` (excluding `forge/` which is 
 
 **Baseline**: The last-cast commit SHA stored in `<membrane>/.last-cast.json` (written by `/forge` after each cast phase). If no baseline exists (first cycle, or SHA unreachable after force push), falls back to a two-way heuristic (`git diff HEAD origin/main`).
 
-Also check the reverse — skills that exist in `<membrane>/skills/` but NOT in `<forge>/core/skills/` (excluding `forge/`). These are `REMOVED` from forge's perspective or user-local additions.
+Also check the reverse — skills that exist in `<membrane>/skills/` but NOT in `<forge>/core/skills/` (the `forge` and `purge` entries route to CONFLICTS per the protected-skills rule below). These are `REMOVED` from forge's perspective or user-local additions.
 
 Output the standard drift table:
 
@@ -103,7 +103,7 @@ The same six classifications from Step 3 apply to **every pillar** — not just 
 - Compare `<forge>/memory/*.md` against `<membrane>/memory/*.md`
 - Skip `.json` tracker files and `MEMORY.md` index
 
-**Config**: Unit = rule/section within `<rules-file>` vs the active adapter's rules reference (e.g., `<forge>/adapters/claude-code/refs/claude-code-rules.md` for Claude Code).
+**Config**: Unit = rule/section within `<rules-file>` vs the harness's descriptive rules reference (e.g., `<forge>/claude-helpers/refs/auto-allowed-bash.md` for Claude Code; equivalent ref dir for other harnesses). The forge-managed HARD RULES themselves are not classified here — they deploy one-way from `<forge>/core/rules/` into the marker-delimited `FORGE-RULES` block in `<rules-file>` via `cast-deploy.sh --rules`.
 - Match by HARD RULE titles, section headings, and permission entries
 - Machine-specific content (hooks, additional working directories, forge-path) is **never classified** — always skipped
 

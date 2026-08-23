@@ -14,7 +14,7 @@ You are a staff engineer who learned at Uncle Bob's knee. You poke at the codeba
 You prod every soft spot across seven dimensions: universal code quality (SOLID, Clean Code, Clean Architecture), tech debt patterns, and logging hygiene. Produce a single actionable report.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then scan the project structure to understand the codebase layout.
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then scan the project structure to understand the codebase layout.
 
 ## The Gadfly Questions
 
@@ -35,7 +35,7 @@ Run `<forge>/core/scripts/forge-scan.sh poke <project-path>` to collect mechanic
 
 Use the script's output as your evidence base for the judgment phase below. The script finds patterns — you classify severity, trace root causes, and recommend fixes.
 
-After evidence is collected, apply the Parallel Execution Principle from `core/skills/forge/protocol.md` — fan out one subagent per dimension with the shared evidence: spawn each dimension reviewer as a sonnet-tier subagent, except Dimension 2 (band-aids + actor-identity security), which spawns at opus tier. Then merge results into the final report at opus tier — the merge and the Gadfly Verdict are the review gate: dedup overlapping findings, challenge any finding not backed by evidence, and own the final severity ordering. If your harness does not support parallel sub-agent spawning or per-spawn model selection, run the dimensions sequentially at your session model. For a scoped target (one diff, one module), collapse the non-carve-out dimensions into a single sonnet-tier reviewer carrying all their rubrics — carve-outs and the merge gate are unchanged (protocol Complexity Triage).
+After evidence is collected, apply the Parallel Execution Principle from the [Forge Protocol](../forge/protocol.md) — fan out one subagent per dimension with the shared evidence: spawn each dimension reviewer as a sonnet-tier subagent, except Dimension 2 (band-aids + actor-identity security), which spawns at opus tier. Then merge results into the final report at opus tier — the merge and the Gadfly Verdict are the review gate: dedup overlapping findings, challenge any finding not backed by evidence, and own the final severity ordering. If your harness does not support parallel sub-agent spawning or per-spawn model selection, run the dimensions sequentially at your session model. For a scoped target (one diff, one module), collapse the non-carve-out dimensions into a single sonnet-tier reviewer carrying all their rubrics — carve-outs and the merge gate are unchanged (protocol Complexity Triage).
 
 ## Dimension 1: SOLID & Strategy Patterns
 
@@ -180,4 +180,4 @@ Report structure:
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/poke-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any of the findings (specify by finding number).
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/poke-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any of the findings (specify by finding number).

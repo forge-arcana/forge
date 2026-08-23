@@ -212,7 +212,7 @@ Skip this phase entirely if `--dry` or if no outgoing / `[↑]` conflict rows we
 
 ### 3a: Config sync (harness-specific rules file)
 
-For approved config rows: merge selected changes into the adapter-specific rules reference for the active harness — for Claude Code that lives at `<forge>/adapters/claude-code/refs/claude-code-rules.md`; other adapters bind their own rules file. Sync rules:
+For approved config rows: merge selected changes into the harness's rules reference — for Claude Code that lives at `<forge>/claude-helpers/refs/auto-allowed-bash.md`; other harnesses bind their own ref file. Sync rules:
 - Global rules file (e.g., `~/.claude/CLAUDE.md`, `AGENTS.md`) ↔ reference auto-allowed table
 - WebFetch domains must match exactly
 - Destructive commands NEVER in allow list
@@ -229,6 +229,7 @@ Protected skills (`forge`, `purge`) are already excluded at PLAN table level —
 | Trigger | What fires |
 |---------|-----------|
 | Any `<forge>/learnings/*.md` > 50 entries | Learning review |
+| Any `<forge>/memory/*-learnings.md` > 20 entries | Learning review (art-learnings files that live in `memory/` by design, e.g. `/purge`'s, are reviewed on entry count like any other learnings file) |
 | `<forge>/memory/` has > 20 files | Memory review |
 
 Run `<forge>/core/scripts/fold-evidence.sh` to collect evidence, then hand the evidence to an opus-tier subagent to classify each entry: **CURRENT** / **STALE** / **MERGED** / **EVOLVED** / **PROMOTED** — curation verdicts over the shared knowledge base need the strongest judgment, and the subagent keeps the bulky evidence dump out of the main context. Present its review sub-table, apply after user confirms — the user's confirmation is the gate for every prune or merge. If your harness lacks subagent spawning or per-spawn model selection, run the classification inline at your session model.
@@ -381,7 +382,7 @@ Always runs (even for subsequent cycles) against the target project. Skips only 
 
 ### 4a: Read forge reference (parallel)
 
-- The active adapter's rules reference (e.g., `<forge>/adapters/claude-code/refs/claude-code-rules.md` for Claude Code)
+- The harness's rules reference (e.g., `<forge>/claude-helpers/refs/auto-allowed-bash.md` for Claude Code)
 - `<forge>/core/skills/forge/stack-guide.md` — tech stack reference
 - `<forge>/core/skills/forge/forge-conventions.md` — distilled conventions checklist
 

@@ -181,8 +181,25 @@ for f in "$FORGE_PATH"/memory/*.md; do
   [[ ! -f "$f" ]] && continue
   fname=$(basename "$f")
   [[ "$fname" == "MEMORY.md" ]] && continue
-  mtype=$(sed -n 's/^type:[[:space:]]*//p' "$f" 2>/dev/null || echo "unknown")
-  desc=$(sed -n 's/^description:[[:space:]]*//p' "$f" 2>/dev/null || echo "(no description)")
+  # Forge-side memory carries no frontmatter by design (`type:`/`description:` are
+  # membrane-side classification keys, written only on membrane-local memory files).
+  # `sed -n 's/.../p'` exits 0 whether or not it matched anything, so an `|| echo`
+  # fallback after it can never fire — read type:/description: ONLY from a leading
+  # `---` frontmatter block, and report absence explicitly instead of leaving a
+  # blank cell (indistinguishable from a real parse failure).
+  mtype="n/a (forge-side)"
+  desc=""
+  if [[ "$(sed -n '1p' "$f" 2>/dev/null)" == "---" ]]; then
+    fm=$(sed -n '2,/^---$/p' "$f" 2>/dev/null | sed '$d')
+    fm_type=$(printf '%s\n' "$fm" | sed -n 's/^type:[[:space:]]*//p' | head -1)
+    fm_desc=$(printf '%s\n' "$fm" | sed -n 's/^description:[[:space:]]*//p' | head -1)
+    [[ -n "$fm_type" ]] && mtype="$fm_type"
+    [[ -n "$fm_desc" ]] && desc="$fm_desc"
+  fi
+  if [[ -z "$desc" ]]; then
+    desc=$(sed -n 's/^# *//p' "$f" 2>/dev/null | head -1)
+    [[ -z "$desc" ]] && desc="(no description)"
+  fi
   echo "| $fname | $mtype | $desc |"
 done
 echo ""

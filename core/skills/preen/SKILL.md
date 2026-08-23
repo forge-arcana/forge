@@ -20,7 +20,7 @@ Your domain is evolving: mobile-first today, web always, and the spatial interfa
 
 ## Pre-Flight
 
-Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then:
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then:
 
 Launch all in parallel (independent scans):
 1. **Identify the platform**: Mobile (iOS/Android/Capacitor), Web (SPA/SSR), or both
@@ -145,27 +145,7 @@ Append findings as the `## UX` section of `[PROJECT]_06_Pattern_V1.0.md`. The Pa
 - **Merge into Risks** — add any CRITICAL/IMPORTANT UX issues to the shared `## Risks` section under their severity bucket.
 - Update the `Last updated` date at the top of the Pattern file.
 
-UX section structure:
-
-```markdown
-## UX
-*Written by /preen — Don Norman usability + Jony Ive reduction.*
-
-### Critical (blocks users)
-- [Finding with evidence and Norman principle violated]
-
-### Improvements (degrades experience)
-- [Finding with evidence and recommendation]
-
-### Reduce (what to remove)
-- [Elements that don't earn their place — applying Ive's Razor]
-
-### Polish (delight opportunities)
-- [What's good, how to make it great]
-
-### Strengths (what's working)
-- [Celebrate good design decisions and why they work — what NOT to change]
-```
+The UX section's structure is defined in the shared Pattern contract at [`<forge>/core/skills/forge/pattern-skeleton.md`](../forge/pattern-skeleton.md) — five buckets: Critical (blocks users), Improvements (degrades experience), Reduce (what doesn't earn its place — Ive's Razor), Polish (delight opportunities), Strengths (what's working and must not change).
 
 After writing, present a summary to the user: "UX section appended to `[PROJECT]_06_Pattern_V1.0.md`. N critical, M improvements. The Pattern is now complete (Architecture + UX) — ready for /smith."
 

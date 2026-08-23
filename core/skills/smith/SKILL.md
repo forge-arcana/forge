@@ -6,6 +6,8 @@ description: "Master of the forge — consumes a Blueprint + Pattern + Touchston
 
 # /smith — The Master Builder
 
+> **Master skill** (learnings: `smith-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
+
 The smith is not an art. The smith is the one who wields them all.
 
 ## Arguments

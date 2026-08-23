@@ -15,7 +15,7 @@ You are a senior solutions architect reviewing and enhancing a product blueprint
 `$ARGUMENTS` — path to a file to probe, OR a description of what to probe (e.g., "the migration plan", "current conversation"). Optional.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then resolve the **probe target**:
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then resolve the **probe target**:
 
 1. **Explicit argument given** — use it (file path → read it; description → scope the review to that topic)
 2. **No argument — infer from context**:
@@ -90,50 +90,7 @@ Adapt output format to the probe target:
 - Leave the original Blueprint file **untouched** — the Blueprint is the scope, the Pattern is the form. Never rewrite the Blueprint.
 - No `-probed.md` copies. The Pattern is the sole architecture artifact.
 
-Pattern file skeleton:
-
-```markdown
-# [PROJECT] — Pattern
-
-*The form the Blueprint takes — validated architecture and UX decisions /smith consumes.*
-
-Written: [YYYY-MM-DD] | Last updated: [YYYY-MM-DD]
-
----
-
-## Architecture
-*Written by /probe — tech decisions validated against the stack guide and current best practices.*
-
-### [Section name, e.g., Tech Architecture (Blueprint §13)]
-- **Current recommendation**: [from Blueprint]
-- **Verdict**: confirmed / enhanced — [reason]
-- **Configuration**: [specific guidance — versions, flags, topology]
-- **Pitfalls**: [known gotchas and mitigations]
-- **References**: [links to docs / RFCs]
-
-[... one entry per technical Blueprint section (Sections 13–19 typically)]
-
----
-
-## UX
-*Written by /preen when the product has UI-facing features. Empty otherwise.*
-
-[Placeholder — populated by /preen]
-
----
-
-## Risks
-*Both /probe and /preen contribute. Severity: CRITICAL (blocks go-live) / IMPORTANT (significant risk) / MINOR (improvement opportunity).*
-
-### CRITICAL
-- [Risk — mitigation / required action]
-
-### IMPORTANT
-- [Risk — mitigation]
-
-### MINOR
-- [Observation — improvement opportunity]
-```
+The Pattern file skeleton is the shared contract at [`<forge>/core/skills/forge/pattern-skeleton.md`](../forge/pattern-skeleton.md). Three sections: **Architecture** (yours — one entry per technical Blueprint section, each with Current recommendation / Verdict / Configuration / Pitfalls / References), **UX** (placeholder — /preen's), **Risks** (shared, bucketed CRITICAL / IMPORTANT / MINOR).
 
 **If probing a plan, conversation, or other non-Blueprint target** → present the review inline (no Pattern file):
 - Lead with `## Architecture Review Summary`
@@ -143,4 +100,4 @@ Written: [YYYY-MM-DD] | Last updated: [YYYY-MM-DD]
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/probe-learnings.md`. Present the Pattern file (Architecture section) to the user with a summary of changes. If the Blueprint has UI-facing features, suggest running `/preen` next to append the UX section.
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/probe-learnings.md`. Present the Pattern file (Architecture section) to the user with a summary of changes. If the Blueprint has UI-facing features, suggest running `/preen` next to append the UX section.

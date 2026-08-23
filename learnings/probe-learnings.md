@@ -101,10 +101,6 @@
 
 **Apply when**: choosing a Postgres host for a stack with an always-on consumer; re-checking any "serverless DB by default" recommendation.
 
-## LLM Cost Capture: the Usage Object Is Four-Dimensional (2026-07-04)
-**Learning**: Per-call cost computed as input×rate + output×rate misprices every cached call: cache reads bill ~0.1× and cache writes ~1.25× of the input rate, and the input count excludes the cached prefix. A spend ledger fed by LLM calls must price all four usage fields at their distinct rates, store the model ID and a rate-effective-date per entry (pricing windows and model turnover corrupt history otherwise), and verify caching actually engages (cache reads > 0) — prefixes below the minimum cacheable length silently don't cache.
-**Apply when**: Any product metering LLM spend per tenant or feature.
-
 ## One Developer App Per SaaS Customer — Credential Pooling Closed on Major Platforms (2026-08-15)
 
 **Learning**: X closed the shared-app pattern on 2026-03-31: one developer app PER SaaS customer is mandatory (the Developer Agreement forbids credential pooling; intermediaries still pooling are running a model the platform just closed). A multi-tenant scheduler can no longer post through its own single platform app — "customer shoulders the billing" is not a pricing choice there, it is the only lawful architecture. The Basic paid tier was retired (force-migrated), replaced by pay-per-use pricing with a binding account-level cap (unverified accounts limited to a low daily post count).

@@ -110,45 +110,7 @@ The Wedge has eight heats. Each is single-purpose and discrete.
 
 Read Opus + Vow end-to-end. Produce a **Soul Brief** — a prose document (not bullets, not fields) that transmits the product's essence to the council. Fielded summaries flatten soul into shelf-fits; prose carries the metaphor, sensation, weight, and anti-aesthetic that fields cannot. The Soul Brief is the council's commission letter, and the lever that breaks cross-project convergence.
 
-```markdown
-# Soul Brief — [PROJECT]
-
-## What it IS
-
-[2–3 paragraphs of essence prose. Not function. Not features. Sensorial — the sound the product makes when tapped, its weight in the hand, its temperature, its pace, the quality of its light. The kind of paragraph a critic would write reviewing an object that doesn't exist yet. Concrete imagery; avoid abstract design language ("modern", "clean", "intuitive" are forbidden in this section).]
-
-## What it ISN'T (anti-aesthetic)
-
-[3–5 specific things this product rejects, each as a sentence — not a label. "It rejects the cheerful efficiency of productivity SaaS — its tone would never read as 'we're so excited to help you optimize your day.'" Discrimination is more powerful than identification: naming the gravity wells the product is *not* allows everything else to breathe.]
-
-## Examples from life (non-design references)
-
-[3–5 references from outside design — a song with album + artist, a building with architect + place, a moment in nature, a tool from another era, a paragraph from a book, a film scene. NOT portfolio sites, NOT design agencies, NOT other apps. One sentence per reference explaining what about it the product shares. This section breaks the agency-aesthetic gravity by sourcing inspiration from outside the design subculture.]
-
-## Forbidden Defaults (project-specific, layered on top of universal Banned Defaults)
-
-[3–7 specific aesthetic moves the model would reach for unconsciously *given this product*, that this product must reject. e.g., "no glassmorphism — the product is opaque, not translucent"; "no horizontal-scroll Locomotive-style hero — the product is still, not kinetic"; "no dark-mode-purple-accent — the product is daylight, not midnight"; "no atmospheric-gradient-mesh background — the product is matter, not vapor". Binding constraints downstream — apprentices must justify any borderline use.]
-
-## Three Lenses (derived from the soul above)
-
-[Three distinct interpretive lenses, each tuned to THIS product's soul. Each named in 1–3 words and justified in one sentence. Different products yield different lens trios — emergent divergence is the goal, not engineered tension. Examples — a contemplative product might get "ritual / instrument / dwelling"; a kinetic product "creature / weather / vehicle"; a tactile product "tool / garment / vessel"; a documentary product "archive / map / fossil"; a social product "campfire / market / parlor". Pick lenses that genuinely illuminate this product's essence; do not reach for lenses because they sound interesting.]
-
-- **Lens A — [name]**: [one-sentence justification — what about the soul this lens illuminates]
-- **Lens B — [name]**: [one-sentence justification]
-- **Lens C — [name]**: [one-sentence justification]
-
-## Memorable signature (one sentence)
-
-[the ONE thing a user will remember and describe to a friend — a typographic move, a color collision, a motion gesture, a spatial decision. Specific enough to draw. Derived from "What it IS", not invented separately.]
-
-## Founder constraints
-
-[brand colors / existing logo / category conventions the founder explicitly named — only if mentioned in Opus or supplied as arguments]
-
-## Reference set (if any provided)
-
-[URLs/images, with one-line descriptions of what about each is relevant]
-```
+Load [`<forge>/core/skills/wedge/soul-brief-scaffold.md`](soul-brief-scaffold.md) for the section template. Its eight sections in order: **What it IS** (2–3 paragraphs of sensorial essence prose), **What it ISN'T** (3–5 rejected gravity wells, each a sentence), **Examples from life** (3–5 non-design references — songs, buildings, nature, era-tools, books, film), **Forbidden Defaults** (3–7 project-specific moves the model would reach for unconsciously), **Three Lenses** (three 1–3-word lenses, each justified in one sentence), **Memorable signature** (one sentence), **Founder constraints**, **Reference set**.
 
 Persist this to `[PROJECT]_03a_SoulBrief_V1.0.md` in the project root. The Soul Brief is the council's commission letter; its prose sections (What it IS, What it ISN'T, Examples from life, Forbidden Defaults) are non-negotiable transmission channels — apprentices read them in full, not as summary.
 
@@ -167,67 +129,9 @@ Apprentices receive — **in full**, not summarized:
 
 Each apprentice returns **two artifacts**: a **Direction Card** (markdown — the spec) AND a **scoped HTML fragment** (the rendered vision of the lens-interpreted soul at production-grade craft). The fragment is what Heat 3 assembles into the unified preview the user picks from. Visual decisions need visual artifacts — Direction Cards alone ask the user to *imagine* a Touchstone; the rendered fragment lets the user *see* it.
 
-The Direction Card template:
+The Direction Card template lives at [`<forge>/core/skills/wedge/direction-card-scaffold.md`](direction-card-scaffold.md) — hand it to each apprentice in full. Its sections: Lens + one-line thesis, Examples from life that guided this direction, How this lens illuminates the soul, Memorable signature, Typography (display + body + reasoning), Color (dominant / accent / atmosphere), Motion philosophy, Spatial logic, Vocabulary grounding (optional), Forbidden Defaults respected, Substance tier, Risk / kill condition.
 
-```markdown
-# Direction [A|B|C] — [The Lens] (e.g., "The Instrument")
-**Lens**: [the assigned essence-lens, e.g., "instrument"]
-**One-line thesis**: [the soul of the soul — what rendering this product *as an instrument* (or whichever lens) commits to. Must reference the lens AND the Soul Brief's "What it IS".]
-
-## Examples from life that guided this direction
-
-[1–2 references from the Soul Brief's Examples from life that shaped your choices, OR new non-design references you reached for — songs, buildings, moments in nature, paragraphs, tools from another era. NOT design portfolios. One sentence per reference explaining what about it informed the direction.]
-
-## How this lens illuminates the soul
-
-[2–3 sentences. What does seeing the product *through this lens* reveal that other lenses would miss? What does the lens demand of the typography, the palette, the motion, the spatial logic?]
-
-## Memorable signature
-
-[the ONE thing answering the Soul Brief's Memorable Signature field — the gesture, collision, or move that makes this direction unforgettable. Must be implementable at real scale and survive the lens.]
-
-## Typography
-
-- **Display**: [font name + Google Fonts URL or source]
-- **Body**: [font name + source]
-- **Reasoning**: [why this pairing serves the lens AND the soul. Not "modern and elegant" — name what about the type belongs to *this* lens.]
-
-## Color
-
-- **Dominant**: [hex + role — what carries the page]
-- **Accent**: [hex + role — what breaks it]
-- **Atmosphere**: [hex(es) + treatment — gradient mesh, noise, single hairline, flat warm white, etc. May be "none — the page is solid; substance lives in typography" if the lens demands stillness.]
-
-## Motion philosophy
-
-[one sentence — orchestration, restraint, drama, stillness. May be "zero motion — silence is the gesture" if the lens demands it.]
-
-## Spatial logic
-
-[asymmetric / grid-broken / dense / sparse — the layout's posture. Justify by lens.]
-
-## Vocabulary grounding (optional)
-
-[If you drew from the Family × Tone reference shelf, name the pairing — e.g., "Editorial × brutally minimal" or "invented: archival × tactile". If the lens called for vocabulary not on the shelf, name it and describe it. May be "none — invented from soul + lens directly" if you preferred to work without shelf reference.]
-
-## Forbidden Defaults respected
-
-[Restate the Soul Brief's Forbidden Defaults relevant to this direction and confirm none are present. If any borderline use exists, justify it explicitly — otherwise the direction is rejected.]
-
-## Substance tier (per HARD RULE — Required Substance)
-
-[**maximalist** / **minimal** / **atmospheric** — declare which tier governs this direction's required substance, and how the implementation density will reflect it]
-
-## Risk / kill condition
-
-[what about this direction could fail the Soul Brief or the Memorable Signature]
-```
-
-The Scoped HTML Fragment requirements:
-
-- **Scoped CSS** — every selector prefixed with the direction's container class (e.g., `.direction-a`). NO `:root` declarations, NO `body { ... }`, NO global resets, NO unscoped element selectors. Tokens declared as scoped custom properties (e.g., `.direction-a { --color-dominant: #...; }`).
-- **Self-contained** — Google Fonts `<link>` tags are returned alongside the fragment so Heat 3 can hoist them into the preview shell's `<head>`. Fragment markup itself contains only the `<section class="direction-a">...</section>` tree.
-- Fragment constraints (scoping, required regions, fonts block, substance-tier density) are specified in full in the Council Apprentice Brief Template below — that text is what the apprentice receives.
+The scoped HTML fragment's constraints — CSS scoping under `.direction-[A|B|C]`, the separate `<!-- FONTS -->` block, required regions, substance-tier density — are stated normatively in the Council Apprentice Brief Template below; that text is what the apprentice receives.
 
 The three Direction Cards land in `[PROJECT]_03b_DirectionCards_V1.0.md` (concatenated for the user to compare). The three scoped fragments are passed to the anti-convergence audit, then Heat 3.
 
@@ -425,7 +329,7 @@ Pay special attention to Required Substance: the substance tier (maximalist / mi
 
 You produce TWO artifacts:
 
-1. **Direction Card** (markdown — template above). Name SPECIFIC fonts (with real Google Fonts URLs), SPECIFIC hex colors, SPECIFIC motion principles (or declare "zero motion" if your lens demands it). Generic answers ("a clean modern sans paired with a serif") are rejected — name the font. Cite 1–2 EXAMPLES FROM LIFE (non-design references) that guided your choices. Declare your Substance Tier explicitly. Restate the relevant Forbidden Defaults and confirm none are present.
+1. **Direction Card** — fill the scaffold you were handed, section by section. Name SPECIFIC fonts (with real Google Fonts URLs), SPECIFIC hex colors, SPECIFIC motion principles (or declare "zero motion" if your lens demands it). Generic answers ("a clean modern sans paired with a serif") are rejected — name the font. Cite 1–2 EXAMPLES FROM LIFE (non-design references) that guided your choices. Declare your Substance Tier explicitly. Restate the relevant Forbidden Defaults and confirm none are present.
 
 2. **Scoped HTML fragment** — production-grade rendered vision of your direction, contained entirely within `<section class="direction-[A|B|C]">...</section>` (you will be told which letter you are). HARD constraints:
    - All CSS scoped under `.direction-[A|B|C]` — NO `:root`, NO `body`, NO global resets, NO unscoped element selectors. Tokens declared as scoped custom properties: `.direction-A { --color-dominant: #...; --font-display: '...'; ... }`.

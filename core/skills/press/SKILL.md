@@ -12,7 +12,7 @@ description: "Assess go-live readiness across security, scalability, operations,
 You are a staff engineer performing a pre-launch readiness assessment. You apply steady, systematic pressure across seven dimensions — testing structural integrity before the product ships. Score each dimension, identify critical gaps, and produce an actionable scorecard.
 
 ## Pre-Flight
-Follow the Forge Protocol pre-flight (`<forge>/core/skills/forge/protocol.md`), then scan the entire project structure.
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then scan the entire project structure.
 
 ## Evidence Collection
 
@@ -58,40 +58,18 @@ Standard API docs, runbooks, ADRs, onboarding, README. (No project-specific lens
 
 ## Output Format
 
-```markdown
-# Go-Live Readiness Audit — [PROJECT NAME]
-**Date**: [date] | **Auditor**: /press
+Report headed `# Go-Live Readiness Audit — [PROJECT NAME]` with a date + auditor line, then:
 
-## Readiness Scorecard
+- **Readiness Scorecard** — one row per dimension in the order above, columns `Dimension | Score (1-5) | Critical Gaps (count) | Status`, closing with a bolded **Overall** row summing to X/35.
+- **Go-Live Verdict** — READY / NOT READY / READY WITH CONDITIONS.
+- **Critical Gaps (must fix before launch)** — each with file path and recommended fix.
+- **Important Gaps (fix within first sprint post-launch)**.
+- **Recommendations (nice to have)**.
 
-| Dimension | Score (1-5) | Critical Gaps | Status |
-|-----------|-------------|---------------|--------|
-| Security | X/5 | [count] | red/yellow/green |
-| Scalability | X/5 | [count] | red/yellow/green |
-| Operations | X/5 | [count] | red/yellow/green |
-| Compliance | X/5 | [count] | red/yellow/green |
-| Observability | X/5 | [count] | red/yellow/green |
-| Deployment | X/5 | [count] | red/yellow/green |
-| Documentation | X/5 | [count] | red/yellow/green |
-| **Overall** | **X/35** | **[total]** | **red/yellow/green** |
-
-**Go-Live Verdict**: READY / NOT READY / READY WITH CONDITIONS
-
-## Critical Gaps (must fix before launch)
-[list with file paths and recommended fixes]
-
-## Important Gaps (fix within first sprint post-launch)
-[list]
-
-## Recommendations (nice to have)
-[list]
-```
-
-Scoring: 1 = not addressed, 2 = partially, 3 = adequate, 4 = good, 5 = excellent.
-Status: red = 1-2, yellow = 3, green = 4-5.
+Scoring: 1 = not addressed, 2 = partially, 3 = adequate, 4 = good, 5 = excellent. Status: red = 1-2, yellow = 3, green = 4-5.
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight (`<forge>/core/skills/forge/protocol.md`), writing learnings to `memory/press-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any critical gaps (specify by item).
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/press-learnings.md`. Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — whether to fix any critical gaps (specify by item).
 
 **Then prompt the Atlas.** A go-live readiness pass is the moment the founder should also see the production landscape from above. After presenting the verdict, offer — via the same multi-choice prompt — to run `/plot` (As-Built cast): *"You're assessing go-live readiness. Want the Atlas — a bird's-eye map of what actually ships (services, stores, integrations, trust boundaries), with the drift from the plan surfaced?"* This is an offer, not a gate — `/press` completes whether or not the founder takes it. `/plot` draws the map and, if a Planned Atlas (or Pattern Architecture) exists, shows where the build deviated from it.
