@@ -8,53 +8,65 @@ session plans and delegates, never holds the implementation artifact.
   the transcript tail; on a top-tier model (fable/mythos/opus) it injects a
   plan-and-delegate rubric as additional context. Silent (fails open) on any
   other tier or when the model can't be determined.
-- `tier-guard.sh` — `PreToolUse` hook, matcher `Edit|Write|NotebookEdit`.
-  Structurally enforces the rubric: denies direct writes when the session is
-  top-tier, but always allows subagent writes (detected via the payload's
-  `agent_id` field) so delegated implementation still goes through. Fails
-  open on any uncertain path — never blocks a cheap-tier session.
+- `tier-guard.sh` — `PreToolUse` hook, matcher `Edit|Write|NotebookEdit|Agent`.
+  Structurally enforces the rubric with two gates. The **write gate** denies
+  direct writes when the session is top-tier. The **spawn gate** denies an
+  `Agent` spawn that carries no explicit `model` parameter — rule 5-7 says a
+  tier binds *only* via that parameter, so a parameterless spawn silently
+  inherits the parent's top tier and runs grep-shaped work on the most
+  expensive model in the fleet. Subagent calls are always allowed on both
+  gates (detected via the payload's `agent_id`) so delegated work goes
+  through. Spawn-gate exemptions that need no parameter: `subagent_type:
+  fork` (inherits by design; the harness ignores a model parameter there) and
+  any agent whose `.claude/agents/<name>.md` frontmatter already pins a
+  `model:`. Separate escape hatches — `FORGE_ALLOW_INLINE_EDITS` disarms only
+  the write gate, `FORGE_ALLOW_UNTRIAGED_SPAWN` only the spawn gate; wanting
+  to hand-edit a file is not the same as wanting untriaged spawns. Fails open
+  on any uncertain path — never blocks a cheap-tier session.
+
+**Known blind spot, both hooks**: the running model is read from the
+transcript tail, and on a session's *first* prompt the transcript may carry
+no `.message.model` line yet. Both hooks fail open there — and first prompts
+are exactly when large investigation fan-outs happen. No sturdier model
+signal is exposed to a hook payload today.
 
 ## Install
 
 `cast-deploy.sh --hooks` copies both scripts verbatim into `<membrane>/hooks/`
-(creating the directory if missing) and preserves the executable bit.
-`cast-deploy.sh --verify-hooks` byte-compares the membrane copies against
-forge source.
+(creating the directory if missing), preserves the executable bit, and wires
+them into `settings.json` (see below). `cast-deploy.sh --verify-hooks` checks
+both halves — bodies *and* registration — and exits non-zero if either is
+wrong.
 
-## settings.json wiring is per-user — forge never edits it
+## settings.json wiring is forge-managed (narrowly)
 
-Installing the hook bodies does not wire them up. Each user adds the
-following entries to their own `settings.json` `hooks` block (forge never
-writes to `settings.json`):
+`cast-deploy.sh --hooks` installs the bodies **and** wires them, via an
+idempotent `jq` merge of forge's own two entries into the membrane's
+`settings.json`.
 
-```json
-"UserPromptSubmit": [
-  {
-    "matcher": "",
-    "hooks": [
-      {
-        "type": "command",
-        "command": "~/.claude/hooks/tier-routing.sh"
-      }
-    ]
-  }
-]
-```
+This reverses the earlier "forge never writes settings.json" rule. That rule
+assumed a single-user membrane whose owner would read the printed
+`not wired` line and act on it. On a multi-user box it became N manual steps
+nobody performed: an audit of every human membrane found hook **bodies** with
+no registration at all. Bodies without nerves are worse than neither — the
+membrane reads as enforced and enforces nothing.
 
-```json
-"PreToolUse": [
-  {
-    "matcher": "Edit|Write|NotebookEdit",
-    "hooks": [
-      {
-        "type": "command",
-        "command": "~/.claude/hooks/tier-guard.sh"
-      }
-    ]
-  }
-]
-```
+What the merge touches, and nothing else:
 
-After installing, `cast-deploy.sh --hooks` checks whether the membrane's
-`settings.json` already references each hook filename and reports "wired" or
-"not wired — add the settings.json entry (see core/hooks/README.md)" per hook.
+- only `.hooks.PreToolUse` and `.hooks.UserPromptSubmit`;
+- within those, only array entries whose `command` names a forge hook file.
+  Your permissions, env, model, statusline and hand-written hooks are read
+  and re-emitted verbatim.
+
+Properties: **remove-then-append**, so repeated casts yield one entry and a
+stale matcher (e.g. the pre-Agent `Edit|Write|NotebookEdit`) self-heals;
+**atomic** temp-file + `mv`, so an interrupted cast cannot truncate the file;
+**one-time backup** to `settings.json.pre-forge-hooks.bak` before the first
+managed write; **refuses** to touch a `settings.json` that is not valid JSON.
+
+The registrations are declared in `cast-deploy.sh`'s `FORGE_HOOK_WIRING`
+array — add a row there when adding a hook.
+
+`cast-deploy.sh --verify-hooks` byte-compares the bodies against forge source
+**and** checks registration and matcher, exiting non-zero on `UNWIRED` or
+`STALE-MATCHER`. Installed-but-dark is a failure, not a printed line.

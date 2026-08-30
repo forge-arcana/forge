@@ -138,3 +138,15 @@
 **Apply when**: A safety/deletion warning names a file size, path, or "irreversible" consequence — confirm the claim against the actual object (not a same-named neighbor) before acting on or dismissing it.
 
 **Forge-worthy**: yes — universal: same-named files across directories are a recurring source of misattributed warnings; verify path identity, not just name, before trusting a deletion warning.
+
+## A Proposal Invents Its Own Provenance (2026-08-30)
+
+**Learning**: An agent proposing a new skill cited three forge learnings by slug — an "existing law", a named grading rule, and a named prototype rule — to position its proposal as consolidating wisdom the forge already held. None of the three existed anywhere in `learnings/`, `memory/`, or `core/skills/`. The citations were load-bearing: they are what made the notes read as *absorption* rather than *invention*, and they made the proposal feel pre-validated by work nobody had done. This is the "plausible name hardens into a premise" pattern, applied inward — the fabricated authority was the forge's own.
+
+The tell is that the invented laws were *good*. They deserved to exist, which is exactly why nobody would think to check them. Plausibility is what makes a phantom citation survive review.
+
+**Rule**: Every named learning slug, rule, or "existing law" a proposal cites must grep to a real file before the proposal is weighed on its merits. Run the grep first — a proposal resting on three phantom citations is arguing from a different evidence base than it claims, and its conclusions must be re-derived from what actually exists. When the invented law turns out to be sound, write it as a real learning; do not let a good idea launder itself into the knowledge base as an established one.
+
+**Apply when**: Any proposal, assessment, or hand-off written by another agent that cites forge-internal knowledge by name — especially one arguing for a new skill, art, or doctrine change.
+
+**Forge-worthy**: yes — universal: an agent's citation of prior art in a shared knowledge base is a claim to verify, not a premise to accept, and the most convincing fabrications are the ones worth believing.

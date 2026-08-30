@@ -240,10 +240,86 @@ verify_rules() {
 }
 
 # --- Hooks deploy/verify: copy forge core/hooks/*.sh bodies into the
-#     membrane's hooks/ dir. NEVER touches settings.json — that wiring is
-#     per-user and must be added by hand (see core/hooks/README.md). After
-#     installing, checks whether settings.json already references each hook
-#     filename and reports wired/not-wired per hook, informationally only. ---
+#     membrane's hooks/ dir, then wire ONLY forge's own two hook entries into
+#     settings.json via an idempotent jq merge.
+#
+#     Why forge writes settings.json now: it used to only PRINT "not wired",
+#     on the doctrine that wiring was per-user. On a multi-user box that line
+#     was N separate manual steps nobody performed — an audit found every
+#     human membrane carrying hook BODIES with no registration at all. Bodies
+#     without nerves are worse than no bodies: the membrane reads as enforced
+#     and enforces nothing. Same managed-block pattern as --rules writing into
+#     CLAUDE.md between FORGE-RULES markers; here the entry's `command` string
+#     containing the hook filename IS the marker.
+#
+#     Scope discipline: the merge only ever touches .hooks.PreToolUse and
+#     .hooks.UserPromptSubmit, and within those only array entries whose
+#     command matches a forge hook filename. Permissions, env, model,
+#     statusline and any hand-written hooks are read and re-emitted verbatim.
+#     Remove-then-append makes it idempotent AND self-healing: a stale matcher
+#     (e.g. the pre-Agent "Edit|Write|NotebookEdit") is corrected on the next
+#     cast. Atomic temp-file + mv, so an interrupted cast cannot leave a
+#     truncated settings.json that breaks the harness on next start. ---
+
+# The forge-managed hook registrations. One row per hook body:
+#   <filename>|<event>|<matcher>
+# The matcher for tier-guard MUST include Agent — the spawn gate is dark
+# without it (see core/hooks/tier-guard.sh header).
+FORGE_HOOK_WIRING=(
+  "tier-guard.sh|PreToolUse|Edit|Write|NotebookEdit|Agent"
+  "tier-routing.sh|UserPromptSubmit|"
+)
+
+# Split a FORGE_HOOK_WIRING row into base/event/matcher (matcher may contain |).
+_wiring_parts() {
+  local row="$1"
+  _w_base="${row%%|*}"; row="${row#*|}"
+  _w_event="${row%%|*}"; _w_matcher="${row#*|}"
+  # No trailing field at all means an empty matcher, not a repeat of the event.
+  if [[ "$_w_event" == "$row" ]]; then _w_matcher=""; fi
+  return 0   # must end truthy: the script runs under `set -e`
+}
+
+# Wire forge's hook entries into the membrane settings.json. Idempotent.
+wire_hooks() {
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "| settings.json | SKIP | jq not found — cannot wire, add entries by hand (see core/hooks/README.md) |"
+    return 1
+  fi
+  [[ -f "$MEMBRANE_SETTINGS_FILE" ]] || echo '{}' > "$MEMBRANE_SETTINGS_FILE"
+  if ! jq -e . "$MEMBRANE_SETTINGS_FILE" >/dev/null 2>&1; then
+    echo "| settings.json | ERROR | not valid JSON — refusing to touch it |"
+    return 1
+  fi
+  # One-time backup before the first managed write.
+  if [[ ! -f "$MEMBRANE_SETTINGS_FILE.pre-forge-hooks.bak" ]]; then
+    cp "$MEMBRANE_SETTINGS_FILE" "$MEMBRANE_SETTINGS_FILE.pre-forge-hooks.bak"
+  fi
+  local row tmp
+  for row in "${FORGE_HOOK_WIRING[@]}"; do
+    _wiring_parts "$row"
+    [[ -f "$MEMBRANE_HOOKS/$_w_base" ]] || continue
+    tmp="$MEMBRANE_SETTINGS_FILE.tmp.$$"
+    if jq --arg event "$_w_event" \
+          --arg matcher "$_w_matcher" \
+          --arg base "$_w_base" \
+          --arg cmd "$MEMBRANE_HOOKS/$_w_base" '
+      .hooks //= {}
+      | .hooks[$event] = (
+          ((.hooks[$event] // [])
+             | map(select([.hooks[]?.command // ""] | any(test($base)) | not)))
+          + [{matcher: $matcher, hooks: [{type: "command", command: $cmd}]}]
+        )
+    ' "$MEMBRANE_SETTINGS_FILE" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]]; then
+      mv "$tmp" "$MEMBRANE_SETTINGS_FILE"
+      echo "| $_w_base | WIRED | $_w_event matcher='${_w_matcher:-<all>}' |"
+    else
+      rm -f "$tmp"
+      echo "| $_w_base | ERROR | jq wiring failed — settings.json left unchanged |"
+    fi
+  done
+  return 0
+}
 deploy_hooks() {
   echo "## Deploying forge core/hooks → $MEMBRANE_HOOKS"
   echo ""
@@ -262,17 +338,16 @@ deploy_hooks() {
     cp "$f" "$dest"
     chmod +x "$dest"
     echo "| $base | DEPLOYED | $(stat -c %s "$f") bytes |"
-    if [[ -f "$MEMBRANE_SETTINGS_FILE" ]] && grep -qF "$base" "$MEMBRANE_SETTINGS_FILE" 2>/dev/null; then
-      echo "| $base | wired | settings.json references this hook |"
-    else
-      echo "| $base | not wired — add the settings.json entry (see core/hooks/README.md) |"
-    fi
   done
   if [[ "$any" -eq 0 ]]; then
     echo "| hooks | SKIP | no *.sh files found in $FORGE_HOOKS |"
+    echo ""
+    echo "**Hooks deploy complete — nothing to wire**"
+    return 0
   fi
+  wire_hooks
   echo ""
-  echo "**Hooks deploy complete — settings.json was NOT modified (per-user wiring)**"
+  echo "**Hooks deploy complete — bodies installed and forge hook entries wired in $MEMBRANE_SETTINGS_FILE**"
 }
 
 verify_hooks() {
@@ -298,11 +373,47 @@ verify_hooks() {
       echo "| $base | OK | In sync |"
     fi
   done
+
+  # Registration check. Bodies alone are NOT enforcement — a membrane with
+  # hook files and no settings.json entries reads as guarded and guards
+  # nothing, which is strictly worse than having neither. This check FAILS
+  # (contributes to a non-zero exit) rather than warning, and it verifies the
+  # MATCHER too: a stale tier-guard matcher without Agent leaves the spawn
+  # gate dark while every body byte-compares clean.
+  local row
+  for row in "${FORGE_HOOK_WIRING[@]}"; do
+    _wiring_parts "$row"
+    [[ -f "$FORGE_HOOKS/$_w_base" ]] || continue
+    if [[ ! -f "$MEMBRANE_SETTINGS_FILE" ]]; then
+      echo "| $_w_base | UNWIRED | no $MEMBRANE_SETTINGS_FILE — run cast-deploy.sh --hooks |"
+      errors=$((errors + 1))
+      continue
+    fi
+    # jq emits the literal token ABSENT when no entry references this hook,
+    # so an entry with an empty matcher (tier-routing's "match everything")
+    # stays distinguishable from no entry at all.
+    local live
+    live=$(jq -r --arg event "$_w_event" --arg base "$_w_base" '
+      [ (.hooks[$event] // [])[]
+        | select([.hooks[]?.command // ""] | any(test($base)))
+        | .matcher // "" ] | first // "ABSENT"
+    ' "$MEMBRANE_SETTINGS_FILE" 2>/dev/null)
+    if [[ "$live" == "ABSENT" ]]; then
+      echo "| $_w_base | UNWIRED | body present but no $_w_event entry in settings.json — installed-but-dark |"
+      errors=$((errors + 1))
+    elif [[ "$live" != "$_w_matcher" ]]; then
+      echo "| $_w_base | STALE-MATCHER | $_w_event matcher is '$live', expected '$_w_matcher' — run cast-deploy.sh --hooks |"
+      errors=$((errors + 1))
+    else
+      echo "| $_w_base | WIRED | $_w_event matcher='${_w_matcher:-<all>}' |"
+    fi
+  done
+
   echo ""
   if [[ $errors -eq 0 ]]; then
-    echo "**All hooks verified OK**"
+    echo "**All hooks verified OK — bodies in sync and wired**"
   else
-    echo "**$errors hook(s) need attention**"
+    echo "**$errors hook issue(s) need attention**"
   fi
   return $errors
 }

@@ -59,6 +59,8 @@ ALLOWLIST_TERMS=(
   "Docker" "Kubernetes" "Terraform" "Ansible" "GitHub" "GitLab" "Bitbucket"
   # Forge mythology + Claude tools
   "Smith" "Warden" "Forge" "Anthropic" "Claude" "WebSearch" "WebFetch" "AskUserQuestion" "TodoWrite"
+  # Harness tool names — appear verbatim in hook matchers and tier-guard logic
+  "NotebookEdit" "ExitPlanMode" "EnterPlanMode" "SlashCommand" "BashOutput" "KillShell" "ListMcpResources" "ReadMcpResource"
   # Forge artifact names (canonical lineage and Wedge intermediates; "WedgeBrief" is a retired predecessor of SoulBrief, kept for historical references)
   "SoulBrief" "WedgeBrief" "DirectionCards" "PreviewTouchstone" "ChosenDirection" "PitchCritique"
   # Claude Code hook event names (referenced in technical content)
