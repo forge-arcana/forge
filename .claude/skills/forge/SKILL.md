@@ -195,7 +195,9 @@ Always run `bash <forge>/core/scripts/cast-deploy.sh --rules` (every cast, no PL
 
 ### Hooks
 
-Always run `bash <forge>/core/scripts/cast-deploy.sh --hooks` (every cast, no PLAN row needed). This installs the hook bodies from `<forge>/core/hooks/` into `<membrane>/hooks/`. Verify with `cast-deploy.sh --verify-hooks`. Settings wiring (the `hooks` block in `settings.json` that actually invokes them) is per-user and is NEVER auto-edited by forge — see `<forge>/core/hooks/README.md` for the snippets the user adds themselves.
+Always run `bash <forge>/core/scripts/cast-deploy.sh --hooks` (every cast, no PLAN row needed). This installs the hook bodies from `<forge>/core/hooks/` into `<membrane>/hooks/` **and wires them** into the membrane's `settings.json`, via an idempotent `jq` merge scoped to forge's own two entries — every other key, including hand-written hooks, is re-emitted verbatim. Verify with `cast-deploy.sh --verify-hooks`, which now fails on `UNWIRED` or `STALE-MATCHER` as well as body drift.
+
+> The earlier rule — *settings wiring is per-user and is NEVER auto-edited by forge* — was **retired 2026-08-30**. It assumed a single-user membrane whose owner would act on a printed `not wired` nudge; on a shared box it became N manual steps nobody performed, and an audit found every human membrane carrying hook bodies with no registration at all. Bodies without nerves are worse than neither: the membrane reads as enforced and enforces nothing. See `<forge>/core/hooks/README.md`.
 
 ### Learnings
 For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry into `<membrane>/learnings/<file>.md`.
