@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-08-23",
+  "lastRun": "2026-09-04",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -249,7 +249,18 @@
     "Reverting a File You Accidentally Committed Destroys the Author's Working Copy Too",
     "The Tier-Based Work-Router Belongs In The Forge, Not Just One Membrane",
     "Delegation Does Not Cover a Session's Own Orchestration Turns",
-    "HARD RULE candidate — Fix/flag inline; never defer issues to an end-of-cycle summary"
+    "HARD RULE candidate — Fix/flag inline; never defer issues to an end-of-cycle summary",
+    "HARD RULE candidate — Split the rules file by CHURN, and act on a structural instruction the first time",
+    "A Browser Profile Encodes Its Birth Environment — Never Relocate One",
+    "HARD RULE candidate — A cross-system identifier join that matches nothing looks exactly like success",
+    "A safeguard that cannot evaluate its condition must refuse, not pass",
+    "A fix that does not work is evidence about the diagnosis, not just the fix",
+    "A mirror of external state rots silently, and a test asserting its content cements the rot",
+    "An optional interface method's absence is a decision — default it toward the safe direction",
+    "State that must survive N events cannot be re-derived from the current snapshot",
+    "Prove a regression test by reverting in a COPY, never in place",
+    "Relaying a Claim Is Asserting It",
+    "Push Your Own Commits From a Scratch Clone"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

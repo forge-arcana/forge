@@ -83,8 +83,7 @@
 **Apply when**: Planning parallel heats that touch shared route/config files.
 
 ## Prove a Compile-Time Guarantee by Breaking It, Not by Asserting It (2026-08-08)
-**Learning**: A refactor whose value is "this bug class is now a compile error" should be verified by temporarily introducing the bug and recording exactly what fails — which both proves the guarantee and reveals which layers have NO guard. Revert surgically, never by checkout, when the probed file also carries uncommitted work.
-**Apply when**: Any exhaustiveness/registry refactor claiming compile-time protection.
+**Promoted to `global-patterns.md`** (merged with scratch-copy neutralisation guidance — the hazard is session-generic, not smith-specific). See that file for the current entry; do not re-add content here.
 
 ## A Hand-Maintained Inverse Is a Distinct Defect Class, and It Hides (2026-08-08)
 **Learning**: Forward builders paired with reverse parsers (build a key / parse it back, arm a cooldown / poll for it) drift silently and fail as an EMPTY UI rather than an error — the reverse side simply finds nothing. Grep for the CONSTRUCTED VALUES, not just the table names; a first-pass inventory found none of four such pairs, a value-pattern sweep found all four.
