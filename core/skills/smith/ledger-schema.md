@@ -29,6 +29,7 @@
   "totalHeatsEstimate": 15,
   "blockers": [],
   "deferredFindings": [{ "heat": 2, "art": "poke", "severity": "MINOR", "title": "..." }],
+  "visualPicks": [{ "heat": 7, "decision": "typeface", "candidates": ["A: one sans, wordmark keeps serif", "B: serif headings"], "pick": "A", "prototype": "memory/prototypes/heat-07-typeface.html", "pickedAt": "..." }],
   "phaseGates": {
     "foundation": { "arts": ["probe"], "status": "passed", "checkpointSha": "def5678" },
     "core": { "arts": ["probe", "press"], "status": "pending" }
@@ -51,6 +52,7 @@
 - **`checkpointSha`** — git commit SHA at each heat completion. Phase gates also snapshot the full ledger to `memory/smith-ledger-checkpoint-<gate>.json`. Stamped only by `<forge>/core/scripts/smith-checkpoint.sh` (`--heat N` / `--gate name`) — never hand-edited; `smith-rollback.sh` consumes these SHAs for rollback.
 - **`cycleHistory`** — final gate convergence tracking. Used for stall detection: if findings don't decrease for 2 consecutive cycles, smith triggers user review.
 - **`deferredFindings`** — MINOR findings accepted as-is, carried forward for future cleanup.
+- **`visualPicks`** — one entry per visual-identity decision (typeface, colour tokens, brand marks, page architecture) a heat changed. Written when the founder picks from the comparison prototype and before any repo edit for that decision; `pick: "touchstone"` records a conformance restoration that needed no new prototype. A heat touching visual-identity files with no matching entry is a gate violation.
 
 ## Human-Readable: `memory/smith-progress.md`
 

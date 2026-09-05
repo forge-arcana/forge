@@ -122,6 +122,18 @@ actual output. Bug reports are handled autonomously with zero hand-holding from 
 Use `colorScheme: 'dark'` if the project uses dark mode. NEVER say "it should work" — SHOW
 it works. If you can't screenshot, tell the user and ask them to verify.
 
+## HARD RULE — Visual Decisions Are Shown, Then Built
+
+> **Any change to a typeface, colour tokens, brand marks, or page architecture is presented
+> as a prototype the founder can compare — the current state and each candidate, at phone
+> and desktop, light and dark — before code changes land.**
+
+A findings list cannot be approved by eye; a prototype can. The chosen candidate becomes the
+spec: implementation matches it, never reinterprets it. Restoring conformance to an already
+approved design constitution (the Touchstone) needs no new prototype — the constitution is the
+pick. Record the pick where the work is tracked (smith ledger, PR description) so the reason
+survives the session.
+
 ## HARD RULE — Verification Before Done
 
 No task is marked complete without **proof it works** — tests pass, logs are clean, behavior

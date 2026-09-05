@@ -56,7 +56,7 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
 
 **Touchstone gate** — if either `[PROJECT]_03e_Touchstone_V1.0.md` or `[PROJECT]_03e_Touchstone_V1.0.html` is missing, surface a warning: "Touchstone incomplete — the project has no aesthetic constitution to inherit. Build will proceed with framework defaults, which is rarely what the magnum opus deserves." Offer to run `/wedge` before continuing (recommended for any UI-facing work). The user can override with `--no-touchstone` to proceed without one — typically appropriate for backend-only work, CLI tools, or libraries. (A partial Touchstone — only HTML, only MD — is a defect; either re-run `/wedge` or accept `--no-touchstone`.)
 
-**Touchstone conformance** — when the Touchstone exists, every UI-facing apprentice receives the MD's YAML token block (colors, typography, spacing, rounded, components) AND the Do's/Don'ts prose section as part of its commission. Apprentices MUST use these tokens (font families, color variables, motion timing) instead of inventing new values, AND comply with the project-specific Do's/Don'ts. Apprentices that introduce non-Touchstone fonts, colors, motion tokens, or violate a Do/Don't are rejected and re-tasked.
+**Touchstone conformance** — when the Touchstone exists, every UI-facing apprentice receives the MD's YAML token block (colors, typography, spacing, rounded, components) AND the Do's/Don'ts prose section as part of its commission. Apprentices MUST use these tokens (font families, color variables, motion timing) instead of inventing new values, AND comply with the project-specific Do's/Don'ts. Apprentices that introduce non-Touchstone fonts, colors, motion tokens, or violate a Do/Don't are rejected and re-tasked. The `typography.faces` block is part of that commission: `ui_face` carries every interface word, `logotype_face` may reach only the wordmark, and a second family on a heading, figure, or dialog title is a rejected commission unless the Touchstone declares a `heading_face` with its audience and reason.
 
 **Pitch gate** — if no `[PROJECT]_04_Pitch_V1.0.md` exists AND the Blueprint contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Ask the user — using your harness's multi-choice prompt if available, otherwise inline — with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste. Pitch writes its verdict as a `<!-- PITCHED: [VERDICT] -->` marker at the top of the Pitch file (or the Blueprint if no Pitch file exists yet).
 
@@ -211,6 +211,7 @@ Each heat follows: **Plan → Build → Verify → Evaluate → Fix → Checkpoi
 - Identify relevant source (blueprint sections or workspec steps) to implement
 - List files to create/modify
 - Check dependency graph — if independent heats exist, spawn apprentices at the tier the heat's grade prescribes (T1 → low-effort sonnet, T2 → sonnet, T3 → opus or built inline; see Grade Each Heat and Apprentice System)
+- **Visual-identity gate** — if the heat changes a typeface, colour token, brand mark, or page architecture (the "Visual decisions are shown, then built" rule), smith does not edit the repo first. It publishes a comparison prototype — the current state and each candidate, at 375 and ≥1280, light and dark, rendered through Touchstone tokens — asks the founder to pick via the harness's multi-choice prompt, records the pick in the ledger's `visualPicks`, and only then builds to it. Reaching 2b with a visual-identity change and no recorded pick is a defect: stop and prototype. Exception: a change that only *restores* Touchstone conformance (a non-Touchstone font crept in, a token drifted) needs no pick — the Touchstone is the pick; record it as such.
 
 ### 2b: Build
 
@@ -221,6 +222,8 @@ Write code following:
 - Vertical slices — DB schema → service/business logic → API route → UI component (where applicable)
 
 Smith builds the code itself. The arts evaluate. Apprentices handle independent parallel work.
+
+Smith refuses to touch visual-identity files (font imports, typography and colour tokens, brand-mark assets, page-level layout of a marketing or logged-out page) in a heat that has no `visualPicks` entry for that decision — see the 2a gate.
 
 ### 2c: Verify
 

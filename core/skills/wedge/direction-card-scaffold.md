@@ -19,9 +19,10 @@
 
 ## Typography
 
-- **Display**: [font name + Google Fonts URL or source]
-- **Body**: [font name + source]
-- **Reasoning**: [why this pairing serves the lens AND the soul. Not "modern and elegant" — name what about the type belongs to *this* lens.]
+- **UI face**: [ONE font name + Google Fonts URL or source — carries every interface word: headings, body, labels, figures]
+- **Wordmark face**: [font name + source, or "same" — applied to the logotype beside the brand mark and nowhere else]
+- **Second heading face**: [default "none". If named: the audience it serves and why weight/tracking on the UI face cannot carry the hierarchy — one sentence each. Never on figures.]
+- **Reasoning**: [why this face serves the lens AND the soul. Not "modern and elegant" — name what about the type belongs to *this* lens. Hierarchy is size, weight, tracking, colour — say how.]
 
 ## Color
 

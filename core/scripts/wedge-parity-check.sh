@@ -53,6 +53,8 @@ fi
 # Metadata scalars (version/name/description) and token-reference values
 # ("{path.to.token}") are skipped — the former aren't design tokens, the
 # latter resolve to another row's value rather than declaring their own.
+# Rationale scalars under typography.faces (heading_face_audience /
+# heading_face_reason — prose sentences, not values) are skipped too.
 TOKENS_TSV="$(awk '
   function trim(s) {
     gsub(/^[ \t]+|[ \t]+$/, "", s)
@@ -88,6 +90,7 @@ TOKENS_TSV="$(awk '
 
     if (val == "") next
     if (L0 == "version" || L0 == "name" || L0 == "description") next
+    if (key ~ /_(audience|reason)$/) next
 
     gsub(/^"|"$/, "", val)
     gsub(/^\x27|\x27$/, "", val)

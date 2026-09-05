@@ -52,6 +52,7 @@ Standard CI/CD completeness, env parity, feature flags, migration up/down, zero-
 - Non-production bot protection wired into the deploy pipeline (not applied manually) — see Dimension 1 split.
 - **Egress-cost exposure** — flag layers where growth is pure egress (public buckets, media, APK distribution); the stack-guide default is R2 ($0 egress). GCS/hyperscaler egress on a viral path is an unbounded bill.
 - **Multi-provider blast radius** — if the app spans providers, verify each agent/CI credential is least-privilege and scoped (a brokered agent across N providers has a larger blast radius than one on a single cloud); confirm spend caps wherever a leaked key means runaway cost (e.g. Runpod GPU).
+- **Launch surface reviewed** — if a logged-out or marketing page exists and no `/preen` report covers its Dimension 8 (landing shape), flag IMPORTANT "landing shape unreviewed" and point to `/preen`. Go-live readiness owns the check that the review happened; `/preen` owns the review.
 
 ### 7. Documentation
 Standard API docs, runbooks, ADRs, onboarding, README. (No project-specific lens — assess as-is.)

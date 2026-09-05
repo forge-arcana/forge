@@ -60,7 +60,7 @@ You commit at one of two ends — bold maximalism or refined minimalism — and 
 > **Every Touchstone must be specific, intentional, and production-grade. The shape of substance — and the code density that delivers it — varies by tone.**
 >
 > **Universal floor (every Touchstone, every tone):**
-> - **Distinctive font pairing** — characterful display (PP Editorial New, Söhne, Cormorant, Migra, Tiempos, Reckless, Sentinel, Whyte, Authentic Sans, NM Type, Ogg) + complementary body. No system stacks. No banned defaults.
+> - **One characterful interface face** — a distinctive family (Söhne, Whyte, Authentic Sans, NM Type, Reckless Neue, Migra, and their kin) carries every interface word: headings, body, labels, figures, dialog titles. Hierarchy is size, weight, tracking, colour — never a change of family. A display face (PP Editorial New, Cormorant, Tiempos, Ogg) may live on the **wordmark beside the brand mark** and nowhere else; putting it on headings needs the audience-and-reason sentence the Touchstone scaffold demands, and it never touches a figure. No system stacks. No banned defaults.
 > - **Dominant + sharp accent** — ONE color carries the page, ONE accent breaks it. Minimal directions may use the accent once and still count as "sharp."
 > - **Production-grade** — real Google Fonts via `<link>`, real CSS variables, real implementation that breathes in any browser.
 > - **Specificity** — every value is deliberate, named, tokenized, defendable.
@@ -129,7 +129,7 @@ Apprentices receive — **in full**, not summarized:
 
 Each apprentice returns **two artifacts**: a **Direction Card** (markdown — the spec) AND a **scoped HTML fragment** (the rendered vision of the lens-interpreted soul at production-grade craft). The fragment is what Heat 3 assembles into the unified preview the user picks from. Visual decisions need visual artifacts — Direction Cards alone ask the user to *imagine* a Touchstone; the rendered fragment lets the user *see* it.
 
-The Direction Card template lives at [`<forge>/core/skills/wedge/direction-card-scaffold.md`](direction-card-scaffold.md) — hand it to each apprentice in full. Its sections: Lens + one-line thesis, Examples from life that guided this direction, How this lens illuminates the soul, Memorable signature, Typography (display + body + reasoning), Color (dominant / accent / atmosphere), Motion philosophy, Spatial logic, Vocabulary grounding (optional), Forbidden Defaults respected, Substance tier, Risk / kill condition.
+The Direction Card template lives at [`<forge>/core/skills/wedge/direction-card-scaffold.md`](direction-card-scaffold.md) — hand it to each apprentice in full. Its sections: Lens + one-line thesis, Examples from life that guided this direction, How this lens illuminates the soul, Memorable signature, Typography (UI face + wordmark face + second heading face or none + reasoning), Color (dominant / accent / atmosphere), Motion philosophy, Spatial logic, Vocabulary grounding (optional), Forbidden Defaults respected, Substance tier, Risk / kill condition.
 
 The scoped HTML fragment's constraints — CSS scoping under `.direction-[A|B|C]`, the separate `<!-- FONTS -->` block, required regions, substance-tier density — are stated normatively in the Council Apprentice Brief Template below; that text is what the apprentice receives.
 
@@ -234,6 +234,8 @@ Produce `[PROJECT]_03e_Touchstone_V1.0.md` adjacent to the HTML, following the *
 
 This heat may run as a **sonnet-tier subagent leg** — the scaffold fully specifies the schema, section list, and generation rules, making it implementation-to-spec — only with this gate wired: before Heat 8, the orchestrator (opus tier) reviews the Touchstone.md token values against the HTML's computed styles and the prose sections against the Soul Brief + Chosen Direction. If that review is not run, Heat 6 stays inline at the orchestrator.
 
+That review also enforces the **one-face contract** (scaffold rules 6-7): `typography.faces.ui_face` is present; every non-logotype `fontFamily` resolves to it; a `heading_face` carries a real audience sentence and reason sentence; `figures` is `tabular-nums` on the UI face; and the Do's and Don'ts carry the line "One family for the interface. The wordmark may keep its own. Nothing else may." Then read the HTML's selectors: the logotype face must be reachable only from the wordmark element — a `h1, h2, .display` rule feeding it is the exact two-voice defect this contract exists to prevent.
+
 **Script tier for the mechanical half of that gate.** Run the token-value leg as a script rather than eyeballing the diff:
 
 ```
@@ -269,7 +271,7 @@ After /preen passes and parity is verified, the Touchstone is **locked**.
 ## Aesthetic constitution
 - **Direction**: [lens name, e.g., "The Instrument"]
 - **Substance tier**: [maximalist / minimal / atmospheric]
-- **Typography**: [display] + [body] · **Dominant**: [hex] · **Accent**: [hex]
+- **Typography**: UI face [family] · wordmark [family or "same"] · second heading face [none / family + one-line reason] · **Dominant**: [hex] · **Accent**: [hex]
 - **Motion**: [one-line philosophy] · **Memorable signature**: [the one thing]
 
 ## Downstream

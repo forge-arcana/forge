@@ -24,24 +24,35 @@ colors:
   on-surface: "#______"
   # add accent / atmosphere tokens as the chosen direction requires
 typography:
+  faces:
+    ui_face: [REQUIRED — the one family for all interface text: headings, body, labels, figures, dialog titles]
+    logotype_face: [OPTIONAL — applied ONLY to the wordmark adjacent to the brand mark; omit if the wordmark uses ui_face]
+    code_face: [OPTIONAL — monospace for code, identifiers, log output ONLY; never money, counts, or timestamps]
+    heading_face: [OPTIONAL — a second face on headings. Permitted only with the next two lines filled; never on figures]
+    heading_face_audience: [one sentence — who this audience is and why a second voice serves them]
+    heading_face_reason: [one sentence — why weight and tracking on ui_face cannot carry the hierarchy]
+  figures:
+    fontFamily: "{typography.faces.ui_face}"
+    fontVariantNumeric: tabular-nums
+    fontWeight: [number — weight carries emphasis, not face]
   headline-display:
-    fontFamily: [display font name]
+    fontFamily: "{typography.faces.ui_face}"   # or {typography.faces.heading_face} when declared
     fontSize: [px]
     fontWeight: [number]
     lineHeight: [unitless or dimension]
     letterSpacing: [em]
   headline-lg:
-    fontFamily: [display font name]
+    fontFamily: "{typography.faces.ui_face}"
     fontSize: [px]
     fontWeight: [number]
     lineHeight: [unitless or dimension]
   body-md:
-    fontFamily: [body font name]
+    fontFamily: "{typography.faces.ui_face}"
     fontSize: [px]
     fontWeight: [number]
     lineHeight: [unitless or dimension]
   label-md:
-    fontFamily: [label font name]
+    fontFamily: "{typography.faces.ui_face}"
     fontSize: [px]
     fontWeight: [number]
     lineHeight: [unitless or dimension]
@@ -85,7 +96,7 @@ components:
 
 ## Typography
 
-[Prose: name the display font + body font + any label/data font. Describe the typographic strategy — what voice each font carries, where each is used, what hierarchy they enforce.]
+[Prose: name the `ui_face` and, if declared, the `logotype_face` / `code_face` / `heading_face`. Describe the typographic strategy — how hierarchy is carried by size, weight, tracking, and colour on ONE family; where the logotype face appears (the wordmark, nowhere else); that figures are tabular numerals on the UI face. A change of family is not a hierarchy tool. If `heading_face` is declared, restate its audience and reason here in one sentence.]
 
 ## Layout
 
@@ -109,7 +120,8 @@ components:
 - Do use the accent color only for the single most important action per screen.
 - Don't mix rounded and sharp corners in the same view.
 - Do maintain WCAG AA contrast (4.5:1 for body text).
-- Don't introduce a third typeface; the two declared fonts are the entire system.
+- One family for the interface. The wordmark may keep its own. Nothing else may.
+- Don't set money, counts, or timestamps in any face but the UI face; figures are tabular numerals, emphasis by weight.
 - Do let the atmospheric backdrop carry depth — additional shadows compete with it.
 - Don't animate on scroll if the chosen tone is brutally minimal — silence is the gesture.
 
@@ -123,3 +135,5 @@ These are project-specific. Generate them from the Chosen Direction's commitment
 3. **No invented sections.** Stick to: Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts. Omit any that don't apply (e.g., a Touchstone with no components defined yet may omit the Components section); never reorder.
 4. **Token references** use `{path.to.token}` syntax — `{colors.primary}`, `{rounded.md}`, `{typography.label-md}`. Composite references permitted only inside `components:`.
 5. **Do's and Don'ts are project-specific** — derived from the Chosen Direction's commitments and the WedgeBrief's Refused Tones. Generic guardrails ("maintain contrast") permitted only if directly load-bearing for this Touchstone.
+6. **One interface face.** `typography.faces.ui_face` is required and every non-logotype token's `fontFamily` resolves to it (or to `heading_face` under rule 7). `logotype_face` may be applied only to the wordmark adjacent to the brand mark — the HTML must not reach it from any heading, figure, or dialog title selector. `code_face` covers code, identifiers, and log output only. The line "One family for the interface. The wordmark may keep its own. Nothing else may." is always emitted in Do's and Don'ts — it is the one generic guardrail that is always load-bearing.
+7. **A second heading face must be argued.** `heading_face` is permitted only when `heading_face_audience` and `heading_face_reason` are each filled with one sentence, and it never reaches `figures`. A blank or generic sentence ("for elegance") fails the Heat 6 review. Figures are always `{typography.faces.ui_face}` with `tabular-nums`; hierarchy is size, weight, tracking, colour — never a change of family.
