@@ -63,3 +63,9 @@
 **Learning**: Verifying an ADDITION means proving the new thing IS in the served bytes; verifying a REMOVAL means proving the old strings are NOT — because a stale dist deploys as a silent no-op that is indistinguishable from success at the deploy line (the version id increments either way). Grep the deployed bundle for the removed identifiers/copy and require zero hits, with the same CDN caveat: fetch the new asset hash directly, not the possibly-cached HTML reference.
 
 **Apply when**: Any deploy whose change is a removal (dead feature, retired copy, deleted route); pair with the addition-shaped check when a change does both.
+
+## Craft and Posture Are Different Questions (2026-09-05)
+
+**Learning**: A mechanism can be 5/5 on craft — hash-pinned, locked, fully audited — and still be unready, because craft asks "is the mechanism correct" while posture asks "what does the assembled default do." A well-built decision path sitting behind a default-open route is unready regardless of how good the path is. Gate go-live review on the assembled default a stranger would actually hit, not on the mechanism in isolation, and give the safe posture a supported install path — a flag that cannot survive a restart is not a posture, it is a demo.
+
+**Apply when**: Reviewing a feature that is individually well-engineered but reachable through a default configuration — especially auth, authorization, or anything gating code execution.
