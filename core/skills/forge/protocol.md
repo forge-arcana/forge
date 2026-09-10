@@ -74,6 +74,8 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
 | `haiku` | Mechanical LLM work — collation, formatting, template filling |
 | `script` | Deterministic work that leaves the LLM entirely — a shell/CLI step, not a model |
 
+**Claude binding of the top tier.** In Claude Code the `opus` tier deploys as the exact model id `claude-opus-4-8`, not the bare `opus` alias. The alias floats to the newest Opus (currently Opus 5); pinning holds forge arts and the fold triage sub-agent on a vetted top-level model and never lets the tier drift onto an unvetted release or Fable. The pin lives in one place — `FORGE_OPUS_MODEL` in `cast-deploy.sh`, applied to injected skill frontmatter via `tier_to_model`. Where a per-spawn model control accepts an exact id, opus-tier spawns pass `claude-opus-4-8` too; where it accepts only aliases, they fall back to the nearest opus alias. `sonnet` and `haiku` stay floating aliases by intent.
+
 ### Class → tier map
 
 - **Evaluative legwork** (dimensions, personas, passes) → sonnet, with security carve-outs at opus and the merge/verdict step wired at opus

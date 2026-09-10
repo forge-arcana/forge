@@ -108,29 +108,50 @@ bootstrap_layout() {
   ln -sfn "$AGENTS_SCRIPTS" "$MEMBRANE_SCRIPTS_LINK"
 }
 
+# --- Top-tier model pin. The neutral `opus` tier is the top-level model forge
+#     arts and the fold triage sub-agent run on. In Claude Code it deploys as an
+#     EXACT model id, deliberately NOT the bare `opus` alias — that alias floats
+#     to the newest Opus (Opus 5) and would silently carry the top tier onto a
+#     model forge has not vetted; nor Fable. Change this one constant to move the
+#     whole top tier. haiku/sonnet stay as floating aliases (unpinned by intent). ---
+FORGE_OPUS_MODEL="claude-opus-4-8"
+
+# --- tier_to_model: map a neutral model tier to the Claude `model:` value.
+#     Shared by injection and --verify so the two can never drift. Returns empty
+#     for inherit/unhinted/unknown (ride the session model — nothing injected). ---
+tier_to_model() {
+  case "$1" in
+    haiku|sonnet) printf '%s' "$1" ;;
+    opus)         printf '%s' "$FORGE_OPUS_MODEL" ;;
+    *)            printf '' ;;
+  esac
+}
+
 # --- inject_model_frontmatter: translate the neutral `<!-- model: <tier> -->`
 #     comment in a deployed skill into a real `model:` frontmatter field that
-#     Claude Code honours. haiku/sonnet/opus are injected; `inherit` and
-#     unhinted skills ride the session model untouched; any other tier value
-#     WARNs to stderr and injects nothing (rides the session model). The neutral
-#     comment stays in the body, so the source in core/ and the forge-build
-#     distributable remain 100% vendor-neutral. Per the Open Agent Skills spec,
-#     other tools (Codex/Gemini) ignore the unknown `model:` key — the value is
-#     never interpreted, so this is invisible to non-Claude harnesses. ---
+#     Claude Code honours. haiku/sonnet/opus are injected (opus as the pinned
+#     FORGE_OPUS_MODEL); `inherit` and unhinted skills ride the session model
+#     untouched; any other tier value WARNs to stderr and injects nothing (rides
+#     the session model). The neutral comment stays in the body, so the source in
+#     core/ and the forge-build distributable remain 100% vendor-neutral. Per the
+#     Open Agent Skills spec, other tools (Codex/Gemini) ignore the unknown
+#     `model:` key — the value is never interpreted, so this is invisible to
+#     non-Claude harnesses. ---
 inject_model_frontmatter() {
   local file="$1"
   [[ -f "$file" ]] || return 0
-  local tier
+  local tier model
   tier=$(grep -m1 -oE '<!--[[:space:]]*model:[[:space:]]*[a-zA-Z]+' "$file" 2>/dev/null | grep -oE '[a-zA-Z]+$' || true)
   case "$tier" in
     ""|haiku|sonnet|opus|inherit) ;;
     *) echo "WARN: unknown model tier '$tier' in $file — no frontmatter injected; skill rides the session model" >&2 ;;
   esac
-  awk -v tier="$tier" '
+  model=$(tier_to_model "$tier")
+  awk -v model="$model" '
     BEGIN { n = 0 }
     /^---[[:space:]]*$/ {
       n++
-      if (n == 2 && (tier == "haiku" || tier == "sonnet" || tier == "opus")) print "model: " tier
+      if (n == 2 && model != "") print "model: " model
       print
       next
     }
@@ -460,6 +481,7 @@ if [[ "${1:-}" == "--verify" ]]; then
     diff_output=$(skill_diff "$skill_dir" "$claude")
     # If the neutral hint names an injectable tier, the Claude copy must carry the matching frontmatter.
     hint_tier=$(grep -m1 -oE '<!--[[:space:]]*model:[[:space:]]*[a-zA-Z]+' "$neutral/SKILL.md" 2>/dev/null | grep -oE '[a-zA-Z]+$' || true)
+    hint_model=$(tier_to_model "$hint_tier")
     # The neutral copy must be byte-identical to forge — NO frontmatter leak into the cross-tool store.
     if grep -q '^model:[[:space:]]' "$neutral/SKILL.md" 2>/dev/null; then
       echo "| $skill | LEAK | model: frontmatter found in neutral cross-tool store |"
@@ -467,8 +489,8 @@ if [[ "${1:-}" == "--verify" ]]; then
     elif [[ -n "$diff_output" ]]; then
       echo "| $skill | DIFFERS | $diff_output |"
       errors=$((errors + 1))
-    elif [[ "$hint_tier" == "haiku" || "$hint_tier" == "sonnet" || "$hint_tier" == "opus" ]] && ! grep -q "^model:[[:space:]]*${hint_tier}[[:space:]]*$" "$claude/SKILL.md" 2>/dev/null; then
-      echo "| $skill | NO-INJECT | hint says $hint_tier but Claude copy lacks model: $hint_tier frontmatter — redeploy |"
+    elif [[ -n "$hint_model" ]] && ! grep -q "^model:[[:space:]]*${hint_model}[[:space:]]*$" "$claude/SKILL.md" 2>/dev/null; then
+      echo "| $skill | NO-INJECT | hint says $hint_tier but Claude copy lacks model: $hint_model frontmatter — redeploy |"
       errors=$((errors + 1))
     else
       echo "| $skill | OK | In sync |"
