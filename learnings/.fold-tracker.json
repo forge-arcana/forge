@@ -327,6 +327,11 @@
     "One Developer App Per SaaS Customer \u2014 Credential Pooling Closed on Major Platforms",
     "BYO App Credentials Ride the Token Seam as a Bundle",
     "Per-IP Rate Limits and Serverless Edge Shared Egress IPs Don't Mix",
-    "Background Sweeps Against Metered Third-Party APIs Must Be Opt-In When the Meter Is the Customer's"
+    "Background Sweeps Against Metered Third-Party APIs Must Be Opt-In When the Meter Is the Customer's",
+    "The Compliant Integration May Be a Different Product Shape",
+    "Per-Customer Credentials Can Be Legally Forced, Not Chosen",
+    "Serverless Edge Shares Egress IPs \u2014 IP-Rate-Limited APIs Will Collide",
+    "Background Sweeps Against Metered APIs Must Be Opt-In When the Customer Pays",
+    "Porting a Node App to a Serverless Edge Runtime: State Must Be Request-Scoped"
   ]
 }
