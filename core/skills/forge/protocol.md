@@ -73,6 +73,7 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
 | `sonnet` | Implementation-to-spec and structured rubric-evaluation legwork |
 | `haiku` | Mechanical LLM work — collation, formatting, template filling |
 | `script` | Deterministic work that leaves the LLM entirely — a shell/CLI step, not a model |
+| `local` | Code generation delegable to a local LLM via `llm-delegate.sh` — zero cost, reviewed by Claude |
 
 **Claude binding of the top tier.** In Claude Code the `opus` tier deploys as the exact model id `claude-opus-4-8`, not the bare `opus` alias. The alias floats to the newest Opus (currently Opus 5); pinning holds forge arts and the fold triage sub-agent on a vetted top-level model and never lets the tier drift onto an unvetted release or Fable. The pin lives in one place — `FORGE_OPUS_MODEL` in `cast-deploy.sh`, applied to injected skill frontmatter via `tier_to_model`. Where a per-spawn model control accepts an exact id, opus-tier spawns pass `claude-opus-4-8` too; where it accepts only aliases, they fall back to the nearest opus alias. `sonnet` and `haiku` stay floating aliases by intent.
 
@@ -146,6 +147,52 @@ Rules:
 3. **Grades are recorded in the plan artifact** (heat table, dimension list) so the user can override them before execution.
 4. **T1 deferral is batching, not omission.** Every T1 unit's output still passes through a standing gate before the work is called done — deferred gates are never trimmed.
 5. **Grade the target, not just the unit.** When the whole target is narrow (one diff, one screen, one deployable unit), collapse the non-carve-out legs into a single subagent carrying all their rubrics. Carve-out legs (security, emotional design) keep their own spawn and tier, and the merge/verdict gate never shrinks — only legwork width does.
+
+## Local LLM Delegation
+
+When a local Ollama instance is available, fan-out legs and code-generation work can be delegated to a local LLM at zero token cost. The local tier is an optimization — work routes through it when available and falls back to the pinned Claude tier silently when not.
+
+### Detection
+
+`<forge>/core/scripts/llm-delegate.sh` handles detection, fallback, and response parsing. Exit 0 = local LLM available and produced output. Exit 1 = unavailable (Ollama not running, model not found). Exit 2 = empty response. Any non-zero exit triggers fallback to the skill's pinned Claude tier.
+
+### Skill declaration
+
+Skills opt in via their model comment:
+
+```
+<!-- model: sonnet | local-delegable: true; ... -->
+<!-- model: opus | fan-out: dimensions → sonnet; fan-out-local: dimensions 1,3,4,5,6,7; ... -->
+```
+
+- `local-delegable: true` — the skill's primary code-generation work can use local LLM
+- `fan-out-local: <legs>` — named fan-out legs can use local LLM instead of their pinned tier
+
+### Delegation pattern
+
+The orchestrating session spawns a haiku-tier subagent whose only job is to call `llm-delegate.sh` and return the output:
+
+```
+Opus (orchestrate) → Haiku subagent (call llm-delegate.sh) → Local LLM ($0.00) → Opus (review)
+```
+
+The haiku subagent costs ~$0.001 per spawn. The local LLM output costs $0.00. Claude pays only for the orchestration prompt and the review pass.
+
+### Rules
+
+1. **Security carve-outs never go local.** Any leg explicitly carved out at opus tier (security dimensions, auth/authz review, payment logic) stays on Claude regardless of the skill's local-delegable declaration.
+2. **Merge/verdict gates never go local.** The opus merge, consolidation, and final verdict steps that review subagent output stay on Claude.
+3. **Fallback is silent.** If `llm-delegate.sh` exits non-zero, the orchestrator spawns the leg at its pinned Claude tier without user intervention. Local delegation is an optimization, not a requirement.
+4. **Quality gate.** The reviewing Claude (opus) treats local LLM output the same as sonnet output — it deduplicates, challenges unevidenced findings, and owns the final verdict. If the local output fails the quality gate, the orchestrator may retry on Claude.
+5. **User opt-out.** Setting `FORGE_LLM_DISABLE=1` skips local delegation entirely — all work routes through Claude tiers as before.
+
+### Validated skills (battery 2026-09-12)
+
+| Skill | Local Score | Claude Score | Delegable Legs |
+|-------|------------|--------------|----------------|
+| `/poke` | 3.9/5 | 5.0 | Dimensions 1,3,4,5,6,7 (not dim 2 security) |
+| `/srs` | 4.0/5 (tuned) | 4.5 | Primary code generation |
+| `/pound` | est. 3.5-4.0 | 5.0 | Non-security personas |
 
 ## Execution (art-specific)
 

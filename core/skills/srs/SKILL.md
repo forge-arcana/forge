@@ -2,7 +2,7 @@
 name: srs
 description: Setup or update restart.sh to bring up the entire local dev stack. Proposes ports, kills zombies, checks DB, verifies port health. Use when user needs a local dev startup script.
 ---
-<!-- model: sonnet | bash codegen, user reviews before run; no fan-out -->
+<!-- model: sonnet | local-delegable: true; bash codegen, user reviews before run; no fan-out -->
 
 # /srs — Setup Restart Script
 
