@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-09-11",
+  "lastRun": "2026-09-12",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -266,7 +266,12 @@
     "Craft and Posture Are Different Questions",
     "An Unimplemented Rule Is Worse Than No Rule",
     "Order Work So a Kill Leaves the Tree Better, Not Worse",
-    "2026-09-05 typography and landing"
+    "2026-09-05 typography and landing",
+    "The Compliant Integration May Be a Different Product Shape",
+    "Per-Customer Credentials Can Be Legally Forced, Not Chosen",
+    "Serverless Edge Shares Egress IPs — IP-Rate-Limited APIs Will Collide",
+    "Background Sweeps Against Metered APIs Must Be Opt-In When the Customer Pays",
+    "Porting a Node App to a Serverless Edge Runtime: State Must Be Request-Scoped"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

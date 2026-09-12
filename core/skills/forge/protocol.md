@@ -194,6 +194,32 @@ The haiku subagent costs ~$0.001 per spawn. The local LLM output costs $0.00. Cl
 | `/srs` | 4.0/5 (tuned) | 4.5 | Primary code generation |
 | `/pound` | est. 3.5-4.0 | 5.0 | Non-security personas |
 
+### Setup
+
+Any user on the machine can use local LLM delegation.
+
+1. **Install Ollama**: `curl -fsSL https://ollama.com/install.sh | sh`
+2. **Pull a coding model**: `ollama pull qwen3-coder:30b` (or any coding-capable model)
+3. **Verify**: the delegation script auto-detects a running Ollama at `localhost:11434`
+
+### Configuration
+
+Environment variables control model selection and endpoint routing. Set in your shell profile or per-session.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `OLLAMA_URL` | `http://localhost:11434` | Primary Ollama endpoint |
+| `FORGE_LLM_MODEL` | `qwen3-coder:30b` | Model to use for delegation |
+| `FORGE_LLM_SYSTEM` | Built-in concise prompt | System prompt override |
+| `FORGE_LLM_REMOTE_URL` | (none) | Fallback remote Ollama endpoint |
+| `FORGE_LLM_DISABLE` | (none) | Set to `1` to skip all local delegation |
+
+**Endpoint fallback chain**: `OLLAMA_URL` → `--url` flag → `localhost:11434` → `FORGE_LLM_REMOTE_URL`. First reachable endpoint wins.
+
+**Using a different model**: Any Ollama-compatible model works. Set `FORGE_LLM_MODEL` to the model tag (e.g. `deepseek-coder-v2:16b`, `codestral:22b`). The default system prompt is tuned for concise single-solution output — override with `FORGE_LLM_SYSTEM` if your model needs different instructions.
+
+**Remote Ollama**: To delegate to an Ollama instance on another machine, set `FORGE_LLM_REMOTE_URL=http://<host>:11434`. The remote endpoint is tried last in the fallback chain — local always takes priority.
+
 ## Execution (art-specific)
 
 Each art defines its own execution in its SKILL.md:

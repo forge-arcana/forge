@@ -384,3 +384,33 @@
 **Learning**: Two stores that jointly decide an authorization need invariants between them and one lock ordering — a lock on each alone is theatre. A store guarded by a lock sitting next to a store guarded by nothing, with no decision path consulting the other, produced "rejected" records for work still running, both-succeed races between concurrent decisions, and crash states with no repair path. The fix: one outer lock (always acquired in the same order across every path that touches either store), cross-store checks in every decision path (an accept refuses what the other store already claims, and vice versa), a durable intent written before the irreversible act, and a reconcile pass run on every entry and at boot to repair whatever a crash left half-done.
 
 **Apply when**: Two persistent stores each hold half of what a single authorization decision depends on — a pending-request store and a decided-state store, a lock file and a registry, a cache and its source of truth used to gate a write.
+
+## The Compliant Integration May Be a Different Product Shape (2026-09-11)
+
+**Learning**: A platform's biggest-audience surface can have no official API at all, and no roadmap for one — the only legitimate integration is then a different product shape than the one you set out to sell (e.g. a messaging transport on the customer's own business account, not a broadcast-publish lane). Re-verified across three separate research passes and confirmed by what every serious competitor actually ships. Don't scope a lane around a surface until you've proven a first-party, ToS-safe API for it exists; reverse-engineered web protocols are a ban, not an integration.
+
+**Apply when**: Evaluating whether to support a new platform or channel — establish the compliant API surface first, and accept that the shape it forces may not match the feature you wanted to sell.
+
+## Per-Customer Credentials Can Be Legally Forced, Not Chosen (2026-09-11)
+
+**Learning**: A platform can forbid credential pooling and mandate one developer app per SaaS customer. When it does, "the customer shoulders their own API billing/quota" stops being a pricing decision and becomes the only lawful architecture — a multi-tenant integration through your single app is no longer allowed. The corollary that dissolves the apparent cost: BYO app credentials fit an existing per-channel encrypted token row as a JSON bundle ({appKey, appSecret, accessToken, …} in one row). Stateless adapters that receive the decrypted token per call carry a bundle unchanged — no new table, no per-channel adapter construction. What reads as the largest unbudgeted architecture item can dissolve at the payload layer.
+
+**Apply when**: A third party mandates per-tenant apps or bans shared credentials — model it as BYO-by-construction, and vault the whole credential bundle in the seam that already carries a single token.
+
+## Serverless Edge Shares Egress IPs — IP-Rate-Limited APIs Will Collide (2026-09-11)
+
+**Learning**: Serverless edge platforms share outbound egress IPs across all their tenants, so any third-party API that rate-limits or bans by client IP will see your traffic pooled with strangers'. Two consequences: never do per-call session creation against such an API (persist and refresh sessions instead), and keep a non-edge egress path as break-glass for when the shared pool gets throttled or blocked. This is an unresolved property of the platform, not a bug you can wait out.
+
+**Apply when**: Calling any per-IP-limited or per-IP-bannable third-party API from a serverless edge runtime — design for shared egress from the start.
+
+## Background Sweeps Against Metered APIs Must Be Opt-In When the Customer Pays (2026-09-11)
+
+**Learning**: On a metered third-party API where reads cost money (e.g. per-metric-read pricing) and the meter is the customer's account, an unconditional periodic sweep — an hourly metrics/insights pull, say — is a silent bill you run up on someone else's card. Metered read paths must be declared off / opt-in, never default-on; the same sweep is fine only where reads are free or billed to you.
+
+**Apply when**: Adding any recurring background fetch against a third-party API — check whether reads are metered and whose account the meter belongs to before making it default-on.
+
+## Porting a Node App to a Serverless Edge Runtime: State Must Be Request-Scoped (2026-09-11)
+
+**Learning**: Porting a Node HTTP app (Hono/Drizzle/Better-Auth/Pino shape) to a serverless edge runtime (workerd) surfaces a consistent class of failures, all rooted in one rule — no long-lived per-process state. Verified at runtime, not in theory: (1) module-singletons crash at startup — a DB client or auth instance built at import time throws during module-eval; make both request-scoped, e.g. an AsyncLocalStorage holding the per-request client behind a Proxy exported under the old name so existing call sites are untouched. (2) Never cache a DB client across requests — it works for the request that created it then throws "cannot perform I/O on behalf of a different request"; open a fresh client per request (a managed pool binding pools the real connections) and close it after. (3) The raw-TCP Postgres driver needs a managed connection binding whose connection string arrives per-request on the env, not at module load; the HTTP/WS drivers are the only "connection-string-at-init" option but trade away interactive transactions / row locks. (4) `process.env` is empty at module load unless the runtime is configured to populate it from vars/secrets. (5) Node-internals loggers don't run — replace with a tiny console JSON-lines logger the platform's log pipeline ingests. (6) Prefer the platform's native object-storage binding over the S3 SDK — no credentials, no signed URLs, no egress. (7) Some libraries resolve AsyncLocalStorage via a dynamic node import that doesn't surface the constructor on edge runtimes; a shim setting `globalThis.AsyncLocalStorage` first fixes it. Debug method: a dry-run build proves the bundle compiles; bisect module-eval crashes with a trivial `export default {fetch(){}}` to isolate runtime vs import-graph.
+
+**Apply when**: Porting any Node server to a serverless edge runtime — audit every module-load singleton (DB, auth, logger, storage client) and make per-connection state request-scoped before chasing individual errors.
