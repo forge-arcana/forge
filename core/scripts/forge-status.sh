@@ -93,7 +93,7 @@ if [[ "$MODE" == "--pull" ]]; then
   }
   echo "**STATUS**: Up to date (pulled)"
 else
-  git -C "$FORGE_PATH" fetch 2>/dev/null
+  git -C "$FORGE_PATH" fetch 2>/dev/null || true
   BEHIND=$(git -C "$FORGE_PATH" rev-list HEAD..origin/main --count 2>/dev/null || echo "0")
   if [[ "$BEHIND" -gt 0 ]]; then
     echo "**STATUS**: $BEHIND commits behind remote. Run \`/forge\` to pull and sync."
