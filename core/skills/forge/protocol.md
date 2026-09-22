@@ -75,7 +75,7 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
 | `script` | Deterministic work that leaves the LLM entirely — a shell/CLI step, not a model |
 | `local` | Code generation delegable to a local LLM via `llm-delegate.sh` — zero cost, reviewed by Claude |
 
-**Claude binding of the top tier.** In Claude Code the `opus` tier deploys as the exact model id `claude-opus-4-8`, not the bare `opus` alias. The alias floats to the newest Opus (currently Opus 5); pinning holds forge arts and the fold triage sub-agent on a vetted top-level model and never lets the tier drift onto an unvetted release or Fable. The pin lives in one place — `FORGE_OPUS_MODEL` in `cast-deploy.sh`, applied to injected skill frontmatter via `tier_to_model`. Where a per-spawn model control accepts an exact id, opus-tier spawns pass `claude-opus-4-8` too; where it accepts only aliases, they fall back to the nearest opus alias. `sonnet` and `haiku` stay floating aliases by intent.
+**Claude binding of the top tier.** In Claude Code the `opus` tier deploys as the exact model id `claude-opus-5-5`, not the bare `opus` alias. The alias floats to the newest Opus; pinning holds forge arts and the fold triage sub-agent on a vetted top-level model and never lets the tier drift onto an unvetted future release or Fable. The pin lives in one place — `FORGE_OPUS_MODEL` in `cast-deploy.sh`, applied to injected skill frontmatter via `tier_to_model`. Where a per-spawn model control accepts an exact id, opus-tier spawns pass `claude-opus-5-5` too; where it accepts only aliases, they fall back to the nearest opus alias. `sonnet` and `haiku` stay floating aliases by intent.
 
 ### Class → tier map
 

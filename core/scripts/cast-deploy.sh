@@ -114,7 +114,7 @@ bootstrap_layout() {
 #     to the newest Opus (Opus 5) and would silently carry the top tier onto a
 #     model forge has not vetted; nor Fable. Change this one constant to move the
 #     whole top tier. haiku/sonnet stay as floating aliases (unpinned by intent). ---
-FORGE_OPUS_MODEL="claude-opus-4-8"
+FORGE_OPUS_MODEL="claude-opus-5-5"
 
 # --- tier_to_model: map a neutral model tier to the Claude `model:` value.
 #     Shared by injection and --verify so the two can never drift. Returns empty
