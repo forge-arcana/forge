@@ -100,27 +100,3 @@
 **Learning**: "Default to serverless/scale-to-zero Postgres" assumes bursty traffic where sleeping pays. It inverts when any component is always-on (a per-minute cron or queue consumer): the instance never sleeps, serverless pricing loses to a small flat-rate managed instance, and free-tier compute hours burn out in days. Pick a flat-price provider in the required region and keep the exit cheap: use the DB as plain vanilla Postgres (no provider-specific features), reach it through a connection-string indirection layer, and keep nightly logical dumps restore-drilled — then a provider swap is ~30 minutes and "too late to switch" never happens.
 
 **Apply when**: choosing a Postgres host for a stack with an always-on consumer; re-checking any "serverless DB by default" recommendation.
-
-## One Developer App Per SaaS Customer — Credential Pooling Closed on Major Platforms (2026-08-15)
-
-**Learning**: X closed the shared-app pattern on 2026-03-31: one developer app PER SaaS customer is mandatory (the Developer Agreement forbids credential pooling; intermediaries still pooling are running a model the platform just closed). A multi-tenant scheduler can no longer post through its own single platform app — "customer shoulders the billing" is not a pricing choice there, it is the only lawful architecture. The Basic paid tier was retired (force-migrated), replaced by pay-per-use pricing with a binding account-level cap (unverified accounts limited to a low daily post count).
-
-**Apply when**: Designing multi-tenant posting/scheduling against X or any platform whose terms forbid credential pooling — architect BYO-per-customer apps from the start.
-
-## BYO App Credentials Ride the Token Seam as a Bundle (2026-08-15)
-
-**Learning**: Per-customer app credentials (`{appKey, appSecret, accessToken, ...}`) fit an existing per-channel encrypted token vault as a single JSON bundle in one token row: stateless adapters that receive the decrypted token per call carry a bundle unchanged, so BYO-credentials needs no new table and no per-channel adapter construction. What looks like the largest unbudgeted architecture item can dissolve at the payload layer.
-
-**Apply when**: Adding bring-your-own-credentials support to any multi-tenant integration layer that already passes decrypted tokens to stateless adapters.
-
-## Per-IP Rate Limits and Serverless Edge Shared Egress IPs Don't Mix (2026-08-15)
-
-**Learning**: Some platforms rate-limit by IP (e.g. Bluesky), and Cloudflare Workers — like other serverless edge platforms — share egress IPs across ALL customers on the platform, so a per-IP-limited API called from serverless edge burns a rate budget shared with strangers. Never create a session per publish; persist and refresh sessions, and keep a non-edge egress path as break-glass.
-
-**Apply when**: Calling any per-IP-rate-limited third-party API from a serverless edge platform with shared egress IPs.
-
-## Background Sweeps Against Metered Third-Party APIs Must Be Opt-In When the Meter Is the Customer's (2026-08-15)
-
-**Learning**: On platforms where API reads bill to the CUSTOMER's meter (e.g. a per-read insights charge), an unconditional hourly metrics sweep is a silent bill run up on someone else's account. Metered-platform insights must ship declared off/opt-in, not default-on.
-
-**Apply when**: Building any background polling/analytics sweep against a third-party API whose usage is billed to the end customer's account.

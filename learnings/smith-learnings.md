@@ -82,9 +82,6 @@
 **Learning**: Concurrent heats editing different regions of the same files make per-unit selective staging impossible — git cannot split within a file. Accept combined multi-unit gate commits, declare it in the ledger early, and sequence heats that must own the same file regions.
 **Apply when**: Planning parallel heats that touch shared route/config files.
 
-## Prove a Compile-Time Guarantee by Breaking It, Not by Asserting It (2026-08-08)
-**Promoted to `global-patterns.md`** (merged with scratch-copy neutralisation guidance — the hazard is session-generic, not smith-specific). See that file for the current entry; do not re-add content here.
-
 ## A Hand-Maintained Inverse Is a Distinct Defect Class, and It Hides (2026-08-08)
 **Learning**: Forward builders paired with reverse parsers (build a key / parse it back, arm a cooldown / poll for it) drift silently and fail as an EMPTY UI rather than an error — the reverse side simply finds nothing. Grep for the CONSTRUCTED VALUES, not just the table names; a first-pass inventory found none of four such pairs, a value-pattern sweep found all four.
 **Apply when**: Auditing any codebase with derived string keys, scope names, or serialized identifiers.

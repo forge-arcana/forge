@@ -17,3 +17,7 @@
 ## SessionStorage Avoids Consent for Ephemeral Preferences (2026-05-29)
 **Learning**: A persistent cookie for language/theme preference technically requires GDPR/privacy consent disclosure as a non-essential cookie. `sessionStorage` is consent-free (non-persistent, browser-only, never sent to server) and is a valid alternative for preferences that don't need to outlive the session. Use cookies only when server-side reading is genuinely required.
 **Apply when**: Any app storing user preferences — evaluate whether sessionStorage eliminates the compliance burden before defaulting to cookies.
+
+## Mocks Must Model the Vendor's Real Contract, Not the Code's Assumption (2026-09-19)
+**Learning**: Bugs ship green when a test mock encodes the same wrong assumption as the code under test — e.g. a composite identifier modeled as its bare component, or a post-transaction object modeled as carrying the pre-transaction catalog fields. A mock that shares the code's assumption validates the bug instead of catching it. Derive mock shapes from the vendor's actual payloads or published types, not from how the code consumes them.
+**Apply when**: Writing or reviewing tests that mock a third-party SDK or API — check each mocked shape against a captured real payload or the vendor's type definitions.
