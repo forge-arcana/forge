@@ -198,6 +198,10 @@ Always run `bash <forge>/core/scripts/cast-deploy.sh --hooks` (every cast, no PL
 
 > The earlier rule — *settings wiring is per-user and is NEVER auto-edited by forge* — was **retired 2026-08-30**. It assumed a single-user membrane whose owner would act on a printed `not wired` nudge; on a shared box it became N manual steps nobody performed, and an audit found every human membrane carrying hook bodies with no registration at all. Bodies without nerves are worse than neither: the membrane reads as enforced and enforces nothing. See `<forge>/core/hooks/README.md`.
 
+### Settings defaults
+
+Always run `bash <forge>/core/scripts/cast-deploy.sh --settings` (every cast, no PLAN row needed). This applies forge-managed settings defaults to the membrane's `settings.json` with SET-IF-ABSENT semantics: if the key already exists (user's own choice), it is left untouched; otherwise the forge default is set. Currently sets `autoCompactWindow: 250000` to reduce cache-read costs on 1M-context models. Verify with `cast-deploy.sh --verify-settings`.
+
 ### Learnings
 For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry into `<membrane>/learnings/<file>.md`.
 

@@ -24,8 +24,10 @@
 #   cast-deploy.sh --verify-scripts                   verify runtime scripts match forge
 #   cast-deploy.sh --rules                            deploy forge core/rules → membrane global rules file
 #   cast-deploy.sh --verify-rules                     verify membrane rules block matches forge core/rules
-#   cast-deploy.sh --hooks                            deploy forge core/hooks/*.sh → membrane hooks/ (bodies only, never settings.json)
+#   cast-deploy.sh --hooks                            deploy forge core/hooks/*.sh → membrane hooks/ (+ wire forge's own entries into settings.json)
 #   cast-deploy.sh --verify-hooks                     verify membrane hook bodies match forge core/hooks
+#   cast-deploy.sh --settings                         apply forge settings defaults to membrane settings.json (SET-IF-ABSENT)
+#   cast-deploy.sh --verify-settings                  verify forge settings defaults are present in membrane settings.json
 #   cast-deploy.sh --bootstrap                        create dirs + symlinks (no skill deploy)
 #
 # Environment overrides:
@@ -291,6 +293,18 @@ FORGE_HOOK_WIRING=(
   "tier-routing.sh|UserPromptSubmit|"
 )
 
+# The forge-managed settings defaults. One row per key:
+#   <key>|<json-value>
+# Applied with SET-IF-ABSENT semantics: if the key already exists in membrane
+# settings.json (user's own choice), it is left untouched; otherwise set to
+# this default. Why autoCompactWindow 250k: on 1M-context models auto-compact
+# defaults to ~967k, so sessions grow to ~1M before trimming; cache reads
+# dominate usage; 250k cap cuts that. Users can still override via env var
+# CLAUDE_CODE_AUTO_COMPACT_WINDOW or --autocompact flag.
+FORGE_SETTINGS_DEFAULTS=(
+  "autoCompactWindow|250000"
+)
+
 # Split a FORGE_HOOK_WIRING row into base/event/matcher (matcher may contain |).
 _wiring_parts() {
   local row="$1"
@@ -439,6 +453,94 @@ verify_hooks() {
   return $errors
 }
 
+# --- Settings defaults: apply forge defaults to membrane settings.json with
+#     SET-IF-ABSENT semantics. If a key already exists (user's own choice), it
+#     is left untouched and reported as KEPT; otherwise it is set and reported
+#     as SET. Same atomic jq merge pattern as wire_hooks. ---
+
+apply_settings_defaults() {
+  echo "## Applying forge settings defaults to $MEMBRANE_SETTINGS_FILE"
+  echo ""
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "| settings | SKIP | jq not found — cannot apply defaults |"
+    return 1
+  fi
+  [[ -f "$MEMBRANE_SETTINGS_FILE" ]] || echo '{}' > "$MEMBRANE_SETTINGS_FILE"
+  if ! jq -e . "$MEMBRANE_SETTINGS_FILE" >/dev/null 2>&1; then
+    echo "| settings | ERROR | not valid JSON — refusing to touch it |"
+    return 1
+  fi
+  # One-time backup before the first managed write.
+  if [[ ! -f "$MEMBRANE_SETTINGS_FILE.pre-forge-settings.bak" ]]; then
+    cp "$MEMBRANE_SETTINGS_FILE" "$MEMBRANE_SETTINGS_FILE.pre-forge-settings.bak"
+  fi
+  local row key value tmp
+  for row in "${FORGE_SETTINGS_DEFAULTS[@]}"; do
+    key="${row%%|*}"
+    value="${row#*|}"
+    # Check if key already exists
+    if jq -e --arg k "$key" 'has($k)' "$MEMBRANE_SETTINGS_FILE" >/dev/null 2>&1; then
+      local current
+      current=$(jq -r --arg k "$key" '.[$k]' "$MEMBRANE_SETTINGS_FILE")
+      if [[ "$current" == "$value" ]]; then
+        echo "| $key | OK | $value (already set) |"
+      else
+        echo "| $key | KEPT | user value: $current (forge default: $value) |"
+      fi
+    else
+      tmp="$MEMBRANE_SETTINGS_FILE.tmp.$$"
+      if jq --arg k "$key" --argjson v "$value" '. + {($k): $v}' "$MEMBRANE_SETTINGS_FILE" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]]; then
+        mv "$tmp" "$MEMBRANE_SETTINGS_FILE"
+        echo "| $key | SET | $value |"
+      else
+        rm -f "$tmp"
+        echo "| $key | ERROR | jq merge failed — settings.json left unchanged |"
+      fi
+    fi
+  done
+  echo ""
+  echo "**Settings defaults applied**"
+  return 0
+}
+
+verify_settings() {
+  echo "## Settings Defaults Verification"
+  echo ""
+  local errors=0
+  if [[ ! -f "$MEMBRANE_SETTINGS_FILE" ]]; then
+    echo "| settings | MISSING | no $MEMBRANE_SETTINGS_FILE — run cast-deploy.sh --settings |"
+    return 1
+  fi
+  if ! jq -e . "$MEMBRANE_SETTINGS_FILE" >/dev/null 2>&1; then
+    echo "| settings | ERROR | not valid JSON |"
+    return 1
+  fi
+  local row key value
+  for row in "${FORGE_SETTINGS_DEFAULTS[@]}"; do
+    key="${row%%|*}"
+    value="${row#*|}"
+    if ! jq -e --arg k "$key" 'has($k)' "$MEMBRANE_SETTINGS_FILE" >/dev/null 2>&1; then
+      echo "| $key | MISSING | forge default not set — run cast-deploy.sh --settings |"
+      errors=$((errors + 1))
+    else
+      local current
+      current=$(jq -r --arg k "$key" '.[$k]' "$MEMBRANE_SETTINGS_FILE")
+      if [[ "$current" == "$value" ]]; then
+        echo "| $key | OK | $value |"
+      else
+        echo "| $key | USER-VALUE | $current (forge default: $value) |"
+      fi
+    fi
+  done
+  echo ""
+  if [[ $errors -eq 0 ]]; then
+    echo "**All settings defaults verified**"
+  else
+    echo "**$errors setting(s) missing**"
+  fi
+  return $errors
+}
+
 if [[ "${1:-}" == "--hooks" ]]; then
   deploy_hooks
   exit 0
@@ -446,6 +548,16 @@ fi
 
 if [[ "${1:-}" == "--verify-hooks" ]]; then
   verify_hooks
+  exit $?
+fi
+
+if [[ "${1:-}" == "--settings" ]]; then
+  apply_settings_defaults
+  exit 0
+fi
+
+if [[ "${1:-}" == "--verify-settings" ]]; then
+  verify_settings
   exit $?
 fi
 
@@ -601,7 +713,7 @@ else
 fi
 
 if [[ ${#skills[@]} -eq 0 ]]; then
-  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --rules | --verify-rules | --hooks | --verify-hooks | --bootstrap" >&2
+  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --rules | --verify-rules | --hooks | --verify-hooks | --settings | --verify-settings | --bootstrap" >&2
   exit 1
 fi
 
@@ -643,7 +755,7 @@ done
 echo ""
 echo "**Deploy complete**"
 
-# --all also deploys runtime scripts, the forge rules block, and hook bodies
+# --all also deploys runtime scripts, the forge rules block, hook bodies, and settings defaults
 if [[ "${1:-}" == "--all" ]]; then
   echo ""
   deploy_scripts
@@ -651,4 +763,6 @@ if [[ "${1:-}" == "--all" ]]; then
   deploy_rules
   echo ""
   deploy_hooks
+  echo ""
+  apply_settings_defaults
 fi

@@ -144,3 +144,14 @@ Before pushing, think from a **CI perspective**: *"What does a fresh `git clone`
 look like?"* Generated/gitignored files (i18n, codegen, protobuf, GraphQL) that typecheck/build
 depend on need explicit compile steps in CI — local dev won't catch this because files
 already exist on disk.
+
+## HARD RULE — Context Hygiene — A Session Is a Task
+
+> **A session is a task, not a days-long workspace. Clear context between unrelated work, and compact while the cache is warm.**
+
+1. **/clear between unrelated tasks.** Carrying one task's context into the next costs cache reads on every turn and buys nothing.
+2. **Before a break longer than ~1 hour, /compact or /clear** while the prompt cache is still warm. Main-session cache TTL is 1 hour; a cold /compact on a large session is the most expensive kind.
+3. **Don't switch model or toggle MCP servers mid-task**. Each rebuilds the whole cache. (Editing CLAUDE.md or memory mid-session does not.)
+4. **Keep always-loaded rules lean** (CLAUDE.md under ~200 lines). Move specialist content into on-demand skills that load when needed, not every prompt.
+
+The test: would this context still be needed if the task started fresh? If not, clear it.
