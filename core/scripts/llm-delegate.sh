@@ -10,17 +10,21 @@
 #   --system PROMPT    System prompt override (default: built-in)
 #   --url URL          Ollama endpoint (default: http://localhost:11434)
 #   --num-ctx N        Context window (default: 4096)
+#   --num-predict N    Max output tokens (default: num_ctx * 3/4)
+#   --timeout SECS     Curl timeout in seconds (default: 600)
 #   --temperature T    Sampling temperature (default: 0.2)
 #   --strip-fences     Strip outer markdown code fences from output
 #   --quiet            Suppress stderr stats
 #
 # Environment variables:
-#   OLLAMA_URL            Primary Ollama endpoint
-#   FORGE_LLM_REMOTE_URL  Fallback remote Ollama endpoint
-#   FORGE_LLM_MODEL       Default model override
-#   FORGE_LLM_SYSTEM      Default system prompt override
+#   OLLAMA_URL               Primary Ollama endpoint
+#   FORGE_LLM_REMOTE_URL     Fallback remote Ollama endpoint
+#   FORGE_LLM_MODEL          Default model override
+#   FORGE_LLM_SYSTEM         Default system prompt override
+#   FORGE_LLM_NUM_PREDICT    Default num_predict override
+#   FORGE_LLM_TIMEOUT        Default timeout override
 #
-# Exit codes: 0=success, 1=unavailable, 2=empty response
+# Exit codes: 0=success, 1=unavailable/timeout, 2=empty or truncated-without-answer
 
 set -euo pipefail
 
@@ -30,6 +34,8 @@ MODEL=""
 SYSTEM=""
 URL=""
 NUM_CTX=4096
+NUM_PREDICT=""
+TIMEOUT="${FORGE_LLM_TIMEOUT:-600}"
 TEMPERATURE=0.2
 STRIP_FENCES=0
 QUIET=0
@@ -41,6 +47,8 @@ while [ $# -gt 0 ]; do
         --system) SYSTEM="$2"; shift 2 ;;
         --url) URL="$2"; shift 2 ;;
         --num-ctx) NUM_CTX="$2"; shift 2 ;;
+        --num-predict) NUM_PREDICT="$2"; shift 2 ;;
+        --timeout) TIMEOUT="$2"; shift 2 ;;
         --temperature) TEMPERATURE="$2"; shift 2 ;;
         --strip-fences) STRIP_FENCES=1; shift ;;
         --quiet) QUIET=1; shift ;;
@@ -68,6 +76,7 @@ fi
 
 [ -z "$MODEL" ] && MODEL="${FORGE_LLM_MODEL:-qwen3-coder:30b}"
 [ -z "$SYSTEM" ] && SYSTEM="${FORGE_LLM_SYSTEM:-$DEFAULT_SYSTEM}"
+[ -z "$NUM_PREDICT" ] && NUM_PREDICT="${FORGE_LLM_NUM_PREDICT:-$((NUM_CTX * 3 / 4))}"
 
 if [ ${#ARGS[@]} -gt 0 ]; then
     PROMPT="${ARGS[*]}"
@@ -80,14 +89,25 @@ fi
 
 PAYLOAD=$(python3 -c "
 import json, sys
-model, system, prompt, num_ctx, temperature = sys.argv[1:6]
+model, system, prompt, num_ctx, num_predict, temperature = sys.argv[1:7]
 print(json.dumps({
     'model': model, 'system': system, 'prompt': prompt, 'stream': False,
-    'options': {'temperature': float(temperature), 'num_ctx': int(num_ctx)},
+    'options': {'temperature': float(temperature), 'num_ctx': int(num_ctx), 'num_predict': int(num_predict)},
 }))
-" "$MODEL" "$SYSTEM" "$PROMPT" "$NUM_CTX" "$TEMPERATURE")
+" "$MODEL" "$SYSTEM" "$PROMPT" "$NUM_CTX" "$NUM_PREDICT" "$TEMPERATURE")
 
-RESPONSE=$(curl -s "${RESOLVED_URL}/api/generate" -d "$PAYLOAD")
+set +e
+RESPONSE=$(curl -s --max-time "$TIMEOUT" "${RESOLVED_URL}/api/generate" -d "$PAYLOAD")
+CURL_EXIT=$?
+set -e
+if [ $CURL_EXIT -ne 0 ]; then
+    echo "llm-delegate.sh: request failed or timed out after ${TIMEOUT}s (curl exit $CURL_EXIT)" >&2
+    exit 1
+fi
+if [ -z "$RESPONSE" ]; then
+    echo "llm-delegate.sh: empty response from endpoint" >&2
+    exit 1
+fi
 
 echo "$RESPONSE" | python3 -c "
 import json, sys, re
@@ -95,21 +115,40 @@ import json, sys, re
 strip_fences = $([ "$STRIP_FENCES" -eq 1 ] && echo True || echo False)
 quiet = $([ "$QUIET" -eq 1 ] && echo True || echo False)
 
-d = json.load(sys.stdin)
+try:
+    d = json.load(sys.stdin)
+except json.JSONDecodeError:
+    print('llm-delegate.sh: invalid JSON response from endpoint', file=sys.stderr)
+    sys.exit(1)
+
+if d.get('error'):
+    print(f'llm-delegate.sh: endpoint error: {d[\"error\"]}', file=sys.stderr)
+    sys.exit(1)
+
 text = d.get('response', '')
 text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+text = re.sub(r'<think>.*\Z', '', text, flags=re.DOTALL).strip()
 
 if strip_fences:
     text = re.sub(r'^\`\`\`[a-zA-Z0-9_+-]*\n', '', text)
     text = re.sub(r'\n\`\`\`\s*\$', '', text)
     text = text.strip()
 
+done_reason = d.get('done_reason', '')
 tokens = d.get('eval_count', 0)
-if tokens <= 0:
-    print('llm-delegate.sh: empty response from model', file=sys.stderr)
+
+if not text:
+    if done_reason == 'length':
+        print('llm-delegate.sh: hit num_predict limit with no output', file=sys.stderr)
+    else:
+        print('llm-delegate.sh: empty response from model', file=sys.stderr)
     sys.exit(2)
 
 print(text)
+
+if done_reason == 'length' and not quiet:
+    print('[WARNING: truncated at num_predict]', file=sys.stderr)
+
 if not quiet:
     dur = d.get('total_duration', 0) / 1e9
     speed = tokens / max(d.get('eval_duration', 1) / 1e9, 0.001)
