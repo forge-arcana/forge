@@ -24,7 +24,7 @@
 #   FORGE_LLM_NUM_PREDICT    Default num_predict override
 #   FORGE_LLM_TIMEOUT        Default timeout override
 #
-# Exit codes: 0=success, 1=unavailable/timeout, 2=empty or truncated-without-answer
+# Exit codes: 0=success, 1=unavailable/timeout, 2=empty, think-only, or truncated at num_predict (partial text still on stdout)
 
 set -euo pipefail
 
@@ -146,8 +146,13 @@ if not text:
 
 print(text)
 
-if done_reason == 'length' and not quiet:
-    print('[WARNING: truncated at num_predict]', file=sys.stderr)
+if done_reason == 'length':
+    if not quiet:
+        dur = d.get('total_duration', 0) / 1e9
+        speed = tokens / max(d.get('eval_duration', 1) / 1e9, 0.001)
+        print(f'[{tokens} tokens, {dur:.1f}s, {speed:.1f} tok/s, model: {d.get(\"model\", \"?\")}]', file=sys.stderr)
+    print('llm-delegate.sh: truncated at num_predict (partial output on stdout)', file=sys.stderr)
+    sys.exit(2)
 
 if not quiet:
     dur = d.get('total_duration', 0) / 1e9
