@@ -44,8 +44,14 @@ case "$model" in
   *fable*|*mythos*|*opus*)
     : # top tier — fall through and emit the rubric
     ;;
+  *haiku*)
+    # Haiku cheap tier: no delegation, no artifact block, explicit label
+    text="You are running on ${model} — a cheap-tier model. Writes are allowed. No delegation required."
+    jq -n --arg text "$text" '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":$text}}' 2>/dev/null
+    exit 0
+    ;;
   *)
-    # Not top tier — cheap session gets no injected text.
+    # Other cheap tiers (Sonnet, etc.) — no injected text
     exit 0
     ;;
 esac
