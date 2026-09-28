@@ -75,7 +75,7 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
 | `script` | Deterministic work that leaves the LLM entirely — a shell/CLI step, not a model |
 | `local` | Code generation delegable to a local LLM via `llm-delegate.sh` — zero cost, reviewed by Claude |
 
-**Claude binding of the top tier.** In Claude Code the `opus` tier deploys as the exact model id `claude-opus-5-5`, not the bare `opus` alias. The alias floats to the newest Opus; pinning holds forge arts and the fold triage sub-agent on a vetted top-level model and never lets the tier drift onto an unvetted future release or Fable. The pin lives in one place — `FORGE_OPUS_MODEL` in `cast-deploy.sh`, applied to injected skill frontmatter via `tier_to_model`. Where a per-spawn model control accepts an exact id, opus-tier spawns pass `claude-opus-5-5` too; where it accepts only aliases, they fall back to the nearest opus alias. `sonnet` and `haiku` stay floating aliases by intent.
+**Claude binding of the top tier.** In Claude Code all three tiers deploy as exact model ids (`claude-opus-5-5`, `claude-sonnet-4-5`, `claude-haiku-4-5`), not floating aliases. A floating alias can resolve to a model outside an org's availableModels allowlist, and Claude Code then silently ignores the pin (measured 2026-09-28: a `sonnet`-pinned skill ran at the session model). The pins live in one place — `FORGE_OPUS_MODEL`, `FORGE_SONNET_MODEL`, and `FORGE_HAIKU_MODEL` in `cast-deploy.sh`, applied to injected skill frontmatter via `tier_to_model`. Where a per-spawn model control accepts an exact id, tier spawns pass the exact id; where it accepts only aliases, they fall back to the nearest alias.
 
 ### Class → tier map
 
@@ -105,6 +105,8 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
 
    - **A spawn's model parameter binds — in both directions, including downward.** Subagents spawned from a top-tier session ran on a bottom-tier model for the whole of their work. This is the mechanism to reach for whenever a leg should run below the session; it is not fragile, and it is not harness-specific in principle (any harness exposing per-spawn model selection behaves this way).
    - **A skill's `model:` frontmatter does *not* pull a session below what it is already running.** A task skill pinned one tier down was invoked on a higher-tier session, and every turn of that invocation — including the invocation turn — ran at the session model. Frontmatter binds upward and is correct the moment a session sits *below* a skill's needed tier; it is simply not a cap.
+
+   **Measured 2026-09-28:** Frontmatter escalates upward only on a user slash invocation; a model-initiated Skill-tool invocation runs at the session model regardless of frontmatter. A floating alias (`model: sonnet`) that resolves outside the availableModels allowlist is silently ignored — the skill ran at the session model. Consequence: on a cheap default session model, users should invoke opus arts themselves (slash commands), and any flow that needs an art at opus from inside another skill must spawn a subagent with an explicit model parameter (rule 6), not call the Skill tool.
 
    The structural consequence: **a skill that does its work inline in the session runs at the session's tier, whatever its frontmatter says.** Invoking a mechanical task-skill from a top-tier session spends top-tier tokens on mechanical work. This is not a delegation failure — an inline skill invocation is not a delegation at all.
 

@@ -110,22 +110,24 @@ bootstrap_layout() {
   ln -sfn "$AGENTS_SCRIPTS" "$MEMBRANE_SCRIPTS_LINK"
 }
 
-# --- Top-tier model pin. The neutral `opus` tier is the top-level model forge
-#     arts and the fold triage sub-agent run on. In Claude Code it deploys as an
-#     EXACT model id, deliberately NOT the bare `opus` alias — that alias floats
-#     to the newest Opus (Opus 5) and would silently carry the top tier onto a
-#     model forge has not vetted; nor Fable. Change this one constant to move the
-#     whole top tier. haiku/sonnet stay as floating aliases (unpinned by intent). ---
+# --- Model tier pins. All tiers deploy as exact model ids (not floating
+#     aliases) because a floating alias can resolve to a model outside an org's
+#     availableModels allowlist, and Claude Code then silently ignores the pin
+#     (measured 2026-09-28: a `sonnet`-pinned skill ran at the session model).
+#     Change these constants when the allowlist moves. ---
 FORGE_OPUS_MODEL="claude-opus-5-5"
+FORGE_SONNET_MODEL="claude-sonnet-4-5"
+FORGE_HAIKU_MODEL="claude-haiku-4-5"
 
 # --- tier_to_model: map a neutral model tier to the Claude `model:` value.
 #     Shared by injection and --verify so the two can never drift. Returns empty
 #     for inherit/unhinted/unknown (ride the session model — nothing injected). ---
 tier_to_model() {
   case "$1" in
-    haiku|sonnet) printf '%s' "$1" ;;
-    opus)         printf '%s' "$FORGE_OPUS_MODEL" ;;
-    *)            printf '' ;;
+    haiku)  printf '%s' "$FORGE_HAIKU_MODEL" ;;
+    sonnet) printf '%s' "$FORGE_SONNET_MODEL" ;;
+    opus)   printf '%s' "$FORGE_OPUS_MODEL" ;;
+    *)      printf '' ;;
   esac
 }
 

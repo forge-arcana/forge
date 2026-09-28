@@ -2,7 +2,7 @@
 name: smith
 description: "Master of the forge — consumes a Blueprint + Pattern + Touchstone (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern + Touchstone, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 ---
-<!-- model: inherit | fan-out: build/fix apprentices → tier by heat grade (T1 → low-effort sonnet, T2 → sonnet gated by scoped opus art pass, T3 → opus apprentice or built inline at the session model, full opus gate either way); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) | local-delegable: true; fan-out-local: T1/T2 build/fix code-generation legs (security/auth/payment heats and ALL review/verdict gates stay on Claude) -->
+<!-- model: opus | fan-out: build/fix apprentices → tier by heat grade (T1 → low-effort sonnet, T2 → sonnet gated by scoped opus art pass, T3 → opus apprentice or built inline at the session model, full opus gate either way); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) | pinned opus (2026-09-28): with a cheap default session model, a slash-invoked /smith escalates to the top tier to orchestrate; the ceiling rule still delegates all implementation | local-delegable: true; fan-out-local: T1/T2 build/fix code-generation legs (security/auth/payment heats and ALL review/verdict gates stay on Claude) -->
 
 # /smith — The Master Builder
 

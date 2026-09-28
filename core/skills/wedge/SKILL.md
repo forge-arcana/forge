@@ -2,7 +2,7 @@
 name: wedge
 description: "Master of aesthetic. Drives a single decisive thrust that splits the project's identity from generic AI slop. Reads Opus + Vow, extracts a prose Soul Brief (what the product IS, ISN'T, examples-from-life, forbidden defaults), then summons three design-apprentices on essence-lenses derived from the Soul Brief, and forges the Touchstone — paired artifacts (HTML vision + MD typed contract per DESIGN.md spec) that persist as the visual constitution every downstream artifact conforms to. TRIGGER when: user has an Opus and Vow and wants the project to have a soul-bearing visual face before scope or architecture lock."
 ---
-<!-- model: inherit | fan-out: council apprentices → opus; Heat 6 codification → sonnet (opus reviews MD before Heat 8); audit at top level; Heat 3 assembly + Heat 7 parity check are script tier (wedge-preview-assemble.sh, wedge-parity-check.sh) -->
+<!-- model: opus | fan-out: council apprentices → opus; Heat 6 codification → sonnet (opus reviews MD before Heat 8); audit at top level; Heat 3 assembly + Heat 7 parity check are script tier (wedge-preview-assemble.sh, wedge-parity-check.sh) | pinned opus (2026-09-28): with a cheap default session model, a slash-invoked /wedge escalates to the top tier to orchestrate; the ceiling rule still delegates all implementation -->
 
 # /wedge — The Master of Aesthetic
 
