@@ -75,7 +75,7 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
 | `script` | Deterministic work that leaves the LLM entirely — a shell/CLI step, not a model |
 | `local` | Code generation delegable to a local LLM via `llm-delegate.sh` — zero cost, reviewed by Claude |
 
-**Claude binding of the top tier.** In Claude Code all three tiers deploy as exact model ids (`claude-opus-5-5`, `claude-sonnet-4-5`, `claude-haiku-4-5`), not floating aliases. A floating alias can resolve to a model outside an org's availableModels allowlist, and Claude Code then silently ignores the pin (measured 2026-09-28: a `sonnet`-pinned skill ran at the session model). The pins live in one place — `FORGE_OPUS_MODEL`, `FORGE_SONNET_MODEL`, and `FORGE_HAIKU_MODEL` in `cast-deploy.sh`, applied to injected skill frontmatter via `tier_to_model`. Where a per-spawn model control accepts an exact id, tier spawns pass the exact id; where it accepts only aliases, they fall back to the nearest alias.
+**Claude binding of the top tier.** In Claude Code all three tiers deploy as exact model ids (`claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-4-5`), not floating aliases. A floating alias can resolve to a model outside an org's availableModels allowlist, and Claude Code then silently ignores the pin (measured 2026-09-28: a `sonnet`-pinned skill ran at the session model). The pins live in one place — `FORGE_OPUS_MODEL`, `FORGE_SONNET_MODEL`, and `FORGE_HAIKU_MODEL` in `cast-deploy.sh`, applied to injected skill frontmatter via `tier_to_model`. Where a per-spawn model control accepts an exact id, tier spawns pass the exact id; where it accepts only aliases, they fall back to the nearest alias.
 
 ### Class → tier map
 
