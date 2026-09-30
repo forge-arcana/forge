@@ -248,3 +248,15 @@
 ## Prior art before bespoke (2026-11-18)
 **Learning**: Agents repeatedly built bespoke fixes for problems that platforms, standards or mature open source already solved. The hand-rolled version cost more and broke in ways the known one would not. Reframing first (what is the problem class, who already solves it) catches this before code exists. The gate is now a forge HARD RULE carried by `/pry reframe`.
 **Apply when**: Starting any build, feature, redesign, multi-file change or non-trivial fix, or briefing a subagent that builds or fixes.
+
+## Barrel Imports Break Vite in Monorepos (2026-09-30)
+**Learning**: A shared package barrel (`index.ts`) that re-exports server-only code (pino, fs, path, crypto) causes Vite to pull Node.js modules into browser builds, failing with `"X" is not exported by "__vite-browser-external:path"`. Frontend files must use deep imports (`@pkg/utils/money.js`, `@pkg/constants/enums.js`) instead of the barrel. Enable with `"./*": "./src/*"` in package.json exports.
+**Apply when**: Any monorepo where a shared package has both server-only AND browser-safe exports.
+
+## Error Handler Environment Check (2026-09-30)
+**Learning**: `=== "production"` should be `!== "development"` for error handler stack trace visibility. Staging, preview, and unknown environments should hide stack traces too. Fail-safe toward production behavior.
+**Apply when**: Writing error handlers that conditionally expose stack traces or debug info.
+
+## Integer Money Pattern (2026-09-30)
+**Learning**: Store all currency as smallest-unit integers (cents/centavos) in the database. $19.95 → `1995`. Convert at boundaries: user input → `toSmallest()` before DB writes, `fromSmallest()` at payment provider boundary, `format()` for display. Eliminates floating-point drift. Industry standard (Stripe, Xendit, PayMongo, Square). ORM `numeric`/`decimal` types map to strings in most ORMs (Drizzle, Prisma), causing scattered cast bugs.
+**Apply when**: Any project handling currency. Decide this on day one — retrofitting is painful.
