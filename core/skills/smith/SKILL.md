@@ -45,7 +45,7 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
 2. **Launch all reads in parallel** (all independent — sequential if your harness lacks parallel tool calls):
    - Read the Blueprint file **and the paired Pattern file** (if present), plan file, or extract work spec from conversation context (per Input Resolution)
    - Read the **Touchstone pair** if present — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter as the normative token block — colors, typography, spacing, rounded, components, plus the Do's/Don'ts prose section) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: load for visual reference). The MD is the aesthetic contract every screen smith builds must inherit; the HTML is the soul that contract serves.
-   - Read project rules file (`CLAUDE.md`/`AGENTS.md`) for stack, conventions, current state
+   - Read the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated) for stack, conventions, current state
    - Read `<forge>/core/skills/forge/stack-guide.md` for tech reference
    - Read `memory/smith-ledger.json` if it exists (resume mode — skip to Session Resume)
    - Read `memory/smith-workspec.md` if it exists (plan/conversation mode resume)

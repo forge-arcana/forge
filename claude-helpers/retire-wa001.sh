@@ -13,7 +13,7 @@
 #
 # REMOVAL: once the team has cycled at least once, delete this file and its
 # invocation in core/skills/forge/SKILL.md + .claude/skills/forge/SKILL.md
-# (Phase 2 cast). Tracked in CLAUDE.md Outstanding.
+# (Phase 2 cast). Tracked in AGENTS.md Outstanding.
 
 set -uo pipefail
 

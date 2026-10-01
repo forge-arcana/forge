@@ -28,7 +28,7 @@ Before each heat, smith scans the dependency graph for work whose inputs are alr
 2. **Concurrency cap**: Maximum 3-4 apprentices running simultaneously. More causes diminishing returns — merge resolution overhead grows faster than throughput gains.
 3. **Timeouts**: If an apprentice hasn't completed within the expected scope (no progress signal for 3+ minutes), smith checks status. Stuck apprentices are terminated and their work restarted or absorbed by smith directly.
 4. **Sync points**: All apprentices must complete before: unit boundaries, phase gates, and any heat whose output is a dependency for another. No sonnet apprentice output merges past a unit boundary before an opus-tier art pass covers it.
-5. **Context loading**: Apprentices receive the relevant blueprint sections, project CLAUDE.md, stack guide, and any evidence they need. They do NOT read the smith ledger or smith learnings — that's the master's domain.
+5. **Context loading**: Apprentices receive the relevant blueprint sections, the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated), stack guide, and any evidence they need. They do NOT read the smith ledger or smith learnings — that's the master's domain.
 6. **No overlapping dependencies**: Never fan out heats that modify the same files or modules. Build fan-out is only for truly independent code paths.
 7. **Merge conflicts**: If two apprentices modify the same file, smith resolves the merge. This is tracked in Layer 3 (apprentice proficiency) as a learning.
 8. **HARD RULE**: Apprentices NEVER use `&&`, `;`, or `||` to chain bash commands. Copy this rule verbatim into every apprentice prompt.

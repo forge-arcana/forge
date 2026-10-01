@@ -31,7 +31,7 @@ You are summoned, never scheduled. When the forge grows heavy, when the learning
 4. **Read ALL art SKILL.md files**: `<forge>/core/skills/*/SKILL.md`
 5. **Read reference docs**: `<forge>/core/skills/forge/stack-guide.md`, `<forge>/core/skills/forge/forge-conventions.md`, `<forge>/claude-helpers/refs/auto-allowed-bash.md`
 6. **Read accumulated purge learnings**: `<forge>/memory/purge-learnings.md` (skip if first run)
-7. **Read project CLAUDE.md**: `<forge>/CLAUDE.md`
+7. **Read project AGENTS.md**: `<forge>/AGENTS.md`
 
 Build a complete mental model of the forge's current state before proceeding.
 
@@ -139,7 +139,7 @@ Web-search to verify any entry you suspect is stale. Don't guess.
 Scan ALL files in `<forge>/memory/` for:
 
 - **Stale references**: tools, conventions, or decisions that no longer apply
-- **Promoted content**: memory that's already been absorbed into a SKILL.md or CLAUDE.md rule (redundant)
+- **Promoted content**: memory that's already been absorbed into a SKILL.md or AGENTS.md rule (redundant)
 - **Project contamination**: same rules as Dimension 1a
 
 ## Dimension 3: Skill Fitness (arts AND task skills)
@@ -168,8 +168,8 @@ Scan reference docs for internal consistency:
 
 - **stack-guide.md**: are the technology choices current? Any deprecated libraries? Web-search for major version changes.
 - **auto-allowed-bash.md** (`<forge>/claude-helpers/refs/auto-allowed-bash.md`): does it match `~/.claude/CLAUDE.md`? Any drift?
-- **CLAUDE.md (forge)**: is the Current Context section accurate? Arts table correct? Skill counts right?
-- **CLAUDE.md (forge) — size/currency**: `wc -c <forge>/CLAUDE.md`. If it exceeds **~25k chars**, the rules file has overgrown its cache-churn budget (a fat CLAUDE.md reloads into every cached prompt → Cache-Write spend every session). Flag an `UPDATE` finding: archive the **oldest** `- **Recent**:` bullets to `<forge>/memory/recent-history.md` (keep only the newest ~2 inline), and update the `- **Earlier history**` pointer line to match. This is forge-internal compaction — `/purge` owns it, NOT `/wrap` (which is for projects). Note: this is the ONE compaction `/purge` performs; it does NOT touch the append-only `.fold-tracker.json` (see the HARD RULE above — that prohibition is about the tracker, not CLAUDE.md history).
+- **AGENTS.md (forge)**: is the Current Context section accurate? Arts table correct? Skill counts right?
+- **AGENTS.md (forge) — size/currency**: `wc -c <forge>/AGENTS.md`. If it exceeds **~25k chars**, the rules file has overgrown its cache-churn budget (a fat AGENTS.md reloads into every cached prompt → Cache-Write spend every session). Flag an `UPDATE` finding: archive the **oldest** `- **Recent**:` bullets to `<forge>/memory/recent-history.md` (keep only the newest ~2 inline), and update the `- **Earlier history**` pointer line to match. This is forge-internal compaction — `/purge` owns it, NOT `/wrap` (which is for projects). Note: this is the ONE compaction `/purge` performs; it does NOT touch the append-only `.fold-tracker.json` (see the HARD RULE above — that prohibition is about the tracker, not AGENTS.md history).
 
 ## Consolidation
 
@@ -198,7 +198,7 @@ After user confirms:
 4. **Commit & push** — `/purge` owns its own commit flow (forge has no linter/docs):
    - **Conflict check**: Run `git -C <forge> diff --name-only --diff-filter=U`. If ANY unresolved files exist, **STOP** and list them.
    - **Stage** changed files with `git add <file>` (never `git add -A`)
-   - **Update context** in `<forge>/CLAUDE.md` Current Context section
+   - **Update context** in `<forge>/AGENTS.md` Current Context section
    - **Commit**: `"Purge: [what was cleansed]"` (no AI/agent attribution metadata — no `Co-Authored-By` footers)
    - If no changes were made, skip the commit.
    - **Push decision**: Use `AskUserQuestion` (purge is Claude-Code-coupled, so the Claude tool is the prompt primitive) — options: "Yes, push" / "No, keep local"

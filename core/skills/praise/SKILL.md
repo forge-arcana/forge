@@ -23,7 +23,7 @@ description: "Feedback-driven improvement loop — ingests user feedback, testin
 
 1. **Resolve forge path** from your harness's global config (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses), managed by `/forge`
 2. **Launch all reads in parallel** (all independent after forge path resolves):
-   - Read project `CLAUDE.md`/`AGENTS.md` for stack, conventions, current state
+   - Read the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated) for stack, conventions, current state
    - Read `<forge>/core/skills/forge/stack-guide.md` for tech reference
    - Scan cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions)
    - Read `<forge>/learnings/praise-learnings.md` if it exists (routing wisdom from prior runs)

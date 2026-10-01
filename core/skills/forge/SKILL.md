@@ -176,7 +176,7 @@ Skip this phase entirely if `--dry`. Run BEFORE outgoing absorption so the lates
 > `bash <forge>/claude-helpers/retire-wa001.sh`. It removes the retired
 > WA-001 OAuth-workaround artifacts (deployed token scripts + SessionStart hook)
 > from this membrane. Idempotent and silent once clean. **Remove this step and
-> the script once the team has migrated** — see CLAUDE.md Outstanding.
+> the script once the team has migrated** — see AGENTS.md Outstanding.
 
 For each approved incoming row (and each conflict row where user chose `[↓]`):
 
@@ -381,8 +381,8 @@ Never delete — archival is a move.
    bash <forge>/core/scripts/fold-purity-check.sh --commit-msg "<message>"
    ```
    Commit messages have leaked project names and contributor names in the past. The check catches `Absorb 7 learnings from <Person> (<Project> session, ...)` patterns and similar. If non-zero, rewrite the message until clean.
-5. **Update context** in `<forge>/CLAUDE.md` Current Context section.
-6. **Compact check**: if CLAUDE.md > ~20k chars, overflow to `memory/`.
+5. **Update context** in `<forge>/AGENTS.md` Current Context section.
+6. **Compact check**: if AGENTS.md > ~20k chars, overflow to `memory/`.
 7. **Commit**: descriptive message (what was absorbed, no project names, no contributor names). **No AI/agent attribution metadata (no `Co-Authored-By` lines).**
 8. **Push decision**: ask the user — using your harness's multi-choice prompt if available, otherwise inline — options: "Push to origin" / "Keep local".
 
@@ -398,10 +398,14 @@ Always runs (even for subsequent cycles) against the target project. Skips only 
 
 ### 4b: Scan project (parallel)
 
-- Read project rules file (`CLAUDE.md` for Claude Code, `AGENTS.md` as cross-tool fallback)
+- Check for BOTH `AGENTS.md` and `CLAUDE.md` at project root and read whichever exist; check blockers (including ancestor-directory `CLAUDE.md`/`CLAUDE.local.md`) and classify the rules-file state (procedure: forge-conventions §1; see Rules-file state below). On Claude Code, also run `claude --version` to get the installed version.
 - Read harness-specific settings file (e.g., `.claude/settings.json`) if present
 - Glob for `package.json`, `tsconfig*`, `pnpm-workspace.yaml`, `packages/`
 - Check for `memory/`, `docs/`, `dev/restart.sh`, `dev/kill-zombies.sh`
+
+### Rules-file state
+
+The procedure — blockers, state table, stale-registry check, version gate, apply rules — lives in `<forge>/core/skills/forge/forge-conventions.md` §1 (already read in 4a). It is the single source, so it reaches every teammate on the same run it lands: follow it exactly.
 
 ### 4c: Divergence Report
 
@@ -410,7 +414,7 @@ Always runs (even for subsequent cycles) against the target project. Skips only 
 
 | Aspect | Forge Convention | Current Project | Action |
 |--------|-----------------|-----------------|--------|
-| Project rules file | Required with standard sections | [exists/missing] | [create/update] |
+| Project rules file | `AGENTS.md` required with standard sections | [OK/LINKED/SHIM/LEGACY/SHADOWED/MISSING/BLOCKED] | [none/unlink/remove shim/migrate/merge/create/replace stale registry/upgrade Claude Code first/resolve blocker] |
 | Hard rules | Live in global rules file — do NOT duplicate | [global/missing] | Skip if global membrane exists |
 | Harness settings | Only if project-specific overrides needed | [exists/missing/not needed] | [skip/create] |
 | memory/ directory | Required | [exists/missing] | [create] |
@@ -426,7 +430,7 @@ Present as console markdown, then ask the user — using your harness's multi-ch
 
 ### 4d: Apply (after confirmation)
 
-**Project rules file** (create or update) — standard sections. Hard rules and shorthand commands live in the global rules file — do NOT duplicate. If the project already has a `## Shorthand Commands` section, remove it during this forge cycle.
+**Project rules file** — apply the rules-file action per forge-conventions §1. The template below creates `AGENTS.md` in state `MISSING`, replaces a confirmed stale registry, or supplies missing standard sections for the existing rules file as §1 allows (which file, and when). Hard rules and shorthand commands live in the global rules file — do NOT duplicate. If the project already has a `## Shorthand Commands` section, remove it during this forge cycle.
 
 ```markdown
 # [Project Name] — Project Rules

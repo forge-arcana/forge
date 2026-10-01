@@ -13,7 +13,7 @@ Concise status snapshot. No prose preamble — just the header and table.
 1. **Gather all state in parallel** (MANDATORY — never rely on conversation memory):
 
    **Batch A** — launch ALL of these in parallel (independent reads):
-   - Read the project's `CLAUDE.md`/`AGENTS.md` (especially `## Current Context` section)
+   - Read the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated), especially the `## Current Context` section
    - Glob for active plan files in your harness's plan directory (e.g. `.claude/plans/*.md` for Claude Code; check the equivalent path for other harnesses)
    - Glob for project memory files: `memory/project_*.md`
    - Run `<forge>/core/scripts/wawa-status.sh` (collapses `git status` + `git log` + `git diff --stat` into one call)
@@ -22,7 +22,7 @@ Concise status snapshot. No prose preamble — just the header and table.
 
 3. **STRICT sourcing — ZERO inference**:
    - **Phase work**: ONLY from an active plan file in the harness's plan directory. No plan file = no phase rows.
-   - **Other items**: ONLY from `CLAUDE.md`/`AGENTS.md` `## Current Context`. Copy verbatim — do not add items.
+   - **Other items**: ONLY from the project rules file's `## Current Context`. Copy verbatim — do not add items.
    - Do NOT infer tasks from conversation memory, audit findings, or code exploration.
 
 4. **Filter ruthlessly** — from the sourced items, only keep rows that meet ONE of:

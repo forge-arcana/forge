@@ -113,7 +113,7 @@ Universal aesthetic principles propagate to `<forge>/learnings/global-patterns.m
 
 `/purge` is the Warden — guardian of the forge itself. While the Smith forges products from blueprints, the Warden ensures the forge that does the forging stays sharp and pure. Stale knowledge dulls the blade. Drift contaminates the steel. Duplicates weigh down the anvil. Project names that leak in betray the forge's universality. The Warden burns it all away until only what matters remains.
 
-Four dimensions, analyzed in parallel by independent subagents — Knowledge Purity (learnings), Memory Hygiene (memory), Skill Fitness (skill bloat and consistency), Reference Integrity (stack guide, rules, CLAUDE.md). The master consolidates findings, the user confirms, the Warden applies.
+Four dimensions, analyzed in parallel by independent subagents — Knowledge Purity (learnings), Memory Hygiene (memory), Skill Fitness (skill bloat and consistency), Reference Integrity (stack guide, rules, AGENTS.md). The master consolidates findings, the user confirms, the Warden applies.
 
 The Warden is summoned, never scheduled. Lives only at `.claude/skills/purge/` (never deployed to user membranes — the Warden writes to forge directly, so containment by location prevents projects from writing to forge by proxy).
 
@@ -264,5 +264,5 @@ forge/
 ├── .claude/skills/
 │   ├── forge/             # Bootstrap (so /forge is discoverable on fresh clone)
 │   └── purge/             # The Warden — master tender (forge-internal, never deployed)
-└── CLAUDE.md
+└── AGENTS.md
 ```

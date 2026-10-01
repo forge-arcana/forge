@@ -18,7 +18,7 @@ Complex work is parallelized using **subagents** — lightweight child contexts 
 
 ### 3. Self-Improvement Loop
 
-After any correction from the user, Claude **immediately updates its learnings** (in memory files or the project's `CLAUDE.md`). It writes rules for itself to prevent the same mistake from recurring. This creates a feedback loop where error rates drop over time as the rule set grows.
+After any correction from the user, Claude **immediately updates its learnings** (in memory files or the project's `AGENTS.md`). It writes rules for itself to prevent the same mistake from recurring. This creates a feedback loop where error rates drop over time as the rule set grows.
 
 ### 4. Verification Before Done
 
@@ -66,11 +66,11 @@ Code is never committed separately from its documentation. This applies to imple
 
 ## Context Persistence
 
-Each project has **one `CLAUDE.md`** in its root containing rules, current state, and key learnings. When it grows too large (40k+ chars), detailed history overflows to memory files (`memory/`) while the root file stays under 20k chars.
+Each project has **one `AGENTS.md`** in its root containing rules, current state, and key learnings. When it grows too large (40k+ chars), detailed history overflows to memory files (`memory/`) while the root file stays under 20k chars.
 
 The command **"save context"** triggers a full replacement of the Current Context section with a snapshot of the current state (branch, test count, completed phases, pending work).
 
-No separate task/context/todo files are created in the repo — everything lives in `CLAUDE.md` or memory files.
+No separate task/context/todo files are created in the repo — everything lives in `AGENTS.md` or memory files.
 
 ---
 
@@ -94,7 +94,7 @@ No separate task/context/todo files are created in the repo — everything lives
 
 Outputs a structured status summary with **no prose preamble** — just data:
 
-1. **Re-read first**: Always re-reads the project's `CLAUDE.md` Current Context section AND any active plan file before generating the table. Never relies on conversation memory — it goes stale. Cross-references completed items against plan items.
+1. **Re-read first**: Always re-reads the project's `AGENTS.md` Current Context section AND any active plan file before generating the table. Never relies on conversation memory — it goes stale. Cross-references completed items against plan items.
 2. **Status line**: Branch, last commit, test counts (unit + E2E), type/lint errors.
 3. **Outstanding work table**:
 

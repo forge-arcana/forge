@@ -21,7 +21,7 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 1. **Resolve forge path** from your harness's global config (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses), managed by `/forge`
 2. **Determine project path**: from `$ARGUMENTS` or current working directory
 3. **Determine pass count**: from `$ARGUMENTS` or default to 3
-4. **Read project context**: the project's `CLAUDE.md`/`AGENTS.md`
+4. **Read project context**: the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated)
 
 ## Step 1: Evidence Collection (once)
 

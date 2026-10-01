@@ -2,17 +2,16 @@
 # bin/forge-build — Generic Forge v2 build pipeline.
 #
 # Reads tool-neutral sources from core/ and emits a single universal payload:
-#   build/AGENTS.md          — thin pointer file (<150 lines, <32 KiB)
+#   build/.agents/FORGE.md   — skill registry (<150 lines, <32 KiB); never the
+#                              project's AGENTS.md, which holds the project's own rules
 #   build/.agents/skills/    — Open Agent Skills standard path (Anthropic, Dec 2025;
 #                              cross-tool standard since Jan 2026)
-#   build/.agents/rules/     — full HARD RULES bodies linked from AGENTS.md
+#   build/.agents/rules/     — full HARD RULES bodies linked from FORGE.md
 #   build/scripts/           — runtime helpers from core/scripts/
 #
 # No <adapter> argument. No per-vendor builds. No adapter manifests. The output
-# is the cross-tool standard; tools that natively read it (Codex, Cursor,
-# Gemini CLI, DeepSeek TUI, Bob, Amp, Factory) consume it directly. Claude Code
-# users opt in via claude-helpers/bootstrap.sh which writes a 1-line CLAUDE.md
-# (`@AGENTS.md`) so Claude's @-import mechanism resolves to AGENTS.md content.
+# is the cross-tool standard. Agents read the project's own AGENTS.md natively
+# (Claude Code v2.1.277+ included); FORGE.md is reference material only.
 #
 # Usage:
 #   bin/forge-build                              build to ./build/
@@ -20,7 +19,7 @@
 #   bin/forge-build --deploy <project> --dry-run preview deploy without writing
 #   bin/forge-build --help                       show this message
 #
-# See memory/maxima-pivot-plan.md for the architectural rationale.
+# See archive/maxima-pivot-plan.md for the architectural rationale.
 
 set -euo pipefail
 
@@ -45,7 +44,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --help|-h)
-      sed -n '2,21p' "${BASH_SOURCE[0]}" | sed 's|^# \{0,1\}||'
+      sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's|^# \{0,1\}||'
       exit 0
       ;;
     *)
@@ -103,8 +102,8 @@ if compgen -G "$SRC_SCRIPTS"/*.sh > /dev/null; then
 fi
 echo "  ✓ $SCRIPT_COUNT scripts emitted to scripts/"
 
-# --- 5. Compose AGENTS.md ---
-AGENTS_MD="$BUILD_DIR/AGENTS.md"
+# --- 5. Compose .agents/FORGE.md (skill registry) ---
+FORGE_MD="$BUILD_DIR/.agents/FORGE.md"
 
 # Helper: extract first descriptive paragraph from a markdown file.
 # Skips H1 heading, then captures the first content block (blockquote or paragraph),
@@ -138,11 +137,11 @@ frontmatter_field() {
 
 {
   cat <<HEADER
-# Forge — Agent Instructions
+# Forge — Skill Registry
 
 Forge is a tool-neutral knowledge + skills framework for AI coding agents. Skills (a.k.a. arts and masters) live in \`.agents/skills/<name>/SKILL.md\` per the [Open Agent Skills specification](https://agentskills.io/) (Anthropic, December 2025; cross-tool standard since January 2026). Most agents auto-discover them; some let you invoke explicitly via \`/<name>\` slash commands.
 
-This file is the registry. Skill bodies live in \`.agents/skills/\`. HARD RULES live in \`.agents/rules/\`.
+This file is the registry. Skill bodies live in \`skills/\`. HARD RULES live in \`rules/\`. (Paths are relative to this file, inside \`.agents/\`.)
 HEADER
 
   # Rules pointers (first paragraph + link)
@@ -155,7 +154,7 @@ HEADER
     summary=$(first_paragraph "$rule_file" | head -2 | tr '\n' ' ' | sed 's/  */ /g' | sed 's/ *$//')
     echo "**${rule_name}** — ${summary}"
     echo ""
-    echo "→ Full rules: [.agents/rules/${rule_name}.md](.agents/rules/${rule_name}.md)"
+    echo "→ Full rules: [rules/${rule_name}.md](rules/${rule_name}.md)"
     echo ""
   done
 
@@ -201,7 +200,7 @@ MODELHINT
     fi
     [[ -z "$short_desc" ]] && short_desc="—"
 
-    echo "| /${skill_name} | ${short_desc} | [.agents/skills/${skill_name}/SKILL.md](.agents/skills/${skill_name}/SKILL.md) |"
+    echo "| /${skill_name} | ${short_desc} | [skills/${skill_name}/SKILL.md](skills/${skill_name}/SKILL.md) |"
   done
 
   # Footer
@@ -209,23 +208,23 @@ MODELHINT
 
 ---
 
-Generic Forge v2. Built from [forge-arcana/forge](https://github.com/forge-arcana/forge). See \`memory/maxima-pivot-plan.md\` for the architecture rationale.
+Generic Forge v2. Built from [forge-arcana/forge](https://github.com/forge-arcana/forge). See \`archive/maxima-pivot-plan.md\` for the architecture rationale.
 
-For Claude Code users: \`bash <forge>/claude-helpers/bootstrap.sh <project>\` writes a 1-line \`CLAUDE.md\` containing \`@AGENTS.md\` so Claude's @-import mechanism reads this file. Other tools require no bootstrap.
+Claude Code (v2.1.277+) and other agents read the project's \`AGENTS.md\` natively; this registry is reference material and is not auto-loaded by Claude Code.
 FOOTER
-} > "$AGENTS_MD"
+} > "$FORGE_MD"
 
-# --- 6. Validate AGENTS.md size ---
-agents_bytes=$(wc -c < "$AGENTS_MD")
-agents_lines=$(wc -l < "$AGENTS_MD")
-echo "  ✓ AGENTS.md composed (${agents_lines} lines, ${agents_bytes} bytes)"
+# --- 6. Validate FORGE.md size ---
+forge_bytes=$(wc -c < "$FORGE_MD")
+forge_lines=$(wc -l < "$FORGE_MD")
+echo "  ✓ .agents/FORGE.md composed (${forge_lines} lines, ${forge_bytes} bytes)"
 
-if [[ $agents_bytes -gt 32768 ]]; then
-  echo "  ⚠ AGENTS.md exceeds Codex's 32 KiB project_doc_max_bytes cap (${agents_bytes} bytes)" >&2
+if [[ $forge_bytes -gt 32768 ]]; then
+  echo "  ⚠ FORGE.md exceeds Codex's 32 KiB project_doc_max_bytes cap (${forge_bytes} bytes)" >&2
   echo "     Trim required — consider further progressive disclosure." >&2
 fi
-if [[ $agents_lines -gt 150 ]]; then
-  echo "  ⚠ AGENTS.md exceeds 150-line target (${agents_lines} lines)" >&2
+if [[ $forge_lines -gt 150 ]]; then
+  echo "  ⚠ FORGE.md exceeds 150-line target (${forge_lines} lines)" >&2
 fi
 
 echo ""
@@ -241,27 +240,50 @@ if [[ -n "$DEPLOY_TARGET" ]]; then
   if [[ "$DRY_RUN" -eq 1 ]]; then
     echo ""
     echo "DRY-RUN: would deploy:"
-    echo "  $BUILD_DIR/AGENTS.md           → $DEPLOY_TARGET/AGENTS.md"
-    echo "  $BUILD_DIR/.agents/skills/     → $DEPLOY_TARGET/.agents/skills/"
-    echo "  $BUILD_DIR/.agents/rules/      → $DEPLOY_TARGET/.agents/rules/"
-    echo "  $BUILD_DIR/scripts/            → $DEPLOY_TARGET/scripts/"
+    echo "  $BUILD_DIR/.agents/FORGE.md    → $DEPLOY_TARGET/.agents/FORGE.md"
+    echo "  $BUILD_DIR/.agents/skills/*/   → $DEPLOY_TARGET/.agents/skills/<name>/  (each forge skill replaced; other dirs untouched)"
+    echo "  $BUILD_DIR/.agents/rules/*.md  → $DEPLOY_TARGET/.agents/rules/         (same-named files overwritten; others untouched)"
+    echo "  $BUILD_DIR/scripts/*.sh        → $DEPLOY_TARGET/scripts/               (same-named files overwritten; others untouched)"
     exit 0
   fi
 
   echo ""
   echo "Deploying to $DEPLOY_TARGET ..."
 
-  cp "$BUILD_DIR/AGENTS.md" "$DEPLOY_TARGET/AGENTS.md"
-
   mkdir -p "$DEPLOY_TARGET/.agents"
-  rm -rf "$DEPLOY_TARGET/.agents/skills" "$DEPLOY_TARGET/.agents/rules"
-  cp -r "$BUILD_DIR/.agents/skills" "$DEPLOY_TARGET/.agents/skills"
-  cp -r "$BUILD_DIR/.agents/rules" "$DEPLOY_TARGET/.agents/rules"
+  cp "$BUILD_DIR/.agents/FORGE.md" "$DEPLOY_TARGET/.agents/FORGE.md"
 
-  rm -rf "$DEPLOY_TARGET/scripts"
-  cp -r "$BUILD_DIR/scripts" "$DEPLOY_TARGET/scripts"
+  # Additive deploy: replace only forge-owned items; never remove a project's own files.
+  mkdir -p "$DEPLOY_TARGET/.agents/skills" "$DEPLOY_TARGET/.agents/rules" "$DEPLOY_TARGET/scripts"
 
-  echo "  ✓ AGENTS.md, .agents/skills/, .agents/rules/, scripts/ deployed"
-  echo ""
-  echo "For Claude Code users: bash $FORGE_ROOT/claude-helpers/bootstrap.sh $DEPLOY_TARGET"
+  for skill_dir in "$BUILD_DIR/.agents/skills"/*/; do
+    [[ -d "$skill_dir" ]] || continue
+    skill_name=$(basename "$skill_dir")
+    rm -rf "$DEPLOY_TARGET/.agents/skills/$skill_name"
+    cp -r "$skill_dir" "$DEPLOY_TARGET/.agents/skills/$skill_name"
+  done
+
+  for rule_file in "$BUILD_DIR/.agents/rules"/*.md; do
+    [[ -f "$rule_file" ]] || continue
+    cp "$rule_file" "$DEPLOY_TARGET/.agents/rules/$(basename "$rule_file")"
+  done
+
+  for script_file in "$BUILD_DIR/scripts"/*.sh; do
+    [[ -f "$script_file" ]] || continue
+    cp "$script_file" "$DEPLOY_TARGET/scripts/$(basename "$script_file")"
+  done
+
+  echo "  ✓ .agents/FORGE.md, .agents/skills/, .agents/rules/, scripts/ deployed (additive; project files untouched)"
+
+  if [[ -f "$DEPLOY_TARGET/AGENTS.md" ]] && [[ "$(head -n 1 "$DEPLOY_TARGET/AGENTS.md")" == "# Forge — Agent Instructions" ]]; then
+    {
+      echo ""
+      echo "WARNING: $DEPLOY_TARGET/AGENTS.md is a STALE generated forge registry (older forge-build versions wrote it there)."
+      echo "  Agents now load it as the project's rules. The registry lives at .agents/FORGE.md."
+      echo "  Replace AGENTS.md with the project's own rules (running /forge in the project will flag it). The file was not modified."
+    } >&2
+  elif [[ ! -f "$DEPLOY_TARGET/AGENTS.md" ]] || ! grep -q '\.agents/FORGE\.md' "$DEPLOY_TARGET/AGENTS.md"; then
+    echo ""
+    echo "Hint: add a pointer line to the project's AGENTS.md, e.g. \"Forge skill registry: .agents/FORGE.md\" (AGENTS.md was not modified)."
+  fi
 fi

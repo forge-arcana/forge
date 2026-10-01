@@ -260,7 +260,7 @@ if [[ "$LEAKS_FOUND" -eq 1 ]]; then
   echo "═══════════════════════════════════════════════════════════════════════"
   echo ""
   echo "The HARD RULE 'No Project Names in Forge' has been violated."
-  echo "See <forge>/CLAUDE.md and <forge>/learnings/global-patterns.md"
+  echo "See <forge>/AGENTS.md and <forge>/learnings/global-patterns.md"
   echo "(Exhibit A: 'How a Project-Name Leak Happens') for context."
   echo ""
   echo "Violations:"

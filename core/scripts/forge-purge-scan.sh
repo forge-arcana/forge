@@ -368,9 +368,9 @@ for ref in stack-guide.md auto-allowed-bash.md forge-conventions.md protocol.md 
 done
 echo ""
 
-echo "### CLAUDE.md Current Context freshness"
+echo "### AGENTS.md Current Context freshness"
 echo '```'
-grep -A5 '## Current Context' "$FORGE_PATH/CLAUDE.md" 2>/dev/null | head -8 || echo "(no Current Context section)"
+grep -A5 '## Current Context' "$FORGE_PATH/AGENTS.md" 2>/dev/null | head -8 || echo "(no Current Context section)"
 echo '```'
 echo ""
 
@@ -385,9 +385,9 @@ echo "**Total skills in skills/**: $TOTAL_SKILLS ($ARTS arts + $MASTERS masters 
 echo "Note: /purge (The Warden) is forge-internal — lives at .claude/skills/purge/, not counted above."
 echo ""
 
-# Check if CLAUDE.md counts match
-CLAIMED_SKILLS=$(grep -o '[0-9]* global skills' "$FORGE_PATH/CLAUDE.md" 2>/dev/null || echo "not stated")
-echo "**CLAUDE.md claims**: $CLAIMED_SKILLS"
+# Check if AGENTS.md counts match
+CLAIMED_SKILLS=$(grep -o '[0-9]* global skills' "$FORGE_PATH/AGENTS.md" 2>/dev/null || echo "not stated")
+echo "**AGENTS.md claims**: $CLAIMED_SKILLS"
 echo "**Actual**: $TOTAL_SKILLS"
 echo ""
 

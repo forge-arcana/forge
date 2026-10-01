@@ -30,7 +30,7 @@ The 150-line guidance for a SKILL.md applies to **arts**. The three orchestratio
 1. **Resolve forge path** from the harness's global rules file (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses, managed by `/forge`)
 2. **Launch steps 2-6 in parallel** (all independent after forge path is resolved):
    - **Read accumulated learnings**: `<forge>/learnings/<learnings-file>` — skip if file doesn't exist yet (first run)
-   - **Read project context**: the project's `CLAUDE.md`/`AGENTS.md` for stack, conventions, and current state
+   - **Read project context**: the project's `AGENTS.md` (fall back to `CLAUDE.md` only in a project `/forge` has not migrated yet) for stack, conventions, and current state
    - **Read stack guide**: `<forge>/core/skills/forge/stack-guide.md` for tech reference — pay special attention to the **Logging Convention** section; all evaluative arts should validate projects against it
    - **Scan project structure** to understand the codebase layout
    - **Load web research cache**: read `memory/.web-cache.json` if it exists — use cached results for queries within their TTL (see Web Research Cache below)

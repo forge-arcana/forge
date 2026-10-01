@@ -16,6 +16,12 @@ Execute the following steps in order. Do NOT skip steps. Do NOT commit without c
 - If lint errors can't be auto-fixed, report them to the user
 - **Why first:** Lint can change code, which affects what gets staged, documented, and learned.
 
+## Step 1b: Rules-file Shadow Check
+- If `CLAUDE.md`'s whole content is exactly `@AGENTS.md` (a leftover import shim), it shadows nothing — note it in one line, suggest `/forge` to remove it, and continue the wrap. Do not stop.
+- Otherwise, if BOTH `AGENTS.md` and `CLAUDE.md` (real content) exist at the project root, stop and flag it before staging. On Claude Code only `CLAUDE.md` loads, so `AGENTS.md` (the real rules) is silently ignored. This usually means `/init` or a memory-append shortcut recreated `CLAUDE.md`.
+- Show the stray `CLAUDE.md` content and ask the user — using your harness's multi-choice prompt if available, otherwise inline: "Propose a merge into AGENTS.md for my approval" / "Leave it (I'll resolve)". On the first, show the proposed merged `AGENTS.md`; write it and delete `CLAUDE.md` only after the user approves that result.
+- Never delete it without approval. If prompts are suppressed (e.g., invoked by `/smith`), report the shadow and do not delete. On Claude Code below 2.1.277 (or version unknown) never delete `CLAUDE.md` — report only.
+
 ## Step 2: Stage
 - Stage specific changed files with `git add <file>` (never use `git add -A` or `git add .`)
 - Do NOT stage files that contain secrets (.env, credentials.json, etc.)
@@ -27,7 +33,8 @@ Execute the following steps in order. Do NOT skip steps. Do NOT commit without c
 Do both of these **in parallel** (independent operations — sequentially if your harness lacks parallel tool calls):
 
 **3a: Save Context**
-- Update the `## Progress` section in the project's `CLAUDE.md`/`AGENTS.md`
+- Update the `## Progress` section in the project's `AGENTS.md`
+- Un-migrated project (only `CLAUDE.md` exists): write to that `CLAUDE.md` and print one line suggesting `/forge` to migrate. Never create a second rules file.
 - **Replace** it with current state: branch, test count, completed phases, pending work
 - Stale history belongs in git log or memory files
 
@@ -36,7 +43,7 @@ Do both of these **in parallel** (independent operations — sequentially if you
 Locate the docs directory using this resolution order:
 
 1. **In-repo**: Check for `docs/` directory in the project root
-2. **External repo**: If no `docs/` exists, search the project's rules file (`CLAUDE.md`/`AGENTS.md`) for a `## Documentation` section containing a local filesystem path
+2. **External repo**: If no `docs/` exists, search the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated) for a `## Documentation` section containing a local filesystem path
 
 **Convention for external docs**: In the rules file, declare the docs location like this:
 ```markdown
@@ -53,7 +60,7 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
 **If no docs directory is found** (neither in-repo nor external), skip this step.
 
 ## Step 5: Compact (gated — skip entirely in the common case)
-- Check the size of the project's rules file (`CLAUDE.md`/`AGENTS.md`) — a cheap `wc -c`.
+- Check the size of the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated) — a cheap `wc -c`.
 - **If it is under ~20k characters, skip this entire step.** Do NOT read or scan `memory/` files just to confirm they're fine. This is the common case and the single biggest cost lever in `/wrap` — an unconditional memory dedup re-reasons over the whole corpus on every commit.
 - **Only if the rules file exceeds ~20k characters:**
   - Hand the compaction to an opus-tier subagent — curating long-term memory is judgment work, and a wrong keep/move call loses knowledge permanently. If your harness lacks subagent spawning or per-spawn model selection, defer: flag the oversized rules file to the user and skip compaction rather than running it at the current tier.
