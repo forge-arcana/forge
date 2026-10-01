@@ -1,6 +1,10 @@
 # Forge — Recent History (Archive)
 
-> Older "Recent" entries moved from `CLAUDE.md` during the 2026-04-27, 2026-04-30, four 2026-05-04 wraps, the 2026-05-10 wrap, the 2026-06-13 wrap, the 2026-06-14 purge-trim, the 2026-06-18 wrap, the 2026-07-16 wrap, the 2026-07-19 wrap, the 2026-08-15 wrap, and the 2026-09-23 wrap. Kept inline there: only the most recent 1–2 entries. Anything older lives here.
+> Older "Recent" entries moved from `CLAUDE.md` during the 2026-04-27, 2026-04-30, four 2026-05-04 wraps, the 2026-05-10 wrap, the 2026-06-13 wrap, the 2026-06-14 purge-trim, the 2026-06-18 wrap, the 2026-07-16 wrap, the 2026-07-19 wrap, the 2026-08-15 wrap, the 2026-09-23 wrap, and the 2026-10-02 fold. Kept inline there: only the most recent 1–2 entries. Anything older lives here.
+
+## 2026-09-23 → 2026-09-29 — Context hygiene + machine default — moved from AGENTS.md 2026-10-02
+
+`cast-deploy.sh --settings` (ridden by `--all`) applies SET-IF-ABSENT settings defaults — currently `autoCompactWindow: 250000`; new "Context Hygiene — A Session Is a Task" HARD RULE. 2026-09-28/29: machine default is Sonnet 5.5 with an Opus 5.5 advisor (managed settings; Haiku 4.5 was the default for one day); arts, /smith and /wedge stay pinned to Opus — a blind /poke A/B found unpinned Sonnet matched pinned Opus on quality at ~⅓ the cost but rarely escalated on its own, so pins remain the only binding path to Opus; tier pins are exact ids (opus-5-5, sonnet-5-5, haiku-4-5).
 
 ## 2026-09-23 — Fold + curation — moved from CLAUDE.md 2026-09-23
 

@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-09-23",
+  "lastRun": "2026-10-02",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -281,7 +281,10 @@
     "A \"waiting\"/queued UI state implies the item will be processed; if no code path ever re-drives that queue when the blocking condition clears, the label overpromises",
     "Soul-driven convergence is legitimate — do not respawn for manufactured difference",
     "Data-dense products can reject the minimal/atmospheric tiers as \"too airy\"",
-    "Theme applies to the calm state; the critical/alarm state is theme-independent"
+    "Theme applies to the calm state; the critical/alarm state is theme-independent",
+    "Verification must be independent of the thing verified",
+    "Promote to Core: Builds Go Through the Forge Arts by Default",
+    "Promote to Core: A Native Fallback Is Not a Successor — Read the Precedence Rule Before Migrating"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

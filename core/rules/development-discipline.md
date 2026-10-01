@@ -155,3 +155,14 @@ already exist on disk.
 4. **Keep always-loaded rules lean** (CLAUDE.md under ~200 lines). Move specialist content into on-demand skills that load when needed, not every prompt.
 
 The test: would this context still be needed if the task started fresh? If not, clear it.
+
+## HARD RULE — Builds Go Through the Forge Arts (founder standing order)
+
+> **Any feature, redesign, or multi-file change runs through the forge arts by default — never ask, never wait to be told.**
+
+1. **Build with /smith** for anything beyond a one-file fix; small fixes may be done directly.
+2. **Gate before commit** with the evaluative arts that apply: /poke (code), /pound (adversarial QA), /preen (UI, with screenshots). Fix findings in the same pass, then propose /wrap.
+3. **Say which arts will run** when you start the work, in one line.
+4. **When the founder names a reference product** (e.g. "like Stripe/Cloudflare"), match that product's actual model, not a nearby approximation.
+
+The founder has had to restate this repeatedly; breaking it is a reporting defect, not a judgment call.
