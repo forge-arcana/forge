@@ -105,12 +105,8 @@ Scan for custom/bespoke handling where the adopted framework already provides a 
 
 Validate against `<forge>/core/skills/forge/forge-conventions.md` checklist item 6 (Logging) and `stack-guide.md` Logging Convention.
 
-**Key checks:**
-- Human-initiated actions logged with context (`userId`, `action`, `resourceId`, `outcome`)
-- Pre-action intent logged (before the action, not just on failure)
-- No pulsing logs (heartbeats, health polls, unchanged status checks)
-- No sensitive data in logs — Pino `redact` configured
-- Dev verbose / prod sparse — gated by env check
+**Beyond the checklist, verify the two mechanisms it does not name:**
+- Sensitive-data protection is enforced, not assumed — Pino `redact` configured
 - Browser console → `logs/dev.log` via `/api/dev/log` endpoint (dev only, stripped in prod)
 
 ## Dimension 5: Clean Functions

@@ -8,7 +8,7 @@ description: "Master of aesthetic. Drives a single decisive thrust that splits t
 
 > *In the forge, the wedge is what splits the unformed. Driven once, driven hard, driven straight — it cannot be tentative and remain a wedge. So too the aesthetic of a magnum opus: one decisive thrust, or none at all.*
 
-The Wedge is the third Master of the forge — alongside The Smith (master builder) and The Warden (master tender). Where Smith forges and Warden tends, **The Wedge drives**. Its single thrust separates the project's identity from the noise; what remains, crystallized into a single HTML page, is the **Touchstone** — the standard against which every subsequent screen, deck, and rendering is measured.
+The Wedge is the third Master of the forge — alongside The Smith (master builder) and The Warden (master tender). Where Smith forges and Warden tends, **The Wedge drives**. Its single thrust separates the project's identity from the noise; what remains, crystallized into a paired HTML vision and MD token contract, is the **Touchstone** — the standard against which every subsequent screen, deck, and rendering is measured.
 
 > **Master skill** (learnings: `wedge-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 
@@ -65,7 +65,7 @@ You commit at one of two ends — bold maximalism or refined minimalism — and 
 > - **Production-grade** — real Google Fonts via `<link>`, real CSS variables, real implementation that breathes in any browser.
 > - **Specificity** — every value is deliberate, named, tokenized, defendable.
 >
-> **Tone-conditional substance (per the chosen tone — see Heat 2):**
+> **Tier-conditional substance (per the Substance Tier the chosen direction declares on its Direction Card):**
 > - **Maximalist tones** (maximalist chaos, retro-futuristic, brutalist/raw, art deco/geometric, playful/toy-like): atmospheric background, orchestrated page-load motion, multi-layer depth. **Code density: high.**
 > - **Minimal tones** (brutally minimal, refined/luxury, editorial/magazine, industrial/utilitarian): surgical negative space, exact typographic scale, one deliberate motion gesture (or zero — silence is permitted). Atmospheric backdrop optional and subtle if present (hairline rule, flat warm white, 0.02-opacity grain — never gradient mesh). **Code density: low. Precision: high.**
 > - **Atmospheric/organic tones** (liquid/atmospheric, organic/natural, soft/pastel): depth and air — gradient mesh, organic curves, soft transitions, ambient motion. **Code density: medium-high.**
@@ -76,7 +76,7 @@ You commit at one of two ends — bold maximalism or refined minimalism — and 
 
 > **The Wedge is project-bound. The aesthetic answers the magnum opus, never the inverse.**
 >
-> Read the Opus and Vow first. Distill the emotional core. *Then* select the aesthetic family that answers it. A solemn legal-tech tool does not get neon brutalism because the council finds neon interesting this week; a scrappy consumer toy does not get Tiempos and gold leaf because the council wants to feel sophisticated. The soul leads; the aesthetic follows.
+> Read the Opus and Vow first. Distill the emotional core into the Soul Brief. *Then* let the soul, refracted through its lenses, decide the aesthetic — never a family picked off the shelf. A solemn legal-tech tool does not get neon brutalism because the council finds neon interesting this week; a scrappy consumer toy does not get Tiempos and gold leaf because the council wants to feel sophisticated. The soul leads; the aesthetic follows.
 >
 > Two consecutive `/wedge` invocations on different projects must produce visibly different aesthetics — different fonts, palettes, motion philosophies, spatial logic. The Heat 2 council fan-out instructs apprentices to read recent `wedge-learnings.md` entries and avoid repeating the last 3 projects' choices. Force divergence; never converge on a house style.
 
@@ -169,10 +169,10 @@ Assemble the three scoped HTML fragments into a single `[PROJECT]_03c_PreviewTou
   "[Lens C name]" [path to Direction C fragment]
 ```
 
-Each apprentice's `<!-- FRAGMENT -->` block should be written to a temp file before invoking the script. The script isolates each fragment inside its own `<iframe srcdoc="...">` (HTML-escaped, so fragment CSS/JS can never bleed across tabs or into the shell chrome), emits a plain-JS tab selector with `#t0`/`#t1`/`#t2` hash deep-linking, and is deterministic — same fragments in, byte-identical shell out. Because each tab is an isolated document rather than a same-page `<section>`, two of the prose requirements below move INTO the fragment file before you hand it to the script, rather than living in the shell:
+Each apprentice's `<!-- FRAGMENT -->` block should be written to a temp file before invoking the script. The script isolates each fragment inside its own `<iframe srcdoc="...">` (HTML-escaped, so fragment CSS/JS can never bleed across tabs or into the shell chrome), emits a plain-JS tab selector with `#t0`/`#t1`/`#t2` hash deep-linking, and is deterministic — same fragments in, byte-identical shell out. Because each tab is an isolated document rather than a same-page `<section>`, two things the hand-written fallback shell would carry move INTO the fragment file before you hand it to the script:
 
-- **Fonts** (requirement 4 below) — fold each direction's `<!-- FONTS -->` block (the Google Fonts `<link>` tags) into the top of its own fragment file; the shell's `<head>` can't reach into an iframe's document.
-- **Per-direction header strip** (requirement 5 below) — prepend the caption row (direction letter, lens name, Memorable Signature, 1–2 examples-from-life) to the fragment file's markup, above its `<section>`, so it renders inside that tab's iframe.
+- **Fonts** — fold each direction's `<!-- FONTS -->` block (the Google Fonts `<link>` tags) into the top of its own fragment file; the shell's `<head>` can't reach into an iframe's document.
+- **Per-direction header strip** — prepend the caption row (direction letter, lens name, Memorable Signature, 1–2 examples-from-life) to the fragment file's markup, above its `<section>`, so it renders inside that tab's iframe.
 
 If the script is unavailable, write the shell directly: a fixed top selector bar (three buttons labeled with each lens name, default-active A), three per-direction containers each holding its apprentice's scoped fragment with the fragment's font `<link>` tags hoisted into the shell `<head>`, hash deep-linking on `#t0`/`#t1`/`#t2`, and a per-direction caption row (letter, lens name, Memorable Signature, 1-2 examples-from-life).
 
@@ -182,7 +182,7 @@ The shell HTML/CSS/JS is mechanical — no creative apprentice work. The Wedge w
 
 Open `[PROJECT]_03c_PreviewTouchstone_V1.0.html` in the user's browser (`open`, `xdg-open`, or print the absolute path).
 
-Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — how to proceed. Question body includes the absolute path to the preview HTML and a one-line summary of each direction (lens name + Memorable Signature sentence + the example-from-life that most shaped it). Four options:
+Then ask the user — using your harness's multi-choice prompt if available, otherwise inline — how to proceed. Question body includes the absolute path to the preview HTML and a one-line summary of each direction (lens name + Memorable Signature sentence + the example-from-life that most shaped it). Three kinds of answer:
 
 1. **Direction A / B / C** — pick one to crystallize.
 2. **Hybridize via Other** — describe a fourth direction or fuse two of the three. The Wedge **synthesizes the hybrid into a single direction** before proceeding to Heat 5 — picking ONE typography pairing, ONE dominant color, ONE motion philosophy. No two-aesthetics-fused output.
@@ -250,7 +250,7 @@ After this heat the project has both Touchstone forms — vision (HTML) and cont
 
 Auto-invoke `/preen` on the rendered Touchstone (HTML). /preen evaluates against Don Norman's usability principles plus Jony Ive's reductive craft. Apply critique that does not violate the chosen direction (a critique like "this feels too brutalist" is irrelevant if brutalist was the picked direction; a critique like "the hover target is below the WCAG minimum" is mandatory).
 
-Additionally validate the **Implementation Matches Vision** HARD RULE: if the chosen tone is minimal but the HTML is dense with motion and ornament, /preen flags this as a tone-implementation mismatch and the Touchstone is reworked. Same for the inverse.
+Additionally validate the **Required Substance** HARD RULE (implementation matches vision): if the chosen direction's Substance Tier is minimal but the HTML is dense with motion and ornament, /preen flags this as a tier-implementation mismatch and the Touchstone is reworked. Same for the inverse.
 
 Validate **HTML ↔ MD parity**: every CSS variable in the HTML's `<style>` must map to a token in the MD's YAML frontmatter, and vice versa. Drift is a defect. Run `<forge>/core/scripts/wedge-parity-check.sh [PROJECT]_03e_Touchstone_V1.0.md [PROJECT]_03e_Touchstone_V1.0.html` (script tier — same script as the Heat 6 gate) for the token-value half of this check; any FAIL row blocks the lock below until resolved (either the HTML is corrected to match the MD's declared value, or the MD is corrected if the HTML's rendering is actually right).
 

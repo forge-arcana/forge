@@ -124,31 +124,11 @@ The `.md` carries the mermaid block (diffable, renders in most markdown viewers)
 
 ## Hand-Off
 
-```markdown
-# Atlas forged — [PROJECT] ([Planned | As-Built])
-
-- HTML (pin this to the wall): `[absolute path]`
-- MD (source + mermaid): `[absolute path]`
-- Rendered through: [Touchstone tokens | neutral technical style — no Touchstone found]
-- Drift baseline: [Planned Atlas V1.0 | Pattern Architecture section | none — first map, no baseline]
-
-## The landscape
-- **Deployable units**: [count] — [one-line shape, e.g. "web + API + 2 workers + cron"]
-- **Data stores**: [list]
-- **External integrations**: [list]
-- **Boundary posture**: [one line — what's public, what's IAM-gated/internal]
-
-## Drift (As-Built only)
-- **Unplanned in production**: [the sharpest deltas — nodes/edges in build that were in no plan]
-- **Planned but absent**: [what the plan had that never shipped]
-- **Changed**: [tech/boundary/protocol swaps]
-- **Read**: [one line — benign drift, or load-bearing drift that needs a decision before go-live]
-
-## Next
-- **Drift is benign / landscape is clean** → proceed to go-live; keep this Atlas as the operational reference.
-- **Load-bearing drift surfaced** → decide per delta (accept & document, or revert), then `/plot --refine`, or route through `/praise` if it implies a Pattern change.
+Output an **Atlas forged — [PROJECT] ([Planned | As-Built])** notice: absolute paths to the HTML and MD, what it rendered through (Touchstone tokens or neutral style), and the drift baseline used; **The landscape** (deployable-unit count and shape, data stores, external integrations, boundary posture in one line); for As-Built, **Drift** (unplanned in production, planned but absent, changed, and a one-line read: benign or load-bearing); then **Next**:
+- **Planned Atlas forged** → continue the build; the As-Built Atlas at go-live diffs against this.
+- **Drift benign / landscape clean** → proceed to go-live; keep this Atlas as the operational reference.
+- **Load-bearing drift** → decide per delta (accept and document, or revert), then `/plot --refine`; route Pattern-level implications through `/praise`.
 - **Boundary ambiguity flagged** → `/press` (Security + Deployment dimensions) on the flagged nodes.
-```
 
 ## Self-Improvement Loop
 
@@ -164,9 +144,3 @@ Per the [Forge Protocol](../forge/protocol.md) post-flight, append to `memory/pl
 ## Post-Flight
 
 Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/plot-learnings.md`.
-
-Suggest next steps:
-
-- **Planned Atlas forged (early baseline)** → continue the build; the As-Built Atlas at go-live will diff against this.
-- **As-Built Atlas, drift benign** → proceed to go-live with the Atlas as the operational reference.
-- **As-Built Atlas, load-bearing drift** → resolve per delta, then `/plot --refine`; route Pattern-level implications through `/praise`.

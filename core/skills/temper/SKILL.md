@@ -68,7 +68,7 @@ Spawn N sonnet-tier subagents per art (poke + press) in a single parallel batch.
 ```
 You are {{PERSONA}}. Analyze the following project evidence
 for {{TASK_DESCRIPTION}}.
-NEVER use && or ; to chain bash commands.
+NEVER use &&, ; or || to chain bash commands. One command per call.
 Do NOT run forge-scan.sh — evidence is provided below.
 
 PROJECT CONTEXT:
@@ -128,7 +128,7 @@ If your harness lacks the script, apply the same rules manually — parse all pa
 |-------------|------------|-------|
 | N/N passes | **Confirmed** | Every independent pass found this — definitely real |
 | >= N/2 passes (round up) | **Likely** | Majority of passes found this — probably real |
-| 1 pass only | **Possible** | Single pass found this — may be noise or edge case |
+| Fewer than N/2 passes (round up) | **Possible** | A minority of passes found this — may be noise or edge case |
 
 ### Severity Promotion
 

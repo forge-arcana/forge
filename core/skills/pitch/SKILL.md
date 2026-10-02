@@ -28,7 +28,7 @@ When invoked with `--critique`, you adopt a second mode: a VC partner who has ev
 
 ### HARD RULE — Founder Voice, Not Marketing Voice
 
-> **The Pitch is written in the founder's grain, sourced from Opus prose.** Phrases like *"we are excited to,"* *"revolutionary platform,"* *"leading-edge solution,"* *"industry-disrupting,"* *"transforming the way people X"* are forbidden. The pitch reads as if the founder is talking to their cofounder over coffee, not pitching from a stage. Wherever an Opus passage carries the founder's actual cadence, surface it verbatim or close to verbatim.
+> **The Pitch is written in the founder's grain, sourced from Opus prose.** Phrases like *"we are excited to,"* *"revolutionary platform,"* *"leading-edge solution,"* *"industry-disrupting,"* *"transforming the way people X"* are forbidden. The pitch reads as if the founder is talking to their cofounder over coffee, not pitching from a stage. Wherever an Opus passage carries the founder's actual cadence, surface it verbatim or close to verbatim. Two cadence tells are forbidden in generated Pitch prose as well: em-dashes (rewrite with a comma, period, colon, semicolon or parentheses) and the tricolon negation hook ("No X. No Y. Just Z."); say what the thing is instead of listing what it is not.
 
 ### HARD RULE — Ballpark Numbers are Required
 
@@ -143,36 +143,16 @@ Delegate the render to a **sonnet-tier subagent**, handed a render brief you wri
 
 After the Pitch is written, output:
 
-```markdown
-# Pitch forged — [PROJECT]
-
-- HTML (read this with your cofounder, send to your first investor): `[absolute path]`
-- MD (source): `[absolute path]`
-
-## The synthesis
-- **The Bet**: [one sentence — verbatim from §1]
-- **The Wound** (essence): [one phrase]
-- **The Inversion** (essence): [one phrase]
-- **The Field** (first-100 size): [the ballpark number]
-- **The Stake** (top kill condition): [one sentence]
-- **The Signal** (stop-the-bet metric): [one sentence]
-- **The Stand**: [one sentence — verbatim from §7]
-
-## Read this with your cofounder before /probe, /preen, /smith.
-
-If either of you reads it and feels resistance — to a kill condition, to the numbers in The Field, to the Inversion itself — surface it now. Resistance to alignment artifacts compounds into resistance against architecture decisions, scope decisions, and build calls downstream. Better one revision pass on the Pitch than three months of muddy work that the cofounder never quite believed in.
-
-## Next
+A **Pitch forged — [PROJECT]** notice: absolute paths to the HTML and the MD; **The synthesis**, one line per section (Bet and Stand verbatim from §1 and §7; Wound and Inversion as one phrase each; Field as the first-100 ballpark; Stake as the top kill condition; Signal as the stop-the-bet metric); one short paragraph telling the founder to read it with the cofounder before `/probe`, `/preen`, `/smith` and to surface any resistance now, because resistance to the Pitch compounds into resistance to every downstream decision; then **Next**:
 - **Aligned and ready** → `/probe` (architecture validation), `/preen` (UX validation if UI-facing), then `/smith`.
-- **Want a stress-test before sending to investors** → `/pitch --critique` (runs the seven-dimension review pass on this pitch).
-- **Resistance surfaced** → `/pitch --refine` (regenerates V1.1 with feedback), or revisit `/prime` if the resistance is at the Opus / Vow / Touchstone level.
-```
+- **Want a stress-test before sending to investors** → `/pitch --critique`.
+- **Resistance surfaced** → `/pitch --refine`, or revisit `/prime` if the resistance is at the Opus / Vow / Touchstone level.
 
 ---
 
 ## Optional — `/pitch --critique`
 
-Runs the seven-dimension VC-style review pass on the existing Pitch. **This is feedback on the pitch, not a different pitch.** Treat it the way `/probe` treats a Pattern or `/preen` treats a UX surface — the artifact is the artifact; the review is the review.
+Runs the seven-dimension VC-style review pass on the existing Pitch. **This is feedback on the pitch, not a different pitch.**
 
 ### Process
 
@@ -243,7 +223,7 @@ Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings
 
 Suggest next steps:
 
-- **Pitch generated, alignment landed cleanly with cofounder** → `/probe` (architecture validation), `/preen` (UX validation if UI-facing), then `/smith`.
-- **Pitch generated, resistance surfaced** → `/pitch --refine` (V1.1 regeneration with feedback), or revisit `/prime` if resistance is at Opus / Vow / Touchstone level.
+After a `--critique` run, suggest:
+
 - **Critique verdict KILL or NEEDS RETHINK** → revisit `/prime` to revise the Vow's viability thread and the Opus's "Why us" before any build resources are committed.
 - **Critique verdict WORTH BUILDING or FUNDABLE** → proceed to `/probe` then `/smith` with conviction.

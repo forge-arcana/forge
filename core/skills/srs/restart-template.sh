@@ -10,11 +10,14 @@
 #   E2E:        ${E2E_PORT}
 #
 # Usage:
-#   bash restart.sh              # Full restart
-#   bash restart.sh --dry-run    # Show what would be killed
+#   bash dev/restart.sh              # Full restart
+#   bash dev/restart.sh --dry-run    # Show what would be killed
 #
 set -euo pipefail
-cd "$(dirname "$0")"
+# This script lives in dev/; the project root is one level up. Resolve it before any cd
+# so a relative $0 cannot skew it.
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
+cd "$(dirname "$0")/.."
 
 # ── Port Configuration ───────────────────────────────────────────────
 API_PORT=[API_PORT]
@@ -55,7 +58,16 @@ for p in "${DEV_PORTS[@]}"; do
 done
 
 # Kill orphaned node processes matching this project
+# Dev servers can retitle themselves: Next.js 16 runs as `next-server (v16.x.x)`, with no `node`,
+# `next dev` or project name in the command line (literal last verified 2026-10-02; recheck on a
+# major bump). It also auto-selects another port when the configured one is busy, so the port kill
+# above misses it. Match the current title, then scope to this project by working directory (Linux /proc).
+# PROJECT_ROOT is resolved at the top of this script (one level above dev/).
 ORPHANS=$(pgrep -f "node.*(vite|tsx|dev-server|playwright|vitest).*[PROJECT_NAME]" 2>/dev/null || true)
+for PID in $(pgrep -f "next-server" 2>/dev/null || true); do
+  CWD=$(readlink "/proc/$PID/cwd" 2>/dev/null || true)
+  case "$CWD" in "$PROJECT_ROOT"|"$PROJECT_ROOT"/*) ORPHANS="$ORPHANS $PID" ;; esac
+done
 if [ -n "$ORPHANS" ]; then
   for PID in $ORPHANS; do
     if $DRY_RUN; then

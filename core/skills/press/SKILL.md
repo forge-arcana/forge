@@ -38,7 +38,7 @@ Standard N+1, connection pooling, caching, indexing, load-testing readiness. Pro
 Standard error tracking, health checks, backups, rollback, graceful shutdown. Project-specific lens:
 - **Structured logging** — must match `<forge>/core/skills/forge/stack-guide.md` Logging Convention (Pino on Node — JSON, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`). If compute is on the edge (Workers), Pino is replaced by `console.log`-JSON → an OTLP backend; verify telemetry still lands single-pane.
 - **DR posture** (stack-guide makes this an explicit line item) — if prod is on Neon (no cross-region replication), verify the floor: Launch-plan PITR + a scheduled cross-region `pg_dump`. If the product needs region-survivable DR or HIPAA/BAA, verify it's on the Cloud SQL escalation — don't discover the gap here.
-- **Local dev tooling** — `restart.sh` + `kill-zombies.sh` exist per `<forge>/core/skills/forge/forge-conventions.md` items 6-7; suggest `/srs` if missing.
+- **Local dev tooling** — `dev/restart.sh` + `dev/kill-zombies.sh` exist per `<forge>/core/skills/forge/forge-conventions.md` item 7 (Dev Stack); suggest `/srs` if missing.
 
 ### 4. Compliance
 Standard data privacy, audit trail, ToS/Privacy refs, cookie consent. Project-specific lens informed by jurisdiction (GDPR / local equivalent / per-region retention rules).

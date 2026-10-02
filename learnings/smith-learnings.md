@@ -1,7 +1,7 @@
 # /smith Learnings
 
 > Accumulated learnings from smith runs (orchestration, apprentice delegation, art proficiency).
-> Absorbed by the `/forge` cycle. See `<forge>/skills/forge/protocol.md` for the absorb protocol.
+> Absorbed by the `/forge` cycle. See `<forge>/core/skills/forge/protocol.md` for the absorb protocol.
 
 <!-- Add learnings below this line -->
 
@@ -10,13 +10,13 @@
 **Learning**: When the user's brief locks a platform/service decision, treat the platform's actual API shape as covered by that decision — the integration mechanics are implementation details, not a fresh decision point. Don't re-interview when discovering that the platform exposes a different protocol than the existing code expects (e.g., the platform wraps an upstream service behind its own queue API rather than passing through native endpoints). The decision was "use platform X"; building the adapter for X's actual API is part of executing that decision, not a new "should we use X" question. Distinguish "what platform/service" (user decision) from "how to integrate with the platform's actual API shape" (engineering detail).
 **Apply when**: Mid-build, you discover that a locked platform choice requires an adapter or transport layer the original plan didn't anticipate. Build the adapter; don't re-open the platform decision. Only escalate if the discovery genuinely invalidates the platform choice (e.g., the platform can't satisfy a hard requirement at all, not just "it requires more code than expected").
 
-## User Global Rules Override Skill-Specific Overrides (2026-05-16)
-**Learning**: When a user's global rule (set in their harness's rules file) conflicts with a skill-specific override declared in the skill's documentation, the user rule wins. Smith's protocol may declare "auto-wrap at phase gates" as a local override of the global "no auto-commit" rule — but if the user's global ruleset forbids auto-commit, smith must batch the actions that would normally trigger the override (commits, deployments, external sends) and defer to user-triggered action at end-of-run. The skill protocol is subordinate to the global ruleset. Phase gate evaluations and progress updates still happen; commits do not.
-**Apply when**: Designing a skill protocol that includes an action override (auto-commit, auto-push, auto-deploy, auto-send). Always document the override as "subject to global user rules" and have the skill check the user's rules file (or known patterns) before activating. When in doubt, the skill defers to the user.
+## A Skill's Action Override Binds Only Where the Global Rule Sanctions It (2026-05-16, evolved 2026-10-02)
+**Learning**: When a user's global rule conflicts with an override declared in a skill's documentation, the global rule wins — the skill protocol is subordinate to the global ruleset. An override (auto-commit, auto-push, auto-deploy, auto-send) is legitimate only when the global rule itself names the exception, and only within the bounds it names: the No Auto-Commit rule now carves out explicitly delegated commit authority for a multi-step build, bounded to that invocation, which is what makes smith's phase-gate commits valid. Absent such a carve-out, the skill batches the actions the override would have triggered and defers them to a user-triggered step at end-of-run; gate evaluations and progress updates still happen.
+**Apply when**: Designing a skill protocol that includes an action override. Write the exception into the global rule, not just the skill, and bound it (which actions, which invocation). Where the rules file is silent, the skill defers to the user.
 
-## Never Skip Final-Gate Convergence at Go-Live Boundaries (2026-05-16)
-**Learning**: NEVER skip the final-gate convergence (heavy evaluative arts: /press + /pound, optionally /temper) when the work involves go-live to paid infrastructure with externally-exposed surfaces. The "save time" rationalization is a trap. The arts run as subagents in ~5 minutes of subagent wall time, and routinely catch BLOCK-class findings — legal-exposure gaps, security holes (replay attacks, missing auth defenses), audit-chain breaks, broken reconciler probes in newly-introduced lanes, missing fallback safety on cost-accounting paths — that would ship silently otherwise. The cost of running the arts is trivial vs the cost of a single legal-exposure incident, security incident, or budget overrun in production. If the user pushes back on the skip, the user is right.
-**Apply when**: A build phase is about to invoke /wrap and the work touched paid infrastructure, externally-exposed routes, content moderation, audit logging, financial accounting, or any compliance-adjacent surface. Run the convergence even if the build phase tests are green — the unit tests cover individual surfaces; the convergence covers cross-cutting concerns.
+## Never Trim the Art Gates — Least of All at Go-Live or on an Unattended Run (2026-05-16 → 2026-08-09)
+**Learning**: The "save time" rationalization for skipping evaluative arts is a trap in exactly the two situations where it is most tempting. (1) Go-live to paid infrastructure with externally-exposed surfaces: the final-gate convergence (/press + /pound, optionally /temper) runs as subagents in ~5 minutes of wall time and routinely catches BLOCK-class findings — legal-exposure gaps, security holes (replay attacks, missing auth defenses), audit-chain breaks, broken reconciler probes in newly-introduced lanes, missing fallback safety on cost-accounting paths — that would ship silently otherwise; unit tests cover individual surfaces, the convergence covers cross-cutting concerns. (2) Unattended/overnight runs: one such run kept the skeleton (heats, verify, phase-gate commits) but substituted inline self-evaluation for the per-heat art passes without declaring it. Every correctness gate that ran held; every later finding was exactly the class the skipped gate owns, arriving as user-prompted post-hoc review — including one the author's self-review missed and a fresh pass caught. Unattended is when the ceremony matters MOST. Trim scope, never gates; any substitution goes in the ledger, because "the run happened" reads as "the gates ran." If the user pushes back on a skip, the user is right.
+**Apply when**: A build phase is about to invoke /wrap and the work touched paid infrastructure, externally-exposed routes, content moderation, audit logging, financial accounting, or any compliance-adjacent surface — run the convergence even if the build-phase tests are green; and when configuring any autonomous/overnight orchestrated build.
 
 ## Test the Safety-Net Path, Not Just the Golden Path (2026-05-16)
 **Learning**: When writing a "fallback" or "safety net" code path that activates only on invalid/missing/malformed input, write a test that explicitly exercises that path. Happy-path tests won't trigger it, so the fallback often ships untested — and the fallback is precisely the code that's supposed to be the last line of defense. Common shapes: data-validation fallbacks (clamp, default, retry with alternate source), timeout fallbacks, missing-field fallbacks, type-coercion fallbacks. For each, write tests that pass valid input (golden), invalid input (triggers fallback), AND boundary input (just-barely-valid, just-barely-invalid). The safety net is what shouldn't crash; tested code shouldn't be the place the system actually breaks.
@@ -25,10 +25,6 @@
 ## Cross-Cutting Concerns Drop Quietly in Transport-Layer Refactors (2026-05-16)
 **Learning**: When a refactor splits a previously-monolithic function into multiple transport-specific lanes (local vs cloud, on-prem vs SaaS, sync vs async, primary vs fallback), cross-cutting concerns tend to drop silently on one of the lanes. The most common drop-outs: audit logging, content moderation, output hashing, security checks (CSRF, rate limiting, role enforcement), observability (metrics, structured logs), and idempotency. The pattern: the original function did all of these inline; the new transport lane re-implements only the "main" logic and forgets the cross-cutting pieces. Before merging such a refactor, walk every lane against an explicit checklist of cross-cutting concerns derived from the original function. The checklist should be a written artifact, not an implicit memory. /press or /poke at the refactor boundary catches this; better to bake the checklist into the design.
 **Apply when**: Refactoring an auth/audit/moderation-adjacent function into multiple lanes, or adding a new transport/protocol/backend to an existing system. Make the cross-cutting checklist explicit; review each lane against it; write tests that verify each cross-cutting concern fires on each lane.
-
-## Evaluate the Previous Heat While Forging the Next (2026-07-04)
-**Learning**: Launching the evaluation art on heat N as a background subagent while building heat N+1 inline eliminates dead time; findings arrive mid-heat and batch-fix cheaply.
-**Apply when**: Any build-evaluate loop where heat N+1 touches disjoint files from heat N's review scope.
 
 ## Schema Heats: Review Before Regenerating Migrations (2026-07-04)
 **Learning**: On a fresh project with an empty dev DB, sequence schema work as build → typecheck → art review → batch-fix → delete + regenerate ONE clean migration. Fixing schema findings after data exists costs a real migration per finding; before, it costs nothing.
@@ -45,10 +41,6 @@
 ## Convergence Loop: Decreasing Findings = Converging, Not Stalling (2026-07-05)
 **Learning**: A strictly decreasing serious-finding count across cycles is the healthy convergence signature. Fix-then-re-evaluate with fresh adversarial lenses each cycle surfaces the second-order defects the fixes themselves introduce.
 **Apply when**: Judging whether a final-gate loop is converging or should trip the stall check.
-
-## Anti-Double-Post: Prefer Defer Over Republish When Landing Is Unconfirmable (2026-07-05)
-**Learning**: For at-least-once delivery against external APIs, the dangerous case is "the write may have landed but isn't visible yet." Blindly retrying double-posts; the safe posture is to defer an unconfirmable ambiguous retry to a wider-window reconciler rather than republish on a fast retry.
-**Apply when**: Any external side-effect (posts, payments, emails) where success is not immediately readable back.
 
 ## Interim Crash-Safety Commits Inside Long Units (2026-07-04)
 **Learning**: A 15-heat unit is too long for a single gate commit. Committing at the unit's halfway point (tests green, prior heats reviewed) converts hours of exposure into zero without violating the no-per-heat-commit rule. Label it an interim checkpoint in the ledger.
@@ -102,17 +94,13 @@
 **Learning**: When a self-review finds a defect class (dead imports), check whether a compiler flag closes it permanently before hand-fixing instances — measuring the blast radius first turns "should we?" into a bounded job. Do NOT reflexively enable noisy sibling flags: an unused parameter is often a kept signature, and noise trains people to ignore the gate.
 **Apply when**: Any repo lacking a lint gate where typecheck is the only mechanical reviewer.
 
-## Never Trim the Art Gates on an Unattended Run; Declare Any Substitution (2026-08-09)
-**Learning**: An overnight run kept the skeleton (heats, verify, phase-gate commits) but substituted inline self-evaluation for the per-heat art passes without declaring it. Measured outcome: every correctness gate that ran held; every later finding was exactly the class the skipped gate owns, arriving as user-prompted post-hoc review — including one the author's self-review missed and a fresh pass caught. Unattended is when the ceremony matters MOST; trim scope, never gates, and any substitution goes in the ledger because "the run happened" reads as "the gates ran."
-**Apply when**: Configuring any autonomous/overnight orchestrated build.
+## Inspect the Installed Dependency, Don't Recall It — Builders and Reviewers Alike (2026-06-29 → 2026-07-04)
+**Learning**: For code against a fast-moving SDK or library, the exact schema/contract lives in the installed package on disk (`node_modules/<pkg>/dist`), not in anyone's training-data memory. Grep the installed source for ground truth before authoring a factory/adapter/wrapper; instruct build apprentices to inspect the package rather than recall the API — it produced correct current-API usage the orchestrator's own context could not supply; and feed the extracted contracts to the gate reviewer so it verifies against reality, not assumptions. Pair the build order with an exact file whitelist, verbatim hard rules, and "your final message is a build report."
+**Apply when**: Wrapping, adapting, or delegating any heat that codes against a fast-moving dependency.
 
-## Build Apprentices Succeed on SDK-Heavy Heats With "Inspect, Don't Recall" Orders (2026-07-04)
-**Learning**: For heats built on fast-moving SDKs, instructing the apprentice to inspect the installed package on disk (not recall the API from training) produced correct current-API usage the orchestrator's own context could not supply. Pair with an exact file whitelist, verbatim hard rules, and "your final message is a build report."
-**Apply when**: Delegating any heat that codes against a fast-moving dependency.
-
-## Parallel Build Apprentices Need Disjoint Package Boundaries (2026-07-04)
-**Learning**: Concurrent build apprentices avoid conflict when their write scopes are disjoint packages with a single declared shared touchpoint. Declare shared-file touchpoints in the commission so the later writer preserves the earlier one's edit.
-**Apply when**: Fanning out two or more writing apprentices.
+## Parallel Writing Apprentices: Declare Write Scopes, Name the Neighbours' Paths, Re-Read Shared Files (2026-07-04 → 2026-08-05)
+**Learning**: Concurrent build apprentices avoid conflict when their write scopes are disjoint (ideally whole packages) and every commission states three things: its writable paths, the paths concurrent apprentices own ("do NOT touch X"), and any declared shared touchpoint with "re-read any shared file immediately before editing" so the later writer preserves the earlier one's edit. Measured: ~20 apprentice runs at 3-4 concurrent with zero write collisions; both near-misses were in a shared constants file, and the re-read instruction absorbed the earlier edits cleanly.
+**Apply when**: Fanning out two or more writing apprentices. See also the "Fence Every Subagent Brief" HARD RULE (`core/rules/development-discipline.md`) for the deletion-side fence.
 
 ## Normative Checklists Make Review Apprentices Decisive (2026-07-04)
 **Learning**: Giving an evaluation apprentice an explicit PASS/FAIL checklist of normative requirements plus a "do NOT re-litigate" list of recorded decisions yields directly actionable output and zero duplicate findings. Free-form "review this" prompts re-open settled decisions.
@@ -122,10 +110,6 @@
 **Learning**: Instead of re-running an art solely to verify fixes, fold "verify these N fixes (PASS/FAIL each)" into the next heat's review prompt. One apprentice, two jobs, no extra latency.
 **Apply when**: Sequencing fix verification inside a heat cycle.
 
-## Explicit Write-Scope Declarations Enable 4-Wide Apprentice Concurrency (2026-08-05)
-**Learning**: ~20 apprentice runs at 3-4 concurrent with zero write collisions — every commission names its writable paths AND the paths concurrent apprentices own ("do NOT touch X"), plus "re-read any shared file immediately before editing." Both near-misses were in a shared constants file; the re-read instruction absorbed the earlier edits cleanly.
-**Apply when**: Running 3+ concurrent writing apprentices.
-
 ## Tiered Build/Review Cadence: Findings Formatted as Fix Commissions (2026-08-05)
 **Learning**: Lower-tier builders produce honest deviation sections when commissions demand them explicitly; higher-tier scoped reviewers then find 2-5 IMPORTANT per heat, and fix apprentices close them reliably when each finding carries file:line + a concrete fix + a named test to add. The finding format IS the fix commission — vague findings produce vague fixes.
 **Apply when**: Structuring any multi-tier build/review/fix pipeline.
@@ -133,10 +117,6 @@
 ## Infra-Gated Multi-Repo Builds: Build+Verify the Core, Document the Gated Tail (2026-06-29)
 **Learning**: When downstream code cannot compile or run until an upstream artifact is published/deployed, do not speculatively commit unverifiable code across live repos. Build and hard-verify the self-contained foundation; implement only consumer changes verifiable in isolation; deliver the infra-gated remainder as a runbook with exact ready-to-apply code, explicit at each gate about verified vs awaiting-provisioning.
 **Apply when**: Any platform/migration build with a publish→deploy→consume dependency chain.
-
-## Extract API Contracts From Installed Dependency Source, Not Memory (2026-06-29)
-**Learning**: For a factory/adapter wrapping a fast-moving library, the exact schema/contract lives in node_modules/<pkg>/dist. Grep the installed source for ground truth before authoring the wrapper, and feed the extracted contracts to the gate reviewer so it verifies against reality, not training-data assumptions.
-**Apply when**: Wrapping or adapting any fast-moving dependency.
 
 ## Multi-Session Shared-Tree Builds Need Deploy Windows, Not Just Lane Claims (2026-08-15)
 **Learning**: When several agent sessions build concurrently in one working tree and deploys bundle that tree, lane claims (which FILES are whose) are insufficient — the scarce resource is the DEPLOY WINDOW (a moment the whole tree is committed, migrated, and safe to bundle). The working pattern: each session commits its half as it completes; a session needing to deploy asks the in-flight peer for a go signal defined as "migration in prod + server half committed"; migrate-first applies to WHOEVER deploys next, not whoever wrote the migration — a bundle carries every committed line, so the migration its passenger code selects must be in prod before any peer's deploy, and the migration author should apply it before handing over the window.
@@ -147,3 +127,8 @@
 **Learning**: Under rate limits and process kills, the only state that survives is what's on disk — so sequence work to write fixes before attempting proofs, never the other way round, and never use a live-tree mutation (`stash`, an in-place revert) to stage a proof when a scratch copy would do the same job with zero blast radius. Two apprentices were killed mid-proof having written nothing recoverable; one `git stash` left the tree uncompilable for about a minute before it was resolved; and a resume record that still said "heat 1 pending" after eleven heats had actually landed would have replayed heat 1 on the next resume, redoing finished work and risking drift from what was actually built. Stamping orchestration checkpoints as heats complete — not just at the end — closes that last gap.
 
 **Apply when**: Running any multi-step build or review under conditions where a kill or interruption is plausible (rate limits, long agent sessions, flaky infra) — order writes before proofs, revert in scratch copies never live trees, and keep resume/progress records current as you go rather than batching them at the end.
+
+## Lock the Foundation, Then Fan Out Pages in Parallel (2026-06-27)
+<!-- relocated from prime-learnings.md by /purge, 2026-10-02 — build-orchestration wisdom, which is smith's territory -->
+**Learning**: Parallel subagents can build a cohesive single-codebase app with zero integration type-errors IF the entire shared substrate is built and type-checked FIRST: data layer, design tokens, complete UI primitive kit, shared pickers, modal context, app shell, stub pages — all green before fan-out. Then one agent per page with a strict disjoint file scope, an exhaustive API contract in the prompt, "read the real source for signatures," and NO builds inside agents (they would see each other's incomplete work) — verify centrally. The single hard barrier: the foundation must compile before the fan-out starts.
+**Apply when**: Building any multi-screen app with parallel agents sharing one codebase.

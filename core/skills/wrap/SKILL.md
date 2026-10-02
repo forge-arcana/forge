@@ -33,7 +33,7 @@ Execute the following steps in order. Do NOT skip steps. Do NOT commit without c
 Do both of these **in parallel** (independent operations — sequentially if your harness lacks parallel tool calls):
 
 **3a: Save Context**
-- Update the `## Progress` section in the project's `AGENTS.md`
+- Update the `## Current Context` section in the project's `AGENTS.md`
 - Un-migrated project (only `CLAUDE.md` exists): write to that `CLAUDE.md` and print one line suggesting `/forge` to migrate. Never create a second rules file.
 - **Replace** it with current state: branch, test count, completed phases, pending work
 - Stale history belongs in git log or memory files

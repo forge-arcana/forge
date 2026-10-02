@@ -60,7 +60,7 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
 
 **Touchstone conformance** — when the Touchstone exists, every UI-facing apprentice receives the MD's YAML token block (colors, typography, spacing, rounded, components) AND the Do's/Don'ts prose section as part of its commission. Apprentices MUST use these tokens (font families, color variables, motion timing) instead of inventing new values, AND comply with the project-specific Do's/Don'ts. Apprentices that introduce non-Touchstone fonts, colors, motion tokens, or violate a Do/Don't are rejected and re-tasked. The `typography.faces` block is part of that commission: `ui_face` carries every interface word, `logotype_face` may reach only the wordmark, and a second family on a heading, figure, or dialog title is a rejected commission unless the Touchstone declares a `heading_face` with its audience and reason.
 
-**Pitch gate** — if no `[PROJECT]_04_Pitch_V1.0.md` exists AND the Blueprint contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting. Ask the user — using your harness's multi-choice prompt if available, otherwise inline — with options: "Yes, validate business model first" / "Skip, model already validated". A `KILL` or `NEEDS RETHINK` verdict surfaces to the user — building toward a broken business model is waste. Pitch writes its verdict as a `<!-- PITCHED: [VERDICT] -->` marker at the top of the Pitch file (or the Blueprint if no Pitch file exists yet).
+**Pitch gate** — if no `[PROJECT]_04_Pitch_V*.md` / `.html` exists AND the Blueprint contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting (it requires the Touchstone — see the Touchstone gate above). Ask the user — using your harness's multi-choice prompt if available, otherwise inline — with options: "Yes, write the Pitch first" / "Skip, proceed without a Pitch". If a Pitch exists, read the `<!-- PITCHED: [VERDICT] — [date] -->` marker at the top of `<body>` in the Pitch HTML: a `KILL` or `NEEDS RETHINK` verdict surfaces to the user before any heat starts — building toward a broken business model is waste. The marker is written only by `/pitch --critique`; no marker means no review pass was requested, and smith proceeds normally.
 
 ## Step 0.5: Scope Gate
 
@@ -73,27 +73,7 @@ Depending on input mode:
 - **Plan file mode** → read the plan file, identify implementation steps, estimate complexity
 - **Conversation mode** → scan conversation context for: architecture decisions, implementation steps, file lists, API designs, data models. Synthesize into a structured work spec.
 
-For plan/conversation modes, persist the extracted spec to `memory/smith-workspec.md`:
-
-```markdown
-# Smith Work Spec — [Short Title]
-
-## Source
-[Plan file path or "conversation context"]
-
-## Scope
-[1-2 sentence summary of what's being built]
-
-## Implementation Steps
-1. [Step from plan/conversation]
-2. ...
-
-## Key Files
-- [file] — [action: new/modify/delete]
-
-## Hash
-[sha256 of this content — for session resume change detection]
-```
+For plan/conversation modes, persist the extracted spec to `memory/smith-workspec.md` with sections Source, Scope, Implementation Steps, Key Files, and Hash (sha256 of the content, for session-resume change detection) — schema in [ledger-schema.md](ledger-schema.md).
 
 ### Heat Estimation
 
@@ -123,7 +103,7 @@ When working from a blueprint: the **Consumption Guide** (Section 22 footer) def
 **Foundation Unit** (always first):
 - Heat 1: Project scaffolding + data model (Sections 13, 16)
 - Heat 2: Auth system (Sections 3, 15)
-- Heat 3: Dev tooling — invoke `/srs` for restart.sh + kill-zombies.sh, set up logging (Section 13 + forge conventions)
+- Heat 3: Dev tooling — invoke `/srs` for dev/restart.sh + dev/kill-zombies.sh, set up logging (Section 13 + forge conventions)
 
 **Core Workflow Unit** (the product's heartbeat):
 - One heat per numbered step in Section 5 (Primary Workflow)
@@ -193,7 +173,6 @@ Output the full build plan as a table:
 | 1 | Foundation | Scaffolding + schema | §13, §16 | T1 | — | — |
 | 2 | Foundation | Auth system | §3, §15 | T3 | Heat 1 | — |
 | 3 | Foundation | Dev tooling | — | T1 | Heat 1 | Yes (with Heat 2) |
-| 4 | Core | User registration | §5.1 | T2 | Foundation | — |
 | ...| ... | ... | ... | ... | ... | ... |
 
 Estimated heats: N | Parallelizable: M
@@ -238,9 +217,7 @@ Run tests and build to establish ground truth before evaluation. Tiered expectat
 | Phase gates | Integration tests pass |
 | Final gate | Full test suite + production build |
 
-Verify results are passed to the evaluation arts as evidence. An art evaluating with test results is an expert; an art evaluating without them is a speculator.
-
-If verify fails, smith fixes before invoking arts — no point evaluating broken code.
+Verify results go to the evaluation arts as evidence. If verify fails, smith fixes before invoking arts.
 
 ### 2d: Evaluate
 
@@ -290,9 +267,9 @@ Phase gates are escalated evaluations at unit and phase boundaries.
 | Core Workflow complete | `/probe` + `/press` | Yes — `/wrap` |
 | Each Supporting unit complete | `/press` | Yes — `/wrap` |
 | Hardening complete | `/temper` | Yes — `/wrap` |
-| **Final Gate** | `/temper` + `/pound` + `/pitch`* | Yes — `/wrap` |
+| **Final Gate** | `/temper` + `/pound` + `/pitch --critique`* | Yes — `/wrap` |
 
-*`/pitch` only if product has monetization — re-validates the business model against what was actually built.
+*`/pitch --critique` only if the product has monetization and a Pitch exists — the review pass re-scores the business model against what was actually built and writes the `PITCHED` verdict marker.
 
 Gate arts spawn at opus tier and run with their full fan-out — the single-agent scoping applied to per-heat passes does not apply at gates.
 
@@ -378,15 +355,7 @@ Smith persists state to survive session breaks. On startup, if `memory/smith-led
 
 1. Read the ledger
 2. Read `memory/smith-progress.md`
-3. Present current state:
-
-```
-Resuming forge session for [Project Name].
-Phase: [phase] | Heat: [N] of ~[M] | Unit: [name]
-Last completed: Heat [X] — [title]
-Next: Heat [Y] — [title]
-```
-
+3. Present current state in one block: `Resuming forge session for [Project Name].`, then phase / heat N of ~M / unit, last completed heat, next heat.
 4. Continue from where it left off. No re-planning unless the source has changed — check with `<forge>/core/scripts/smith-checkpoint.sh <project-path> --hash-check blueprint` (script tier; prints `UNCHANGED`/`CHANGED` against the ledger's recorded hash).
 
 If it reports `CHANGED`: re-run Step 1 (decomposition) with the updated blueprint, preserving completed heats where possible.
@@ -407,58 +376,9 @@ For plan/conversation mode: run `--hash-check workspec` instead (and `--hash-che
 
 ## The Learning Membrane
 
-Three layers of wisdom accumulate independently. Each feeds back into the next run.
+> Full details: [learning-membrane.md](learning-membrane.md) — what each layer captures, with examples.
 
-### Layer 1: Smith Learnings (`memory/smith-learnings.md`)
-
-The master's own wisdom about *how to forge* — orchestration, not code quality:
-
-- Build order optimizations (e.g., "scaffold logging before auth — auth errors need log context")
-- Heat decomposition insights (e.g., "payment heats are 2x larger than estimated — split into sub-heats")
-- Art combination effectiveness (e.g., "poke + preen parallel on UI heats catches 30% more issues than sequential")
-- Circuit breaker calibration (e.g., "3 cycles too few for payment logic, 5 needed")
-- Wrap timing patterns (e.g., "wrap after Foundation unit, not after each Foundation heat")
-
-**Format** (follows forge protocol):
-```markdown
-## [Date] — [Short Title]
-- **Learning**: [universal principle, no project names/paths]
-- **Forge-worthy**: [yes/no] — [reason]
-```
-
-### Layer 2: Art Learnings (existing files)
-
-Each art writes to its own `memory/<art>-learnings.md` via the forge protocol post-flight. Smith does not touch these. The arts evolve independently — smith is the engine that drives their repetition.
-
-The more smith works, the more each art runs, the sharper each art gets.
-
-### Layer 3: Apprentice Proficiency (`memory/smith-apprentice-log.md`)
-
-Smith learning how to best deploy apprentices:
-
-- Which task types benefit from parallelization vs. which cause merge conflicts
-- Optimal apprentice scope sizing (too broad = context overflow, too narrow = overhead waste)
-- Fan-out patterns that worked vs. patterns that needed manual merge resolution
-- Evidence sharing strategies (shared collection vs. per-apprentice collection)
-
-**Format**: Same as Layer 1.
-
-### Preflight Reading
-
-Smith reads all three layers during Step 0. Layer 1 shapes the build plan and heat cycle strategy. Layer 3 shapes apprentice allocation decisions. Layer 2 is read by each art in its own preflight — smith doesn't interfere with art wisdom.
-
-### Post-Heat Capture
-
-After each heat's evaluate-fix cycle:
-- Write to Layer 1 if smith learned something about orchestration
-- Write to Layer 3 if smith learned something about apprentice effectiveness
-- Arts write to Layer 2 via their own post-flight (automatic, no smith intervention)
-
-Three independent streams, one forge.
-
-### Forge-Worthy Promotion
-
-Learnings marked `Forge-worthy: yes` in any layer get promoted to the membrane's `learnings/general.md` by the `/forge` cycle's fold phase, same as art learnings. Universal orchestration patterns flow back into the forge for all future smith runs across all projects.
+Three layers accumulate independently: **Layer 1** `memory/smith-learnings.md` (orchestration — build order, heat sizing, art combinations, circuit-breaker calibration), **Layer 2** each art's own `memory/<art>-learnings.md` (written by the art's post-flight; smith never touches these), **Layer 3** `memory/smith-apprentice-log.md` (delegation — scope sizing, fan-out patterns, merge conflicts). Layers 1 and 3 are read in Step 0 and written at Step 2f in the Forge Protocol post-flight format; `Forge-worthy: yes` entries are promoted by the `/forge` fold phase.
 
 ## Progress Tracking
 
@@ -470,11 +390,10 @@ Two files persist smith state:
 
 ## Hard Rules
 
-1. **NEVER** chain bash commands with `&&`, `;`, or `||`. This applies to smith AND all apprentices.
+1. **NEVER** chain bash commands with `&&`, `;`, or `||`. This applies to smith AND all apprentices — include the rule verbatim in every apprentice prompt.
 2. **Auto-wrap** at unit boundaries and phase gates. No asking — just invoke `/wrap`.
 3. **Multi-choice prompts** ONLY when arts produce conflicting recommendations that smith cannot resolve. The master decides everything else autonomously.
-4. **NEVER** skip evaluation. Even if the code "looks fine." Every heat gets at minimum `/poke`.
+4. **NEVER** skip evaluation on a T2 or T3 heat because the code "looks fine." T1 heats take verify (2c) as their per-heat gate and their diffs are reviewed, batched and untrimmed, at the next phase gate — no diff leaves a phase unevaluated.
 5. **NEVER** proceed past the final gate with CRITICAL or IMPORTANT findings unless the user explicitly accepts them after convergence stalls or max cycles.
 6. **ALWAYS** persist the ledger before any milestone or potential interruption point.
 7. **ALWAYS** follow the stack guide conventions when building. The blueprint defines *what*, the stack guide defines *how*.
-8. **ALWAYS** include the no-chaining rule in every apprentice prompt verbatim.

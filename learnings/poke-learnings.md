@@ -17,10 +17,6 @@
 **Learning**: Success toasts are redundant when the UI already shows the outcome: (1) page navigation after action, (2) toggle/switch updates inline, (3) dialog closes and parent list refreshes. Keep error toasts always — error feedback is never redundant. Validation errors belong inline near the field (Apple HIG, Material Design), not in toasts/snackbars. Form-level errors should render as inline text under the input, not as ephemeral notifications.
 **Apply when**: Reviewing toast/snackbar usage in any UI codebase during tech debt audits.
 
-## Band-Aid Fallback Detection: Ask "Where Should This Be Set?" (2026-03-15)
-**Learning**: When reviewing `||`/`??` fallback patterns, the key question is: "Where should this field have been set?" If the answer is "at creation/insert time" and the fallback re-derives the value from a parent or sibling, it's a band-aid masking a data integrity bug. Fallback chains (3+ links) are a strong code smell — one authoritative source should suffice.
-**Apply when**: Reviewing code for tech debt, especially around data access patterns with fallback defaults.
-
 ## Client-Supplied Identity in Validation Schemas (2026-03-21)
 **Learning**: When a validation schema accepts an identity field (e.g., `targetUserId`, `ownerUserId`) from the request body for an authenticated endpoint, the backend must verify the relationship between the caller and the referenced entity — not just that the entity exists. Without engagement/relationship verification, any authenticated user can target arbitrary entities with false claims. Especially dangerous for complaint, dispute, and review endpoints.
 **Apply when**: Reviewing any endpoint that accepts an entity ID from the request body and creates a record linking the caller to that entity.
@@ -30,12 +26,8 @@
 **Apply when**: Building search/autocomplete UI components that render near Leaflet or similar map libraries.
 
 ## Pino Logger Exists But Nobody Calls It (2026-03-28)
-**Learning**: When agents build modules in parallel, they all import and instantiate the logger but may not actually call log.info/warn/error in the code paths. Verify that logger calls exist on both success AND failure paths — not just the import statement. The forge-scan detects `logger.` calls, so zero matches despite imports means the logger is dead code. In this case, the server actions DID log correctly (58 calls), but middleware and auth had zero logging despite being the security layer.
+**Learning**: When agents build modules in parallel, they all import and instantiate the logger but may not actually call log.info/warn/error in the code paths. Verify that logger calls exist on both success AND failure paths — not just the import statement. The forge-scan detects `logger.` calls, so zero matches despite imports means the logger is dead code. The gap is rarely uniform: feature modules can log thoroughly while middleware and auth — the security layer — have zero calls, so check per layer, not per repo.
 **Apply when**: Reviewing any codebase where logging infrastructure was set up by one agent and consumed by others. Check for dead logger imports.
-
-## Edge Runtime Logger Compatibility (2026-03-28)
-**Learning**: Next.js middleware runs in the Edge Runtime, which does not support Node.js APIs like `fs` or `net`. Pino relies on Node.js streams and won't work in edge middleware. For edge-compatible logging, use `console.warn` with structured JSON objects as a fallback, or a lightweight edge-compatible logger. Don't import Pino in middleware.ts.
-**Apply when**: Adding logging to Next.js middleware or any Edge Runtime code.
 
 ## Bash Script Exit Code Semantics — Always Exit 0 Masks Failures (2026-05-06)
 **Learning**: When a bash script always exits 0 regardless of outcome (to "never fail the caller"), it prevents the caller from distinguishing success, no-op, transient failure, and permanent failure. Use exit codes to signal outcome: 0=success/no-op, 1=transient failure (retry later), 2=permanent failure (missing dependency, corrupt config). Callers can then decide whether to retry, escalate, or ignore. The "always exit 0" pattern is appropriate only for optional enhancements (e.g., a cache warmup that shouldn't block the main workflow), not for critical operations where the caller needs to know if the action succeeded.

@@ -73,7 +73,7 @@ Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then resolve the *
 
 Additionally, verify the blueprint includes:
 - **Logging strategy** aligned with `<forge>/core/skills/forge/stack-guide.md` Logging Convention (structured logging, dev vs prod verbosity, browser console forwarding). If absent, flag it.
-- **Dev setup plan** that includes `restart.sh` and `kill-zombies.sh` (see `<forge>/core/skills/forge/forge-conventions.md` items 6-7). If absent, flag it.
+- **Dev setup plan** that includes `dev/restart.sh` and `dev/kill-zombies.sh` (see `<forge>/core/skills/forge/forge-conventions.md` item 7, Dev Stack). If absent, flag it.
 - **Language justification**: Section 13 must include explicit reasoning for the backend language choice — not just "we're using TypeScript" but WHY it fits this project's signals. If the justification is missing or generic ("it's popular"), flag as IMPORTANT.
 - **Testing strategy**: Section 18 must go beyond tool names — it must specify (1) which layers get which test types and why, (2) the critical user flows requiring E2E coverage, and (3) how test data is provisioned. If purely declarative (just naming tools without architectural decisions), flag as IMPORTANT.
 

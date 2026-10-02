@@ -143,7 +143,7 @@ to know what NOT to change.
 
 ## Post-Flight
 
-Follow the Forge Protocol post-flight. When writing learnings:
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/preen-learnings.md`. When writing learnings:
 
 - Capture **platform-specific patterns** (e.g., "Capacitor apps on Android 15 need explicit edge-to-edge handling")
 - Capture **reusable design patterns** (e.g., "skeleton screens with matching component shapes reduce perceived load time by 40%")

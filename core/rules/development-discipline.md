@@ -1,7 +1,7 @@
 # HARD RULES — Development Discipline
 
 > Universal rules for any AI-assisted development workflow. Apply regardless of harness.
-> Adapters may add harness-specific phrasing (e.g., the Claude Code adapter binds the
+> Harness-specific bindings are named inline (e.g., Claude Code binds the
 > "decision points" rule to the `AskUserQuestion` tool primitive).
 
 ## HARD RULE — Fix at the Point of Discovery; Don't Defer or Multiply Work
@@ -63,6 +63,12 @@ cd packages/server && git commit -m "fix"
 3. **For non-git commands**: Use separate shell tool calls, one command each
 4. **Subagents must follow this too** — explicitly instruct them in the prompt
 
+## HARD RULE — Fence Every Subagent Brief
+
+> **A brief that omits boundaries is read as permission. Every subagent or delegated-worker brief states (1) the single directory it may write to and (2) "do not delete, create, install, or run anything outside it, and never touch another agent's or the parent's directories".**
+
+Research agents also get "web and read-only inspection only: no local installs, no deletions, no service or GPU actions". Workers acting on a machine also get "no sudo, no service restarts, HTTP-only against shared services". Deletion is the one action the next tool call cannot undo, and an agent acting on an ownership inference deletes confidently.
+
 ## HARD RULE — No Auto-Commit
 
 > **NEVER commit automatically after completing any sprint, phase, or piece of work.**
@@ -95,9 +101,9 @@ and any question where you need the user's answer before proceeding.
 **Exceptions**: rhetorical questions, status updates, and informational statements that
 don't require a response.
 
-**Adapter binding**:
+**Harness binding**:
 - Claude Code → use the `AskUserQuestion` tool
-- Bob → use the inline numbered-options prompt (verify in adapter manifest)
+- Bob → use the inline numbered-options prompt
 - Headless / generic → fall back to inline numbered prompt and parse stdin
 
 ## HARD RULE — Logs First, Always (debugging)
@@ -151,8 +157,8 @@ already exist on disk.
 
 1. **/clear between unrelated tasks.** Carrying one task's context into the next costs cache reads on every turn and buys nothing.
 2. **Before a break longer than ~1 hour, /compact or /clear** while the prompt cache is still warm. Main-session cache TTL is 1 hour; a cold /compact on a large session is the most expensive kind.
-3. **Don't switch model or toggle MCP servers mid-task**. Each rebuilds the whole cache. (Editing CLAUDE.md or memory mid-session does not.)
-4. **Keep always-loaded rules lean** (CLAUDE.md under ~200 lines). Move specialist content into on-demand skills that load when needed, not every prompt.
+3. **Don't switch model or toggle MCP servers mid-task**. Each rebuilds the whole cache. (Editing the rules file or memory mid-session does not.)
+4. **Keep always-loaded rules lean** (each rules file — project `AGENTS.md`, membrane rules file — under ~20k chars; hard-flag above 25k). Move specialist content into on-demand skills that load when needed, not every prompt.
 
 The test: would this context still be needed if the task started fresh? If not, clear it.
 

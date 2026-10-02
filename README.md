@@ -142,7 +142,7 @@ Invocation forms:
 
 ---
 
-## Arts (the Nine P's)
+## Arts (the Ten P's)
 
 Arts are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `core/skills/forge/protocol.md`.
 
@@ -160,12 +160,17 @@ Arts are specialist agent skills — they adopt a persona and have a self-improv
 | `/press` | Go-live readiness scorecard across 7 dimensions (self-improving) |
 | `/pound` | Deep QA with 21 adversarial personas — generates tests, finds edge cases |
 
-The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` runs parallel on UI changes. `/pitch` runs orthogonal — business model viability, before building and before ship. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship.
+The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` runs parallel on UI changes. `/pitch` runs after the Touchstone — one Pitch for founder, cofounder and investor. `/plot` draws the Atlas near go-live. Cadence: poke often, preen on UI changes, pitch after Touchstone, press before milestones, pound before ship, plot at go-live.
 
 ### Business Model
 | Art | What it does |
 |-----|-------------|
-| `/pitch` | VC-style business model critique — market, value prop, revenue model, moat, GTM, kill conditions (self-improving) |
+| `/pitch` | The founder's other voice — generates the seven-section Pitch (Bet / Wound / Inversion / Field / Stake / Signal / Stand) with ballpark numbers, rendered through the Touchstone; `--critique` adds the seven-dimension VC review (self-improving) |
+
+### Landscape
+| Art | What it does |
+|-----|-------------|
+| `/plot` | Principal infra/platform architect — draws the Atlas: deployable units, data stores, external integrations, trust boundaries. Planned cast early, as-built cast at go-live with drift from the plan as the headline (self-improving) |
 
 ### When Blocked
 | Art | What it does |
@@ -195,6 +200,7 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 | `/temper` | Hardened evaluation — runs poke + press N times, consolidates with confidence scoring |
 | `/cicd` | Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures |
 | `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
+| `/burn` | Token Burn — per-session token and estimated-cost report read from the harness's own transcripts |
 
 ---
 
@@ -216,7 +222,7 @@ During any work session (automatic):
   Cast phase deploys forge updates before the fold phase runs.
   Never deletes from user's global space.
 
-Arts (/prime, /probe, /poke, /preen, /press, /pound, /pitch, /pry, /praise):
+Arts (/prime, /probe, /poke, /preen, /press, /pound, /pitch, /plot, /pry, /praise):
   → read forge/learnings/ first → smarter decisions
   → write back to project memory/ → auto-accumulates → next /forge absorbs
 ```
@@ -227,42 +233,35 @@ Arts (/prime, /probe, /poke, /preen, /press, /pound, /pitch, /pry, /praise):
 
 ```
 forge/
-├── skills/                # Git-tracked source of truth for all global skills
-│   ├── prime/             # The originator — ideation to blueprint (art)
-│   ├── probe/             # Architecture challenger (art, self-improving)
-│   ├── poke/              # Tech debt code review (art, self-improving)
-│   ├── preen/             # UI/UX design evaluation (art, self-improving)
-│   ├── press/             # Go-live readiness assessment (art, self-improving)
-│   ├── pound/             # Deep QA with 21 adversarial personas (art)
-│   ├── pitch/             # VC-style business model critique (art)
-│   ├── pry/               # The Lever — relentless solution-finder (art)
-│   ├── praise/            # Feedback router — closes the build-ship-learn loop (art)
-│   ├── smith/             # The Master Builder — autonomous product forging
-│   ├── wedge/             # The Master of Aesthetic — Touchstone (HTML masterpiece)
-│   ├── forge/             # The forge cycle SKILL.md + reference docs
-│   │   ├── SKILL.md               # /forge command
-│   │   ├── claude-code-rules.md   # Workflow rules
-│   │   ├── claude-code-settings.json  # Universal settings reference
-│   │   ├── stack-guide.md         # Tech stack decisions
-│   │   ├── forge-conventions.md   # Conventions checklist
-│   │   ├── preflight.md           # Shared drift classification
-│   │   └── protocol.md            # Shared art pre-flight/post-flight protocol
-│   ├── monci/             # Monitor CI
-│   ├── ponci/             # Push and monitor CI
-│   ├── qt/                # Quick test
-│   ├── srs/               # Restart script setup
-│   ├── vsix/              # VS Code extension publishing
-│   ├── dig/               # Think deeper — staff engineer stance
-│   ├── eli5/              # Explain Like I'm 5
-│   ├── cicd/              # Local CI/CD pipeline
-│   ├── temper/            # Hardened evaluation — repeated poke + press
-│   ├── wawa/              # Outstanding work summary
-│   └── wrap/              # Pre-commit ritual
+├── core/
+│   ├── skills/            # Tool-neutral source of truth for all skills (25)
+│   │   ├── prime/ probe/ poke/ preen/ press/ pound/ pitch/ plot/ pry/ praise/   # the ten arts
+│   │   ├── smith/         # The Master Builder — autonomous product forging
+│   │   ├── wedge/         # The Master of Aesthetic — Touchstone
+│   │   ├── forge/         # The forge cycle
+│   │   │   ├── SKILL.md               # /forge command
+│   │   │   ├── protocol.md            # Shared art pre-flight/post-flight protocol + model tiers
+│   │   │   ├── preflight.md           # Shared drift classification
+│   │   │   ├── forge-conventions.md   # Conventions checklist
+│   │   │   ├── stack-guide.md         # Tech stack decisions
+│   │   │   └── pattern-skeleton.md    # Pattern document skeleton
+│   │   └── burn/ cicd/ dig/ eli5/ monci/ ponci/ qt/ srs/ temper/ vsix/ wawa/ wrap/   # task skills
+│   ├── scripts/           # Tool-neutral runtime scripts (21)
+│   ├── rules/             # HARD RULES (development-discipline.md, forge-governance.md)
+│   └── hooks/             # Tier work-router hook pair (tier-guard.sh, tier-routing.sh)
+├── bin/forge-build        # Emits build/.agents/ (FORGE.md, skills/, rules/) + build/scripts/
+├── build/                 # Generated output (gitignored)
+├── claude-helpers/        # Optional Claude Code reference docs + transient migration glue
 ├── learnings/             # Absorbed team wisdom (art-specific + global patterns)
 ├── memory/                # Team identity & shared conventions
-├── presentation/          # Canonical human-readable overview (index.html)
+├── archive/               # Historical design notes
+├── reference/             # Dated research/assessment notes
+├── plans/                 # Dated implementation plans
+├── presentation/          # Human-readable overview (index.html)
+├── .github/workflows/     # CI (fold-purity.yml)
 ├── .claude/skills/
 │   ├── forge/             # Bootstrap (so /forge is discoverable on fresh clone)
 │   └── purge/             # The Warden — master tender (forge-internal, never deployed)
+├── CONTRIBUTING.md
 └── AGENTS.md
 ```

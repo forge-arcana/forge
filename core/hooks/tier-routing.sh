@@ -5,9 +5,10 @@
 #
 # Why: this used to be model-blind (no model field is given to hooks) and
 # injected generic text on every turn. We now derive the model ourselves by
-# reading the tail of the transcript for the last `.message.model` seen, so
-# cheap sessions (sonnet/haiku) get zero injected text — only top-tier
-# sessions (fable/mythos/opus) get steered toward planning + delegation.
+# reading the tail of the transcript for the last `.message.model` seen.
+# Top-tier sessions (fable/mythos/opus) get the plan-and-delegate rubric.
+# Haiku sessions get a one-line label (cheap tier, writes allowed, no
+# delegation required). Every other model (sonnet, etc.) gets no injected text.
 #
 # Why fail open / fail silent on every error path: this hook runs on EVERY
 # user prompt. A crash, a missing transcript, a malformed JSONL line, or an

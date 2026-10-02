@@ -1,6 +1,6 @@
 ---
 name: praise
-description: "Feedback-driven improvement loop — ingests user feedback, testing findings, or bug reports, routes them through evaluative arts (probe, preen, poke), assesses blueprint impact, and hands off to smith with a prioritized change brief. TRIGGER when: user has feedback to process, wants to close the loop on testing results, end-user reports, or QA findings."
+description: "Feedback-driven improvement loop — ingests user feedback, testing findings, or bug reports, routes them through evaluative arts (probe, preen, poke, press), assesses blueprint impact, and hands off to smith with a prioritized change brief. TRIGGER when: user has feedback to process, wants to close the loop on testing results, end-user reports, or QA findings."
 ---
 <!-- model: opus | fan-out: probe/poke legs → opus; press/preen legs → sonnet; Phase 4 consolidation at opus -->
 
@@ -21,13 +21,7 @@ description: "Feedback-driven improvement loop — ingests user feedback, testin
 
 ## Phase 0: Pre-Flight
 
-1. **Resolve forge path** from your harness's global config (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses), managed by `/forge`
-2. **Launch all reads in parallel** (all independent after forge path resolves):
-   - Read the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated) for stack, conventions, current state
-   - Read `<forge>/core/skills/forge/stack-guide.md` for tech reference
-   - Scan cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions)
-   - Read `<forge>/learnings/praise-learnings.md` if it exists (routing wisdom from prior runs)
-   - Read `memory/.web-cache.json` if it exists (per-query lookups/writes during the run go through `<forge>/core/scripts/web-cache.sh` per the [Forge Protocol](../forge/protocol.md#web-research-cache))
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then scan cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions).
 
 ## Phase 1: Feedback Ingestion & Classification
 
@@ -88,8 +82,6 @@ PROJECT CONTEXT:
 | `/probe` | Architecture / Tech | opus | For each item: architectural gap, wrong decision, or scaling concern? Check the web for current best practices on the specific concern. Severity: CRITICAL / IMPORTANT / MINOR. |
 | `/poke` | Code Quality / Performance | opus | For each item: trace the likely code location, diagnose the root cause, propose the fix. Output FILE, PROBLEM, FIX, EFFORT with severity CRITICAL / IMPORTANT / MINOR. |
 | `/press` | Readiness / Operations | sonnet | For each item: name the readiness dimension (Security, Scalability, Operations, Compliance, Observability, Deployment, Documentation), score 1–5, identify the gap, propose the remediation. |
-
-Tier rationale is unchanged: /probe and /poke diagnoses have no downstream verification gate, so they run at opus; /preen and /press findings are re-graded by the opus-tier Phase 4 merge.
 
 ## Phase 3: Blueprint Delta Assessment
 
@@ -196,15 +188,8 @@ If user selects **"Just the criticals"**: rebuild the plan scoped to Priority 1 
 
 ## Post-Flight
 
-Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/praise-learnings.md`. Praise-specific learning prompts:
-
-**Learnings to capture**:
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/praise-learnings.md`. Capture:
 - Which feedback categories consistently triggered which arts
 - Feedback formats that were easy vs. hard to classify
 - Cases where a blueprint delta was found vs. implementation gaps
 - Effective change brief formats that smith consumed cleanly
-
----
-
-The forge improves through use. Every piece of feedback closes a loop:
-feedback → classify → parallel arts (/preen, /probe, /poke, /press) + Blueprint Delta → Praise Report → Build Plan (waves + sub-agents, user-approved) → Change Brief → /smith.

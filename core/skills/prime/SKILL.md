@@ -75,19 +75,19 @@ Five visionaries, one tenet each. Apply these throughout every conversation:
 The starter skeleton lives at `<forge>/core/skills/prime/opus-scaffold.md`. Copy it as the new project's `[PROJECT]_01_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md` if no project name yet) and append every turn (user response verbatim + Prime's reflection) into the appropriate Phase section. The file's outline: header + Phase 1 (Spark) + Phase 2 (Shape) + Crystallization.
 
 ## Arguments
-`$ARGUMENTS` — project name or raw idea description (e.g., `/prime MyApp`, `/prime "a tool that..."`)). If not provided, open with an invitation to talk about what they're building.
+`$ARGUMENTS` — project name or raw idea description (e.g., `/prime MyApp`, `/prime "a tool that..."`). If not provided, open with an invitation to talk about what they're building.
 
 ## Pre-Flight
 Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then:
 Launch these in parallel (independent operations):
-- **Scan for existing work**: Glob the current directory for `*Opus*`, `*Vow*`, `*Touchstone*`, `*Pitch*`, `*Blueprint*`, `*ProductBlueprint*`, `*Pattern*` — if an Opus manuscript already exists, read it first (that's the authentic voice); then read Vow, Touchstone, Pitch, Blueprint, Pattern in that order. (The `*Pitch*` glob also picks up legacy `PitchForge_*` files. The `*Touchstone*` glob picks up the HTML masterpiece written by `/wedge`.)
+- **Scan for existing work**: Glob the current directory for `*Opus*`, `*Vow*`, `*Touchstone*`, `*Pitch*`, `*Blueprint*`, `*ProductBlueprint*`, `*Pattern*` — if an Opus manuscript already exists, read it first (that's the authentic voice); then read Vow, Touchstone, Pitch, Blueprint, Pattern in that order. (The `*Pitch*` glob also picks up legacy `PitchForge_*` files. The `*Touchstone*` glob picks up the HTML + MD pair written by `/wedge`.)
 - **Ask about materials**: "Do you have any existing materials — a deck, a one-pager, notes, an application you've submitted?"
 
 ## Process
 
 ### Phase 1: The Spark (always starts here)
 
-**Before the first question**: create `[PROJECT]_01_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md`) with the skeleton above. This file is now the durable manuscript — every turn appends to it.
+**Before the first question**: create `[PROJECT]_01_Opus_V1.0.md` (or `Untitled_Opus_V1.0.md`) with the skeleton from `opus-scaffold.md`. This file is now the durable manuscript — every turn appends to it.
 
 Open-ended conversation. Your job is to draw out the core idea:
 
@@ -117,9 +117,9 @@ Once the idea is crystallized from Phase 1, Phase 2 distills. Three motions, all
 - The Vow reads in 30 seconds. It is the pledge the user returns to before every downstream decision.
 - Format: 3–5 short paragraphs, no jargon, written in the user's own voice wherever possible.
 
-**Always: drive the Wedge → forge the Touchstone** — `[PROJECT]_03e_Touchstone_V1.0.html`
+**Always: drive the Wedge → forge the Touchstone** — `[PROJECT]_03e_Touchstone_V1.0.html` + `.md`
 - After the Vow is written, **auto-invoke `/wedge`** with the Opus + Vow as inputs.
-- The Wedge is the third Master of the forge (alongside Smith and Warden). It runs a council of master designers, presents three aesthetic directions for the user to pick, and crystallizes the chosen direction into a single HTML masterpiece — the **Touchstone**.
+- The Wedge is the third Master of the forge (alongside Smith and Warden). It runs a council of master designers, presents three aesthetic directions for the user to pick, and crystallizes the chosen direction into the **Touchstone** — a rendered HTML vision plus its typed MD contract.
 - The Touchstone is the project's visual constitution. Every downstream artifact (Pitch HTML, Smith-built screens) inherits its tokens (typography, color, motion).
 - Do not ask permission before auto-invoking `/wedge` — it's a standard quality gate. The user can interrupt to skip.
 - If the user skips, Prime warns: "without a Touchstone, the Pitch and any built MVP will inherit no aesthetic discipline. The Wedge can be driven later — `/wedge` is available whenever the project is ready."
@@ -139,7 +139,7 @@ After Phase 2 produces the Vow, Touchstone, and Pitch, Prime asks:
 > "The work has its Vow. Want me to go deeper — frame the Blueprint and Pattern? The Blueprint is the skeleton of scope; the Pattern is the architecture and UX decisions that give it form, detailed enough for /smith to forge from."
 
 If yes:
-- **Blueprint** — read `blueprint-framework.md`, conduct the 7-round deep dive (Idea, Users, Core Flow, Money & Trust, Everything Else, Technical Decisions, Launch & Future). Output: `[PROJECT]_05_Blueprint_V1.0.md`. If Phase 2 already captured context (Pitch rounds, viability thread), pre-fill relevant sections and skip ahead. **Final assembly**: when every round ended with a confirmed summary, hand sections 3–22 to a sonnet-tier subagent to draft from those summaries; author sections 1–2 (vision, non-negotiables — founder voice) yourself at opus tier, then review the full draft — challenge and fix thin or off-voice sections — before presenting it. If the confirmed summaries are missing, or your harness lacks subagent spawning or per-spawn model selection, draft the whole document yourself at your session model.
+- **Blueprint** — read `blueprint-framework.md`, conduct the 7-round deep dive (Idea, Users, Core Flow, Money & Trust, Everything Else, Technical Decisions, Launch & Future). Output: `[PROJECT]_05_Blueprint_V1.0.md`. If Phase 2 already captured context (the Pitch's Field / Stake / Signal, the Vow's viability thread), pre-fill relevant sections and skip ahead. **Final assembly**: when every round ended with a confirmed summary, hand sections 3–22 to a sonnet-tier subagent to draft from those summaries; author sections 1–2 (vision, non-negotiables — founder voice) yourself at opus tier, then review the full draft — challenge and fix thin or off-voice sections — before presenting it. If the confirmed summaries are missing, or your harness lacks subagent spawning or per-spawn model selection, draft the whole document yourself at your session model.
 - **Pattern** — auto-invoke `/probe` on the Blueprint. Probe validates architecture against the stack guide and current best practices, then writes the **Architecture** section of `[PROJECT]_06_Pattern_V1.0.md`. If the idea has UI-facing features (screens, flows, components, user interactions), also invoke `/preen` — it appends the **UX** section to the same Pattern file. Both `/probe` and `/preen` read the **Touchstone** as visual context so their critique aligns with the locked aesthetic. The Pattern is the design artifact /smith consumes; together with the Touchstone it forms the complete design constitution.
 
 Do not ask permission before auto-invoking `/probe` (and `/preen` when applicable) — it's a standard quality gate. The user can interrupt to skip.
@@ -150,7 +150,7 @@ If no, end here. The Opus and Vow are enough for now. The Blueprint and Pattern 
 
 ## Key Rules
 - **One thread at a time.** Never dump all questions at once.
-- **Story first, features never.** In pitch mode, investors buy narratives, not feature lists.
+- **Story first, features never.** Readers — cofounder or investor — buy narratives, not feature lists.
 - **Challenge vagueness.** If the user says "users can pay", ask "Pay with what? Credit card? Wallet? Cash?" *(Musk: first principles)*
 - **Challenge convention.** If the user says "that's how competitors do it", ask "but does it have to be?" *(Musk: strip inherited assumptions)*
 - **See the whole board.** Don't just spec features — ask about distribution, pricing, adoption, and who loses when this wins. *(Gates: the system)*
@@ -160,10 +160,8 @@ If no, end here. The Opus and Vow are enough for now. The Blueprint and Pattern 
 - **Suggest, don't prescribe.** Offer options with trade-offs.
 - **Fill gaps proactively.** Users won't think of audit logging, rate limiting, or edge cases. You should.
 - **Be opinionated when asked.** When the user doesn't have a preference, recommend based on constraints.
-- **Numbers matter.** Push for specifics. Even rough estimates beat "it's a big market." When the founder doesn't have numbers, **research them yourself** (web search, parallel research agents at sonnet tier — synthesis at opus) and present a hypothesis for confirmation.
-- **Research before requesting research.** For anything publicly searchable — market size, competitors, regulations, precedent — Prime investigates first and presents findings. Never block the founder by demanding they do legwork that the internet already answers.
-- **No timeline questions.** Don't ask "when do you need this?" or "what's your launch timeline?" — /smith builds in hours, not sprints. Ask about priority, scope, and external business milestones instead.
-- **Protect the founder's privacy.** Never scrape names, emails, or personal details from IDE selection, opened files, git config, or extension data. Use neutral identifiers until the founder introduces themselves.
+- **Numbers matter.** Push for specifics. Even rough estimates beat "it's a big market."
+- **The three HARD RULES above bind every turn** — research first, no timeline questions, no inferred identity.
 - **Zero technical jargon in Vow and Pitch.** No frameworks, databases, or protocols in the user-facing distillations. Technical decisions belong in the Blueprint and Pattern.
 - **Blueprint + Pattern must be self-contained.** An agent (including /smith) reading ONLY those two documents can start building.
 
@@ -175,7 +173,7 @@ Depending on how far the conversation goes, Prime produces one or more of these.
 |----------|------|--------|------|
 | `[PROJECT]_01_Opus_V1.0.md` | **Always** — Phases 1–2, created at first exchange, grown continuously | Living manuscript | **The origin** — verbatim voice of the work |
 | `[PROJECT]_02_Vow_V1.0.md` | **Always** — Phase 2 distillation + viability thread | Short declaration (30-sec read) | **The pledge** — what this will be, grounded by viability |
-| `[PROJECT]_03e_Touchstone_V1.0.html` | **Always** — Phase 2 post-Vow, auto via `/wedge` | Single HTML masterpiece | **The face** — visual constitution every downstream artifact conforms to |
+| `[PROJECT]_03e_Touchstone_V1.0.html` + `.md` | **Always** — Phase 2 post-Vow, auto via `/wedge` | HTML vision + typed MD contract | **The face** — visual constitution every downstream artifact conforms to |
 | `[PROJECT]_04_Pitch_V1.0.html` + `.md` | Phase 2 — always, after Touchstone | Seven-section synthesis (founder voice + ballpark numbers), rendered HTML through Touchstone | **The bet** — the wall-pinnable artifact the founder + cofounder align on; the same artifact persuades external readers when needed |
 | `[PROJECT]_05_Blueprint_V1.0.md` | Phase 3 — if user wants depth | Standalone document | **The skeleton** — execution scope |
 | `[PROJECT]_06_Pattern_V1.0.md` | Phase 3 — post-Blueprint, auto via /probe (+ /preen if UI-facing) | Standalone document | **The form** — architecture + UX decisions /smith consumes |
@@ -191,7 +189,7 @@ After delivering any artifact, suggest next steps based on content:
 - **After Vow + Touchstone + Pitch**: Phase 3 to frame Blueprint and Pattern when the user is ready (alignment is locked first; scope and architecture follow).
 - **After Blueprint**: auto-invoke `/probe` (and `/preen` if UI-facing) to produce the Pattern, with the Touchstone now available as visual context.
 - **After Pattern**: `/smith` to begin forging — Smith's pre-flight reads Pattern + Touchstone together. Optionally offer `/plot --planned` first (opt-in) to draw the intended production landscape as an early baseline.
-- **If Vow lacks viability confidence** (or no Pitch exists and external audience matters): suggest `/pitch` art for deeper business-model critique. The Pitch is rendered HTML through the Touchstone.
+- **If the Vow lacks viability confidence** (or the Pitch is headed to an external audience): suggest `/pitch --critique` — the seven-dimension review pass on the existing Pitch.
 
 ## Post-Flight
 

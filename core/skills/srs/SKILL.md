@@ -6,7 +6,7 @@ description: Setup or update restart.sh to bring up the entire local dev stack. 
 
 # /srs — Setup Restart Script
 
-Generate or update `restart.sh` and `kill-zombies.sh` in the **project root** (never in `scripts/` — these are dev-only utilities that must not pollute production directories or CI cron paths).
+Generate or update `dev/restart.sh` and `dev/kill-zombies.sh` (the project's `dev/` directory — never `scripts/`: these are dev-only utilities that must not pollute production directories or CI cron paths). Both scripts compute the project root as one level up from their own directory (`PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"`) and `cd` there before running project commands.
 
 ## Pre-Flight
 
@@ -16,7 +16,7 @@ Launch all pre-flight reads in parallel (all independent):
 
 2. Read the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated) and `package.json` to understand the stack
 3. Read the stack guide: `<forge>/core/skills/forge/stack-guide.md` (resolve `<forge>` from your harness's global config — e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses — managed by `/forge`)
-4. Scan for existing `restart.sh` — if found, read it and propose updates rather than overwriting
+4. Scan for an existing `dev/restart.sh` (or a legacy root-level `restart.sh`) — if found, read it and propose updates rather than overwriting; move a root-level copy into `dev/`
 5. Read the `restart-template.sh` file in the same directory as this skill
 6. Scan for `docker-compose.yml` or `compose.yml` to determine DB setup
 7. Scan `packages/*/vite.config.ts` to identify Vite dev servers
@@ -57,6 +57,7 @@ Use the template from `restart-template.sh` (same directory as this skill) and c
 ### Process cleanup details:
 - Kill by port using `fuser` (Linux) or `lsof` fallback
 - Kill orphaned node processes: `node.*(vite|tsx|dev-server|playwright|vitest).*[PROJECT_NAME]`
+- Processes that retitle themselves (Next.js 16: `next-server (v16.x.x)`) carry no `node` or project name: match the current literal title and scope by `/proc/<pid>/cwd` inside the project root (the parent of `dev/`). Recheck the literal on a major version bump.
 - Kill stale Playwright browsers: `ms-playwright|playwright.*chromium|playwright.*firefox`
 - Support `--dry-run` flag
 - Support `--include-dev` flag to optionally kill the API port (safe-by-default: skip API)
@@ -92,8 +93,8 @@ A standalone cleanup script for use outside restart — dev servers (Vite, tsx, 
 
 ## Step 4: Verify
 
-- Run `bash -n restart.sh` to syntax-check (project root)
-- Run `bash -n kill-zombies.sh` to syntax-check (project root)
+- Run `bash -n dev/restart.sh` to syntax-check
+- Run `bash -n dev/kill-zombies.sh` to syntax-check
 - Enumerate every kill/cleanup pattern in both scripts against the process names actually found in the Pre-Flight scans — an over-broad `pkill` pattern that matches unrelated processes is the hazard; tighten any that could
 - Show the user the generated scripts (in full) and port layout — the user's review is the gate before anything runs
 - Do NOT run the script automatically — let the user decide when to start

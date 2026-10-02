@@ -14,7 +14,7 @@ Bump version, package, push, release. The user uploads to the marketplace manual
 ---
 
 ## Step 1: Run /wrap
-Invoke the `/wrap` skill first to ensure learnings, context, docs, lint, and commit are all clean.
+Invoke the `/wrap` skill first to ensure lint, context, docs, and commit are all clean.
 
 ## Step 2: Bump Version
 - Determine bump type from `$ARGUMENTS` (default: `patch`)

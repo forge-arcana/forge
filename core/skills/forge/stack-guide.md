@@ -233,7 +233,7 @@ These are patterns confirmed across multiple projects. Not opinions — battle s
 Verified on workerd at runtime across multiple ports — not theory:
 - **Postgres drivers cannot open raw TCP on Workers.** Use a **Hyperdrive binding**; the connection string arrives **per-request** on `env.HYPERDRIVE.connectionString`, never at module-load. (Neon's HTTP/WS drivers are the only connection-string-at-init option; `neon-http` lacks interactive transactions — use the WS flavor if you go that way.)
 - **Module singletons break.** A DB client or auth instance created at import works for the request that created it, then throws `Cannot perform I/O on behalf of a different request`. DB + auth must be **request-scoped**: an `AsyncLocalStorage` holding the per-request client, with a bound Proxy (or scope-aware getter) so existing call sites stay unchanged; a middleware ordered FIRST binds the scope. Create a fresh client per request (Hyperdrive pools the real connections) and close it off the response path.
-- **`process.env` is empty at module-eval on workerd** unless populated: `compatibility_date >= 2025-04-01` mirrors vars/secrets into it at startup — plus `nodejs_compat`, which is now implicit for compatibility dates >= 2026-08-04 (opt out with `no_nodejs_compat`). Bindings (Hyperdrive, R2) are never in `process.env`.
+- **`process.env` is empty at module-eval on workerd** unless populated: `compatibility_date >= 2025-04-01` mirrors vars/secrets into it at startup — plus `nodejs_compat`, which is now implicit for compatibility dates >= 2026-08-04 (opt out with `no_nodejs_compat` plus `no_nodejs_compat_v2`). Bindings (Hyperdrive, R2) are never in `process.env`.
 - **Pino does not run on workerd** (Node internals). Swap in a console JSON-lines logger at runtime; alias the statically-imported pino away from the bundle.
 - **R2: prefer the native binding over S3 clients** for Workers-first apps — no credentials, no signed-URL plumbing, no egress; keep an S3-compatible client (aws4fetch, not the AWS SDK) only for code that must run identically on Node.
 - **Better Auth needs `globalThis.AsyncLocalStorage`** — its dynamic `import("node:async_hooks")` doesn't surface the constructor on workerd. Shim first, before the app: `globalThis.AsyncLocalStorage ??= AsyncLocalStorage`.
@@ -262,6 +262,7 @@ Verified on workerd at runtime across multiple ports — not theory:
 - Phone-first users need placeholder email
 - `freshAge` session cache: direct DB writes (e.g., role switch) won't be reflected in `auth.api.getSession()` until cache expires. Read mutable fields directly from DB in session endpoints.
 - Hono middleware `c.header()` before `await next()` corrupts Better Auth's raw Response cookies. Only set headers on the rejection response (e.g., 429), never on pass-through.
+- Any HttpOnly cookie session (Better Auth or otherwise): XHR requests (file uploads) must set `xhr.withCredentials = true`, and `fetch` must pass `credentials: "include"`. Without it the cookie is not sent and the request gets 401.
 
 ### Paraglide
 - Compile-time = zero runtime bundle cost
@@ -313,7 +314,7 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 
 **Vite `envDir` in monorepos:** Vite reads `.env` from the package root by default, not the monorepo root. Set `envDir: path.resolve(__dirname, "../..")` in every SPA's vite.config.ts so shared `VITE_*` vars from the root `.env.local` reach all SPAs in local dev. Docker builds are unaffected (use `--build-arg`).
 
-**Android edge-to-edge (Capacitor 8 / Android 16+):** Edge-to-edge is mandatory — Android 16 (API 36) disables `windowOptOutEdgeToEdgeEnforcement`. The Google Play targetSdk 36 floor takes effect **2026-08-31** (enforced from that date — treat as binding; new apps *and all updates*. An extension to 2026-11-01 is available via the Policy Status page in Play Console). **Android 17 (API 37) shipped 2026-06-16** with no Play deadline announced yet; its forced migration is fixed-orientation / non-resizable flags being ignored on tablets and foldables — a separate concern from edge-to-edge. **Capacitor 8 removed the `adjustMarginsForEdgeToEdge` config** in favor of the new **System Bars** core plugin (bundled with `@capacitor/core`), which manages status/nav-bar insets via CSS `env(safe-area-inset-*)` variables; use the `SystemBars` API for fine control. (Capacitor 7 only: the legacy fix was `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts` — do not carry it into Cap 8; `StatusBar.setOverlaysWebView(false)` and bare `env(safe-area-inset-top)` never worked on Android WebView.) Capacitor 8 also targets Android SDK 36 and requires Node 22+.
+**Android edge-to-edge (Capacitor 8 / Android 16+):** Edge-to-edge is mandatory — Android 16 (API 36) disables `windowOptOutEdgeToEdgeEnforcement`. The Google Play targetSdk 36 floor has been in force since **2026-08-31** (binding for new apps *and all updates*; the extension requested via the Policy Status page in Play Console expires 2026-11-01). **Android 17 (API 37) shipped 2026-06-16**; no Play targetSdk 37 deadline is published as of 2026-10-02 (the annual cadence points to roughly 2027-08-31 — unverified); its forced migration is fixed-orientation / non-resizable flags being ignored on tablets and foldables — a separate concern from edge-to-edge. **Capacitor 8 removed the `adjustMarginsForEdgeToEdge` config** in favor of the new **System Bars** core plugin (bundled with `@capacitor/core`), which manages status/nav-bar insets via CSS `env(safe-area-inset-*)` variables; use the `SystemBars` API for fine control. (Capacitor 7 only: the legacy fix was `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts` — do not carry it into Cap 8; `StatusBar.setOverlaysWebView(false)` and bare `env(safe-area-inset-top)` never worked on Android WebView.) Capacitor 8 also targets Android SDK 36 and requires Node 22+.
 
 **Android SDK in WSL:** Gradle needs native Linux binaries — Windows `.exe` tools don't execute under WSL. Install cmdline-tools + build-tools natively (e.g., `/root/android-sdk`). Emulator stays on Windows (needs GPU passthrough) — manage via `powershell.exe` or a Node.js helper script for reliable argument handling.
 
@@ -324,8 +325,9 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 - Landing page controlled by env vars: `VITE_APK_URL` (tester sideload), `VITE_GOOGLE_PLAY_URL`, `VITE_APP_STORE_URL` — empty = hide section
 
 ### pnpm
-- v10+ blocks dependency build scripts by default — allow them via the `allowBuilds` map in root `package.json` (pnpm 11, current as of 2026-04-28 — 11.21.0 — and removed `onlyBuiltDependencies`), or `pnpm.onlyBuiltDependencies` (pnpm 10 holdout path)
+- v10+ blocks dependency build scripts by default. pnpm 11+ (11.0 released 2026-04-28; pnpm 12 is current since 2026-08-26 and keeps the v11 settings and lockfile): allow them via the `allowBuilds` map in `pnpm-workspace.yaml` — pnpm 11 stopped reading the `pnpm` field in `package.json` and removed `onlyBuiltDependencies`; pnpm 12 errors on unknown `pnpm-workspace.yaml` keys. pnpm 10 holdout path: `pnpm.onlyBuiltDependencies` in root `package.json`. pnpm 11+ requires Node 22+.
 - `dotenv` in monorepo: `import 'dotenv/config'` looks in CWD, not package root — use explicit path
+- `pnpm --filter <pkg> <arg>` treats `<arg>` as a package.json script name. To run a binary (tsx, tsc, vitest) scoped to a workspace package use `pnpm --filter <pkg> exec <binary> <args>`. Without `exec`, older pnpm fails with `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`; pnpm 11 adds an exec fallback for the filtered shorthand when no selected package has that script (pnpm PR #15430, release carrying it unverified as of 2026-10-02), but a same-named script still wins, so `exec` stays the unambiguous form. Bites CI workflows written as raw shell rather than package scripts.
 
 ### TypeScript
 - `as const` gives literal types — when mutating, explicitly type as `number`
@@ -335,11 +337,13 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 - Never `catch (e: any)` — use `catch (e: unknown)` + a `parseError(e)` helper that handles Error, string, and unknown. Catches `(e as Error).message` crashes on non-Error throws.
 - Define runtime arrays `as const` FIRST, then derive types: `export const ROLES = ['a', 'b'] as const; export type Role = (typeof ROLES)[number];`. Standalone `type Role = 'a' | 'b'` can't be used in `.includes()`, `z.enum()`, or `pgEnum`.
 - `z.coerce.number()` has input type `unknown` — `useForm<ExplicitType>()` with zodResolver causes type conflicts. Use untyped `useForm()` and cast in onSubmit.
+- Shared workspace packages (pnpm or npm) use relative imports, never `@/` aliases: when app A's tsc processes the shared package's files via path mapping, `@/` resolves against app A's tsconfig, not the package's.
 
 ### React
 - Never place a conditional `return` between hooks — React counts hooks per render. Changing the count throws "Rendered fewer hooks than expected". Move early returns before all hooks or remove them.
 - Radix UI `DialogContent` uses `{...props}` which silently overrides internal `style` (positioning). Destructure and merge: `style={{ ...basePositioning, ...style }}`.
 - React video `srcObject` timing: conditionally rendered `<video>` elements need `useEffect` to assign `srcObject` after re-render — can't set it in the same function that triggers the render.
+- Multi-SPA apps (a separate Vite build per role or portal, any client router): cross-role redirects (login, role switch, route guards) must use `window.location.href`. A framework router's `navigate()` only works inside one SPA boundary and cannot cross to a different build.
 
 ### Tailwind v4
 - `@theme` registers `@property` rules that resist class overrides. Inline `style` prop with `--color-*` variables is the only guaranteed override for forced-light containers.
@@ -348,9 +352,13 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 ### GCP
 - `gcloud.cmd` on Windows: use Node subprocess with explicit argument arrays (bash can't find gcloud auth context)
 - WIF providers require `--attribute-condition` on OIDC setup
-- **From 2026-07-15, GitHub auto-enforces immutable subject claims in the Actions OIDC `sub`** for all newly created repos and on repo renames — this breaks WIF trust policies keyed on the old `repo:owner/name:*` form. Fires silently on the next repo you create; the old policy still looks correct. Verify the `sub` claim format on any new repo before wiring WIF trust.
+- **Since 2026-07-15, GitHub enforces immutable subject claims in the Actions OIDC `sub`** for all newly created repos and on repo renames — the claim now carries numeric IDs (`repo:<owner>@<owner-id>/<name>@<repo-id>:...`), which breaks WIF trust policies keyed on the old `repo:owner/name:*` form. Fires silently on the next repo you create; the old policy still looks correct. Verify the `sub` claim format on any new repo before wiring WIF trust.
 - Cloud Run: `min-instances: 1` avoids cold starts in production
 - **Non-production bot protection**: Distinguish internal vs customer-facing staging. *Internal staging* (dev/QA only): use `--no-allow-unauthenticated` (blocks all traffic unless caller has `roles/run.invoker`) + `robots.txt Disallow: /` + `X-Robots-Tag: noindex, nofollow`. *Customer-facing staging* (beta testers, real users): keep `--allow-unauthenticated` and rely on app-level bot protection only (`robots.txt Disallow: /` + `X-Robots-Tag: noindex, nofollow` header). IAM gating locks out real users when the staging environment serves actual customers. Wire bot protection into `deploy.yml` — never deploy staging without at least app-level access controls.
+- Artifact Registry cleanup policies are per-repository; there is no project-level default, so every new Docker repo starts with none and old images accumulate at cost. On repo creation apply keep-last-5 + delete-rest (`{"action":{"type":"Keep"},"mostRecentVersions":{"keepCount":5}}` + `{"action":{"type":"Delete"},"condition":{"tagState":"ANY"}}`) with `gcloud artifacts repositories set-cleanup-policies <repo> --policy=<file> --no-dry-run`. Make it a checklist item in any blueprint or deploy script that creates repos for Cloud Run.
+
+### Firebase
+- Web API keys are project identifiers, not secrets, but an unrestricted one is a quota and billing exposure. In Google Cloud API Keys set BOTH restrictions on every key that ships to clients: application restriction (HTTP referrers: deployment domain + `localhost/*` + `127.0.0.1/*`) and API restriction (allowlist only the Firebase APIs the app calls). Never leave the Gemini Developer API (Generative Language API) on a client-shipped key, and never ship a Gemini Developer API key in client code; call it from a server. Security rules protect data integrity, not quota. (Checked against Firebase's API-key docs 2026-10-02.)
 
 ---
 

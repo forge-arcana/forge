@@ -2,7 +2,7 @@
 
 > Reference document for all art-type skills. Arts are skills that adopt a specialist persona and have a self-improving learning loop. Each art's SKILL.md references this protocol for shared pre-flight and post-flight steps.
 >
-> Path conventions: `<forge>` = the forge repo path; `<membrane>` = the harness's per-tool config directory (`~/.claude/` for Claude Code, `~/.bob/` for Bob, etc.); `<rules-file>` = the harness's global rules file (`~/.claude/CLAUDE.md` for Claude Code, `AGENTS.md` for Bob).
+> Path conventions: `<forge>` = the forge repo path; `<membrane>` = the harness's per-tool config directory (`~/.claude/` for Claude Code, `~/.bob/` for Bob, etc.); `<rules-file>` = the harness's global rules file (`~/.claude/CLAUDE.md` for Claude Code, `~/.bob/rules/00-forge.md` or `AGENTS.md` for Bob).
 
 ## What Is an Art?
 
@@ -28,7 +28,7 @@ The 150-line guidance for a SKILL.md applies to **arts**. The three orchestratio
 ## Pre-Flight (every art runs these before starting)
 
 1. **Resolve forge path** from the harness's global rules file (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent rules file for other harnesses, managed by `/forge`)
-2. **Launch steps 2-6 in parallel** (all independent after forge path is resolved):
+2. **Launch these reads in parallel** (all independent after forge path is resolved):
    - **Read accumulated learnings**: `<forge>/learnings/<learnings-file>` — skip if file doesn't exist yet (first run)
    - **Read project context**: the project's `AGENTS.md` (fall back to `CLAUDE.md` only in a project `/forge` has not migrated yet) for stack, conventions, and current state
    - **Read stack guide**: `<forge>/core/skills/forge/stack-guide.md` for tech reference — pay special attention to the **Logging Convention** section; all evaluative arts should validate projects against it
@@ -63,7 +63,7 @@ This principle applies to ALL arts and skills. When in doubt, ask: "Does this st
 
 ## Model Tiers
 
-Fan-out is not just *where* work splits — it's *what strength of model* each leg runs on. The tier names `opus`, `sonnet`, `haiku`, and `script` are the neutral vocabulary: flow text says "spawn each dimension as a sonnet-tier subagent" or "run the merge at opus tier", and each harness maps tiers to its own models.
+Fan-out is not just *where* work splits — it's *what strength of model* each leg runs on. The tier names `opus`, `sonnet`, `haiku`, `script`, and `local` are the neutral vocabulary: flow text says "spawn each dimension as a sonnet-tier subagent" or "run the merge at opus tier", and each harness maps tiers to its own models.
 
 ### Tier semantics
 
@@ -227,8 +227,8 @@ Environment variables control model selection and endpoint routing. Set in your 
 Each art defines its own execution in its SKILL.md:
 
 - **Evaluative arts** (probe, poke, preen, press, pound): adopt the persona, apply review framework/dimensions, web-search for current best practices, produce a structured report
-- **Generative arts** (prime): adopt the persona, conduct a structured conversation/interview, produce a document
-- **Investigative arts** (pry): decompose blockers, aggressively search for alternatives, challenge assumptions until a path forward emerges
+- **Generative arts** (prime, pitch, plot): adopt the persona and produce an artifact — prime through a structured conversation, pitch by synthesizing Opus + Vow + Touchstone, plot by deriving the topology from evidence
+- **Investigative arts** (pry, praise): pry decomposes blockers and searches for alternatives until a path forward emerges; praise classifies feedback and routes it to the right arts
 
 ## Web Research Cache
 

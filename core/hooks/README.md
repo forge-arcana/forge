@@ -6,8 +6,9 @@ session plans and delegates, never holds the implementation artifact.
 
 - `tier-routing.sh` — `UserPromptSubmit` hook. Detects the running model from
   the transcript tail; on a top-tier model (fable/mythos/opus) it injects a
-  plan-and-delegate rubric as additional context. Silent (fails open) on any
-  other tier or when the model can't be determined.
+  plan-and-delegate rubric as additional context. On a haiku model it injects
+  a one-line label (cheap tier, writes allowed, no delegation required). Silent
+  (fails open) on any other model or when the model can't be determined.
 - `tier-guard.sh` — `PreToolUse` hook, matcher `Edit|Write|NotebookEdit|Agent`.
   Structurally enforces the rubric with two gates. The **write gate** denies
   direct writes when the session is top-tier. The **spawn gate** denies an

@@ -54,6 +54,30 @@
 - **`deferredFindings`** — MINOR findings accepted as-is, carried forward for future cleanup.
 - **`visualPicks`** — one entry per visual-identity decision (typeface, colour tokens, brand marks, page architecture) a heat changed. Written when the founder picks from the comparison prototype and before any repo edit for that decision; `pick: "touchstone"` records a conformance restoration that needed no new prototype. A heat touching visual-identity files with no matching entry is a gate violation.
 
+## Workspec: `memory/smith-workspec.md`
+
+Persisted in plan/conversation modes (Step 0.5):
+
+```markdown
+# Smith Work Spec — [Short Title]
+
+## Source
+[Plan file path or "conversation context"]
+
+## Scope
+[1-2 sentence summary of what's being built]
+
+## Implementation Steps
+1. [Step from plan/conversation]
+2. ...
+
+## Key Files
+- [file] — [action: new/modify/delete]
+
+## Hash
+[sha256 of this content — for session resume change detection]
+```
+
 ## Human-Readable: `memory/smith-progress.md`
 
 ```markdown

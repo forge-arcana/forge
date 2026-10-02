@@ -4,25 +4,29 @@
 
 <!-- Add learnings below this line -->
 
-## New Art Addition Triggers Cross-Reference Sweep (2026-03-28)
-- **Learning**: Adding a new art or introducing a new skill that changes the forge hierarchy creates stale references in README.md, CLAUDE.md (learning cycle arts list), memory/identity.md (counts, ethos prose, arts list + persona), memory/learnings.md (arts list + cadence note), protocol, and any skill descriptions that reference the old hierarchy. The art-specific file (SKILL.md) and protocol.md get updated in the same session, but identity/learnings docs lag. Run /purge immediately after any new art addition or hierarchy change to catch the stragglers. Specifically: identity.md has 5+ locations with hardcoded art counts; learnings.md has 2; CLAUDE.md learning cycle has 1; README.md has 1 header + 1 section + 1 cadence note. **Also sweep `core/scripts/forge-purge-scan.sh` — it hardcodes the art roster in 3 places** (the SKILL-size table loop, the frontmatter-fitness table loop, and the `ARTS` count); a new art omitted there is silently miscounted as a task skill AND dropped from both fitness tables, so the audit tool that detects staleness is itself stale and reports a wrong decomposition ("N arts + M task skills"). (Same pattern applies to retiring or renaming a top-level skill — see 2026-04-23 /forge consolidation entry.) (2026-07-18: /plot triggered exactly this — identity.md swept 8 spots, learnings.md 1, forge-purge-scan.sh 3 sites; the skill files + protocol.md were already correct from the build, only the memory docs + scan roster lagged.)
-- **Forge-worthy**: yes — universal pattern: new art addition or hierarchy change → immediate /purge to sweep stale cross-references
+## A Structural Change Triggers a Whole-Repo Cross-Reference Sweep (2026-03-28 → 2026-06-13)
+**Learning**: Adding an art, retiring or merging a command, removing a shared protocol step, or landing a pivot on `main` each radiate stale references far beyond the files the change touched. The skill files and `protocol.md` get updated in the same session; everything that *describes* the hierarchy lags. Observed four times (art addition, command consolidation, pivot merge, capability retirement) — the same sweep each time.
+**Sweep surface** (grep the ENTIRE repo for the old token or count — scripts, HTML, JSON, not just markdown):
+1. `AGENTS.md` — arts/skills tables, counts, and Current Context (Branch + Active work describe the pre-change state the moment the change merges).
+2. `memory/identity.md` (hardcoded art counts in 5+ places, ethos prose, numbered roster, liturgical passages that name commands) and `memory/learnings.md` (roster + cadence note).
+3. `README.md` and `presentation/index.html` — headers, cadence notes, dedicated slides. A slide restructure is a rewrite, not find-replace.
+4. Reference docs citing old paths (`forge-conventions.md`, `protocol.md`) and every skill pre-flight step that reads them.
+5. Forge-internal skills under `.claude/skills/` (purge, forge bootstrap) — the easiest to forget because they are not deployed and not in `core/skills/`. The cleansing tool has carried a phantom reference in its own definition.
+6. `core/scripts/forge-purge-scan.sh` — hardcodes the art roster in 3 places (two table loops + the `ARTS` count). An art omitted there is miscounted as a task skill and dropped from both fitness tables, so the audit that detects staleness is itself stale.
+7. User-visible error messages in supporting scripts, learning-file headers ("Absorbed by /old-command" — one line repeated across ~10 files, batch them), settings allowlist paths, `.gitignore` comments and dead deploy-target patterns.
+8. The plan doc that drove the change — once merged it is archaeology; move it from `memory/` to `archive/`.
+**Rules**: (1) Run `/purge` immediately after any such change. (2) Never assume the skill that performed a removal swept its own references. (3) Fix error messages before commit — they reach users faster than docs. (4) Keep one explicit "replaces the old X" bridge line in the new command's docs; that is migration ergonomics, not a stale ref.
+**Apply when**: A new art lands, a top-level command is retired, renamed or merged, a shared pre-flight step or cross-cutting capability is removed, or a branch carrying renamed top-level paths merges onto `main`.
+**Forge-worthy**: yes — universal: a structural change to a documented system requires sweeping every consumer, including the tooling that performs the sweep.
 
-## Promoted-Duplicate Detection Is Underused (2026-03-28)
-- **Learning**: When learnings are promoted from art-specific files (poke-learnings.md, etc.) to global-patterns.md, the source entry is rarely removed. Over time, art-specific files accumulate entries that are exact duplicates of global-patterns.md — invisible to humans, caught by the scan's duplicate title detection. The fix is always the same: global copy wins, source entry removed. Note: the global copy may be less complete than the source — always compare before removing.
-- **Forge-worthy**: yes — universal pattern for any learning system where entries can be promoted to a shared store without removing from the source
-
-## Promoted Learnings Create Triple Duplication (2026-03-19)
-**Learning**: When a learning is absorbed into the stack guide's "Key Learnings" section, it becomes the canonical location. Rule: once a learning lives in stack-guide.md, remove it from global-patterns.
-**Apply when**: Running /purge or /forge — check if any global-patterns entry already exists in stack-guide.md.
+## Promotion Leaves the Source Copy Behind — the Canonical Copy Wins (2026-03-19 → 2026-03-28)
+**Learning**: When a learning is promoted — art-specific file → `global-patterns.md`, or `global-patterns.md` → the stack guide's "Key Learnings" — the source entry is rarely removed. Duplicates accumulate invisibly; the scan's duplicate-title detection catches them. The fix is always the same: the most-promoted location is canonical (stack guide > global-patterns > art-specific file) and the lower copy is removed. The promoted copy may be less complete than the source — compare before removing, and carry any missing detail up first.
+**Apply when**: Running `/purge` Dimension 1c or the `/forge` 3c review — check each art-specific entry against `global-patterns.md`, and each `global-patterns.md` entry against `stack-guide.md`.
+**Forge-worthy**: yes — universal pattern for any learning system where entries can be promoted to a shared store without removing them from the source.
 
 ## Entity Names Are Project Leaks (2026-03-19)
-**Learning**: Domain-specific entity variable names (`tripId`, `seatId`, `employerUserId`) in examples reveal the source project even without the project name. Use generic entity names (`orderId`, `itemId`, `targetUserId`) in all forge examples and learnings.
+**Learning**: Domain-specific entity identifiers in code examples (an ID field named after a product's core noun, a role-specific user ID) reveal the source project even when the project name is absent. Use neutral commerce-style names (`orderId`, `itemId`, `targetUserId`) in all forge examples and learnings. When recording this kind of leak, describe the class — never quote the leaked identifier as the "bad example".
 **Apply when**: Writing or reviewing any forge content that includes code examples with entity names.
-
-## SKILL.md Bloat From Absorbed Learnings (2026-03-20)
-**Learning**: When learnings get promoted into a SKILL.md (e.g., detection heuristics, grep patterns, detailed rules), they bloat the skill over time. Inline grep patterns belong in `forge-scan.sh`, logging rules belong in `forge-conventions.md`. The trim test: "Would the LLM produce worse output if this section were half the length?" If not, reference the source doc instead of restating.
-**Apply when**: Running /purge Dimension 3 (Skill Fitness) — check for sections >30% of file that restate content from reference docs or scan scripts.
 
 ## Art Consolidation: Scope Over Count (2026-03-20)
 **Learning**: When two arts overlap >50% in findings, merge them. A wider-scope art with more dimensions is better than two overlapping arts that produce duplicate findings. The evaluative trifecta (poke → press → pound) works because each has a distinct scope: code quality, operational readiness, adversarial QA. Adding a fourth art for "universal principles" created redundancy with poke's existing tech debt dimensions.
@@ -32,34 +36,15 @@
 **Learning**: When adding a new evaluative art that runs on a different trigger (e.g., "on UI changes") rather than escalating intensity, explicitly label it as "parallel" from the start. Without the label, it gets inserted into existing sequences by default, creating naming inconsistencies (e.g., "trifecta" with 4 items). The trigger determines placement: same trigger escalation = sequential, different trigger = parallel.
 **Apply when**: Adding new arts or evaluative skills to an existing escalation sequence.
 
-## Output Format Templates Are Low-Value Bloat (2026-03-21)
-**Learning**: Example output tables with placeholder values (X, ..., [repeat for each]) consume 30-70 lines per skill but add near-zero value — the LLM can infer table structure from column headers alone. Replace verbose markdown template blocks with a compact 3-5 line format description listing section names and column headers. Applied across 6 skills for a 38% total reduction (1,350 → 833 lines) with no behavior loss. The trim test still applies: "Would the LLM produce worse output if this section were half the length?"
-**Apply when**: Running /purge Dimension 3 (Skill Fitness) — flag any Output Format section >15 lines as a trim candidate.
-
-## Purge Must Never Remove Tracker Entries Without Verifying All Stores (2026-03-29)
-**Learning**: The purge orphan scan detected entries in the fold tracker that weren't in any `learnings/*.md` file and classified them as "orphans" to remove. But some existed under different titles (title mismatch) and others existed in `memory/*.md` files (wrong search scope). Removing them from the tracker told the next `/fold` run they were unprocessed — causing re-absorption and duplicates in global-patterns.md. This is a data corruption bug: purge silently poisoned the tracker, and fold faithfully executed the poison.
-**Rules**: (1) Never remove a tracker entry unless you've verified the title doesn't exist in ANY forge file — learnings, memory, skills, CLAUDE.md. (2) Check for fuzzy title matches, not just exact. "Test Factories Must Mirror DI Container" and "Test Factories Must Mirror Production DI Container" are the same entry. (3) Before removing, show the user what will be removed and why — tracker cleanup is destructive.
-**Forge-worthy**: yes — universal pattern for any system with a processing tracker that gates idempotent operations
-
-## Pivot Completion Triggers a Cross-Reference Sweep, Not Just a Branch Merge (2026-05-10)
-**Learning**: When a major architectural pivot lands on `main`, the docs that described the in-progress state become stale instantly — and the pre-existing pivot-plan doc (`memory/<plan>.md`) becomes archaeology, not active context. The CLAUDE.md "Current Context" section is the obvious target, but the drift extends well beyond it: (1) reference docs that cite the old paths (e.g., `core/skills/forge/forge-conventions.md` line 3 cited `<forge>/adapters/claude-code/refs/claude-code-rules.md` after `adapters/` was retired), (2) Pre-flight steps in skills that read those reference docs (`.claude/skills/purge/SKILL.md` step 5 cited the same retired path), (3) memory files describing forge architecture (`memory/learnings.md` had two stale paths — `claude-code-rules.md ↔ ~/.claude/CLAUDE.md` config sync + `skills/forge/` for the post-pivot `core/skills/forge/`), (4) `.gitignore` comments and dead deploy-target patterns (`.bob/`, `.agent/` left behind from the pre-pivot adapter system), (5) the pivot-plan doc itself, which is now reference-only and should be moved from `memory/` to `archive/` to match the existing `archive/<old-design>.md` convention. Run `/purge` immediately after any pivot merge — the surface is wider than it looks.
-**Forge-worthy**: yes — universal pattern for any system where an in-progress architectural pivot's terminology and paths are documented across multiple docs, then merged.
-**Apply when**: A major branch merging onto `main` carries renamed or retired top-level paths. Post-merge, sweep: branch claim in CLAUDE.md, "active work" claim, all reference-doc citations of retired paths, all skill pre-flight steps reading those references, memory files describing architecture, .gitignore comment lines, and the pivot-plan doc itself (move to `archive/`).
+## Tracker "Orphans" Are Not Orphans — the Re-Absorption Incident (2026-03-29)
+**Learning**: A purge orphan scan classified fold-tracker entries with no matching `learnings/*.md` title as removable. Some existed under slightly different titles (fuzzy mismatch); others lived in `memory/*.md` (wrong search scope). Removing them told the next fold they were unprocessed — re-absorption and duplicates in `global-patterns.md`. Purge silently poisoned the tracker, and fold faithfully executed the poison.
+**Rule**: Superseded by the stronger rule now in `purge/SKILL.md` — the tracker is APPEND-ONLY. No verification makes removal safe, because no single user can see every membrane. This entry is the incident record behind that rule (see `reference/2026-03-29-tracker-append-only.md`).
+**Forge-worthy**: yes — universal: a processing tracker that gates idempotent operations must never be pruned on a "no matching output" heuristic.
 
 ## Single-Pass Purge Is Legitimate When the Forge Is Already Clean (2026-05-10)
 **Learning**: The skill prescribes parallel four-dimension subagent fan-out (Knowledge Purity / Memory Hygiene / Skill Fitness / Reference Integrity). When the scan output is mostly clean (no project leaks, no learning duplication, no critical bloat) and the actionable findings cluster in *one* dimension (post-pivot Reference Integrity drift), spawning four subagents that each re-verify the scan output is wasteful — most return "minor things" the master already saw. In that case, master-side consolidation with all evidence read in pre-flight is sufficient and faster. The four-dimension fan-out earns its keep when the forge is genuinely heavy (≥ one trigger threshold breached, or evidence of contamination in multiple dimensions). When the scan comes back light, a single-pass purge respects the user's token budget without compromising the user-gate ceremony.
 **Forge-worthy**: no — purge-internal pacing decision; lives in `purge-learnings.md` only.
 **Apply when**: Running `/purge`. After the scan returns, look at the findings: if they cluster in ≤2 dimensions and total < ~10 items, do single-pass consolidation. If the scan flags a trigger threshold (learnings > 50, memory > 20 files) OR reveals contamination patterns across multiple dimensions, fan out four subagents per the skill's standard methodology.
-
-## Command Retirement Sweep Is Wider Than It Looks (2026-04-23)
-**Learning**: When a top-level command is retired or merged into another (e.g., trio → unified), the surface references extend far beyond the SKILL.md being replaced. Expected hits: the command's own docs. Overlooked hits: (1) human-readable overviews (README.md, presentation slide decks with dedicated deep-dive slides), (2) error messages in supporting scripts that reference the old command by name in user-visible text, (3) learning file headers across every art that say "Absorbed by /old-command", (4) identity/memory docs with liturgical passages that name the command in poetic prose, (5) sibling skill SKILL.md lines that mention the old command in pre-flight or post-flight references, (6) settings files with stale allowlist paths pointing at the old bootstrap directory.
-**Rules**: (1) On any command retirement, grep the ENTIRE repo for the old command token — scripts, HTML, JSON, not just markdown. (2) Update error messages before commit — they reach users faster than docs do. (3) Learning file headers are a single-line pattern repeated across ~10 files — batch them. (4) For visual decks with dedicated slides (e.g., three slides for a trio becoming one), the restructure is a rewrite, not find-replace — collapse ceremoniously. (5) Keep a single explicit "replaces the old X" bridge line in the new command's docs; that's good migration ergonomics, not a stale ref.
-**Forge-worthy**: yes — universal pattern for any system where top-level commands consolidate, rename, or retire
-
-## Capability Retirement Is a Pivot-Class Cross-Reference Event — Audit the Cleanser Itself (2026-06-13)
-**Learning**: Removing a shared pre-flight step or cross-cutting capability radiates drift exactly like a pivot merge, not like a localized edit. When WA-001's token-preflight step was retired from `protocol.md` Pre-Flight, the next `/purge` found a phantom reference *inside `purge/SKILL.md` itself* ("already handled by the protocol Pre-Flight step 0") — the cleansing tool had drift in its own definition. The forge-internal skills under `.claude/skills/` (purge, forge bootstrap) are the easiest to forget precisely because they are not deployed and not in `core/skills/`. The same retirement also left `CLAUDE.md` "Active work" describing a month-old phase as current.
-**Rules**: (1) After removing any shared/cross-cutting protocol step, grep ALL SKILL.md across BOTH `core/skills/` AND `.claude/skills/` for the removed step's tokens — never assume the skill that performed the removal swept its own references. (2) A capability retirement should refresh `CLAUDE.md` Branch + Active-work the same way a pivot merge does. (3) Treat "what referenced the thing I just deleted?" as a whole-repo sweep, not a local one.
-**Forge-worthy**: yes — universal pattern: removing a shared step requires sweeping every consumer, including the tooling that performs the sweep.
 
 ## Unpromoted Forge-worthy Entries in memory/ Are a Manual Fold, Not a Misplacement (2026-06-13)
 **Learning**: `memory/<art>-learnings.md` is an art's raw forge-self-review output (where the art writes during post-flight, per its SKILL.md); `learnings/<art>-learnings.md` is the promoted/absorbed store. Entries flagged `Forge-worthy: yes` that linger in `memory/` with no `learnings/` counterpart were simply never folded. The right cleanse is to promote them (append to `learnings/<art>-learnings.md`, dedup by title) — exactly what `/forge` fold would do — and let the raw `memory/` file regenerate on the next self-review run. Don't mislabel the `memory/` file as a "pillar-placement error"; it's the designated raw output. (Dedup-by-title on the next fold makes the manual promotion idempotent against the regenerated raw file.)
@@ -120,3 +105,43 @@ The tell is that the invented laws were *good*. They deserved to exist, which is
 **Apply when**: Any proposal, assessment, or hand-off written by another agent that cites forge-internal knowledge by name — especially one arguing for a new skill, art, or doctrine change.
 
 **Forge-worthy**: yes — universal: an agent's citation of prior art in a shared knowledge base is a claim to verify, not a premise to accept, and the most convincing fabrications are the ones worth believing.
+
+## Same-File Findings From Two Reviewers Must Be Merged, Not Queued (2026-10-02)
+
+**Learning**: Two reviewers can each propose a correct fix to the same file that fails when both land — one relocated a generated script, the other added logic that derived a path from the script's own location. Consolidation checks every file touched by more than one dimension for combined effect and writes one merged instruction before any editor starts.
+
+**Apply when**: Consolidating findings from parallel dimension reviewers, before any editor is briefed.
+
+**Forge-worthy**: no — forge-internal
+
+## A Purge Leaves the Membrane Stale — Cast Right After the Commit (2026-10-02)
+
+**Learning**: The maintainer's membrane still holds the pre-purge learnings files, so the next cycle reads every retired title as new outgoing work and can undo the purge. Put the membrane cast in the cleansing plan as its own row, and before overwriting each membrane file confirm it equals the pre-purge committed version.
+
+**Apply when**: Planning the cleansing steps of any purge that edits learnings or memory files.
+
+**Forge-worthy**: no — forge-internal
+
+## Extracting a Section to a Sibling File Breaks Copies That Have No Siblings (2026-10-02)
+
+**Learning**: A skill mirrored into a directory that carries only its SKILL.md cannot follow a relative link to an extracted sibling. Point extraction pointers at the full `<forge>/core/skills/<name>/` path, and after any extraction check every mirror of the skill.
+
+**Apply when**: Extracting a section of a skill into a sibling file to bring it under a size ceiling.
+
+**Forge-worthy**: no — forge-internal
+
+## A Line Ceiling in an Editor Brief Invites Unlisted Cuts (2026-10-02)
+
+**Learning**: Told to bring a skill under a ceiling, an editor that falls short after the approved extractions will trim text no finding named. The brief must say: apply the findings, report the remaining gap, cut nothing else.
+
+**Apply when**: Briefing an editor subagent on a skill that must meet a line ceiling.
+
+**Forge-worthy**: no — forge-internal
+
+## Count Findings by Grep, Not From Hand-Backs (2026-10-02)
+
+**Learning**: Interim per-dimension counts relayed from reviewer summaries were wrong in three of five dimensions. Count FINDING_START and SEVERITY lines in the saved reports before quoting any total.
+
+**Apply when**: Quoting finding totals in a purge plan, report, or log entry.
+
+**Forge-worthy**: no — forge-internal

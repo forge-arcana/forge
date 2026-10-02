@@ -7,7 +7,7 @@ user-invocable: true
 
 # /purge — Cleanse the Forge
 
-> **Art** (learnings: `purge-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
+> **Master skill** (learnings: `purge-learnings.md`, kept in `<forge>/memory/`) — follow the Forge Protocol (`<forge>/core/skills/forge/protocol.md`) for pre-flight and post-flight.
 >
 > **Location is intentional.** This skill lives only at `<forge>/.claude/skills/purge/`, never under `<forge>/core/skills/`. The `/forge` cycle does not deploy it to user membranes — `/purge` writes to forge files directly, so running it from any project other than the forge repo would violate the "no writing to forge from a project" HARD RULE. Keeping it in `.claude/skills/` confines it to the forge repo by construction. Purge is intentionally Claude-Code-coupled (the de-Claude pivot left it as-is); forge maintainers using a different harness invoke its logic via the same prose, manually.
 
@@ -42,6 +42,7 @@ These thresholds indicate when the forge needs purging. `/forge --dry` can flag 
 | Trigger | What it means |
 |---------|--------------|
 | Any `<forge>/learnings/*.md` file > 50 entries | Learning file is bloated — review for staleness, duplication, consolidation |
+| Any `<forge>/memory/*-learnings.md` file > 20 entries | Art-learnings file kept in `memory/` by design (e.g. purge's own) — review on entry count like any learnings file |
 | `<forge>/memory/` has > 20 files | Memory directory is growing — review for stale/promoted/redundant files |
 
 When triggered, classify each entry/file: **CURRENT** (keep), **STALE** (remove — web-search to verify), **MERGED** (consolidate with duplicate), **EVOLVED** (rewrite with updated info), **PROMOTED** (already in SKILL.md — redundant).
@@ -65,7 +66,7 @@ You are an independent dimension reviewer for /purge — The Warden of the Forge
 Your job is to analyze the forge against ONE dimension. Other dimensions are
 being analyzed in parallel by other subagents. Stay in your lane.
 
-NEVER use && or ; to chain bash commands.
+NEVER use &&, ; or || to chain bash commands. One command per call.
 Do NOT run forge-purge-scan.sh — evidence is provided below.
 Do NOT modify any forge files. Output findings only — the master applies them.
 
@@ -148,7 +149,7 @@ For ALL skills in `<forge>/core/skills/*/SKILL.md` (not just arts):
 
 ### 3a: Bloat Analysis
 Use the scan script's section-level breakdown. Flag any skill where:
-- **Total lines > 150** — skill may need trimming (poke at ~210 is the ceiling after absorbing 7 dimensions)
+- **Total lines > 150** — an art may need trimming (poke's accepted ceiling is ~210 after absorbing 7 dimensions). The three orchestration skills (`/forge`, `/smith`, `/wedge`) carry a 400-line ceiling instead, per `protocol.md` → Convention; above it, flag the inline multi-step payloads to move into sibling scaffold files
 - **Any single section > 30% of file** — section is doing too much, consider splitting or referencing external docs
 - **Inline grep patterns** — these belong in `forge-scan.sh`, not in SKILL.md. The scan script runs them mechanically; duplicating in the skill is maintenance burden.
 - **Restated reference content** — logging rules, conventions, framework lists that already live in `forge-conventions.md` or `stack-guide.md`. Reference the doc, don't restate.
@@ -169,7 +170,7 @@ Scan reference docs for internal consistency:
 - **stack-guide.md**: are the technology choices current? Any deprecated libraries? Web-search for major version changes.
 - **auto-allowed-bash.md** (`<forge>/claude-helpers/refs/auto-allowed-bash.md`): does it match `~/.claude/CLAUDE.md`? Any drift?
 - **AGENTS.md (forge)**: is the Current Context section accurate? Arts table correct? Skill counts right?
-- **AGENTS.md (forge) — size/currency**: `wc -c <forge>/AGENTS.md`. If it exceeds **~25k chars**, the rules file has overgrown its cache-churn budget (a fat AGENTS.md reloads into every cached prompt → Cache-Write spend every session). Flag an `UPDATE` finding: archive the **oldest** `- **Recent**:` bullets to `<forge>/memory/recent-history.md` (keep only the newest ~2 inline), and update the `- **Earlier history**` pointer line to match. This is forge-internal compaction — `/purge` owns it, NOT `/wrap` (which is for projects). Note: this is the ONE compaction `/purge` performs; it does NOT touch the append-only `.fold-tracker.json` (see the HARD RULE above — that prohibition is about the tracker, not AGENTS.md history).
+- **AGENTS.md (forge) — size/currency**: `wc -c <forge>/AGENTS.md`. If it exceeds **~25k chars**, the rules file has overgrown its cache-churn budget (a fat AGENTS.md reloads into every cached prompt → Cache-Write spend every session). Flag an `UPDATE` finding: archive the **oldest** dated bullets under `## Current Context` (the `- **YYYY-MM-DD ...**:` entries) to `<forge>/memory/recent-history.md` (keep only the newest ~2 inline), and update the `- **Earlier history**` pointer line to match. This is forge-internal compaction — `/purge` owns it, NOT `/wrap` (which is for projects). Note: this is the ONE compaction `/purge` performs; it does NOT touch the append-only `.fold-tracker.json` (see the HARD RULE above — that prohibition is about the tracker, not AGENTS.md history).
 
 ## Consolidation
 

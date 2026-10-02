@@ -70,19 +70,7 @@ When a step fails:
 
 After CI completes (pass or fail), output:
 
-```
-## CI Report — [PROJECT NAME]
-
-| Step | Result | Duration |
-|------|--------|----------|
-| Lint | pass | 2s |
-| Typecheck | pass | 4s |
-| Unit tests | pass (47/47) | 8s |
-| E2E tests | pass (12/12) | 45s |
-| Build | pass | 12s |
-
-**CI Status**: PASS — ready to deploy
-```
+`## CI Report — [PROJECT NAME]`: a table `Step | Result | Duration` with one row per step run (Lint, Typecheck, Unit tests, E2E tests, Build; test rows show pass counts), then `**CI Status**: PASS — ready to deploy` or `FAIL — <step>`.
 
 If `--ci` flag: stop here. Do not deploy.
 
@@ -108,7 +96,7 @@ Scan for deploy configuration (container-first — Cloud Run and Cloudflare Cont
 | Signal | Platform | Deploy Command |
 |--------|----------|----------------|
 | `Dockerfile` + `deploy.yml` with Cloud Run | GCP Cloud Run | `gcloud run deploy` |
-| `Dockerfile` (standalone) | Docker-based (ask user) | `docker build && docker push` |
+| `Dockerfile` (standalone) | Docker-based (ask user) | `docker build`, then `docker push` (two separate calls) |
 | `vercel.json` or `.vercel/` | Vercel | `vercel deploy` / `vercel --prod` |
 | `netlify.toml` or `.netlify/` | Netlify | `netlify deploy` / `netlify deploy --prod` |
 | `fly.toml` | Fly.io | `fly deploy` |
@@ -138,32 +126,10 @@ For staging/preview deploys, verify bot protection is in place:
 
 ### CD Report
 
-```
-## CD Report — [PROJECT NAME]
-
-| Aspect | Detail |
-|--------|--------|
-| Platform | Cloud Run |
-| Environment | staging |
-| URL | https://myapp-staging-abc123.run.app |
-| Status | LIVE |
-| Smoke test | pass (200 OK in 340ms) |
-| Bot protection | --no-allow-unauthenticated |
-
-**Deploy Status**: SUCCESS
-```
+`## CD Report — [PROJECT NAME]`: a table `Aspect | Detail` with rows Platform, Environment, URL, Status, Smoke test, Bot protection, then `**Deploy Status**: SUCCESS | FAILED`.
 
 ## Step 4: Summary
 
 Output the combined CI/CD result:
 
-```
-## CI/CD Complete — [PROJECT NAME] | YYYY-MM-DD
-
-CI: PASS (5/5 steps, 0 auto-fixes)
-CD: DEPLOYED to staging
-URL: https://...
-
-Auto-fixes applied: 0
-/pry escalations: 0
-```
+`## CI/CD Complete — [PROJECT NAME] | YYYY-MM-DD`, then one line each: CI result (steps passed, auto-fixes applied), CD result and environment, URL, `/pry` escalations.

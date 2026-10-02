@@ -18,9 +18,9 @@
 #   E2E:        ${E2E_PORT}
 #
 # Usage:
-#   bash kill-zombies.sh                # Kill all zombies
-#   bash kill-zombies.sh --dry-run      # Show what would be killed
-#   bash kill-zombies.sh --include-dev  # Also kill the API server process
+#   bash dev/kill-zombies.sh                # Kill all zombies
+#   bash dev/kill-zombies.sh --dry-run      # Show what would be killed
+#   bash dev/kill-zombies.sh --include-dev  # Also kill the API server process
 #
 set -euo pipefail
 
@@ -76,7 +76,16 @@ done
 # ── Kill Orphaned Node Processes ─────────────────────────────────────
 echo ""
 echo "🔍 Checking for orphaned node processes..."
+# Dev servers can retitle themselves: Next.js 16 runs as `next-server (v16.x.x)`, with no `node`,
+# `next dev` or project name in the command line (literal last verified 2026-10-02; recheck on a
+# major bump). It also auto-selects another port when the configured one is busy, so the port kill
+# above misses it. Match the current title, then scope to this project by working directory (Linux /proc).
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
 ORPHANS=$(pgrep -f "node.*(vite|tsx|dev-server|playwright|vitest).*[PROJECT_NAME]" 2>/dev/null || true)
+for PID in $(pgrep -f "next-server" 2>/dev/null || true); do
+  CWD=$(readlink "/proc/$PID/cwd" 2>/dev/null || true)
+  case "$CWD" in "$PROJECT_ROOT"|"$PROJECT_ROOT"/*) ORPHANS="$ORPHANS $PID" ;; esac
+done
 if [ -n "$ORPHANS" ]; then
   for PID in $ORPHANS; do
     if $DRY_RUN; then

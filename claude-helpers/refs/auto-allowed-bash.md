@@ -1,6 +1,6 @@
 # Claude Code — Harness Reference (descriptive)
 
-This file is **descriptive, not authoritative, and not config-synced**. It records the Claude-Code-specific harness setup: which Bash commands run without prompting, which tools are auto-allowed, WebFetch domains, editor conventions, and the shorthand/auto-invocation behaviour a Claude Code membrane exhibits.
+This file is **descriptive, not authoritative**. It is the Claude Code target of `/forge` Phase 3a: approved config rows merge into its harness tables. No script classifies config drift — the model assembles those rows — and the HARD RULES are never synced through it. It records the Claude-Code-specific harness setup: which tools and permissions the reference template grants, editor conventions, and the shorthand/auto-invocation behaviour a Claude Code membrane exhibits.
 
 **The HARD RULES are not owned here.** They live in `<forge>/core/rules/` (`development-discipline.md` + `forge-governance.md`) and deploy one-way into the marker-delimited `FORGE-RULES` block of `~/.claude/CLAUDE.md` on every `/forge` cast (`cast-deploy.sh --rules`). Read `core/rules/` for the current rule text; any rule quoted below is a convenience copy that may lag.
 
@@ -58,7 +58,7 @@ Code is never committed separately from its documentation. This applies to imple
 ## Task Management
 
 1. **Plan First** — Use plan mode or todo lists for multi-step tasks
-2. **Verify Plan** — Check in with the user before starting implementation
+2. **State the Plan** — say in one line which arts will run, then start; ask only when the decision is the user's (irreversible, outward-facing, a real preference)
 3. **Track Progress** — Mark items complete incrementally
 4. **Explain Changes** — Provide a high-level summary at each step
 
@@ -66,7 +66,7 @@ Code is never committed separately from its documentation. This applies to imple
 
 ## Context Persistence
 
-Each project has **one `AGENTS.md`** in its root containing rules, current state, and key learnings. When it grows too large (40k+ chars), detailed history overflows to memory files (`memory/`) while the root file stays under 20k chars.
+Each project has **one `AGENTS.md`** in its root containing rules, current state, and key learnings. `/wrap` compacts it at 20k chars and hard-flags it above 25k; older history overflows to memory files (`memory/`).
 
 The command **"save context"** triggers a full replacement of the Current Context section with a snapshot of the current state (branch, test count, completed phases, pending work).
 
@@ -119,87 +119,15 @@ Outputs a structured status summary with **no prose preamble** — just data:
 
 ---
 
-## Bash Permissions — Avoiding Prompts
+## Bash Rules and Permissions
 
-### HARD RULE: No Command Chaining — EVER
+### No Command Chaining
 
-> **This is a non-negotiable rule. Claude has repeatedly violated it. Zero tolerance.**
+The rule text is owned by `core/rules/development-discipline.md` ("No Command Chaining in Bash — EVER") and deploys in the FORGE-RULES block. Claude Code specifics: the permission matcher keys on a command's first token, so one command per Bash call; for git in another directory use `git -C <path>`; instruct subagents explicitly.
 
-Claude Code's permission system matches commands by their **first token**. Chaining with `&&`, `;`, or `||` means the first token is `cd` (or whatever comes first), not the actual command you want auto-allowed. This triggers unnecessary permission prompts and annoys the user.
+### Permissions
 
-```bash
-# ❌ BAD — starts with `cd`, triggers permission prompt
-cd packages/server && git commit -m "fix"
-cd d:/dev/_git/forge && git status
-
-# ✅ GOOD — separate Bash tool calls, each matches its own pattern
-# Call 1: git -C d:/dev/_git/forge status
-# Call 2: git -C d:/dev/_git/forge log --oneline -3
-
-# ✅ GOOD — for non-git commands, use separate tool calls
-# Call 1: cd packages/server
-# Call 2: npm run build
-```
-
-**Rules**:
-1. **NEVER chain commands with `&&`, `;`, or `||`** in Bash tool calls
-2. **For git commands in other directories**: Use `git -C <path>` — single command, no chaining
-3. **For non-git commands**: Use separate Bash tool calls, one command each
-4. **Subagents must follow this too** — explicitly instruct them in the prompt
-
-### Auto-Allowed Tools
-
-These tools run without prompting:
-
-| Tool | Purpose |
-|------|---------|
-| **Read** | Read file contents |
-| **Write** | Create new files |
-| **Edit** | Modify existing files |
-| **Glob** | Find files by pattern |
-| **Grep** | Search file contents |
-| **Agent** | Launch subagents for parallel work |
-| **TodoWrite** | Track task progress |
-| **NotebookEdit** | Edit Jupyter notebooks |
-| **WebSearch** | Search the web |
-
-### Auto-Allowed Commands
-
-These commands are harmless and should run without prompting:
-
-| Category | Commands |
-|----------|----------|
-| **Shell basics** | `cd`, `ls`, `pwd`, `cat`, `head`, `tail`, `echo`, `printf`, `wc`, `sort`, `uniq`, `tr`, `cut`, `tee`, `test` |
-| **File operations** | `mkdir`, `cp`, `mv`, `touch`, `chmod`, `basename`, `dirname`, `realpath` |
-| **File inspection** | `file`, `stat`, `diff`, `which`, `where`, `whereis`, `type` |
-| **Text processing** | `sed`, `awk`, `xargs` |
-| **Search** | `find`, `grep`, `rg`, `ag` |
-| **Node.js** | `node`, `npm`, `npx`, `pnpm`, `tsx`, `tsc` |
-| **Build/test** | `vitest`, `playwright`, `eslint`, `prettier` |
-| **Network** | `curl`, `wget`, `ping`, `ipconfig`, `ip`, `ss`, `netstat` |
-| **Process** | `ps`, `kill`, `lsof`, `tasklist` |
-| **WSL/Docker** | `wsl`, `docker`, `powershell`, `powershell.exe`, `cmd` |
-| **Git (safe)** | `git status`, `git diff`, `git log`, `git add`, `git commit`, `git branch`, `git checkout`, `git switch`, `git stash`, `git fetch`, `git rebase`, `git merge`, `git cherry-pick`, `git show`, `git tag`, `git rm`, `git mv`, `git check-ignore`, `git config`, `git remote`, `git rev-parse`, `git ls-files`, `git blame`, `git shortlog`, `git describe`, `git -C` |
-| **Other** | `gh`, `bc`, `python`, `python3`, `bash`, `source`, `timeout`, `for`, `du`, `start`, `pandoc` |
-| **Env vars** | `DATABASE_URL=`, `PORT=`, `CI=`, `DEBUG=`, `NODE_OPTIONS=`, `TMPDIR=`, `E2E_DATABASE_URL=`, `set`, `export` |
-
-### Commands That Prompt
-
-The following are **excluded** from auto-allow because they are destructive or affect shared state:
-
-| Command | Reason |
-|---------|--------|
-| `rm` | Deletes files permanently |
-| `git push` | Triggers deploys, affects remote |
-| `git reset` | Can discard commits/work |
-| `git clean` | Deletes untracked files permanently |
-| `git restore` | Can discard uncommitted changes |
-
-### WebFetch Domains
-
-Auto-allowed domains: `github.com`, `raw.githubusercontent.com`, `npmjs.com`, `localhost`, `neon.com`, `orm.drizzle.team`, `better-auth.com`, `hono.dev`, `tanstack.com`, `vite.dev`, `tailwindcss.com`, `pnpm.io`, `inlang.com`, `capacitorjs.com`, `ionic.io`, `capgo.app`, `ably.com`, `resend.com`, `developers.cloudflare.com`, `docs.sentry.io`, `infisical.com`
-
-Payment-gateway and other project-specific vendor domains belong in the project's own settings file, not in this shared reference.
+The reference shape is `claude-helpers/refs/permissions-template.json`: `Read`, `Write`, `Edit`, `Glob`, `Grep`, `WebFetch(*)`, `WebSearch(*)`, `Bash(*)`, `Agent`, `TodoWrite`, `NotebookEdit`. `Bash(*)` and `WebFetch(*)` are blanket allows — the template carries no `deny` or `ask` list, so no shell command and no domain prompts, including `rm`, `git push`, `git reset`, `git clean` and `git restore`. Restraint on those commands comes from the HARD RULES (No Auto-Commit, Only /forge Writes to Forge), not from the permission system. A membrane that wants prompts on destructive commands adds its own `permissions.ask` entries.
 
 ---
 
@@ -210,7 +138,8 @@ When the user's intent clearly matches a single art's TRIGGER condition:
 2. Proceed with the invocation
 
 When the user's intent matches multiple arts:
-- Use `AskUserQuestion` to let the user choose which art to invoke
+- For a feature, redesign, or multi-file change: do not ask. Follow the "Builds Go Through the Forge Arts" HARD RULE — build with `/smith`, gate with the evaluative arts that apply, and name them in one line at the start.
+- For any other multi-art match: use `AskUserQuestion` to let the user choose which art to invoke
 
 When the user's intent doesn't match any art:
 - Proceed normally without invoking any art
@@ -221,24 +150,24 @@ If forge is disabled (via `/forge off`), ALL forge skills are suspended except `
 
 ### Skill Model Recommendations
 
-Skills carry a neutral `<!-- model: opus/sonnet/haiku -->` hint, which `cast-deploy.sh` translates into a real `model:` frontmatter field on the Claude copy at deploy time. Two mechanisms exist and they behave differently (measured 2026-08-16 — see `core/skills/forge/protocol.md` → Model Tiers, rules 6 and 7):
+Skills carry a neutral `<!-- model: opus/sonnet/haiku/inherit -->` hint, which `cast-deploy.sh` translates into a `model:` frontmatter field on the Claude copy at deploy time, as an exact model id (`claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-4-5`) — a floating alias that resolves outside the org's availableModels allowlist is silently ignored. Two mechanisms exist and they behave differently (measured 2026-08-16 and 2026-09-28 — see `core/skills/forge/protocol.md` → Model Tiers, rules 6 and 7):
 
-- **`model:` frontmatter is an escalation floor, not a ceiling.** It raises a session that sits *below* the skill's needed tier. It does **not** pull a session down: a skill pinned one tier down, invoked inline on a higher-tier session, runs every turn — including the invocation turn — at the session model.
+- **`model:` frontmatter is an escalation floor, not a ceiling — and only on a user slash invocation.** It raises a session that sits *below* the skill's needed tier when the user types the slash command. A model-initiated Skill-tool invocation runs at the session model regardless of frontmatter. It does **not** pull a session down: a skill pinned one tier down, invoked inline on a higher-tier session, runs every turn — including the invocation turn — at the session model.
 - **A spawn's model parameter binds in both directions, including downward.** Subagents spawned from a top-tier session run at whatever tier the spawn names, for the whole of their work. This is the only reliable lever for running a leg below the session.
 
-Consequence: work that should run below the session tier must be **delegated to a subagent with an explicit model parameter** — an inline skill invocation is not a delegation and spends the session's tier. Prefer a cheap session default with deliberate escalation over a high default plus inline skills.
+Consequence: work that should run below the session tier must be **delegated to a subagent with an explicit model parameter** — an inline skill invocation is not a delegation and spends the session's tier. Prefer a cheap session default with deliberate escalation over a high default plus inline skills. On a cheap default session, users invoke opus arts themselves by slash command; a flow that needs an art at opus from inside another skill spawns a subagent with an explicit model parameter instead of calling the Skill tool.
 
 ---
 
-## HARD RULE — Update Presentation When Skills Change
+## Presentation upkeep (forge-internal convention — not a deployed HARD RULE)
 
-> **Whenever a new skill or art is added to `core/skills/`, OR an existing skill/art changes its name, description, or core purpose — `presentation/index.html` MUST be updated in the same commit.**
+> When a skill or art is added to `core/skills/`, or changes its name, description, or core purpose, update `presentation/index.html` in the same commit. This governs the forge repo only, so it is not in `core/rules/` and does not deploy to membranes.
 
 For a **new art**, ALL of the following slides must be updated:
 
 | Slide | What to update |
 |-------|---------------|
-| Ten Arts Overview | Add a persona card with art-name, art-title, and art-desc |
+| Arts Overview (slide 9) | Add a persona card with art-name, art-title, and art-desc; keep the slide title's count equal to the Arts table in `AGENTS.md` |
 | Evaluative Trifecta (or equivalent cadence slide) | Add supplementary art chip with cadence label |
 | Arts deep-dive slide (Pry/Purge/Praise or equivalent) | Add a full card with description, routing behaviour, and kitchen analogy |
 | Daily Workflow | Add or extend a scenario that shows when to invoke the new art |
