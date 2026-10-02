@@ -135,7 +135,7 @@ Use `forge-status.sh` classifications:
 
 | Classification | Section |
 |----------------|---------|
-| `FORGE-UPDATED` / `ADDED` (forge-side) | ↓ INCOMING |
+| `FORGE-UPDATED` / `ADDED` (forge-side) / `RETIRED` (memory file removed from forge) | ↓ INCOMING |
 | `DEPLOYED-DIFFERS` / `REMOVED` (membrane-side) | ↑ OUTGOING |
 | `CONFLICT` / `CONFLICT (no-baseline)` | ⚠ CONFLICTS |
 
@@ -209,7 +209,7 @@ Always run `bash <forge>/core/scripts/cast-deploy.sh --settings` (every cast, no
 For each approved learning row: copy/patch `<forge>/learnings/<file>.md` entry into `<membrane>/learnings/<file>.md`.
 
 ### Memory
-For each approved memory row: copy `<forge>/memory/<file>.md` into `<membrane>/memory/<file>.md`.
+For each approved memory row: copy `<forge>/memory/<file>.md` into `<membrane>/memory/<file>.md`. A `RETIRED` row (file retired in forge) instead moves the membrane copy to `<membrane>/memory/archive/` — never delete.
 
 ### Record baseline
 After all incoming is applied (before starting outgoing), write `<membrane>/.last-cast.json`:

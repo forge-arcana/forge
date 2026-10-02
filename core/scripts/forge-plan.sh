@@ -357,6 +357,12 @@ while IFS='|' read -r _ file _ _ status _; do
       section="CONF"; token="CONFLICT (no-baseline)"
       essence="_model fills_ — no baseline; diff <forge>/memory/$file vs <membrane>/memory/$file manually"
       ;;
+    *"Retired in forge"*)
+      # Checked before "cast needed"/"fold candidate": file was git rm'd from forge
+      # but the membrane still holds it. Incoming (archive), never an outgoing fold.
+      section="INC"; token="RETIRED"
+      essence="_model fills_ — removed from forge; move <membrane>/memory/$file to <membrane>/memory/archive/ (check it for local edits first)"
+      ;;
     *"cast needed"*)
       section="INC"; token="FORGE-UPDATED"
       essence="_model fills_ — diff <forge>/memory/$file vs <membrane>/memory/$file"

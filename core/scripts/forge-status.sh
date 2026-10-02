@@ -45,13 +45,13 @@ if [[ -z "$FORGE_PATH" ]]; then
 fi
 
 # --- Windows-safe paths for Node.js (MSYS /c/... → C:/...) ---
-W_HOME=$(winpath "$HOME")
+W_MEMBRANE=$(winpath "$MEMBRANE")
 W_FORGE=$(winpath "$FORGE_PATH")
 
 # --- Load last-cast baseline SHA (written by /forge after a successful cast phase) ---
 LAST_CAST_SHA=""
 LAST_CAST_FILE="$MEMBRANE/.last-cast.json"
-W_LAST_CAST_FILE="$W_HOME/.claude/.last-cast.json"
+W_LAST_CAST_FILE="$W_MEMBRANE/.last-cast.json"
 if [[ -f "$LAST_CAST_FILE" ]]; then
   LAST_CAST_SHA=$("$NODE_BIN" -e "
 const d = require('fs').readFileSync('$W_LAST_CAST_FILE','utf8');
@@ -64,6 +64,12 @@ if [[ ! -d "$FORGE_PATH" ]]; then
   exit 1
 fi
 
+# Probe git readability once (e.g. safe.directory unset for this user). If git cannot
+# read the repo, baseline validation, history titles and retired-entry detection all
+# fail silently -- so the report header carries one loud warning instead.
+GIT_READABLE=true
+git -C "$FORGE_PATH" rev-parse --verify HEAD >/dev/null 2>&1 || GIT_READABLE=false
+
 # Validate baseline SHA is reachable in git history
 if [[ -n "$LAST_CAST_SHA" ]]; then
   git -C "$FORGE_PATH" merge-base --is-ancestor "$LAST_CAST_SHA" HEAD >/dev/null 2>&1 || LAST_CAST_SHA=""
@@ -75,7 +81,11 @@ echo "**Mode**: $MODE"
 if [[ -n "$LAST_CAST_SHA" ]]; then
   echo "**Baseline**: \`${LAST_CAST_SHA:0:7}\` (last cast commit)"
 else
-  echo "**Baseline**: none (all diffs will be CONFLICT — run /forge to establish baseline)"
+  echo "**Baseline**: none (skill diffs will be CONFLICT; memory diffs need manual direction — run /forge to establish baseline)"
+fi
+if [[ "$GIT_READABLE" == "false" ]]; then
+  echo ""
+  echo "> WARNING: git cannot read $FORGE_PATH (check git safe.directory for this user) -- baseline and retired-entry detection are disabled; routing below is unreliable"
 fi
 echo ""
 
@@ -266,18 +276,39 @@ if [[ ${#CHANGED_SKILLS[@]} -gt 0 && -n "$LAST_CAST_SHA" ]]; then
   echo ""
 fi
 
+# --- Forge learning-title history ---
+# Every title that has EVER been a "## " heading in forge learnings, read from git
+# history (added lines only). The tracker alone misses entries authored directly in
+# forge, and titles carrying a date-range suffix; a membrane copy predating a
+# curation would otherwise report those retired entries as "new in user" and route
+# them OUTGOING. Normalised with the same regex as getTitles. Read from stdin, so
+# diff size is no buffer concern. Built before Step 4 -- both the general.md and the
+# per-file comparisons below consume it.
+HISTORY_TITLES_FILE=$(mktemp)
+git -C "$FORGE_PATH" log -p --format= HEAD -- learnings/ 2>/dev/null | "$NODE_BIN" -e "
+const titles = new Set();
+for (const l of require('fs').readFileSync(0,'utf8').split('\n')) {
+  if (!l.startsWith('+## ')) continue;
+  const m = l.slice(1).match(/^## (.+?)(?:\s*\([\d-]+\))?\s*\$/);
+  if (m) titles.add(m[1].trim());
+}
+for (const t of [...titles].sort()) console.log(t);
+" 2>/dev/null > "$HISTORY_TITLES_FILE" || true
+W_HISTORY_TITLES_FILE=$(winpath "$HISTORY_TITLES_FILE")
+
 # --- Step 4: Learning status ---
 echo "## Learning Status"
 echo ""
 
 GENERAL="$MEMBRANE/learnings/general.md"
 TRACKER="$FORGE_PATH/learnings/.fold-tracker.json"
-W_GENERAL="$W_HOME/.claude/learnings/general.md"
+W_GENERAL="$W_MEMBRANE/learnings/general.md"
 W_TRACKER="$W_FORGE/learnings/.fold-tracker.json"
 
 if [[ -f "$GENERAL" ]]; then
-  # Title-based UNPROCESSED calculation: checks BOTH tracker AND forge files
-  # A membrane entry is "processed" if its title is in the tracker OR in any forge learning file
+  # Title-based UNPROCESSED calculation: checks tracker, forge files AND forge git history
+  # A membrane entry is "processed" if its title is in the tracker, in any forge learning
+  # file, or was ever in forge (retired since -- see HISTORY_TITLES_FILE above)
   eval "$("$NODE_BIN" -e "
 const fs = require('fs'), path = require('path');
 const dir = path.join('$W_FORGE', 'learnings');
@@ -298,7 +329,9 @@ for (const l of fs.readFileSync('$W_GENERAL','utf8').split('\n')) {
   const m = l.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
   if (m) membraneTitles.push(m[1].trim());
 }
-const unprocessed = membraneTitles.filter(t => !tracked.has(t) && !forgeTitles.has(t));
+// Titles retired from forge (git history) count as processed, same as the tracker
+const historyT = new Set(fs.readFileSync('$W_HISTORY_TITLES_FILE','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
+const unprocessed = membraneTitles.filter(t => !tracked.has(t) && !forgeTitles.has(t) && !historyT.has(t));
 const processed = membraneTitles.length - unprocessed.length;
 console.log('TOTAL_ENTRIES=' + membraneTitles.length);
 console.log('PROCESSED=' + processed);
@@ -312,7 +345,7 @@ console.log('UNPROCESSED=' + unprocessed.length);
 
   if [[ $UNPROCESSED -gt 0 ]]; then
     echo "**Unprocessed entries** (outgoing — ready for /forge):"
-    # Title-based: show membrane entries NOT in tracker AND NOT in any forge file
+    # Title-based: show membrane entries NOT in tracker, any forge file, or forge history
     "$NODE_BIN" -e "
 const fs = require('fs'), path = require('path');
 const dir = path.join('$W_FORGE', 'learnings');
@@ -328,9 +361,10 @@ try {
   const d = JSON.parse(fs.readFileSync(path.join(dir, '.fold-tracker.json'),'utf8'));
   tracked = new Set(d.processedEntries || []);
 } catch(e) {}
+const historyT = new Set(fs.readFileSync('$W_HISTORY_TITLES_FILE','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
 for (const line of fs.readFileSync('$W_GENERAL','utf8').split('\n')) {
   const m = line.match(/^## (.+?)(?:\s*\([\d-]+\))?\s*$/);
-  if (m) { const t = m[1].trim(); if (!tracked.has(t) && !forgeTitles.has(t)) console.log('- ' + t); }
+  if (m) { const t = m[1].trim(); if (!tracked.has(t) && !forgeTitles.has(t) && !historyT.has(t)) console.log('- ' + t); }
 }
 " 2>/dev/null || true
     echo ""
@@ -373,6 +407,8 @@ for (const t of [...titles].sort()) console.log(t);
 # CURRENT forge file -- i.e. it was consolidated/renamed away. Conflating "tracked"
 # with "present in a forge file" (as ALL_FORGE_TITLES_FILE does, by design, for the
 # newInUser check) would hide exactly this case, so it needs its own set.
+# HISTORY_TITLES_FILE (built before Step 4) widens this: the tracker misses entries
+# authored directly in forge or carrying a date-range suffix.
 TRACKED_TITLES_FILE=$(mktemp)
 "$NODE_BIN" -e "
 const fs = require('fs'), path = require('path');
@@ -390,7 +426,7 @@ for forge_file in "$FORGE_PATH"/learnings/*.md; do
   [[ "$fname" == "general.md" ]] && continue
 
   user_file="$MEMBRANE/learnings/$fname"
-  w_user_file="$W_HOME/.claude/learnings/$fname"
+  w_user_file="$W_MEMBRANE/learnings/$fname"
   w_forge_file=$(winpath "$forge_file")
   forge_count=$(grep -c '^## ' "$forge_file" 2>/dev/null || true)
   forge_count=${forge_count:-0}
@@ -426,14 +462,17 @@ const userT = getTitles('$w_user_file');
 const forgeFileT = getTitles('$w_forge_file');
 const allForgeT = new Set(fs.readFileSync('$(winpath "$ALL_FORGE_TITLES_FILE")','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
 const trackedT = new Set(fs.readFileSync('$(winpath "$TRACKED_TITLES_FILE")','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
-// Truly new in user = in user file, not in ANY forge file or tracker
-const newInUser = [...userT].filter(t => !allForgeT.has(t)).sort();
+const historyT = new Set(fs.readFileSync('$W_HISTORY_TITLES_FILE','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
+// Truly new in user = in user file, not in ANY forge file or tracker, and never in
+// forge's git history (a title retired by curation is not new)
+const newInUser = [...userT].filter(t => !allForgeT.has(t) && !historyT.has(t)).sort();
 // New in this forge file = in forge file, not in user file (includes freshly-merged
 // consolidation titles -- a merged title is by definition new text, so it lands here)
 const newInForge = [...forgeFileT].filter(t => !userT.has(t)).sort();
 // Retired in this forge file = user still has it, this forge file no longer does,
-// but the tracker says it was absorbed at some point -- i.e. consolidated away.
-const retiredInForge = [...userT].filter(t => !forgeFileT.has(t) && trackedT.has(t)).sort();
+// but the tracker or forge's git history says it was there at some point -- i.e.
+// consolidated away.
+const retiredInForge = [...userT].filter(t => !forgeFileT.has(t) && (trackedT.has(t) || historyT.has(t))).sort();
 console.log(JSON.stringify({newInUser, newInForge, retiredInForge}));
 " > "$comparison_file" 2>"$comparison_err_file"
     comparison_rc=$?
@@ -515,7 +554,8 @@ function getEntries(p) {
 }
 const userE = getEntries('$w_user_file');
 const allForgeT = new Set(fs.readFileSync('$(winpath "$ALL_FORGE_TITLES_FILE")','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
-const newTitles = Object.keys(userE).filter(t => !allForgeT.has(t)).sort();
+const historyT = new Set(fs.readFileSync('$W_HISTORY_TITLES_FILE','utf8').split('\n').map(l=>l.trim()).filter(Boolean));
+const newTitles = Object.keys(userE).filter(t => !allForgeT.has(t) && !historyT.has(t)).sort();
 for (const t of newTitles) {
   console.log(t);
   if (userE[t]) console.log('  -> ' + userE[t]);
@@ -651,7 +691,7 @@ for (const t of Object.keys(forgeE).sort()) {
     fi
   fi
 done
-rm -f "$ALL_FORGE_TITLES_FILE"
+rm -f "$ALL_FORGE_TITLES_FILE" "$TRACKED_TITLES_FILE" "$HISTORY_TITLES_FILE"
 echo ""
 
 if [[ ${#LEARNING_DETAILS_LINES[@]} -gt 0 ]]; then
@@ -722,8 +762,16 @@ if [[ -d "$MEMBRANE/memory" ]]; then
         echo "| $fname | yes | no | Skipped (PERSONAL) |"
         MEM_SKIPPED=$((MEM_SKIPPED + 1))
       else
-        echo "| $fname | yes | no | New -- fold candidate |"
-        MEM_FOLD=$((MEM_FOLD + 1))
+        # Forge ever tracked this file but no longer has it => retired by curation, not new.
+        # Guarded: a git failure (safe.directory, shallow clone) must not abort under set -e.
+        forge_ever=$(git -C "$FORGE_PATH" log -1 --format=%H -- "memory/$fname" 2>/dev/null || true)
+        if [[ -n "$forge_ever" ]]; then
+          echo "| $fname | yes | no (retired) | Retired in forge -- archive membrane copy |"
+          MEM_CAST=$((MEM_CAST + 1))
+        else
+          echo "| $fname | yes | no | New -- fold candidate |"
+          MEM_FOLD=$((MEM_FOLD + 1))
+        fi
       fi
     fi
   done
@@ -780,7 +828,7 @@ echo ""
 # 6b: Pre-triage candidates from general.md against forge learnings
 echo "### Candidate pre-triage (general.md vs forge)"
 MEMBRANE_LEARNINGS="$MEMBRANE/learnings/general.md"
-W_MEMBRANE_LEARNINGS="$W_HOME/.claude/learnings/general.md"
+W_MEMBRANE_LEARNINGS="$W_MEMBRANE/learnings/general.md"
 if [[ -f "$MEMBRANE_LEARNINGS" ]]; then
   "$NODE_BIN" -e "
 const fs = require('fs'), path = require('path');
