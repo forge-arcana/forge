@@ -172,3 +172,16 @@ The test: would this context still be needed if the task started fresh? If not, 
 4. **When the founder names a reference product** (e.g. "like Stripe/Cloudflare"), match that product's actual model, not a nearby approximation.
 
 The founder has had to restate this repeatedly; breaking it is a reporting defect, not a judgment call.
+
+## HARD RULE — Every Unit Has a Version You Can Read
+
+> **Every deployable or publishable unit carries a release version and a build identity, and anyone, human or agent, can read which build is running without opening the repo.**
+
+1. **Register the units.** The project rules file has a `## Versions` table: each unit, its version source, where it is surfaced.
+2. **One source per unit.** SemVer in one file; every other copy is derived or held equal by a test. No hardcoded version literals, and no placeholder (`0.0.0`, `dev`, `unknown`) in a deployed artifact.
+3. **Show both identities together.** `X.Y.Z+<sha7>` at a release, `X.Y.(Z+1)-dev.N+<sha7>` between releases, surfaced wherever the unit's kind allows: `GET /version` and the startup log (server), a visible string (UI), `--version` (CLI), manifest and changelog (package), `release` (error tracker).
+4. **Report what is loaded.** Stamp identity at build or capture it once at process start; never derive it from git or other mutable repo state on request.
+5. **Compatibility is not the release version.** Protocols, schemas and stored formats carry their own integers, each defined once.
+6. **A release is a version bump plus a changelog entry. A deploy is done when the running version matches what shipped.**
+
+Detail and per-unit recipes: `<forge>/core/skills/forge/versioning.md`. An existing project adopts as its own task before its next release or deploy; inside unrelated work, report the gap and offer it.

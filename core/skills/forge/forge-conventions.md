@@ -113,3 +113,13 @@ For Windows users on a bash-based workflow (regardless of harness):
 - [ ] `scripts/release-apk.sh` exists (builds APK + uploads to distribution host)
 - [ ] `www/` and `*.apk` in `.gitignore`
 - [ ] `envDir: path.resolve(__dirname, "../..")` in all SPA vite configs (monorepo env var loading)
+
+### 10. Versioning
+- [ ] `## Versions` table in the project rules file lists every deployable or publishable unit with its version source and where it is surfaced
+- [ ] Each unit's release version is SemVer in one source; other manifests are derived or test-held equal
+- [ ] Build identity (`version` + commit SHA) is stamped at build or captured once at process start; deploy builds fail on a placeholder identity
+- [ ] Running version readable per unit: `GET /version` and in `/health` (server), visible in the UI, `--version` (CLI), image labels, error-tracker release
+- [ ] `CHANGELOG.md` has an entry for the current release version
+- [ ] Contract versions (protocol, payload, stored format) each defined once, never compared via the release version
+
+Detail: `versioning.md`.

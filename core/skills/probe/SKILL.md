@@ -88,6 +88,7 @@ Adapt output format to the probe target:
 - If Pattern does NOT exist → create it with the full skeleton (Architecture + empty UX placeholder + Risks).
 - If Pattern EXISTS → update the Architecture section in place. **Preserve the UX section verbatim** (that belongs to /preen). Merge new risks into the Risks section.
 - Leave the original Blueprint file **untouched** — the Blueprint is the scope, the Pattern is the form. Never rewrite the Blueprint.
+- Fill the **Versioned Units** table per `<forge>/core/skills/forge/versioning.md`: every deployable or publishable unit, units that ship together sharing one version, and each wire or storage contract that needs its own integer version.
 - No `-probed.md` copies. The Pattern is the sole architecture artifact.
 
 The Pattern file skeleton is the shared contract at [`<forge>/core/skills/forge/pattern-skeleton.md`](../forge/pattern-skeleton.md). Three sections: **Architecture** (yours — one entry per technical Blueprint section, each with Current recommendation / Verdict / Configuration / Pitfalls / References), **UX** (placeholder — /preen's), **Risks** (shared, bucketed CRITICAL / IMPORTANT / MINOR).

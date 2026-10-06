@@ -434,6 +434,25 @@ if [[ "$SCAN_TYPE" == "press" ]]; then
     'health|healthz|readyz|livez' \
     "ts" "-i"
 
+  scan_pattern "Version surfacing and build-identity stamping" \
+    '/version|buildSha|GIT_SHA|COMMIT_SHA|BUILD_ID|GITHUB_SHA|__APP_VERSION__|version_metadata|org\.opencontainers\.image\.(version|revision)|rev-parse' \
+    "ts"
+
+  scan_pattern "Hardcoded placeholder versions" \
+    "version['\"]?\s*[:=]\s*['\"](0\.0\.0|dev|unknown)['\"]|['\"]0\.0\.0['\"]" \
+    "ts"
+
+  scan_pattern "Error tracker release tag" \
+    'release\s*:' \
+    "ts"
+
+  echo "### Version and changelog files"
+  echo "| Check | Path | Exists? |"
+  echo "|-------|------|---------|"
+  check_exists "Root VERSION file (optional when a manifest is the source)" "VERSION"
+  check_exists "Changelog" "CHANGELOG.md"
+  echo ""
+
   scan_pattern "Graceful shutdown" \
     'SIGTERM|SIGINT|graceful|shutdown' \
     "ts" "-i"

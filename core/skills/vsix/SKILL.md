@@ -6,7 +6,7 @@ description: Publish a VS Code extension — bump version, update changelog, bui
 
 # /vsix — VS Code Extension Publish
 
-Bump version, package, push, release. The user uploads to the marketplace manually.
+Bump version, package, push, release. The user uploads to the marketplace manually. This skill follows the forge versioning standard (`<forge>/core/skills/forge/versioning.md`): `package.json` is the extension's single version source, and the bump, changelog entry and tag in the steps below are that standard's release act.
 
 ## Arguments
 `$ARGUMENTS` — optional version bump type: `patch` (default), `minor`, or `major`. E.g., `/vsix minor`

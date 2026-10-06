@@ -103,7 +103,7 @@ When working from a blueprint: the **Consumption Guide** (Section 22 footer) def
 **Foundation Unit** (always first):
 - Heat 1: Project scaffolding + data model (Sections 13, 16)
 - Heat 2: Auth system (Sections 3, 15)
-- Heat 3: Dev tooling — invoke `/srs` for dev/restart.sh + dev/kill-zombies.sh, set up logging (Section 13 + forge conventions)
+- Heat 3: Dev tooling — invoke `/srs` for dev/restart.sh + dev/kill-zombies.sh, set up logging (Section 13 + forge conventions), wire versioning per `<forge>/core/skills/forge/versioning.md` (version source, stamped build identity, `GET /version`, visible UI version string, `## Versions` table in the project rules file, built from the Pattern's Versioned Units)
 
 **Core Workflow Unit** (the product's heartbeat):
 - One heat per numbered step in Section 5 (Primary Workflow)
@@ -129,7 +129,7 @@ When working from a plan file or conversation context, use the work spec from St
 
 1. **Group implementation steps into units** by functional area (analogous to blueprint units)
 2. **Split each unit into heats** — one heat per vertical slice or independent module
-3. **Infer a Foundation unit** if the work requires scaffolding, config changes, or setup
+3. **Infer a Foundation unit** if the work requires scaffolding, config changes, or setup (a project with no `## Versions` table in its rules file gets versioning wired in this unit)
 4. **Infer a Hardening unit** if the work has 5+ heats (testing, verification)
 5. **Reference steps by description** instead of blueprint section numbers (e.g., "Provider abstraction" instead of "Section 13")
 
@@ -199,7 +199,7 @@ Each heat follows: **Plan → Build → Verify → Evaluate → Fix → Checkpoi
 Write code following:
 - The work source (blueprint spec or workspec steps) for functionality
 - The stack guide for technology choices and conventions
-- The forge conventions checklist for logging, structure, and dev tooling
+- The forge conventions checklist for logging, structure, dev tooling, and versioning
 - Vertical slices — DB schema → service/business logic → API route → UI component (where applicable)
 
 Smith builds the code itself. The arts evaluate. Apprentices handle independent parallel work.

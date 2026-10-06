@@ -21,6 +21,13 @@ Written: [YYYY-MM-DD] | Last updated: [YYYY-MM-DD]
 
 [... one entry per technical Blueprint section (Sections 13–19 typically)]
 
+### Versioned Units
+*Written by /probe per the versioning standard; consumed by /smith's foundation heat. This is the plan; the project rules file's `## Versions` table is the live register.*
+
+| Unit | Kind | Version source | Surfaced at | Contract versions |
+|------|------|----------------|-------------|-------------------|
+| [unit name] | [server / UI / worker / CLI / package / app / image] | [VERSION or manifest path] | [GET /version, UI footer, --version, ...] | [protocol / payload / stored format, each an integer defined once] |
+
 ---
 
 ## UX

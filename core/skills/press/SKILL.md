@@ -39,6 +39,7 @@ Standard error tracking, health checks, backups, rollback, graceful shutdown. Pr
 - **Structured logging** — must match `<forge>/core/skills/forge/stack-guide.md` Logging Convention (Pino on Node — JSON, dev verbose / prod sparse, browser console forwarding via `/api/dev/log`). If compute is on the edge (Workers), Pino is replaced by `console.log`-JSON → an OTLP backend; verify telemetry still lands single-pane.
 - **DR posture** (stack-guide makes this an explicit line item) — if prod is on Neon (no cross-region replication), verify the floor: Launch-plan PITR + a scheduled cross-region `pg_dump`. If the product needs region-survivable DR or HIPAA/BAA, verify it's on the Cloud SQL escalation — don't discover the gap here.
 - **Local dev tooling** — `dev/restart.sh` + `dev/kill-zombies.sh` exist per `<forge>/core/skills/forge/forge-conventions.md` item 7 (Dev Stack); suggest `/srs` if missing.
+- **Running version readable** — per `<forge>/core/skills/forge/versioning.md`: every deployed unit reports release version + build identity (`GET /version` and inside `/health`, visible in the UI, `--version`, image labels, error-tracker `release`), stamped at build or captured at process start. A deployed unit whose running build cannot be read, or whose deploy build can carry a placeholder (`0.0.0`, `dev`, `unknown`), is a **Critical gap**: nobody can confirm what is live or that a rollback took.
 
 ### 4. Compliance
 Standard data privacy, audit trail, ToS/Privacy refs, cookie consent. Project-specific lens informed by jurisdiction (GDPR / local equivalent / per-region retention rules).
@@ -53,6 +54,7 @@ Standard CI/CD completeness, env parity, feature flags, migration up/down, zero-
 - **Egress-cost exposure** — flag layers where growth is pure egress (public buckets, media, APK distribution); the stack-guide default is R2 ($0 egress). GCS/hyperscaler egress on a viral path is an unbounded bill.
 - **Multi-provider blast radius** — if the app spans providers, verify each agent/CI credential is least-privilege and scoped (a brokered agent across N providers has a larger blast radius than one on a single cloud); confirm spend caps wherever a leaked key means runaway cost (e.g. Runpod GPU).
 - **Launch surface reviewed** — if a logged-out or marketing page exists and no `/preen` report covers its Dimension 8 (landing shape), flag IMPORTANT "landing shape unreviewed" and point to `/preen`. Go-live readiness owns the check that the review happened; `/preen` owns the review.
+- **Deploy proves itself** — the deploy script reads the running version afterwards and fails on a mismatch with what was shipped; a release has a `CHANGELOG.md` entry and a single version source (no hand-edited duplicates).
 
 ### 7. Documentation
 Standard API docs, runbooks, ADRs, onboarding, README. (No project-specific lens — assess as-is.)

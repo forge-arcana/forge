@@ -93,6 +93,7 @@ Use the script's output as your evidence base for the facet-derivation fan-out i
 - **Message infrastructure**: queues, brokers, pub/sub, event buses.
 - **External integrations**: from `.env.example` keys and dependency manifest — payment, auth, email/SMS, LLM/AI APIs, analytics, third-party APIs. Each secret-shaped env key usually names an external dependency.
 - **Trust boundaries**: which units are public (`--allow-unauthenticated`, public routes) vs IAM-gated/internal (see `/press` Dimension 1's bot/crawler split); where the VPC / private network edges fall.
+- **Unit versions**: each deployable unit's version source and where its running version is surfaced (the project rules file's `## Versions` table, manifests, a `/version` route, image labels), per `<forge>/core/skills/forge/versioning.md`.
 
 For the **Planned cast**, the evidence source is instead the Pattern's Architecture section and the Blueprint's technical-decisions round — extract the same facet list from the intended design.
 
@@ -105,7 +106,7 @@ Spawn one **sonnet-tier subagent per facet** — deployable units, data stores, 
 **After all facet legs complete, synthesize at opus tier** — this is the creative-judgment core of the art, not a collation:
 
 1. **Merge** the facet node/edge lists into one deduplicated topology; resolve nodes that appear in multiple facets; place every node inside exactly one boundary (edge nodes flagged per the boundary rule).
-2. **Draw** the topology as a **Mermaid C4 container diagram** (`C4Container`) — or a `flowchart` with boundary `subgraph`s if C4 syntax is a poor fit for the shape. One node per deployable unit / store / external system; one labeled edge per dependency. This mermaid block is the diffable source of truth and renders natively in the HTML.
+2. **Draw** the topology as a **Mermaid C4 container diagram** (`C4Container`) — or a `flowchart` with boundary `subgraph`s if C4 syntax is a poor fit for the shape. One node per deployable unit / store / external system; one labeled edge per dependency. This mermaid block is the diffable source of truth and renders natively in the HTML. In the As-Built cast each deployable-unit node is labelled with its release version; a unit with no readable version is labelled `unversioned` and listed in the verdict as a go-live gap.
 3. **Diff** (As-Built cast only) the topology against the drift baseline and build the **drift ledger**: for each node and edge, classify as *Unchanged*, *Added* (in build, not in plan), *Removed* (in plan, not in build), *Changed* (different tech/boundary/protocol), or *Unplanned* (in build, in no plan at all — the sharpest category). Every drift row carries a one-line "why it matters" for go-live.
 4. **Verdict**: a one-paragraph read of the landscape — the shape of the system, the boundary posture, and (As-Built) whether the drift is benign or load-bearing.
 

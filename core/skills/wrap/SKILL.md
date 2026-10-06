@@ -22,6 +22,11 @@ Execute the following steps in order. Do NOT skip steps. Do NOT commit without c
 - Show the stray `CLAUDE.md` content and ask the user — using your harness's multi-choice prompt if available, otherwise inline: "Propose a merge into AGENTS.md for my approval" / "Leave it (I'll resolve)". On the first, show the proposed merged `AGENTS.md`; write it and delete `CLAUDE.md` only after the user approves that result.
 - Never delete it without approval. If prompts are suppressed (e.g., invoked by `/smith`), report the shadow and do not delete. On Claude Code below 2.1.277 (or version unknown) never delete `CLAUDE.md` — report only.
 
+## Step 1c: Version Check
+- If the staged or working diff changes a unit's version source (a `VERSION` file or a manifest `version` field): verify `CHANGELOG.md` has an entry for the new version and that any derived manifest matches. Fix both in place before staging.
+- If the project has deployable or publishable units and its rules file has no `## Versions` table, report it in one line and point to `<forge>/core/skills/forge/versioning.md`. Report only; never block the commit on it and never bump a version unasked.
+- A commit that does not change a version source needs no bump: raising the version is a release act, not a per-commit one.
+
 ## Step 2: Stage
 - Stage specific changed files with `git add <file>` (never use `git add -A` or `git add .`)
 - Do NOT stage files that contain secrets (.env, credentials.json, etc.)
