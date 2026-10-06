@@ -96,7 +96,7 @@ The version object, the same shape wherever a machine reads it:
 | Error tracker | `release` set to `<name>@<version>+<short sha>` | Without it, an error cannot be tied to the build that raised it |
 | Logs | The startup line; no per-line version | |
 
-Unauthenticated `/version` and `/health` responses carry only `name`, `version` and `build.short`. The full SHA, the timestamps, `startedAt` and `dirty`, and anything about branches, filesystem paths, hostnames or dependencies, are served only to authenticated or local callers.
+Unauthenticated responses carry only `name`, `version` and `build.short`: that covers `/version`, `/health` and a publicly served static `version.json`, and those three fields are enough for a stale tab to compare. The full SHA, the timestamps, `startedAt` and `dirty`, and anything about branches, filesystem paths, hostnames or dependencies, are served only to authenticated or local callers.
 
 ## 5. Compatibility is a separate number
 
