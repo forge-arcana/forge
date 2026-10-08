@@ -114,10 +114,11 @@ bootstrap_layout() {
 #     aliases) because a floating alias can resolve to a model outside an org's
 #     availableModels allowlist, and Claude Code then silently ignores the pin
 #     (measured 2026-09-28: a `sonnet`-pinned skill ran at the session model).
-#     Change these constants when the allowlist moves. ---
+#     Change these constants when the allowlist moves: add the new id to
+#     availableModels on every machine BEFORE casting the new pin. ---
 FORGE_OPUS_MODEL="claude-opus-5-5"
 FORGE_SONNET_MODEL="claude-sonnet-5-5"
-FORGE_HAIKU_MODEL="claude-haiku-4-5"
+FORGE_HAIKU_MODEL="claude-haiku-5-5"
 
 # --- tier_to_model: map a neutral model tier to the Claude `model:` value.
 #     Shared by injection and --verify so the two can never drift. Returns empty
