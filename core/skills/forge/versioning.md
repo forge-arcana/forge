@@ -46,10 +46,11 @@ Format:
 | Uncommitted changes at the commit that set the version | `1.4.1-dev.0+a1b2c3d.dirty` |
 
 - `N` is the count of commits since the commit that last changed the version **value**: `git rev-list --count <that commit>..HEAD`. For a `VERSION` file that commit is `git log -1 --format=%H -- VERSION`. For a manifest, match the version line so an edit to dependencies or scripts does not reset the count, for example `git log -1 --format=%H -G'"version"' -- package.json`, or `-G'^version'` for `pyproject.toml`.
+- If no commit has ever changed the version source (the file is new and not yet committed), or its value is edited but not yet committed, there is no baseline to count from. `N` is 0 and the build is dirty: `X.Y.(Z+1)-dev.0+<sha7>.dirty`, with `X.Y.Z` taken from the value on disk.
 - The count needs full history. A shallow clone gives a wrong `N`: CI fetches full depth, and a build that finds a shallow repository (`git rev-parse --is-shallow-repository`) fails instead of guessing.
 - Development builds are labelled against the **next patch** (`1.4.1-dev.N`, not `1.4.0-dev.N`). A pre-release sorts below its own release under SemVer precedence, so `1.4.0-dev.7` would rank as older than `1.4.0`.
 - If the version source already has a pre-release part, append `.dev.N` to it instead: `1.5.0-rc.1.dev.N` sorts above `1.5.0-rc.1` and below `1.5.0-rc.2`. Only a plain `X.Y.Z` source is moved to the next patch. At the commit that set it, with a clean tree, the label is the source unchanged: `1.5.0-rc.1+a1b2c3d`.
-- A dirty tree is never a release build. Release and deploy builds refuse to run on one.
+- A dirty tree is never a release build. Release and deploy builds refuse to run on one. Before enforcing the refusal, look for tracked files that operators edit in place on the deploy host; one of those makes every deploy dirty. Ship such a file as an example plus a gitignored working copy.
 - The part after `+` is SemVer build metadata: the 7-character commit SHA, then `.dirty` if the tree had uncommitted changes. Build metadata never affects ordering.
 - A unit built from more than one repository lists each SHA, primary first: `+a1b2c3d.e4f5a6b`.
 - Published packages and store builds carry only a release or pre-release version. No build whose version carries a `dev` identifier is ever published.
@@ -77,6 +78,7 @@ The version object, the same shape wherever a machine reads it:
 ### Report what is loaded, not what is on disk
 
 - Stamp the identity into the artifact at build time: a bundler `define`, a generated module, a build argument, or the platform's own version metadata.
+- A build that runs without a repository (a pinned-commit sandbox, an image build with no `.git`) takes its identity from the tool that started it, as environment variables or build arguments: the full SHA, the commit time, `N` and the version label. The stamp reads a handed-in identity first and git second, checks that the version is valid SemVer, and fails if it has neither. The tool computes the identity from the full-history repository the commit came from.
 - A service that runs straight from a checkout captures identity **once at process start** and caches it. Reading git when asked reports the newest commit in the repository, not the code in memory, and a process that was never restarted then claims a build it is not running.
 - A deployable artifact must never carry a placeholder. If the build cannot determine a real identity (`dev`, `unknown`, `0.0.0`, an empty SHA), a deploy or release build fails. Local development builds may show `dev`, and any guard that compares identities must treat `dev` as "no comparison", never as a match.
 - A state file that records the running version is believed only while the process that wrote it is alive.
@@ -85,7 +87,7 @@ The version object, the same shape wherever a machine reads it:
 
 | Unit | Required | Notes |
 |------|----------|-------|
-| Server / API / worker | `GET /version` returning the version object; the same object under `version` in `/health`; one startup log line with the full string | On Cloudflare Workers, the `version_metadata` binding (`id`, `tag`, `timestamp`) supplies the deployment identity; add it to the object, it does not replace the release version |
+| Server / API / worker | `GET /version` returning the version object; the same object under `version` in `/health`; one startup log line with the full string | A unit that only receives a route prefix serves it under that prefix (`/api/version`). On Cloudflare Workers, the `version_metadata` binding (`id`, `tag`, `timestamp`) supplies the deployment identity; add it to the object, it does not replace the release version |
 | Web UI | The full string visible to a signed-in user without developer tools: a footer, about or settings screen | Also serve it as a static `version.json` with `Cache-Control: no-store` so a stale tab can compare |
 | Static site | The full string in the page (footer or an about page) and a static `version.json` | No endpoint, no startup log |
 | CLI | `--version` printing the full string | Any `doctor` or `status` command prints it too |
@@ -94,9 +96,9 @@ The version object, the same shape wherever a machine reads it:
 | Container image | Labels `org.opencontainers.image.version`, `.revision` (full SHA), `.created`, `.source` | Tag images with the release version and the SHA, never only `latest` |
 | Mobile app | Version name = release version; build number a monotonically increasing integer never reused; both shown in settings | |
 | Error tracker | `release` set to `<name>@<version>+<short sha>` | Without it, an error cannot be tied to the build that raised it |
-| Logs | The startup line; no per-line version | |
+| Logs | The startup line; no per-line version. A runtime with no startup moment logs it once per instance, on first request | |
 
-Unauthenticated responses carry only `name`, `version` and `build.short`: that covers `/version`, `/health` and a publicly served static `version.json`, and those three fields are enough for a stale tab to compare. The full SHA, the timestamps, `startedAt` and `dirty`, and anything about branches, filesystem paths, hostnames or dependencies, are served only to authenticated or local callers.
+Unauthenticated responses carry only `name`, `version` and `build.short`: that covers `/version`, `/health` and a publicly served static `version.json`, and those three fields are enough for a stale tab to compare. The full SHA, the timestamps, `startedAt` and `dirty`, and anything about branches, filesystem paths, hostnames or dependencies, are served only to authenticated callers, or over a local socket that the network cannot reach. Never infer a local caller from the request address: behind a reverse proxy every request looks local.
 
 ## 5. Compatibility is a separate number
 
@@ -113,13 +115,15 @@ The release version is for people. Whether two things can talk to each other is 
 
 ## 6. The release record
 
-- Raising the version source is the release act. The same commit adds a `CHANGELOG.md` entry headed `## X.Y.Z — YYYY-MM-DD`, one line per change a user or operator would notice.
+- Raising the version source is the release act. The same commit adds a `CHANGELOG.md` entry headed `## X.Y.Z — YYYY-MM-DD` (a hyphen in place of the dash is equally valid), one line per change a user or operator would notice.
 - Tag the commit that raised the version: `vX.Y.Z`, or `<unit>-vX.Y.Z` in a repository with more than one unit. Where a tag push itself triggers publication, the tag is the publish step and is cut only when publishing.
 - The record is the version and the changelog, not the SHA. Hashes change when history is rewritten; `1.4.0` does not.
 
 ## 7. A deploy proves itself
 
 A deploy or update is done when the running unit reports the identity that was just shipped. The deploy script reads `/version` (or the platform equivalent) afterwards and fails on a mismatch. "The command exited zero" is not proof that the new build is serving.
+
+A unit with no HTTP surface (a scheduled or queue worker), or one whose every route sits behind an access gate, is proven by the platform's own deployment or version identifier: the deploy confirms that the active one is the one it just uploaded. Where neither check can be scripted, the check is a recorded manual step, not a skipped one. A failed check reports the deploy as unverified and never rolls back on its own.
 
 ## Adoption
 

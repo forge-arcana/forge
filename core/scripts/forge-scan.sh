@@ -135,6 +135,51 @@ check_exists() {
   fi
 }
 
+# Helper: search wrangler config files by name. scan_pattern filters by file
+# type and cannot target wrangler.toml / wrangler.json / wrangler.jsonc.
+# Comment lines are not counted. A match shows a key is present, not that it is
+# on: samples carry two lines of context so the reader can see `enabled`.
+# Args: label pattern
+scan_wrangler() {
+  local label="$1"
+  local pattern="$2"
+  local count=0
+  local files=()
+  local f
+  # A grep -n line (file:N:text) or context line (file-N-text) whose text is a comment.
+  local comment_re='^.*[:-][0-9]+[:-][[:space:]]*(#|//)'
+
+  # -mindepth 1 keeps the prune from swallowing a scan root named build/ or dist/.
+  while IFS= read -r f; do
+    files+=("$f")
+  done < <(find "$PROJECT" -mindepth 1 \( -name node_modules -o -name .git -o -name dist -o -name build \) -prune \
+    -o -type f \( -name 'wrangler.toml' -o -name 'wrangler.json' -o -name 'wrangler.jsonc' \) -print 2>/dev/null \
+    | LC_ALL=C sort)
+
+  echo "### $label"
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo "**Pattern**: \`$pattern\` | **Matches**: 0 (no wrangler config found)"
+    echo ""
+    return 0
+  fi
+
+  count=$(grep -E -n "$pattern" /dev/null "${files[@]}" 2>/dev/null \
+    | grep -E -v -c "$comment_re") || count=0
+
+  echo "**Pattern**: \`$pattern\` | **Matches**: $count (comment lines excluded; read \`enabled\` from the sample)"
+
+  if [[ "$count" -gt 0 ]]; then
+    echo '```'
+    grep -E -n -A 2 "$pattern" /dev/null "${files[@]}" 2>/dev/null \
+      | grep -E -v "$comment_re" | lean_samples | head -30 || true
+    echo '```'
+    if [[ "$count" -gt 10 ]]; then
+      echo "*($count total matches, showing the first 30 lines including context)*"
+    fi
+  fi
+  echo ""
+}
+
 # ============================================================
 # POKE SCAN — Code quality + tech debt evidence collection
 # ============================================================
@@ -351,7 +396,7 @@ if [[ "$SCAN_TYPE" == "poke" ]]; then
   check_exists "Logging config" "src/lib/logger"
   check_exists "Dev log file" "logs/dev.log"
   check_exists "Logs directory" "logs"
-  check_exists "Error tracking (Sentry)" ".sentryclirc"
+  check_exists "Error tracking (Sentry CLI config; not needed on Workers)" ".sentryclirc"
   check_exists "Kill zombies script" "kill-zombies.sh"
   check_exists "Restart script" "restart.sh"
   echo ""
@@ -426,8 +471,16 @@ if [[ "$SCAN_TYPE" == "press" ]]; then
     'pino|createLogger|getLogger' \
     "ts" "-i"
 
-  scan_pattern "Error tracking integration" \
+  scan_pattern "Error tracking integration (SDK)" \
     'Sentry|sentry|bugsnag|rollbar|datadog' \
+    "ts" "-i"
+
+  # "issues" catches the JSON form, where the key sits on its own line under "observability".
+  scan_wrangler "Workers-native error tracking (wrangler config)" \
+    'upload_source_maps|observability|head_sampling_rate|"issues"'
+
+  scan_pattern "Browser error beacon" \
+    'unhandledrejection|window\.onerror|addEventListener\(.error' \
     "ts" "-i"
 
   scan_pattern "Health check endpoints" \

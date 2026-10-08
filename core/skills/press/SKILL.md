@@ -47,6 +47,7 @@ Standard data privacy, audit trail, ToS/Privacy refs, cookie consent. Project-sp
 ### 5. Observability
 Standard structured logging on all routes, tracing, metrics, alerts, dashboards. Project-specific lens:
 - Validate against `<forge>/core/skills/forge/forge-conventions.md` logging checklist (action context, pre-action intent, no pulsing, dev vs prod gating).
+- **Error tracking by runtime** — per the stack-guide Monitoring row. On Node/containers, an error tracker (Sentry by default) is wired with source maps. On **Cloudflare Workers**, error tracking is satisfied platform-natively and a missing Sentry is **not** a gap: verify wrangler config has `observability.enabled`, `observability.issues.enabled` and `upload_source_maps`, that caught errors reach `console.error()`, and, where a browser app exists, that an `error` + `unhandledrejection` beacon posts to a rate-limited, size-capped same-origin route. Gaps on Workers: observability off, `head_sampling_rate` below 1 with no stated reason, swallowed caught errors, a browser app with no beacon, or no plan for records that must outlive the 3-day (Free) / 7-day (Paid) log retention.
 
 ### 6. Deployment
 Standard CI/CD completeness, env parity, feature flags, migration up/down, zero-downtime, SSL/TLS. Project-specific lens:
