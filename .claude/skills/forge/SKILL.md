@@ -111,7 +111,7 @@ forge @ <sha> ⇄ membrane @ <last-cast-sha>                     N items
 ↓ INCOMING (forge → you) — X items
   [ ] 1  skill      /poke                 FORGE-UPDATED
          → Added band-aid detection to Step 3
-  [ ] 2  learning   Tailwind v4 class scanning  (cygnum)
+  [ ] 2  learning   Tailwind v4 class scanning  (contributor)
          → @source directive required for pnpm workspace symlinks
   [ ] 3  memory     deploy-practices.md   NEW
          → Gate deploy scripts behind env checks
@@ -119,7 +119,7 @@ forge @ <sha> ⇄ membrane @ <last-cast-sha>                     N items
 ↑ OUTGOING (you → forge) — Y items
   [ ] 4  config     <harness-rules-file>  DRIFT
          → Adding WebFetch domain: better-auth.com
-  [ ] 5  learning   Prisma enum migration gotcha  (cygnum)
+  [ ] 5  learning   Prisma enum migration gotcha  (contributor)
          → enum ALTER requires USING cast clause on Postgres
 
 ⚠ CONFLICTS (both changed) — Z items

@@ -1,18 +1,18 @@
 # Forge Assessment — External Review
 
 **Date**: 2026-03-28
-**Reviewer**: Andrej Karpathy (invited by Dario Amodei)
+**Reviewer**: An external-reviewer persona (simulated; no real person wrote or endorsed this text)
 **Subject**: Forge Arcana — shared tooling, conventions, and AI-guided skill architecture
 
 ---
 
-## Dario's Opening Note
+## Framing Note
 
-> Andrej, I asked you here because this is one of the more interesting things I've seen emerge from how people actually use Claude. A single developer built a self-improving agent orchestration system on top of Claude Code — no custom infrastructure, no fine-tuning, just prompt architecture and convention. The whole thing runs on SKILL.md files, shell scripts, and markdown. I want your honest take.
+> The reviewer was asked here because this is one of the more interesting things I've seen emerge from how people actually use Claude. A single developer built a self-improving agent orchestration system on top of Claude Code — no custom infrastructure, no fine-tuning, just prompt architecture and convention. The whole thing runs on SKILL.md files, shell scripts, and markdown. I want your honest take.
 
 ---
 
-## Karpathy's Assessment
+## The Assessment
 
 ### First Impression
 
@@ -125,4 +125,4 @@ The poetry helps too. People underestimate how much good naming and metaphor mat
 
 *"The best architectures are discovered, not designed. This one was clearly discovered — forged, if you will — through iteration. That's fitting."*
 
-— A.K.
+— The reviewer

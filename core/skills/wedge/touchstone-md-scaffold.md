@@ -13,7 +13,7 @@ Where they conflict, the YAML wins and the HTML is corrected. The MD is normativ
 ```markdown
 ---
 version: alpha
-name: [PROJECT — e.g., "Daylight Prestige"]
+name: [PROJECT — e.g., "Ledgerlight"]
 description: [one-line aesthetic thesis from the Chosen Direction]
 colors:
   primary: "#______"

@@ -10,8 +10,8 @@ touches: core/skills/wedge, core/skills/preen, core/skills/smith, core/rules
 
 Two findings from polishing a shipped consumer app this week, both of which the founder wants the forge to catch by default rather than after launch.
 
-1. The Touchstone had named a serif display face for headings and a sans for body. Two stylesheet rules fed the display face to every heading and money figure, so the marketing page and the product read as two voices, and non-technical family members read it as inconsistent. The fix was one sans everywhere, the display face surviving only on the logotype next to the brand mark, hierarchy carried by weight and tracking, figures tabular. A sibling app was found to have the same mix by constitution.
-2. The logged-out landing had been written SEO-first: one centred column stretched to desktop, product never shown. The fix was a product-led hero (copy and sign-in card left, a static mock of the real product right, mascot on it), section rhythm that changes shape, a slim sticky nav with one CTA, and every sentence kept verbatim. Also: hand-drawn stand-ins for third-party brand marks had shipped; real published geometry replaced them, and a demoted secondary row of sign-in providers was restored to full weight.
+1. The Touchstone had named a serif display face for headings and a sans for body. Two stylesheet rules fed the display face to every heading and money figure, so the marketing page and the product read as two voices, and non-technical readers saw it as inconsistent. The fix was one sans everywhere, the display face surviving only on the logotype next to the brand mark, hierarchy carried by weight and tracking, figures tabular.
+2. The logged-out landing had been written SEO-first: one centred column stretched to desktop, product never shown. The fix was a product-led hero (copy and sign-in card left, a static mock of the real product right), section rhythm that changes shape, a slim sticky nav with one CTA, and every sentence kept verbatim. Also: hand-drawn stand-ins for third-party brand marks had shipped; real published geometry replaced them, and a demoted secondary row of sign-in providers was restored to full weight.
 
 ## Proposed changes to the forge
 
@@ -54,5 +54,5 @@ Two findings from polishing a shipped consumer app this week, both of which the 
 
 ## Decisions taken (2026-09-05)
 
-- **Monospace for figures and timestamps**: folded into the one-face rule. A Touchstone may declare `code_face` for code, identifiers, and log output only; money, counts, and timestamps are figures and stay on `ui_face` with tabular numerals. The sibling app's monospace figures are therefore a Dimension 7 finding, routed to its Touchstone.
+- **Monospace for figures and timestamps**: folded into the one-face rule. A Touchstone may declare `code_face` for code, identifiers, and log output only; money, counts, and timestamps are figures and stay on `ui_face` with tabular numerals.
 - **Where the landing checks live**: `/preen` Dimension 8 owns the review; `/press` Deployment only checks that a Dimension 8 report exists for any logged-out or marketing page.

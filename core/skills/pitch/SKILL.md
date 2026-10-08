@@ -103,7 +103,7 @@ If you cannot name what would kill the company in 18 months, you have not though
 What would validate this within 30 / 90 / 180 days. The founder must be able to **stop building** if the signal does not show. Without this section, the project becomes infinite — there is no defined moment when the founder admits the bet failed and re-routes. Define the signal *now*, while honest, before sunk cost makes honesty harder.
 
 - **30-day signal** — the cheapest possible test; concrete number (e.g., *"5 institutions sign LOIs"* or *"first 100 paid bookings"*).
-- **90-day signal** — early traction (e.g., *"10 active wholesale slots, ≥40% utilization"*).
+- **90-day signal** — early traction (e.g., *"10 paying accounts, ≥40% weekly active"*).
 - **180-day signal** — durable proof: a recurring-revenue figure paired with a retention or churn ceiling.
 - **Stop-the-bet signal** — the metric that, if missed, means we honestly stop. The hardest to write; the most important.
 

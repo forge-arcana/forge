@@ -21,22 +21,22 @@ A reference architecture for new projects. Derived from production decisions acr
 | **Real-time** | Ably | Managed pub/sub with guaranteed delivery, automatic reconnection, message history, presence. Eliminates the entire class of Socket.io bugs (dropped connections, room leaks, reconnect storms). |
 | **Frontend** | React 19 + Vite | Component model, hooks (use, useOptimistic, useFormStatus), massive ecosystem. The strongest frontend framework for AI-assisted work by far. Vite 8 (Rolldown — single Rust bundler, 10–30× faster builds) for sub-second HMR. |
 | **Routing** | TanStack Router | Type-safe params + search validation, file-based routing, loaders, pending UI. Better TypeScript story than React Router. |
-| **Server State** | TanStack Query | Caching, background refetch, optimistic updates, request deduplication, pagination. Essential for offline-first (3G users). |
+| **Server State** | TanStack Query | Caching, background refetch, optimistic updates, request deduplication, pagination. Essential for offline-first use on slow or unreliable connections. |
 | **Client State** | useState + React Context | TanStack Query handles server state. No Zustand/Redux needed — useState + context is sufficient for UI state. |
 | **Forms** | React Hook Form + Zod | Performant (uncontrolled), Zod resolvers shared with backend validation. One schema, two runtimes. |
 | **Styling** | Tailwind CSS v4 | Utility-first, consistent, fast to build. AI assistants generate Tailwind fluently — no class-naming debates. |
 | **UI Components** | shadcn/ui | Copy-paste components (not a dependency), accessible, Tailwind-based. Buttons, modals, sheets, tables, forms — all pre-built. |
 | **i18n** | Paraglide | Compile-time, zero runtime cost, fully typed (`m.key()` not `t('key')`). Typos caught by TypeScript. Ideal for 2-5 languages. |
-| **Email** | Resend | Simple API, React Email templates, good deliverability. Transactional only (receipts, notifications, disputes). |
+| **Email** | On Cloudflare: Cloudflare Email Service. Elsewhere: Resend | **Product already running on Cloudflare** (Workers or Containers, Workers Paid already bought): send through Cloudflare Email Service — no third-party provider and no fallback provider; the capacity is already paid for, so build what is needed on it. It is a public beta: read Key Learnings → "Cloudflare Email Service" before enabling it on a domain. **Product hosted elsewhere:** Resend — simple API, React Email templates, good deliverability. Either way: transactional only (receipts, notifications, disputes), and every send goes through one project-local send function, so the provider is one adapter and not scattered calls. |
 | **File Storage** | Cloudflare R2 (signed URLs) | S3-compatible presigned PUT/GET (SigV4, ≤7-day expiry; presigns work on the S3 API domain only, not custom domains) — a near-drop-in for the existing signed-URL flow, with **$0 internet egress** (the single biggest flat-scale lever; note Infrequent Access adds $0.01/GB retrieval, so hot/public objects stay on Standard). GCS stays valid only when compute is on Cloud Run *and* egress is low. |
 | **Monitoring** | Node/containers: Sentry + Pino + OTLP backend. Cloudflare Workers: Workers Logs + Workers Issues + source maps | **Node/containers:** Sentry for error tracking, traces, source maps. Pino for structured logging **on Node only** — it breaks on workerd/edge, so it is a Node convenience, *not* the portability layer. The real portable seam is a vendor-neutral **OTLP backend** (Grafana Cloud / Honeycomb / Axiom): instrument once, export anywhere — and the most agent-operated layer in the stack. **Cloudflare Workers:** error tracking is platform-native and set in wrangler config — no SDK, no DSN, no extra company handling user data. A Workers project does **not** require Sentry; `@sentry/cloudflare` is an optional fallback, not a launch requirement. Config, browser-error beacon and caveats: Key Learnings → "Cloudflare Workers — error tracking". |
 | **Mobile** | Capacitor | Native iOS/Android from React codebase. Camera, GPS, push notifications, haptics, secure storage — all via plugins. No React Native context-switching. |
-| **PWA** | vite-plugin-pwa | Service worker + manifest generation. Works inside Capacitor WebView too. Network-first caching for 3G resilience. |
+| **PWA** | vite-plugin-pwa | Service worker + manifest generation. Works inside Capacitor WebView too. Network-first caching for resilience on slow or unreliable connections. |
 | **Package Manager** | pnpm | Faster, stricter (no phantom deps), disk-efficient. Monorepo workspaces built-in. |
 | **Testing** | Vitest + Playwright | Vitest for unit + integration (fast, ESM-native, same config as Vite). Playwright for E2E (cross-browser, reliable). |
 | **Hosting** | Day 1: single VPS + Docker Compose behind a Cloudflare tunnel. Public launch: container-first — Cloud Run / CF Containers (co-default) | Every project **starts** on one small box (see Day-1 Topology) and moves to a managed container host at a named public-launch trigger recorded in the Blueprint. One Node image serves API + static build (no CORS), portable across **Cloud Run, Cloudflare Containers, Fly, Railway** — the image ports cleanly; migration cost is config + platform glue, not an app rewrite. CF Containers (GA Apr 2026) needs a thin Worker + Durable Object shim in front (no direct HTTP ingress) and caps at 4 vCPU / 12 GiB per instance — fine for this stack's containers; Cloud Run scales larger per instance. **Hetzner** (cost / always-on / egress-heavy / EU residency), **Runpod** (GPU / self-hosted models), and **Workers-edge** (stateless latency-critical routes) are signal-driven escalations — see Hosting Decision Framework. |
 | **CI/CD** | GitHub Actions | Tests, Docker build, **target-agnostic deploy leg** (parameterized registry + deploy step → Cloud Run / Fly / Railway / CF Containers), smoke test, promote. Keyless auth is the gold standard: GCP WIF, npm OIDC trusted publishing, per-run ~5-min OIDC tokens. |
-| **Runtime Secrets** | Infisical | One source of truth for the ~10 long-lived runtime secrets (DB URL, Resend, Ably, Sentry DSN where Sentry is used, Better Auth secret); open-core (MIT except enterprise `ee/`), official MCP server, native Secret Syncs to **CF Workers, GCP Secret Manager, GitHub, Fly.io, and Railway** — every hosting peer this guide names. App reads the native binding at runtime. Multi-provider multiplies native vaults — this keeps them in sync. WIF/OIDC trims the keyless subset; the residue (third-party SaaS keys) has no federation exchange and stays here. |
+| **Runtime Secrets** | Infisical | One source of truth for the ~10 long-lived runtime secrets (DB URL, Ably, Better Auth secret, plus the Resend key and Sentry DSN where those are used); open-core (MIT except enterprise `ee/`), official MCP server, native Secret Syncs to **CF Workers, GCP Secret Manager, GitHub, Fly.io, and Railway** — every hosting peer this guide names. App reads the native binding at runtime. Multi-provider multiplies native vaults — this keeps them in sync. WIF/OIDC trims the keyless subset; the residue (third-party SaaS keys) has no federation exchange and stays here. |
 
 ---
 
@@ -97,7 +97,7 @@ Browser / Capacitor App
   - Better Auth (/api/auth/*)
   - Drizzle ORM → PostgreSQL
   - Services layer (business logic)
-  - External: Ably, Resend, R2 (signed URLs), payment gateway
+  - External: Ably, email provider (see Email row), R2 (signed URLs), payment gateway
         |
         v
   PostgreSQL (Neon default; Cloud SQL / PlanetScale on escalation)
@@ -109,12 +109,12 @@ Single deployment, no CORS headaches. API and frontend share the same origin. Th
 
 ## Day-1 Topology (dogfood phase)
 
-Every new project **starts here**, regardless of its eventual hosting pick: one small VPS running the whole stack in Docker Compose behind a Cloudflare tunnel — the tunnel as sole ingress, no inbound ports except SSH, app + data tiers on a private Docker bridge, billing/compliance-vendor/GPU integrations stubbed. The Hosting Decision Framework below is the **public-launch phase**, entered at a named trigger (real concurrency, open signup, live billing) recorded in the Blueprint. Planning the managed platform from day one guarantees drift — the as-built audit reads as one long "deferred" column — and builds infra before it earns its keep. The single box also ships a *tighter* boundary posture than most managed platforms: nothing listens on the internet, TLS terminates at the edge, the clear-text hop never leaves the private bridge.
+Every new project **starts here**, regardless of its eventual hosting pick: one small VPS running the whole stack in Docker Compose behind a Cloudflare tunnel — the tunnel as sole ingress, no inbound ports except SSH, app + data tiers on a private Docker bridge, paid third-party integrations stubbed. The Hosting Decision Framework below is the **public-launch phase**, entered at a named trigger (real concurrency, open signup, live billing) recorded in the Blueprint. Planning the managed platform from day one guarantees drift — the as-built audit reads as one long "deferred" column — and builds infra before it earns its keep. The single box also ships a *tighter* boundary posture than most managed platforms: nothing listens on the internet, TLS terminates at the edge, the clear-text hop never leaves the private bridge.
 
 **Two mandatory guardrails** — the only non-benign risks the single box introduces; ship them with it, not as afterthoughts:
 
 1. **Offsite backup + a tested restore, from day one.** A `pg_dump` living on the same box as the data is not a backup — wire an offsite copy (object storage, e.g. R2) and run one restore drill before real user data is at stake.
-2. **The single-instance constraint is load-bearing** while generation/background work runs in-process. Document "run exactly one API instance"; gate horizontal scale behind a job queue + shared store (e.g. Redis) first — an in-memory rate limiter silently leaks to N× its ceiling the moment a second instance appears.
+2. **The single-instance constraint is load-bearing** while background work runs in-process. Document "run exactly one API instance"; gate horizontal scale behind a job queue + shared store (e.g. Redis) first — an in-memory rate limiter silently leaks to N× its ceiling the moment a second instance appears.
 
 During dogfood, the DR/Residency line item reduces to guardrail 1; the full posture is a public-launch-trigger item.
 
@@ -271,6 +271,30 @@ Verified on workerd at runtime across multiple ports — not theory:
 - **Sentry stays an optional fallback** (`@sentry/cloudflare`) for a project with a concrete signal: longer retention, cross-platform error correlation, or release-health features.
 - **Build identity:** there is no tracker `release` field; the per-instance startup log line carrying the version string (see `versioning.md`) is what ties an error to a build.
 
+### Cloudflare Email Service (default for products on Cloudflare)
+**Status: public beta (announced 2026-04-16, no general-availability notice as of 2026-09-25). Inbox placement at volume is unproven and no first-hand public data exists; send a test to a real inbox before relying on it.**
+
+- **Requirements:** Workers Paid, and the domain's DNS on Cloudflare. 3,000 emails a month are included, then metered per 1,000 (0.35 USD when read 2026-10-08). Transactional only. Three ways to send: the Workers `send_email` binding, the REST API, SMTP.
+- **Binding:**
+  ```toml
+  [[send_email]]
+  name = "EMAIL"
+  remote = true
+  ```
+  ```jsonc
+  { "send_email": [{ "name": "EMAIL", "remote": true }] }
+  ```
+  ```ts
+  await env.EMAIL.send({ to, from, subject, html, text }); // resolves with a messageId
+  ```
+- **A binding is not an environment variable.** Code shared between a Node runtime and Workers that reads an API key from `process.env` will not find a binding there. Declare it on every Worker that sends and pass it into each handler; the project's one send function takes the binding as an argument.
+- **No fallback means failures must be loud.** A failed send is logged at error level and retried or surfaced to the caller, never dropped. The daily sending quota is published nowhere and is visible only in the account dashboard; `E_DAILY_LIMIT_EXCEEDED` has been reported during ordinary launch testing. Read the quota before launch and before any test that sends in bulk.
+- **Decide the DMARC policy before enabling.** `wrangler email sending enable <zone>` on a domain with no DMARC record publishes `_dmarc` as `v=DMARC1; p=reject;` at once, and that applies to every provider sending as the domain. wrangler's OAuth login has zone read only, so it cannot edit the record afterwards; publish the intended record first.
+- **Just after enabling, sends can fail** with `sending_not_ready` (10206) for the first few minutes. Wait and retry before treating it as a misconfiguration.
+- **Cutover from another provider:** the sending records live on a `cf-bounce` subdomain with their own DKIM selector, so they coexist with the old provider's records while both are live.
+- **Local dev:** with `remote = true` on the binding, `wrangler dev` sends through the real service; without it, expect sends to be simulated. Check which one applies before concluding that a test email was or was not sent.
+- **Untested:** the binding from a Tail Worker and from `scheduled()` and `queue()` handlers (undocumented).
+
 ### Drizzle
 - `drizzle-kit` can't resolve `.js` extensions in TS files — use extensionless imports in schema files
 - No native `upsert()` — use `onConflictDoUpdate` or manual find-then-update-or-insert
@@ -298,7 +322,7 @@ Verified on workerd at runtime across multiple ports — not theory:
 
 ### Paraglide
 - Compile-time = zero runtime bundle cost
-- `m.wallet_balance()` not `t('wallet_balance')` — typos caught by TypeScript
+- `m.welcome_title()` not `t('welcome_title')` — typos caught by TypeScript
 - Vite plugin handles message extraction
 
 ### GCS
@@ -333,7 +357,7 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 
 **`build-mobile.sh`** — Builds all mobile SPAs and merges into `www/`:
 - Vite builds each SPA with `VITE_CAPACITOR=true` (disables SPA base paths, hides web-only features)
-- Merges multiple `dist/` outputs into a single `www/` directory (worker at root, employer at `/employer/`)
+- Merges multiple `dist/` outputs into a single `www/` directory (primary SPA at root, each further SPA under its own path prefix)
 - `VITE_API_URL` unset = relative `/api` (same-origin dev); set = absolute URL for staging/production
 - `www/` is gitignored — build artifact only
 

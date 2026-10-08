@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # llm-delegate.sh: Delegate code generation to a local or remote Ollama LLM.
-# Needs: chmod +x /srv/forge/core/scripts/llm-delegate.sh
+# Needs: chmod +x <forge>/core/scripts/llm-delegate.sh
 #
 # Usage: llm-delegate.sh [OPTIONS] [PROMPT]
 #   If PROMPT is omitted, reads from stdin.

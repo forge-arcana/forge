@@ -142,7 +142,7 @@ scan_file_or_text() {
     file_violations+="$(echo "$attribution_hits" | sed 's/^/    /')"$'\n'
   fi
 
-  # 3. CamelCase identifiers in body — multi-capital compound words like "LegitCheck", "MyApp"
+  # 3. CamelCase identifiers in body — multi-capital compound words like "AcmeShop", "MyApp"
   # Single-capital words at sentence starts are common English; we only flag mid-word capitals.
   # Pattern: word with 2+ uppercase letters and at least one lowercase, not matching common acronym shape.
   local camelcase_hits
@@ -156,13 +156,13 @@ scan_file_or_text() {
     file_violations+="$(echo "$camelcase_hits" | sed 's/^/    /')"$'\n'
   fi
 
-  # 4. Backticked identifiers — `references`, `submittedIp`, `fraud_score` etc.
+  # 4. Backticked identifiers — `orderTotal`, `shipping_status` etc.
   # These are almost always project-specific schema/field names. Allowlist a few generic ones.
   local backtick_hits
   backtick_hits=$(echo "$body" \
     | grep -oE '`[a-z][a-zA-Z_]*[A-Z][a-zA-Z_]*`|`[a-z][a-z_]+_[a-z_]+`' \
     | sort -u \
-    | grep -vE '`(camelCase|snake_case|kebab-case|env_var|api_key|access_token|refresh_token|node_modules|user_id|created_at|updated_at|deleted_at|expiresAt|invalid_grant|client_id|client_secret|grant_type|expires_in|token_type|id_token|scope|state|redirect_uri|code_verifier|code_challenge|cf_clearance|cf-mitigated|head_limit|output_mode|files_with_matches|forge-path|file_path|builtAt|startedAt|version_metadata)`' \
+    | grep -vE '`(camelCase|snake_case|kebab-case|env_var|api_key|access_token|refresh_token|node_modules|user_id|created_at|updated_at|deleted_at|expiresAt|invalid_grant|client_id|client_secret|grant_type|expires_in|token_type|id_token|scope|state|redirect_uri|code_verifier|code_challenge|cf_clearance|cf-mitigated|head_limit|output_mode|files_with_matches|forge-path|file_path|builtAt|startedAt|version_metadata|send_email|sending_not_ready)`' \
     || true)
   if [[ -n "$backtick_hits" ]]; then
     file_violations+="  BACKTICKED-IDENTIFIER (project-specific schema/field names — universalize the principle, drop the names):"$'\n'
@@ -181,7 +181,7 @@ scan_file_or_text() {
     | grep -vE '\b(Any|Every|All|Each|Some|No|Many|Few|Most|Both|This|That|These|Those|My|Our|Your|Their|The) [A-Z][a-z]+' \
     | grep -vE '^\s*(Add|Update|Remove|Fix|Ship|Refactor|Move|Rename|Drop|Bump|Tighten|Loosen|Promote|Cleanse|Polish|Generalize|Absorb|Document|Note|Wire|Unify|Split|Merge|Archive|Resurrect) [A-Z][a-z]+' \
     | grep -vE '\b(Add|Update|Remove|Fix|Ship|Refactor|Bump|Tighten|Polish|Generalize|Absorb|Document|Note|Wire|Unify|Promote) [A-Z][a-z]+ [0-9]' \
-    | grep -vE 'Cloud Run|Cloud Tasks|Cloud Storage|Cloud Functions|Cloud SQL|Cloud Spanner|Cloud Pub|Cloud Build|Better Auth|Pub Sub|Service Bus|Lambda Function|Open Source|Active Directory|Big Query|Data Lake|Side Effect|Dead Letter|Last Known|Last Modified|Last Verified|First Class|First Party|Single Sign|Two Factor|Multi Factor|Plain Text|Rich Text|Cross Platform|Cross Origin|Same Origin|Source Of|Out Of|Ahead Of|Behind The|Day One|Phase One|Phase Two|Phase Three|Read Me|Markdown File|Test Driven|Domain Driven|Event Driven|Type Script|Java Script|Web Sockets|Server Sent|Edge Cases|Use Case|Side Project|Republic Act|Data Privacy|Personal Information|Personal Data|Sensitive Personal|Magic Link|Magic Links|Service Account|Service Accounts|Service Identity|Pre Generated|Per Event|Per Check|Per Request|Per Hour|Per Day|Per Year|Per Month|Per User|Per Tenant|Per Customer|Per Page|Auto Scaling|Cold Start|Hot Path|Happy Path|Edge Case|Best Practice|Anti Pattern|Black Box|Black List|White List|Open Source|Closed Source|Quality Gate|Quality Gates|Status Code|Status Codes|Token Refresh|Refresh Token|Republic Act|Firstname Lastname|Foo Bar|Master Builder|Master Aesthetic|Master Tender|Master of|The Smith|The Wedge|The Warden|The Master|The Masters|Smith Master|Wedge Master|Warden Master|Pre Flight|Post Flight|Soul Brief|Soul Briefs|Forbidden Defaults|Banned Defaults|Three Lenses|Council Verdict|Council Fan|Family Tone|Lens Beats|Beats Fielded|The Regenerate|Cloudflare Workers|Upgrade Required|Versioned Units' \
+    | grep -vE 'Cloud Run|Cloud Tasks|Cloud Storage|Cloud Functions|Cloud SQL|Cloud Spanner|Cloud Pub|Cloud Build|Better Auth|Pub Sub|Service Bus|Lambda Function|Open Source|Active Directory|Big Query|Data Lake|Side Effect|Dead Letter|Last Known|Last Modified|Last Verified|First Class|First Party|Single Sign|Two Factor|Multi Factor|Plain Text|Rich Text|Cross Platform|Cross Origin|Same Origin|Source Of|Out Of|Ahead Of|Behind The|Day One|Phase One|Phase Two|Phase Three|Read Me|Markdown File|Test Driven|Domain Driven|Event Driven|Type Script|Java Script|Web Sockets|Server Sent|Edge Cases|Use Case|Side Project|Republic Act|Data Privacy|Personal Information|Personal Data|Sensitive Personal|Magic Link|Magic Links|Service Account|Service Accounts|Service Identity|Pre Generated|Per Event|Per Check|Per Request|Per Hour|Per Day|Per Year|Per Month|Per User|Per Tenant|Per Customer|Per Page|Auto Scaling|Cold Start|Hot Path|Happy Path|Edge Case|Best Practice|Anti Pattern|Black Box|Black List|White List|Open Source|Closed Source|Quality Gate|Quality Gates|Status Code|Status Codes|Token Refresh|Refresh Token|Republic Act|Firstname Lastname|Foo Bar|Master Builder|Master Aesthetic|Master Tender|Master of|The Smith|The Wedge|The Warden|The Master|The Masters|Smith Master|Wedge Master|Warden Master|Pre Flight|Post Flight|Soul Brief|Soul Briefs|Forbidden Defaults|Banned Defaults|Three Lenses|Council Verdict|Council Fan|Family Tone|Lens Beats|Beats Fielded|The Regenerate|Cloudflare Workers|Cloudflare Email Service|Workers Paid|Tail Worker|TanStack Query|Upgrade Required|Versioned Units' \
     || true)
   if [[ -n "$personal_name_hits" ]]; then
     file_violations+="  PERSONAL-NAME (Firstname Lastname pattern in body — verify not a person):"$'\n'
@@ -204,15 +204,18 @@ if [[ "$1" == "--commit-msg" ]]; then
   scan_file_or_text "<commit message>" "$*"
 
 elif [[ "$1" == "--staged" ]]; then
-  STAGED_FILES=$(git -C "$FORGE_DIR" diff --cached --name-only | grep -E '^(learnings/|memory/|core/skills/|core/rules/|core/hooks/)' | grep -vE '/\.[^/]+$' || true)
+  # FORGE_DIR is core/ (this script lives in core/scripts/), but git prints
+  # repo-root-relative paths, so resolve and anchor everything to the top-level.
+  REPO_ROOT="$(git -C "$FORGE_DIR" rev-parse --show-toplevel)"
+  STAGED_FILES=$(git -C "$REPO_ROOT" diff --cached --name-only | grep -E '^(learnings/|memory/|core/skills/|core/rules/|core/hooks/)' | grep -vE '/\.[^/]+$' || true)
   if [[ -z "$STAGED_FILES" ]]; then
     exit 0  # nothing relevant staged
   fi
   while IFS= read -r f; do
     [[ -z "$f" ]] && continue
-    [[ ! -f "$FORGE_DIR/$f" ]] && continue
+    [[ ! -f "$REPO_ROOT/$f" ]] && continue
     # Get only the staged hunks (additions) — we only care about new content
-    added_lines=$(git -C "$FORGE_DIR" diff --cached "$f" | grep -E '^\+' | grep -vE '^\+\+\+' | sed 's/^+//')
+    added_lines=$(git -C "$REPO_ROOT" diff --cached -- "$f" | grep -E '^\+' | grep -vE '^\+\+\+' | sed 's/^+//')
     [[ -z "$added_lines" ]] && continue
     scan_file_or_text "$f (staged additions)" "$added_lines"
   done <<< "$STAGED_FILES"

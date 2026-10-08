@@ -145,3 +145,11 @@ The tell is that the invented laws were *good*. They deserved to exist, which is
 **Apply when**: Quoting finding totals in a purge plan, report, or log entry.
 
 **Forge-worthy**: no — forge-internal
+
+## A Name-Based Leak Gate Misses Four Surfaces a Content Sweep Must Read by Hand (2026-10-08)
+
+**Learning**: A gate that matches known names passes content that still identifies its source. Four surfaces escape it. (1) The gate's own comments and example identifiers, copied from the incident that motivated the rule. (2) Example rows in skill templates, which carry the author's handle. (3) Example vendor or provider lists: when every example comes from one country, the list reveals a single market. (4) Anonymised anecdotes, which pass every name check but still describe one product. Tells for (4): "Evidence:", "Field-observed", "at one gate", exact counts and durations beside product nouns, quoted project rules. Rewrite to the mechanism in the present tense and drop the count. Also verify the gate itself ran: a staged-mode check that resolves paths against the wrong root skips every file and reports success.
+
+**Apply when**: Running a content-leak sweep, or after changing a purity gate. Read these four surfaces manually and confirm the gate's output shows files examined.
+
+**Forge-worthy**: yes — universal: name matching is necessary but not sufficient for leak detection, and a gate that scans nothing reports the same success as one that found nothing.

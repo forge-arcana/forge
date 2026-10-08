@@ -102,8 +102,8 @@ match-prototype-pixel-exact learning.)
 - "Interaction weight must match consequence weight" (existing /preen law) —
   /polish operationalizes it: inventory dialogs BY CONSEQUENCE, then check
   mechanism monotonicity (heavier act must never have lighter guard; the
-  worst finds are first-click human eviction next to two-step machine-key
-  revoke, and unconfirmed irreversible publish next to confirmed drafts).
+  worst finds are a one-click irreversible action sitting next to a
+  two-step guard on a recoverable one).
 - "The design contract's stated home for X is used by nothing that is X" —
   check the contract's own claims against call sites.
 - "Copy that lies": success banners shown unconditionally, hints referencing

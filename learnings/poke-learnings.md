@@ -68,6 +68,6 @@
 
 ## An Unimplemented Rule Is Worse Than No Rule (2026-09-05)
 
-**Learning**: A rule the project wrote down and did not implement is worse than no rule at all — it certifies the gap in every review that checks the code against something else and never checks the code against its own stated claims. At one gate, three "read-only" comments, a "payload carries no source text" rule, and a "pinned by hash" claim were all promises the code did not keep, and none had been caught by prior review because review compared code to itself, not to the design docs, comments, and runbook claims sitting beside it.
+**Learning**: A rule the project wrote down and did not implement is worse than no rule at all — it certifies the gap in every review that checks the code against something else and never checks the code against its own stated claims. Typical unkept promises: a "read-only" comment above code that writes, a design rule about what a payload may carry, a "pinned by hash" claim with no pin. Prior review misses them because it compares code to itself, not to the design docs, comments, and runbook claims sitting beside it.
 
 **Apply when**: Running any review or gate pass — audit stated rules (design docs, code comments, runbook claims) against the actual implementation as a first-class finding category, not as an afterthought once functional correctness is checked.

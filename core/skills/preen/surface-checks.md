@@ -1,6 +1,6 @@
 # Surface Checks — Typographic Voice & Landing Shape
 
-> Referenced by [SKILL.md](SKILL.md) Dimensions 7 and 8. Mechanical evidence: `<forge>/core/scripts/preen-surface-scan.sh <project-path> [Touchstone.md]`. Origin: two post-launch findings on a shipped consumer app (2026-09) — a display serif reaching every heading and money figure made marketing and product read as two voices; an SEO-first landing never showed the product.
+> Referenced by [SKILL.md](SKILL.md) Dimensions 7 and 8. Mechanical evidence: `<forge>/core/scripts/preen-surface-scan.sh <project-path> [Touchstone.md]`. Why these checks exist: two failure modes that surface only after launch — a display serif reaching every heading and money figure made marketing and product read as two voices; an SEO-first landing never showed the product.
 
 ## §1 Typographic voice (Dimension 7)
 

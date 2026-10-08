@@ -173,7 +173,7 @@ After this round, draft:
     - Guide by region (examples — adapt to the founder's geography):
       - **US:** PCI-DSS, state money transmitter licenses, KYC/AML
       - **EU:** PSD2, GDPR, strong customer authentication
-      - **Southeast Asia:** Central bank e-money regulations, AML laws
+      - **Other markets:** the local central bank's e-money and payments rules, AML laws
       - **General:** Data privacy, consumer protection
     - **Default behavior**: research the regulatory landscape yourself (WebSearch the relevant jurisdiction + product category), draft the likely requirements, and present them for the founder to confirm or refine. Don't ask the founder to do this legwork — it's searchable.
 
@@ -319,10 +319,10 @@ Only after the founder confirms (or redirects), proceed to Q31. Language choice 
     - This affects component architecture.
 
 36. **"Any specific integrations you know you'll need?"**
-    - Payment gateways (Stripe, Xendit, PayMongo)
-    - SMS providers (Twilio, Semaphore, Vonage)
+    - Payment gateways (Stripe, Adyen, or the dominant gateway in the founder's market)
+    - SMS providers (Twilio, Vonage, or a local provider in the founder's market)
     - Maps/geolocation (Google Maps, Mapbox)
-    - Email (SendGrid, SES, Resend)
+    - Email (default per the stack-guide Email row: Cloudflare Email Service when the product runs on Cloudflare, Resend otherwise; raise alternatives only on a concrete signal)
     - Push notifications (FCM, APNS, OneSignal)
     - Analytics (Mixpanel, PostHog, GA4)
 
