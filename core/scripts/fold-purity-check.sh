@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fold-purity-check.sh — Block project-specific leaks from entering the forge
 #
-# Scans staged forge content (learnings/, memory/, core/skills/, core/rules/, core/hooks/) for leak patterns that violate
+# Scans staged or diffed forge content (learnings/ and memory/) for leak patterns that violate
 # the "No Project Names in Forge" HARD RULE. Designed to be invoked by /forge
 # fold phase (3e, 3g) and the commit gate (3i).
 #
@@ -11,6 +11,9 @@
 #   bash fold-purity-check.sh --diff <base> <head>   # scan added lines across a diff range (CI/PR)
 #   bash fold-purity-check.sh --commit-msg <text>    # scan a commit message string
 #
+# Output: one summary line on stdout in every mode ("purity: scanned N file(s), M line(s) [mode]"),
+# so "scanned nothing" and "found nothing" are distinguishable.
+#
 # Exit codes:
 #   0  — clean, no leaks detected
 #   1  — leaks detected (output lists them); caller MUST block the write/commit
@@ -19,7 +22,7 @@
 set -uo pipefail
 
 if [[ $# -eq 0 ]]; then
-  echo "ERROR: usage: fold-purity-check.sh <file> [<file> ...] | --staged | --commit-msg <text>" >&2
+  echo "ERROR: usage: fold-purity-check.sh <file> [<file> ...] | --staged | --diff <base> <head> | --commit-msg <text>" >&2
   exit 2
 fi
 
@@ -93,7 +96,7 @@ ALLOWLIST_TERMS=(
 )
 
 # Build a single regex pattern of allowlist terms (word boundaries)
-# We use grep -wF semantics by joining with | and matching word-bounded.
+# Terms are joined with | and used as a word-bounded grep -E alternation (grep -vwE).
 ALLOWLIST_PATTERN=""
 for term in "${ALLOWLIST_TERMS[@]}"; do
   if [[ -z "$ALLOWLIST_PATTERN" ]]; then
@@ -108,12 +111,24 @@ done
 
 LEAKS_FOUND=0
 REPORT=""
+SCAN_FILES=0
+SCAN_LINES=0
+MODE="files"
+
+print_summary() {
+  echo "purity: scanned $SCAN_FILES file(s), $SCAN_LINES line(s) [$MODE]"
+}
 
 scan_file_or_text() {
   local label="$1"   # display label (filename or "<commit message>")
   local content="$2" # the actual content to scan
 
   local file_violations=""
+
+  SCAN_FILES=$((SCAN_FILES + 1))
+  if [[ -n "$content" ]]; then
+    SCAN_LINES=$((SCAN_LINES + $(printf '%s\n' "$content" | wc -l)))
+  fi
 
   # Strip heading lines (start with #) and code-fenced blocks before name detection.
   # Headings have lots of Title Case False Positives; code blocks have legitimate identifiers.
@@ -170,18 +185,38 @@ scan_file_or_text() {
   fi
 
   # 5. Personal-name pattern: "Firstname Lastname" in body (excluding allowed two-word phrases)
-  # Skip headings (already stripped). Filter:
+  # Skip headings (already stripped). Allowed patterns are STRIPPED from a working copy of
+  # each line (replaced by a non-letter placeholder so neighbours cannot join into a new
+  # match), then the copy is tested; a hit reports the ORIGINAL text, numbered by its
+  # position in the scanned body (headings and fenced code removed; in staged and diff
+  # modes, the position among added lines), so a real name next to an allowed phrase is
+  # still caught. Allowed patterns:
   #   - Known two-word tech phrases
   #   - Determiner + noun-phrase patterns (Any/Every/All/Each/Some/No/Many/Few/Most + Word)
-  #   - Lines that are structural markers (Apply when:, etc.)
+  #   - Leading verb + Word (commit-subject style) and verb + Word + digit
+  # Whole-line exclusion stays only for structural markers (Apply when:, etc.).
+  local allowed_phrases='Cloud Run|Cloud Tasks|Cloud Storage|Cloud Functions|Cloud SQL|Cloud Spanner|Cloud Pub|Cloud Build|Better Auth|Pub Sub|Service Bus|Lambda Function|Open Source|Active Directory|Big Query|Data Lake|Side Effect|Dead Letter|Last Known|Last Modified|Last Verified|First Class|First Party|Single Sign|Two Factor|Multi Factor|Plain Text|Rich Text|Cross Platform|Cross Origin|Same Origin|Source Of|Out Of|Ahead Of|Behind The|Day One|Phase One|Phase Two|Phase Three|Read Me|Markdown File|Test Driven|Domain Driven|Event Driven|Type Script|Java Script|Web Sockets|Server Sent|Edge Cases|Use Case|Side Project|Republic Act|Data Privacy|Personal Information|Personal Data|Sensitive Personal|Magic Link|Magic Links|Service Account|Service Accounts|Service Identity|Pre Generated|Per Event|Per Check|Per Request|Per Hour|Per Day|Per Year|Per Month|Per User|Per Tenant|Per Customer|Per Page|Auto Scaling|Cold Start|Hot Path|Happy Path|Edge Case|Best Practice|Anti Pattern|Black Box|Black List|White List|Open Source|Closed Source|Quality Gate|Quality Gates|Status Code|Status Codes|Token Refresh|Refresh Token|Republic Act|Firstname Lastname|Foo Bar|Master Builder|Master Aesthetic|Master Tender|Master of|The Smith|The Wedge|The Warden|The Master|The Masters|Smith Master|Wedge Master|Warden Master|Pre Flight|Post Flight|Soul Brief|Soul Briefs|Forbidden Defaults|Banned Defaults|Three Lenses|Council Verdict|Council Fan|Family Tone|Lens Beats|Beats Fielded|The Regenerate|Cloudflare Workers|Cloudflare Email Service|Workers Paid|Tail Worker|TanStack Query|Claude Code|Upgrade Required|Versioned Units|Builds Go|Forge Arts|Agent Skills'
   local personal_name_hits
   personal_name_hits=$(echo "$body" \
-    | grep -vE '^\*\*(Apply when|Forge-worthy|Why|How to apply|Learning)\*\*' \
-    | grep -nE '\b[A-Z][a-z]+ [A-Z][a-z]+\b' \
-    | grep -vE '\b(Any|Every|All|Each|Some|No|Many|Few|Most|Both|This|That|These|Those|My|Our|Your|Their|The) [A-Z][a-z]+' \
-    | grep -vE '^\s*(Add|Update|Remove|Fix|Ship|Refactor|Move|Rename|Drop|Bump|Tighten|Loosen|Promote|Cleanse|Polish|Generalize|Absorb|Document|Note|Wire|Unify|Split|Merge|Archive|Resurrect) [A-Z][a-z]+' \
-    | grep -vE '\b(Add|Update|Remove|Fix|Ship|Refactor|Bump|Tighten|Polish|Generalize|Absorb|Document|Note|Wire|Unify|Promote) [A-Z][a-z]+ [0-9]' \
-    | grep -vE 'Cloud Run|Cloud Tasks|Cloud Storage|Cloud Functions|Cloud SQL|Cloud Spanner|Cloud Pub|Cloud Build|Better Auth|Pub Sub|Service Bus|Lambda Function|Open Source|Active Directory|Big Query|Data Lake|Side Effect|Dead Letter|Last Known|Last Modified|Last Verified|First Class|First Party|Single Sign|Two Factor|Multi Factor|Plain Text|Rich Text|Cross Platform|Cross Origin|Same Origin|Source Of|Out Of|Ahead Of|Behind The|Day One|Phase One|Phase Two|Phase Three|Read Me|Markdown File|Test Driven|Domain Driven|Event Driven|Type Script|Java Script|Web Sockets|Server Sent|Edge Cases|Use Case|Side Project|Republic Act|Data Privacy|Personal Information|Personal Data|Sensitive Personal|Magic Link|Magic Links|Service Account|Service Accounts|Service Identity|Pre Generated|Per Event|Per Check|Per Request|Per Hour|Per Day|Per Year|Per Month|Per User|Per Tenant|Per Customer|Per Page|Auto Scaling|Cold Start|Hot Path|Happy Path|Edge Case|Best Practice|Anti Pattern|Black Box|Black List|White List|Open Source|Closed Source|Quality Gate|Quality Gates|Status Code|Status Codes|Token Refresh|Refresh Token|Republic Act|Firstname Lastname|Foo Bar|Master Builder|Master Aesthetic|Master Tender|Master of|The Smith|The Wedge|The Warden|The Master|The Masters|Smith Master|Wedge Master|Warden Master|Pre Flight|Post Flight|Soul Brief|Soul Briefs|Forbidden Defaults|Banned Defaults|Three Lenses|Council Verdict|Council Fan|Family Tone|Lens Beats|Beats Fielded|The Regenerate|Cloudflare Workers|Cloudflare Email Service|Workers Paid|Tail Worker|TanStack Query|Claude Code|Upgrade Required|Versioned Units' \
+    | awk -v phrases="$allowed_phrases" '
+        BEGIN {
+          pre = "(^|[^A-Za-z0-9_])"
+          det = pre "(Any|Every|All|Each|Some|No|Many|Few|Most|Both|This|That|These|Those|My|Our|Your|Their|The) [A-Z][a-z]+"
+          vnum = pre "(Add|Update|Remove|Fix|Ship|Refactor|Bump|Tighten|Polish|Generalize|Absorb|Document|Note|Wire|Unify|Promote) [A-Z][a-z]+ [0-9]"
+          lead = "^[[:space:]]*(Add|Update|Remove|Fix|Ship|Refactor|Move|Rename|Drop|Bump|Tighten|Loosen|Promote|Cleanse|Polish|Generalize|Absorb|Document|Note|Wire|Unify|Split|Merge|Archive|Resurrect) [A-Z][a-z]+"
+          name = "(^|[^A-Za-z0-9_])[A-Z][a-z]+ [A-Z][a-z]+([^A-Za-z0-9_]|$)"
+          phr = "(^|[^A-Za-z0-9_])(" phrases ")([^A-Za-z0-9_]|$)"
+        }
+        /^\*\*(Apply when|Forge-worthy|Why|How to apply|Learning)\*\*/ { next }
+        {
+          w = $0
+          gsub(phr, " _ ", w)
+          gsub(phr, " _ ", w)  # second pass: the trailing boundary char is consumed, so adjacent phrases need it
+          gsub(det, " _ ", w)
+          gsub(vnum, " _ ", w)
+          if (match(w, lead) && substr(w, RSTART + RLENGTH) !~ /^ [A-Z][a-z]/) sub(lead, " _ ", w)
+          if (w ~ name) print NR ":" $0
+        }' \
     || true)
   if [[ -n "$personal_name_hits" ]]; then
     file_violations+="  PERSONAL-NAME (Firstname Lastname pattern in body — verify not a person):"$'\n'
@@ -201,14 +236,24 @@ if [[ "$1" == "--commit-msg" ]]; then
     echo "ERROR: --commit-msg requires the message text as next argument" >&2
     exit 2
   fi
+  MODE="commit-msg"
   scan_file_or_text "<commit message>" "$*"
 
 elif [[ "$1" == "--staged" ]]; then
+  MODE="staged"
+  # Scope is learnings/ and memory/ only. Skill, rule and hook sources legitimately name
+  # functions and products, so they are reviewed by hand and by periodic sweeps, not by
+  # this gate; explicit file arguments still scan any file.
   # FORGE_DIR is core/ (this script lives in core/scripts/), but git prints
   # repo-root-relative paths, so resolve and anchor everything to the top-level.
-  REPO_ROOT="$(git -C "$FORGE_DIR" rev-parse --show-toplevel)"
-  STAGED_FILES=$(git -C "$REPO_ROOT" diff --cached --name-only | grep -E '^(learnings/|memory/|core/skills/|core/rules/|core/hooks/)' | grep -vE '/\.[^/]+$' || true)
+  REPO_ROOT="$(git -C "$FORGE_DIR" rev-parse --show-toplevel 2>/dev/null || true)"
+  if [[ -z "$REPO_ROOT" ]]; then
+    echo "ERROR: cannot resolve the git repository root from $FORGE_DIR" >&2
+    exit 2
+  fi
+  STAGED_FILES=$(git -C "$REPO_ROOT" diff --cached --name-only | grep -E '^(learnings/|memory/)' | grep -vE '/\.[^/]+$' || true)
   if [[ -z "$STAGED_FILES" ]]; then
+    print_summary
     exit 0  # nothing relevant staged
   fi
   while IFS= read -r f; do
@@ -222,9 +267,10 @@ elif [[ "$1" == "--staged" ]]; then
 
 elif [[ "$1" == "--diff" ]]; then
   # CI/PR mode: scan only the lines ADDED between <base> and <head> for changed
-  # learnings/, memory/, core/skills/, and core/rules/ files. Mirrors --staged
+  # learnings/ and memory/ files (same scope as --staged). Mirrors --staged
   # semantics (additions only) so a contributor is never failed on pre-existing
   # content they didn't touch.
+  MODE="diff"
   shift
   if [[ $# -ne 2 ]]; then
     echo "ERROR: --diff requires exactly two refs: --diff <base> <head>" >&2
@@ -234,10 +280,21 @@ elif [[ "$1" == "--diff" ]]; then
   HEAD_REF="$2"
   # FORGE_DIR is core/ (this script lives in core/scripts/). learnings/ and
   # memory/ live at the repo root, so anchor pathspecs to the git top-level.
-  REPO_ROOT="$(git -C "$FORGE_DIR" rev-parse --show-toplevel)"
-  CHANGED_FILES=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACM "$BASE_REF" "$HEAD_REF" -- learnings/ memory/ core/skills/ core/rules/ core/hooks/ \
+  REPO_ROOT="$(git -C "$FORGE_DIR" rev-parse --show-toplevel 2>/dev/null || true)"
+  if [[ -z "$REPO_ROOT" ]]; then
+    echo "ERROR: cannot resolve the git repository root from $FORGE_DIR" >&2
+    exit 2
+  fi
+  for ref in "$BASE_REF" "$HEAD_REF"; do
+    if ! git -C "$REPO_ROOT" rev-parse --verify --quiet "${ref}^{commit}" >/dev/null; then
+      echo "ERROR: unresolvable ref: $ref" >&2
+      exit 2
+    fi
+  done
+  CHANGED_FILES=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACM "$BASE_REF" "$HEAD_REF" -- learnings/ memory/ \
                   | grep -vE '/\.[^/]+$' || true)
   if [[ -z "$CHANGED_FILES" ]]; then
+    print_summary
     exit 0  # no relevant content changed in this range
   fi
   while IFS= read -r f; do
@@ -259,6 +316,7 @@ else
 fi
 
 # --- Output ---
+print_summary
 if [[ "$LEAKS_FOUND" -eq 1 ]]; then
   echo "═══════════════════════════════════════════════════════════════════════"
   echo "  FORGE PURITY CHECK — VIOLATIONS DETECTED"
@@ -275,7 +333,7 @@ if [[ "$LEAKS_FOUND" -eq 1 ]]; then
   echo "  1. Genericize the flagged content — strip project name, contributor name,"
   echo "     local currency, project-specific schema/table names, competitor names."
   echo "  2. If a flagged term is a legitimate universal reference (e.g., a well-known"
-  echo "     tech), add it to ALLOWLIST_TERMS in scripts/fold-purity-check.sh."
+  echo "     tech), add it to ALLOWLIST_TERMS in core/scripts/fold-purity-check.sh."
   echo "  3. Re-run this script until it exits clean."
   echo ""
   exit 1

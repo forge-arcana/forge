@@ -8,7 +8,8 @@ name: Fold Purity
 #
 # Scans ONLY the lines added in the PR (--diff mode), mirroring the local fold
 # gate's --staged behaviour — a contributor is never failed on pre-existing
-# content they did not touch.
+# content they did not touch. Scope is learnings/ and memory/ only (matching the
+# triggers below); skill, rule and hook sources are reviewed by hand and by sweeps.
 
 on:
   pull_request:

@@ -8,10 +8,10 @@ touches: core/skills/wedge, core/skills/preen, core/skills/smith, core/rules
 
 ## Why
 
-Two findings from polishing a shipped consumer app this week, both of which the founder wants the forge to catch by default rather than after launch.
+These are two failure patterns the forge should catch by default rather than after launch.
 
-1. The Touchstone had named a serif display face for headings and a sans for body. Two stylesheet rules fed the display face to every heading and money figure, so the marketing page and the product read as two voices, and non-technical readers saw it as inconsistent. The fix was one sans everywhere, the display face surviving only on the logotype next to the brand mark, hierarchy carried by weight and tracking, figures tabular.
-2. The logged-out landing had been written SEO-first: one centred column stretched to desktop, product never shown. The fix was a product-led hero (copy and sign-in card left, a static mock of the real product right), section rhythm that changes shape, a slim sticky nav with one CTA, and every sentence kept verbatim. Also: hand-drawn stand-ins for third-party brand marks had shipped; real published geometry replaced them, and a demoted secondary row of sign-in providers was restored to full weight.
+1. A Touchstone that names a serif display face for headings and a sans for body invites stylesheet rules that feed the display face to every heading and money figure. The marketing page and the product then read as two voices, and non-technical readers see that as inconsistency. The remedy is one sans everywhere, the display face kept only on the logotype next to the brand mark, hierarchy carried by weight and tracking, and figures set tabular.
+2. A logged-out landing written SEO-first tends to be one centred column stretched to desktop width, with the product never shown. The remedy is a product-led hero (copy and sign-in card left, a static mock of the real product right), section rhythm that changes shape, a slim sticky nav with one CTA, and copy kept verbatim. Two related defects ship with it: hand-drawn stand-ins for third-party brand marks are replaced by real published geometry, and a secondary row of sign-in providers demoted to muted outlines is given full weight.
 
 ## Proposed changes to the forge
 

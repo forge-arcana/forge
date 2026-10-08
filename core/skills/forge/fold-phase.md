@@ -56,6 +56,8 @@ If the script exits non-zero, it lists the violations. Fix every one:
 - Re-genericize the flagged content
 - Add legitimate universal terms to the script's `ALLOWLIST_TERMS` if a flagged term is genuinely a well-known reference (e.g., a major framework, a standard API)
 
+The gate scans staged `learnings/` and `memory/` files only (skill, rule and hook sources are reviewed by hand and by periodic sweeps). It prints one line, `purity: scanned N file(s), M line(s) [mode]`, on every run, so a scan of zero files is distinguishable from a clean scan.
+
 Re-run until exit 0. **Do not unstage and commit anyway.** The script is the gate; bypassing it re-creates exactly the leak that prompted its existence (see `learnings/global-patterns.md` Exhibit A: "How a Project-Name Leak Happens, 2026-04-25").
 
 Target files in `<forge>/learnings/`: route each entry to the learnings file of the art or master it sharpens — `<name>-learnings.md` for prime, probe, poke, preen, press, pound, pitch, plot, pry, praise, smith, wedge — and to `global-patterns.md` only when it is cross-cutting.
