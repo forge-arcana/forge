@@ -40,7 +40,9 @@ Do both of these **in parallel** (independent operations — sequentially if you
 **3a: Save Context**
 - Update the `## Current Context` section in the project's `AGENTS.md`
 - Un-migrated project (only `CLAUDE.md` exists): write to that `CLAUDE.md` and print one line suggesting `/forge` to migrate. Never create a second rules file.
-- **Replace** it with current state: branch, test count, completed phases, pending work
+- **If the rules file has no `## Current Context` heading, create it** as the last section. Never append to a look-alike heading (`## Progress`, `## Status`, `## Roadmap`): `/wawa` reads `## Current Context` only, so anything written elsewhere is invisible to it. If a look-alike section exists, say so in one line and offer to split it (open work into `## Current Context`, dated history into `memory/`, standing reference under its own heading). Do not move it unasked.
+- **Replace** the section with current state: branch, test count, completed phases, pending work. Never append a dated entry to it; a section that grows on every commit has become a changelog.
+- **List open work by name inside the section**: a `### Deferred` list for known unfinished items and a `Parked:` line for intentional non-blockers. A pointer to another document reads as empty to `/wawa`.
 - Stale history belongs in git log or memory files
 
 **3b: Locate Docs Directory**

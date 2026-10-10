@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-10-02",
+  "lastRun": "2026-10-10",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -285,7 +285,8 @@
     "Verification must be independent of the thing verified",
     "Promote to Core: Builds Go Through the Forge Arts by Default",
     "Promote to Core: A Native Fallback Is Not a Successor — Read the Precedence Rule Before Migrating",
-    "Advisor Consults Re-Read the Whole Transcript — Session Size Sets Their Price"
+    "Advisor Consults Re-Read the Whole Transcript — Session Size Sets Their Price",
+    "Promote to Core: A Status Reader Must Report a Missing Source, Not an Empty Slate"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
@@ -354,6 +355,9 @@
     "Porting a Node App to a Serverless Edge Runtime: State Must Be Request-Scoped",
     "Soul-driven convergence is legitimate — do not respawn for manufactured difference",
     "Data-dense products can reject the minimal/atmospheric tiers as \"too airy\"",
-    "Theme applies to the calm state; the critical/alarm state is theme-independent"
+    "Theme applies to the calm state; the critical/alarm state is theme-independent",
+    "A Missing Label Is Not a Maturity Status: Read the Changelog",
+    "Swapping an HTTP-and-Secret Integration for a Platform Binding Changes the Wiring Surface",
+    "A Vendor Onboarding Command Can Publish a Domain-Wide Policy as a Side Effect"
   ]
 }

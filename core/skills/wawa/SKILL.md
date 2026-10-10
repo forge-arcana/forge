@@ -20,6 +20,11 @@ Concise status snapshot. No prose preamble — just the header and table.
 
    **Batch B** — after globs return, read any found plan files and project memory files in parallel
 
+2. **Source check: a missing source is a finding, never a clean slate.** Before building any row, confirm the rules file contains a `## Current Context` heading.
+   - **Absent**: do NOT print `Slate clean`. Print the header line, then `⚠ No "## Current Context" section in <rules file>: status cannot be sourced.` On the next line, list the status-like headings that do exist (for example `## Progress`, `## Status`, `## Roadmap`, `### Pending`) and any launch, roadmap or backlog document the rules file points to, as `Open work may be under: ...`. Then show only git-derived rows (uncommitted or untracked files) and end with `Run /wrap to create the section.` Do not read those other headings into rows: say where the work is, do not guess what it is.
+   - **Present but holds only pointers** to other files, with no items listed: print the table from what is there and add one line, `⚠ "## Current Context" points elsewhere and lists no open work.`
+   - **Present and over ~20k characters in the rules file** (a cheap `wc -c`): add one line, `⚠ Rules file is over 20k characters; /wrap compaction is due.`
+
 3. **STRICT sourcing — ZERO inference**:
    - **Phase work**: ONLY from an active plan file in the harness's plan directory. No plan file = no phase rows.
    - **Other items**: ONLY from the project rules file's `## Current Context`. Copy verbatim — do not add items.
@@ -36,8 +41,8 @@ Concise status snapshot. No prose preamble — just the header and table.
 
 5. **Output format** — a one-line header (Branch / Last commit / Dirty count) followed by a markdown table grouped by section header rows (`Active Work`, `Outstanding`, `Parked`).
    - Columns: `# | Task | Status | Notes`
-   - Active items: `in-progress` / `blocked` / `next`. Cap at 5. If none, single row `Slate clean`.
+   - Active items: `in-progress` / `blocked` / `next`. Cap at 5. If none, single row `Slate clean`, and only when the source check in step 2 passed.
    - Outstanding items: `outstanding`. Sources: rules-file `### Deferred`, incomplete plan items, `project_*.md` memory files with unresolved work. Omit items marked "Do NOT surface in status updates" or fully resolved. If none, omit the Outstanding section entirely.
    - Parked items: `parked`. Source: items the rules file explicitly marks parked/deferred-indefinitely (e.g. a "Parked:" line or list). Copy verbatim as rows — these are intentional non-blockers, not backlog. If none, omit the Parked section entirely.
 
-6. No narrative. No invented rows.
+6. No narrative. No invented rows. The step 2 warning lines are not narrative: always print them when they apply.
