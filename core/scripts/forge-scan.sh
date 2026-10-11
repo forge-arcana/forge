@@ -57,15 +57,21 @@ has_file() {
 
 HAS_TS=false
 HAS_PY=false
+LOOSE_JS=false
 LANGS=()
-if has_file -name 'package.json' -o -name 'tsconfig*.json' -o -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.cts' -o -name '*.js' -o -name '*.jsx' -o -name '*.mjs' -o -name '*.cjs'; then
-  HAS_TS=true
-  LANGS+=("TypeScript/JavaScript")
-fi
-if has_file -name 'pyproject.toml' -o -name 'requirements*.txt' -o -name 'setup.py' -o -name 'Pipfile' -o -name 'uv.lock' -o -name 'poetry.lock' -o -name '*.py'; then
+# Python is detected first: it decides whether loose .js files count as a JS/TS project.
+if has_file -name pyproject.toml -o -name requirements*.txt -o -name setup.py -o -name Pipfile -o -name uv.lock -o -name poetry.lock -o -name *.py; then
   HAS_PY=true
-  LANGS+=("Python")
 fi
+# JS/TS: a package.json, a tsconfig or TypeScript sources always count. Plain JS sources
+# count only when Python is absent: a Python repo with a few static scripts is not a JS/TS project.
+if has_file -name package.json -o -name tsconfig*.json -o -name *.ts -o -name *.tsx -o -name *.mts -o -name *.cts; then
+  HAS_TS=true
+elif has_file -name *.js -o -name *.jsx -o -name *.mjs -o -name *.cjs; then
+  if $HAS_PY; then LOOSE_JS=true; else HAS_TS=true; fi
+fi
+if $HAS_TS; then LANGS+=("TypeScript/JavaScript"); fi
+if $HAS_PY; then LANGS+=("Python"); fi
 # Language-typed rows print only for a detected language. With neither detected,
 # every row prints (zero matches) under the "Not covered" banner.
 PRINT_TS=true
@@ -77,7 +83,11 @@ if [[ ${#LANGS[@]} -gt 0 ]]; then
     echo "> **Skipped**: Python sections (no Python detected)."
   elif ! $HAS_TS; then
     PRINT_TS=false
-    echo "> **Skipped**: TypeScript/JavaScript sections (no JS/TS detected)."
+    if $LOOSE_JS; then
+      echo "> **Note**: loose JavaScript files found without a package.json or TypeScript sources; JS/TS sections skipped."
+    else
+      echo "> **Skipped**: TypeScript/JavaScript sections (no JS/TS detected)."
+    fi
   fi
 else
   echo "**Languages detected**: none (no JS/TS or Python manifests or source files found)"
@@ -320,14 +330,23 @@ top_files_by_lines() {
 # ends at the first non-blank line indented no deeper than its opener, except a
 # line that starts with a closing bracket at the opener's indent (the end of a
 # multi-line signature or call). A nested plain `def` is skipped: its body is not
-# in the opener's scope.
+# in the opener's scope. When the opener leaves a bracket open, the lines up to the
+# one that closes it are the signature (parameters and defaults) and are not
+# tested against BODY.
 # Awk ERE (no \b, \s). Patterns pass through ENVIRON so backslashes survive.
 # Args: label description start_regex body_regex
 scan_py_block() {
   local label="$1" desc="$2" start="$3" body="$4" matches=""
   if ! $PRINT_PY; then return 0; fi
   matches=$(py_files0 | START="$start" BODY="$body" xargs -0 awk '
-    FNR == 1 { inb = 0; skip = 0 }
+    # Net open brackets on a line, ignoring string literals and trailing comments.
+    function bdepth(line,   t, o, c) {
+      t = line
+      gsub(/"[^"]*"/, "", t); gsub(/\047[^\047]*\047/, "", t); sub(/#.*/, "", t)
+      o = gsub(/[([{]/, "&", t); c = gsub(/[]})]/, "&", t)
+      return o - c
+    }
+    FNR == 1 { inb = 0; skip = 0; sig = 0 }
     /^[ \t]*$/ { next }
     {
       match($0, /^[ \t]*/); ind = RLENGTH
@@ -336,8 +355,10 @@ scan_py_block() {
         if (ind > sind || (closer && ind == sind)) next
         skip = 0
       }
-      if (inb && ind <= bind && !(closer && ind == bind)) inb = 0
-      if ($0 ~ ENVIRON["START"]) { inb = 1; bind = ind; next }
+      if (inb && ind <= bind && !(closer && ind == bind)) { inb = 0; sig = 0 }
+      # Signature lines of a multi-line opener (parameters and defaults) are not body.
+      if (sig) { sdepth += bdepth($0); if (sdepth <= 0) sig = 0; next }
+      if ($0 ~ ENVIRON["START"]) { inb = 1; bind = ind; sdepth = bdepth($0); sig = (sdepth > 0); next }
       if (inb && ind > bind && $0 ~ /^[ \t]*def[ \t]/) { skip = 1; sind = ind; next }
       if (inb && $0 !~ /^[ \t]*#/ && $0 ~ ENVIRON["BODY"]) print FILENAME ":" FNR ":" $0
     }' 2>/dev/null || true)
@@ -547,9 +568,10 @@ if [[ "$SCAN_TYPE" == "poke" ]]; then
     "(\|\| ['\"]unknown['\"]|\?\? ['\"]default['\"]|\?\? ['\"]Unknown['\"]|\|\| ['\"]N/A['\"])" \
     "ts"
 
+  # Pure comment lines are prose, not code. Docstring bodies cannot be told apart per line.
   scan_pattern "Sentinel defaults ('unknown', 'default') (Python)" \
     "(\bor |getenv\([^)]*, *|\.get\([^)]*, *)['\"](unknown|default|Unknown|N/A)['\"]" \
-    "py"
+    "py" "" '[[:space:]]*#'
 
   scan_pattern "Unsafe casts (as any)" \
     'as any|as unknown' \
@@ -699,12 +721,16 @@ if [[ "$SCAN_TYPE" == "poke" ]]; then
     'health|healthz|readyz|livez' \
     "py" "-i"
 
+  # A sensitive word counts only after a logging call on the same line (console.x(,
+  # logger.x(, log.x(, this.logger.x(, req.log.x(); a plain assignment is the
+  # hardcoded-secrets row's job. Multi-line log calls are not seen.
   scan_pattern "Sensitive data in logs (password, token, secret)" \
-    'password|token|secret|apiKey|api_key' \
+    '\b(console|logger|log)\.[A-Za-z]+\(.*(password|token|secret|apiKey|api_key)' \
     "ts" "-i"
 
+  # Python: print(, pprint( or logging.x( / logger.x( / log.x( / _logger.x( / self.logger.x( first.
   scan_pattern "Sensitive data in logs (password, token, secret) (Python)" \
-    'password|token|secret|apiKey|api_key' \
+    '(\bprint\(|\bpprint\(|\b(logger|log|logging|_logger)\.[A-Za-z]+\().*(password|token|secret|apiKey|api_key)' \
     "py" "-i"
 
   scan_pattern "Dev log endpoint" \
