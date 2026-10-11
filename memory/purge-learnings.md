@@ -19,9 +19,9 @@
 **Apply when**: A new art lands, a top-level command is retired, renamed or merged, a shared pre-flight step or cross-cutting capability is removed, or a branch carrying renamed top-level paths merges onto `main`.
 **Forge-worthy**: yes — universal: a structural change to a documented system requires sweeping every consumer, including the tooling that performs the sweep.
 
-## Promotion Leaves the Source Copy Behind — the Canonical Copy Wins (2026-03-19 → 2026-03-28)
-**Learning**: When a learning is promoted — art-specific file → `global-patterns.md`, or `global-patterns.md` → the stack guide's "Key Learnings" — the source entry is rarely removed. Duplicates accumulate invisibly; the scan's duplicate-title detection catches them. The fix is always the same: the most-promoted location is canonical (stack guide > global-patterns > art-specific file) and the lower copy is removed. The promoted copy may be less complete than the source — compare before removing, and carry any missing detail up first.
-**Apply when**: Running `/purge` Dimension 1c or the `/forge` 3c review — check each art-specific entry against `global-patterns.md`, and each `global-patterns.md` entry against `stack-guide.md`.
+## Promotion Leaves the Source Copy Behind — the Canonical Copy Wins (2026-03-19 → 2026-10-11)
+**Learning**: When a learning is promoted — art-specific file → `global-patterns.md`, or `global-patterns.md` → the stack guide's "Key Learnings" — the source entry is rarely removed. Duplicates accumulate invisibly; the scan's duplicate-title detection catches them. The fix is always the same: the most-promoted location is canonical (stack guide > global-patterns > art-specific file) and the lower copy is removed. The promoted copy may be less complete than the source — compare before removing, and carry any missing detail up first. The same order applies inside a single fold: a same-day fold can write detail into the stack guide and also absorb art learnings that restate it. When an approved row lands in the stack guide, the matching art entry should be a short pointer carrying only the art-specific judgment, never a second copy.
+**Apply when**: Running `/purge` Dimension 1c or the `/forge` 3c review — check each art-specific entry against `global-patterns.md`, and each `global-patterns.md` entry against `stack-guide.md`. Also apply when a fold or purge routes one source item to both a reference doc and a learnings file.
 **Forge-worthy**: yes — universal pattern for any learning system where entries can be promoted to a shared store without removing them from the source.
 
 ## Entity Names Are Project Leaks (2026-03-19)
@@ -114,7 +114,6 @@ The tell is that the invented laws were *good*. They deserved to exist, which is
 **Learning**: The maintainer's membrane still holds the pre-purge learnings files, so the next cycle reads every retired title as new outgoing work and can undo the purge. Put the membrane cast in the cleansing plan as its own row, and before overwriting each membrane file confirm it equals the pre-purge committed version.
 
 **Apply when**: Planning the cleansing steps of any purge that edits learnings or memory files.
-
 **Forge-worthy**: no — forge-internal
 
 ## Extracting a Section to a Sibling File Breaks Copies That Have No Siblings (2026-10-02)
@@ -148,3 +147,19 @@ The tell is that the invented laws were *good*. They deserved to exist, which is
 **Apply when**: Running a content-leak sweep, or after changing a purity gate. Read these four surfaces manually and confirm the gate's output shows files examined.
 
 **Forge-worthy**: yes — universal: name matching is necessary but not sufficient for leak detection, and a gate that scans nothing reports the same success as one that found nothing.
+
+## A Threshold Breach Is a Routing Check Before a Currency Check (2026-10-11)
+
+**Learning**: A cross-cutting learnings file sat over its entry threshold, and a currency review the day before had found nothing stale, so the open question had become whether to raise the threshold or split the file. The cause was routing. Seventeen of fifty-nine entries sharpened a single art and belonged in that art's file. Asking of each entry which art reads it took the file to forty with no entry lost.
+
+**Apply when**: A learnings file is over its threshold and a staleness review returns nothing to prune. Check each entry against the routing rule before changing the threshold or splitting the file.
+
+**Forge-worthy**: no — forge-internal
+
+## Moved Text Re-Enters the Leak Gate as New Text (2026-10-11)
+
+**Learning**: Relocating or archiving committed text between scanned files makes the staged gate read every moved line as an addition, so content that predates a pattern, or came from an unscanned file, is flagged for the first time. The flags are real work. Reword plain cases in place, and allowlist only web-standard names and the forge's own terms. Read `fold-purity-check.sh` before briefing the fix, because the check on backticked identifiers has its own exclusion list, separate from the main term list.
+
+**Apply when**: A purge plans relocations, or archives a rules-file section into a scanned directory. Budget a gate pass before the commit and expect it to fail the first time.
+
+**Forge-worthy**: no — forge-internal
