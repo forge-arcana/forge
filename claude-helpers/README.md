@@ -19,17 +19,14 @@ project-root `CLAUDE.md` shadows `AGENTS.md` (with both present, only
 `CLAUDE.md` loads). Forge projects therefore carry no project `CLAUDE.md` —
 `/forge` Phase 4 migrates one and `/wrap` flags a stray one.
 
-> An earlier helper here — a SessionStart hook working around Claude Code's
-> OAuth token-refresh race (WA-001) — was retired when Claude Code v2.1.136
-> shipped the upstream fix.
+> The WA-001 workaround (an OAuth token-refresh hook) was retired when Claude
+> Code v2.1.136 shipped the upstream fix, and its cleanup script has been removed.
 
 ## Contents
 
 ```
 claude-helpers/
 ├── README.md             ← this file
-├── retire-wa001.sh       ← transient: cleans leftover WA-001 hook wiring from
-│                            membranes (invoked by the /forge Phase 2 cast)
 └── refs/
     ├── auto-allowed-bash.md       ← descriptive: which Bash commands are
     │                                  Claude-Code-default-permitted (used by
@@ -41,10 +38,5 @@ claude-helpers/
 
 ## Retiring this directory
 
-- **`retire-wa001.sh`** is throwaway migration code; delete it (and its
-  invocation in the `/forge` cast step) once every membrane has run `/forge`
-  after 2026-06-13.
-- **`refs/`** is descriptive-only and is reviewed/cleaned during routine
-  `/purge` cycles.
-
-When both are gone, the entire `claude-helpers/` directory is deleted.
+`refs/` is descriptive-only and is reviewed/cleaned during routine `/purge`
+cycles. When it is gone, the entire `claude-helpers/` directory is deleted.

@@ -21,11 +21,7 @@ After any correction from the user, Claude **immediately updates its learnings**
 
 ### 4. Verification Before Done
 
-No task is marked complete without **proof it works** — tests pass, logs are clean, behavior is demonstrated. Claude diffs its changes against the main branch when relevant and asks itself: *"Would a staff engineer approve this?"*
-
-Before pushing, think from a **CI perspective**: *"What does a fresh `git clone` + `install` look like?"* Generated/gitignored files (i18n, codegen, protobuf, GraphQL) that typecheck/build depend on need explicit compile steps in CI — local dev won't catch this because files already exist on disk.
-
-**HARD RULE — Visual changes require Playwright screenshots**: For ANY visual change (layout, CSS, styling, colors, spacing, components), ALWAYS take a Playwright screenshot at the target viewport (e.g., iPhone SE 375x667) and verify it yourself BEFORE telling the user it's fixed. Use `colorScheme: 'dark'` if the project uses dark mode. NEVER say "it should work" — SHOW it works. If you can't screenshot, tell the user and ask them to verify.
+Owned by `core/rules/development-discipline.md` ("Verification Before Done" and "Visual Changes Require Screenshots") and deployed in the FORGE-RULES block. Not restated here.
 
 ### 5. Demand Elegance (Balanced)
 
@@ -33,14 +29,7 @@ For non-trivial changes, Claude pauses to consider whether there's a more elegan
 
 ### 6. Autonomous Bug Fixing — Logs First, Always
 
-A **hard rule** for debugging, with no exceptions:
-
-1. **Logs first** — Read log files, error output, CI logs, Cloud Logging. If no log exists, add one and reproduce.
-2. **Data second** — Check DB/state only after logs point to an inconsistency.
-3. **Add logging** — If logs are insufficient, add targeted logging and reproduce. Never guess.
-4. **Code last** — Only analyze source code after steps 1-3 provide evidence.
-
-Claude never speculates about "what might have happened" by reading code paths. The phrase **"logs first"** is a hard stop — all speculation ceases and it goes to read actual output. Bug reports are handled autonomously with zero hand-holding from the user.
+Owned by `core/rules/development-discipline.md` ("Logs First, Always") and deployed in the FORGE-RULES block. Not restated here.
 
 ### 7. Documentation & Context Updates
 

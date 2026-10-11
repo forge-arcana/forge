@@ -261,8 +261,9 @@ forge/
 ├── plans/                 # Dated implementation plans
 ├── presentation/          # Human-readable overview (index.html)
 ├── .github/workflows/     # CI (fold-purity.yml)
+├── .agents/skills/forge/  # Bootstrap (so /forge is discoverable on fresh clone)
 ├── .claude/skills/
-│   ├── forge/             # Bootstrap (so /forge is discoverable on fresh clone)
+│   ├── forge -> ../../.agents/skills/forge  # Symlink: Claude Code reads project skills only here
 │   └── purge/             # The Warden — master tender (forge-internal, never deployed)
 ├── CONTRIBUTING.md
 └── AGENTS.md

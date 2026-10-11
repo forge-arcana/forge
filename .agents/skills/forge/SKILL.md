@@ -175,12 +175,6 @@ In `--dry` mode: skip the selection prompt. Print the table and exit.
 
 Skip this phase entirely if `--dry`. Run BEFORE outgoing absorption so the latest ruleset is in place when the absorption logic runs.
 
-> **Transient — WA-001 retirement cleanup.** Before applying rows, run
-> `bash <forge>/claude-helpers/retire-wa001.sh`. It removes the retired
-> WA-001 OAuth-workaround artifacts (deployed token scripts + SessionStart hook)
-> from this membrane. Idempotent and silent once clean. **Remove this step and
-> the script once the team has migrated** — see AGENTS.md Outstanding.
-
 For each approved incoming row (and each conflict row where user chose `[↓]`):
 
 ### Skills

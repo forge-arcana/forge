@@ -16,7 +16,7 @@ Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then scan the enti
 
 ## Evidence Collection
 
-Run `<forge>/core/scripts/forge-scan.sh press <project-path>` to collect mechanical evidence across all seven dimensions. This single command replaces ~25 sequential grep/read tool calls.
+Run `<forge>/core/scripts/forge-scan.sh press <project-path>` to collect mechanical evidence across all seven dimensions. This single command replaces ~25 sequential grep/read tool calls. forge-scan recognizes JS/TS and Python idioms; on any other stack a zero-match scan is not evidence of a clean codebase, so say so in the report and collect that dimension's evidence by hand.
 
 Use the script's output as your evidence base for scoring each dimension below. The script finds patterns — you score severity, identify gaps, and produce the readiness verdict.
 

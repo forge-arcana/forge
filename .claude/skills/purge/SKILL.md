@@ -167,8 +167,8 @@ Use the scan script's section-level breakdown. Flag any skill where:
 
 Scan reference docs for internal consistency:
 
-- **stack-guide.md**: are the technology choices current? Any deprecated libraries? Web-search for major version changes.
-- **auto-allowed-bash.md** (`<forge>/claude-helpers/refs/auto-allowed-bash.md`): does it match `~/.claude/CLAUDE.md`? Any drift?
+- **stack-guide.md**: are the technology choices current? Any deprecated libraries? Web-search for major version changes. Classify each finding as **stale** (once correct, since drifted) or **wrong-from-birth** (never correct, so no version check finds it), and verify security and correctness claims on their substance against primary docs, not by version number.
+- **auto-allowed-bash.md** (`<forge>/claude-helpers/refs/auto-allowed-bash.md`): a descriptive reference with no counterpart in the membrane rules file, so there is nothing to diff it against. Check instead that each section still describes what the skills and `core/rules/` deliver, and flag any section that restates a HARD RULE instead of pointing at `core/rules/`.
 - **AGENTS.md (forge)**: is the Current Context section accurate? Arts table correct? Skill counts right?
 - **AGENTS.md (forge) — size/currency**: `wc -c <forge>/AGENTS.md`. If it exceeds **~25k chars**, the rules file has overgrown its cache-churn budget (a fat AGENTS.md reloads into every cached prompt → Cache-Write spend every session). Flag an `UPDATE` finding: archive the **oldest** dated bullets under `## Current Context` (the `- **YYYY-MM-DD ...**:` entries) to `<forge>/memory/recent-history.md` (keep only the newest ~2 inline), and update the `- **Earlier history**` pointer line to match. This is forge-internal compaction — `/purge` owns it, NOT `/wrap` (which is for projects). Note: this is the ONE compaction `/purge` performs; it does NOT touch the append-only `.fold-tracker.json` (see the HARD RULE above — that prohibition is about the tracker, not AGENTS.md history).
 
@@ -179,6 +179,7 @@ After all four dimension subagents complete, the master collects every FINDING b
 1. **Deduplicate**: if two dimensions flag the same file:line, merge into one finding (keep the higher severity, concatenate rationales).
 2. **Cross-dimension overlap detection**: a project name in `learnings/` (Dim 1) might also appear in `memory/` (Dim 2) — surface as a single "leaked across knowledge surface" finding.
 3. **Sort**: by severity (CRITICAL → IMPORTANT → MINOR), then by dimension.
+4. **Verify content-damage claims against raw bytes**: a finding that says text is truncated, corrupted or missing is checked by the master against the file's raw bytes before it reaches an editor. A reviewer's file reader can truncate long lines for display, and the remedy for a false claim invents text.
 
 ## Output Format
 

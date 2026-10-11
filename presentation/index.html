@@ -526,7 +526,7 @@
   }
 
   .loop-content { flex: 1; }
-  .loop-content strong { display: block; margin-bottom: 4px; font-size: 15px; }
+  .loop-content > strong { display: block; margin-bottom: 4px; font-size: 15px; }
   .loop-content span { font-size: 13px; color: var(--smoke); line-height: 1.5; }
 
   /* ─── SLIDE BACKGROUNDS ─── */
@@ -677,7 +677,7 @@
           </div>
           <div style="padding:14px;font-size:13px;color:var(--smoke);line-height:1.5;">
             <strong style="color:var(--parchment); display:block; margin-bottom:4px;">What Claude can DO</strong>
-            Each skill is a special power — like "review my code" or "create a commit". Stored in <code style="color:var(--fire); font-size:11px;">~/.claude/skills/</code>
+            Each skill is a special power — like "review my code" or "create a commit". Stored in <code style="color:var(--fire); font-size:11px;">~/.agents/skills/</code> (the Open Agent Skills standard, readable by other tools), with a Claude copy in <code style="color:var(--fire); font-size:11px;">~/.claude/skills/</code>
           </div>
           <div class="pillar-arrows">
             <div class="pillar-arrow-row">🔽 <span>Forge → You via <span class="cmd" style="font-size:11px;">/forge</span></span></div>
@@ -832,7 +832,7 @@
             <div class="loop-num" style="background:rgba(249,115,22,0.15); color:var(--fire);">2</div>
             <div class="loop-content">
               <strong>cast — apply incoming</strong>
-              <span>Deploy approved forge updates to ~/.claude/skills/, ~/.claude/learnings/, ~/.claude/memory/. Record the baseline SHA so future drift detection stays accurate.</span>
+              <span>Deploy approved forge updates to ~/.agents/skills/ (plus a Claude copy in ~/.claude/skills/), ~/.claude/learnings/, ~/.claude/memory/. Record the baseline SHA so future drift detection stays accurate.</span>
             </div>
           </div>
           <div class="loop-step" style="border-radius:0; border:none; border-bottom:1px solid var(--steel); margin:0;">
@@ -905,13 +905,13 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════════
-       SLIDE 9 — NINE ARTS OVERVIEW
+       SLIDE 9 — TEN ARTS OVERVIEW
   ═══════════════════════════════════════════════════ -->
-  <div class="slide" data-title="The Nine Arts — Overview">
+  <div class="slide" data-title="The Ten Arts — Overview">
     <div class="scroll-content" style="text-align:center;">
       <div style="font-size:48px; margin-bottom:8px;">🗡️</div>
-      <div class="slide-title">The <span class="fire-text">Nine Arts</span></div>
-      <div class="slide-subtitle">Nine specialist chef hats — each bringing a completely different type of expertise</div>
+      <div class="slide-title">The <span class="fire-text">Ten Arts</span></div>
+      <div class="slide-subtitle">Ten specialist chef hats — each bringing a completely different type of expertise</div>
       <div style="font-size:12px; color:var(--ash); margin-top:6px; font-style:italic;">(/purge was promoted to Master — see Smith slide. The Warden tends the forge itself.)</div>
 
       <div class="persona-grid" style="margin-top:20px;">
@@ -959,6 +959,11 @@
           <div class="art-name" style="color:#f59e0b;">/praise</div>
           <div class="art-title" style="color:#f59e0b;">The Feedback Loop</div>
           <div class="art-desc">Turns real user feedback into prioritised fixes. Routes issues to the right arts, checks blueprint impact, hands off to /smith.</div>
+        </div>
+        <div class="persona-card" style="background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.4);">
+          <div class="art-name" style="color:#6366f1;">/plot</div>
+          <div class="art-title" style="color:#6366f1;">The Cartographer</div>
+          <div class="art-desc">Draws the Atlas: a bird's-eye map of what runs in production. Near go-live it shows where the build drifted from the plan.</div>
         </div>
       </div>
     </div>
@@ -1071,21 +1076,25 @@
           <div class="cmd" style="color:#f59e0b; border-color:#f59e0b;">/praise</div>
           <div style="font-size:12px; color:var(--smoke); margin-top:6px;">Feedback loop — run after<br>every user feedback cycle</div>
         </div>
+        <div style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); border-radius:10px; padding:12px 20px; text-align:center;">
+          <div class="cmd" style="color:#6366f1; border-color:#6366f1;">/plot</div>
+          <div style="font-size:12px; color:var(--smoke); margin-top:6px;">Atlas map — run near go-live<br>(or early, if you like maps)</div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════
-       SLIDE 12 — PRY & PRAISE
+       SLIDE 12 — PRY, PRAISE & PLOT
   ═══════════════════════════════════════════════════ -->
-  <div class="slide bg-blue" data-title="Arts: Pry &amp; Praise">
+  <div class="slide bg-blue" data-title="Arts: Pry, Praise &amp; Plot">
     <div class="scroll-content" style="text-align:center;">
-      <div class="slide-title">Arts: <span class="blue-text">Unstuck & Feedback</span></div>
-      <div class="slide-subtitle">Two arts that stand apart from the normal build-review pattern</div>
+      <div class="slide-title">Arts: <span class="blue-text">Unstuck, Feedback & Atlas</span></div>
+      <div class="slide-subtitle">Three arts that stand apart from the normal build-review pattern</div>
       <div style="font-size:12px; color:var(--ash); margin-top:6px; font-style:italic;">(/purge was promoted to Master — The Warden, who tends the forge itself. See Smith slide.)</div>
 
-      <div style="display:flex; gap:24px; justify-content:center; flex-wrap:wrap; margin-top:28px;">
-        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(20,184,166,0.5); max-width:380px; text-align:left;">
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:28px;">
+        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(20,184,166,0.5); max-width:300px; text-align:left;">
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
             <span style="font-size:40px;">🔧</span>
             <div>
@@ -1107,7 +1116,7 @@
           </div>
         </div>
 
-        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(245,158,11,0.5); max-width:380px; text-align:left;">
+        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(245,158,11,0.5); max-width:300px; text-align:left;">
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
             <span style="font-size:40px;">🔁</span>
             <div>
@@ -1128,6 +1137,27 @@
           </div>
           <div style="background:rgba(245,158,11,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
             🍳 Like a head chef who reads every review card from diners, figures out which chef in the kitchen needs to fix what, and writes up a prioritised improvement brief.
+          </div>
+        </div>
+
+        <div style="background:var(--iron); border-radius:16px; padding:28px; border:2px solid rgba(99,102,241,0.5); max-width:300px; text-align:left;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <span style="font-size:40px;">🗺️</span>
+            <div>
+              <div class="cmd cmd-large" style="color:#6366f1; border-color:#6366f1;">/plot</div>
+              <div style="font-size:13px; color:var(--ash); margin-top:4px;">The Cartographer — Draw the Atlas</div>
+            </div>
+          </div>
+          <div style="font-size:14px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            Draws one picture of your production landscape: the services, data stores, outside integrations and trust boundaries, and where each one is deployed.
+          </div>
+          <div style="font-size:13px; color:var(--smoke); line-height:1.7; margin-bottom:16px;">
+            <strong style="color:var(--parchment);">When it runs:</strong><br>
+            📐 Early, <strong style="color:var(--parchment);">opt-in</strong>: a planned Atlas from the Blueprint<br>
+            🏁 Near go-live: the <strong style="color:var(--parchment);">as-built</strong> Atlas, headlined by the drift from the plan
+          </div>
+          <div style="background:rgba(99,102,241,0.1); border-radius:8px; padding:12px; font-size:13px; color:var(--parchment);">
+            🍳 Like drawing the floor plan of the finished restaurant, then laying it over the original sketch to see which walls, stations and doors moved while you were building.
           </div>
         </div>
       </div>
@@ -1250,12 +1280,12 @@
         <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid rgba(168,85,247,0.4); text-align:center;">
           <div style="font-size:28px; margin-bottom:8px;">📜</div>
           <div style="font-weight:700; font-size:14px; margin-bottom:6px; color:#a855f7;">Reads Opus + Vow</div>
-          <div style="font-size:12px; color:var(--smoke); line-height:1.5;">Distills emotional core, tonal anchor, the one memorable signature. Soul before style.</div>
+          <div style="font-size:12px; color:var(--smoke); line-height:1.5;">Distills a prose Soul Brief: what the product is, what it is not, and the defaults to avoid. Soul before style.</div>
         </div>
         <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid rgba(168,85,247,0.4); text-align:center;">
           <div style="font-size:28px; margin-bottom:8px;">⚖️</div>
           <div style="font-weight:700; font-size:14px; margin-bottom:6px; color:#a855f7;">Council of Three</div>
-          <div style="font-size:12px; color:var(--smoke); line-height:1.5;">Three apprentices in parallel — each on a Family × Tone commission (e.g., "brutally minimal Liquid"). You pick ONE.</div>
+          <div style="font-size:12px; color:var(--smoke); line-height:1.5;">Three apprentices in parallel — each on one essence-lens derived from the Soul Brief. You pick ONE.</div>
         </div>
         <div style="background:var(--iron); border-radius:12px; padding:16px; border:1px solid rgba(168,85,247,0.4); text-align:center;">
           <div style="font-size:28px; margin-bottom:8px;">💎</div>
@@ -1325,6 +1355,16 @@
             <td>✅ Tasting the dish yourself before serving it to the guest</td>
           </tr>
           <tr>
+            <td><span class="cmd">/srs</span></td>
+            <td>Sets up restart and kill-zombies scripts for local dev</td>
+            <td>🔌 Labelling every burner switch so the whole stove lights or shuts down in one go</td>
+          </tr>
+          <tr>
+            <td><span class="cmd">/vsix</span></td>
+            <td>Publishes a VS Code extension</td>
+            <td>📮 Boxing the finished dish and mailing it to the shop shelf</td>
+          </tr>
+          <tr>
             <td><span class="cmd">/ponci</span></td>
             <td>Push to GitHub and watch CI (automated tests) pass or fail</td>
             <td>🚀 Sending the dish to the table and watching the guest's reaction in real time</td>
@@ -1354,6 +1394,11 @@
             <td>Runs /poke + /press multiple times and consolidates results with confidence scores</td>
             <td>🔄 Asking 5 chefs to taste independently, then comparing all their notes</td>
           </tr>
+          <tr>
+            <td><span class="cmd">/burn</span></td>
+            <td>Token and estimated-cost report per session, read from the harness's own transcripts</td>
+            <td>🧾 Reading the grocery bill after service to see what each dish really cost</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -1372,23 +1417,26 @@
         <div style="background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel); width:280px;">
           <div style="background:rgba(249,115,22,0.2); padding:12px 16px; font-weight:700; color:var(--fire);">📖 forge/ (the recipe book)</div>
           <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
-            <div>📂 <strong style="color:var(--parchment);">skills/</strong> — all skill definitions</div>
+            <div>📂 <strong style="color:var(--parchment);">core/skills/</strong> — all skill definitions</div>
             <div style="padding-left:16px; font-size:12px;">⚡ each skill has its own folder</div>
+            <div>📂 <strong style="color:var(--parchment);">core/scripts/</strong> — automation scripts</div>
+            <div>📂 <strong style="color:var(--parchment);">core/rules/</strong> — the hard rules</div>
+            <div>📂 <strong style="color:var(--parchment);">core/hooks/</strong> — session hooks</div>
+            <div>📂 <strong style="color:var(--parchment);">claude-helpers/</strong> — Claude-only refs</div>
             <div>📂 <strong style="color:var(--parchment);">learnings/</strong> — absorbed lessons</div>
             <div style="padding-left:16px; font-size:12px;">📄 global-patterns.md</div>
-            <div style="padding-left:16px; font-size:12px;">📄 poke-learnings.md etc.</div>
             <div>📂 <strong style="color:var(--parchment);">memory/</strong> — team identity</div>
             <div style="padding-left:16px; font-size:12px;">📄 identity.md</div>
-            <div>📂 <strong style="color:var(--parchment);">scripts/</strong> — automation scripts</div>
             <div>📄 <strong style="color:var(--parchment);">AGENTS.md</strong> — forge rules</div>
           </div>
         </div>
 
         <div style="background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel); width:280px;">
-          <div style="background:rgba(59,130,246,0.2); padding:12px 16px; font-weight:700; color:var(--blue);">🍳 ~/.claude/ (your kitchen)</div>
+          <div style="background:rgba(59,130,246,0.2); padding:12px 16px; font-weight:700; color:var(--blue);">🍳 your kitchen (the membrane)</div>
           <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
-            <div>📂 <strong style="color:var(--parchment);">skills/</strong> — deployed skills</div>
-            <div style="padding-left:16px; font-size:12px;">✅ ready for Claude to use</div>
+            <div>📂 <strong style="color:var(--parchment);">~/.agents/skills/</strong> — canonical store</div>
+            <div style="padding-left:16px; font-size:12px;">✅ Open Agent Skills standard, other tools read it too</div>
+            <div>📂 <strong style="color:var(--parchment);">~/.claude/skills/</strong> — Claude copy</div>
             <div>📂 <strong style="color:var(--parchment);">learnings/</strong> — active lessons</div>
             <div style="padding-left:16px; font-size:12px;">📄 general.md (main file)</div>
             <div>📂 <strong style="color:var(--parchment);">memory/</strong> — active identity</div>
@@ -1401,7 +1449,7 @@
         <div style="background:var(--iron); border-radius:12px; overflow:hidden; border:1px solid var(--steel); width:280px;">
           <div style="background:rgba(34,197,94,0.2); padding:12px 16px; font-weight:700; color:var(--green);">💻 your-project/ (the field)</div>
           <div style="padding:14px 16px; font-size:13px; color:var(--smoke); line-height:2;">
-            <div>📄 <strong style="color:var(--parchment);">AGENTS.md</strong> — project rules</div>
+            <div>📄 <strong style="color:var(--parchment);">AGENTS.md</strong> — project rules (one file)</div>
             <div style="padding-left:16px; font-size:12px;">created/updated by /forge</div>
             <div>📂 <strong style="color:var(--parchment);">.claude/</strong></div>
             <div style="padding-left:16px; font-size:12px;">📄 settings.json (overrides)</div>
@@ -1506,7 +1554,8 @@
             2. Fix all issues found<br>
             3. <span class="cmd" style="font-size:11px;">/pound</span> — Adversarial attack<br>
             4. Fix critical issues<br>
-            5. <span class="cmd" style="font-size:11px;">/ponci</span> — Push and watch CI
+            5. <span class="cmd" style="font-size:11px; color:#6366f1; border-color:#6366f1;">/plot</span> — Draw the as-built Atlas<br>
+            6. <span class="cmd" style="font-size:11px;">/ponci</span> — Push and watch CI
           </div>
         </div>
         <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:20px;">
@@ -1625,6 +1674,7 @@
             <div><span class="cmd" style="font-size:11px; color:#22c55e; border-color:#22c55e;">/pitch</span> Business model</div>
             <div><span class="cmd" style="font-size:11px; color:#14b8a6; border-color:#14b8a6;">/pry</span> When stuck</div>
             <div><span class="cmd" style="font-size:11px; color:#f59e0b; border-color:#f59e0b;">/praise</span> Feedback loop</div>
+            <div><span class="cmd" style="font-size:11px; color:#6366f1; border-color:#6366f1;">/plot</span> Atlas map</div>
           </div>
         </div>
 
@@ -1636,6 +1686,7 @@
             <div><span class="cmd" style="font-size:11px;">/qt</span> Quick test</div>
             <div><span class="cmd" style="font-size:11px;">/ponci</span> Push + watch CI</div>
             <div><span class="cmd" style="font-size:11px;">/eli5</span> Explain simply</div>
+            <div><span class="cmd" style="font-size:11px;">/burn</span> Token + cost report</div>
           </div>
         </div>
       </div>
@@ -1683,6 +1734,10 @@
             <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
               <span class="cmd" style="font-size:12px; color:#78716c; border-color:#78716c;">/purge</span>
               <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Occasional — clean forge when it feels cluttered</span>
+            </div>
+            <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
+              <span class="cmd" style="font-size:12px; color:#6366f1; border-color:#6366f1;">/plot</span>
+              <span style="font-size:13px; color:var(--smoke); margin-left:8px;">Near go-live (and once early, if you want a planned map)</span>
             </div>
             <div style="background:var(--iron); border-radius:10px; padding:12px; border:1px solid var(--steel);">
               <span class="cmd" style="font-size:12px;">/srs</span>
@@ -1777,7 +1832,7 @@
           </div>
           <div style="padding:12px 18px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
             <span class="cmd" style="color:#a855f7; border-color:#a855f7;">/wedge</span>
-            <span style="font-size:13px; color:var(--smoke);">→ Council of three apprentices proposes ONE direction each. You pick one. Wedge crystallizes the Touchstone (HTML vision + MD typed-token contract).</span>
+            <span style="font-size:13px; color:var(--smoke);">→ Three apprentices, one essence-lens each from the Soul Brief. You pick one. Wedge crystallizes the Touchstone (HTML vision + MD typed-token contract).</span>
             <span class="pill" style="background:rgba(34,197,94,0.2); color:#22c55e;">one-time per project</span>
           </div>
         </div>
@@ -1903,6 +1958,11 @@
               <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">before ship</span>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="cmd" style="color:#6366f1; border-color:#6366f1;">/plot</span>
+              <span style="font-size:13px; color:var(--smoke);">→ Draw the as-built Atlas of production and see where the build drifted from the plan.</span>
+              <span class="pill" style="background:rgba(99,102,241,0.2); color:#6366f1;">near go-live</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <span class="cmd">/cicd</span>
               <span style="font-size:13px; color:var(--smoke);">→ Full local pipeline: lint + typecheck + test + build + deploy. Auto-fixes.</span>
               <span class="pill" style="background:rgba(249,115,22,0.2); color:var(--fire);">before deploy</span>
@@ -1969,6 +2029,7 @@
           <div style="padding:12px 16px; font-size:13px; color:var(--smoke); flex:1; line-height:2;">
             <span class="cmd" style="font-size:11px; color:#ef4444; border-color:#ef4444;">/pound</span> &nbsp;·&nbsp;
             <span class="cmd" style="font-size:11px; color:#22c55e; border-color:#22c55e;">/pitch</span> &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px; color:#6366f1; border-color:#6366f1;">/plot</span> &nbsp;·&nbsp;
             <span class="cmd" style="font-size:11px;">/cicd</span> &nbsp;·&nbsp;
             <span class="cmd" style="font-size:11px; color:#78716c; border-color:#78716c;">/purge</span> (forge hygiene)
           </div>
@@ -2021,7 +2082,8 @@
             <span class="cmd" style="font-size:11px; color:#14b8a6; border-color:#14b8a6;">/pry</span> when stuck &nbsp;·&nbsp;
             <span class="cmd" style="font-size:11px;">/dig</span> think deeper &nbsp;·&nbsp;
             <span class="cmd" style="font-size:11px;">/eli5</span> need simpler explanation &nbsp;·&nbsp;
-            <span class="cmd" style="font-size:11px;">/monci</span> watch CI only
+            <span class="cmd" style="font-size:11px;">/monci</span> watch CI only &nbsp;·&nbsp;
+            <span class="cmd" style="font-size:11px;">/burn</span> token + cost report
           </div>
         </div>
 
@@ -2043,7 +2105,7 @@
           <div class="loop-num" style="background:var(--green);">1</div>
           <div class="loop-content">
             <strong>Set up Forge on your machine</strong>
-            <span>Clone the forge repo, open Claude in the forge directory, type <span class="cmd" style="font-size:11px;">/forge</span>. This deploys all skills globally to <code style="color:var(--fire); font-size:12px;">~/.claude/</code>. Run once per machine — every future project benefits automatically.</span>
+            <span>Clone the forge repo, open Claude in the forge directory, type <span class="cmd" style="font-size:11px;">/forge</span>. This deploys all skills globally to <code style="color:var(--fire); font-size:12px;">~/.agents/skills/</code>, with a Claude copy in <code style="color:var(--fire); font-size:12px;">~/.claude/skills/</code>. Run once per machine — every future project benefits automatically.</span>
           </div>
         </div>
         <div class="loop-step">
@@ -2057,7 +2119,7 @@
           <div class="loop-num" style="background:var(--green);">3</div>
           <div class="loop-content">
             <strong>Give it a visual soul — /wedge</strong>
-            <span>Type <span class="cmd" style="font-size:11px; color:#a855f7; border-color:#a855f7;">/wedge</span>. A council of three design apprentices each proposes one aesthetic direction. You pick one. It crystallises into the <strong style="color:var(--parchment);">Touchstone</strong> — the visual constitution every screen will conform to. Driven once, never undone.</span>
+            <span>Type <span class="cmd" style="font-size:11px; color:#a855f7; border-color:#a855f7;">/wedge</span>. Three design apprentices each work one essence-lens from your Soul Brief. You pick one. It crystallises into the <strong style="color:var(--parchment);">Touchstone</strong> — the visual constitution every screen will conform to. Driven once, never undone.</span>
           </div>
         </div>
         <div class="loop-step">
@@ -2111,11 +2173,11 @@
           <div style="font-size:13px; color:var(--smoke);">Masters</div>
         </div>
         <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
-          <div class="big-stat" style="font-size:40px;">9</div>
+          <div class="big-stat" style="font-size:40px;">10</div>
           <div style="font-size:13px; color:var(--smoke);">Expert Arts</div>
         </div>
         <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
-          <div class="big-stat" style="font-size:40px;">24</div>
+          <div class="big-stat" style="font-size:40px;">26</div>
           <div style="font-size:13px; color:var(--smoke);">Total Skills</div>
         </div>
         <div style="background:var(--iron); border-radius:12px; padding:16px 20px; border:1px solid var(--steel); text-align:center;">
@@ -2135,7 +2197,7 @@
 
 <div class="nav">
   <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>←</button>
-  <div class="slide-counter" id="counter">1 / 23</div>
+  <div class="slide-counter" id="counter">1 / 24</div>
   <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
 </div>
 

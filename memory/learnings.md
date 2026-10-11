@@ -41,10 +41,10 @@ Consolidated current-state learnings. Historical entries that were superseded ha
 - `core/skills/` is the git-tracked source; `$AGENTS_DIR/skills/` (default `~/.agents/skills/`) is the **canonical deployment target** per the Open Agent Skills standard — neutral, frontmatter-free, read natively by non-Claude tools (Codex CLI, Gemini CLI). The harness's per-tool dir (`~/.claude/skills/` for Claude Code) is a **real directory, not a symlink** (the symlink was retired 2026-06-14): `cast-deploy.sh` regenerates it every cast as a deterministic function of the neutral store, with `model:` frontmatter injected — a field that cannot live in the shared copy. Scripts still symlink (`~/.claude/scripts/` → `~/.agents/scripts/`) since they carry no frontmatter.
 
 ### Bootstrap (2026-03-17, updated 2026-04-23)
-- `.claude/skills/forge/SKILL.md` is the Claude-Code bootstrap copy — full `/forge` logic mirrored here so fresh clones can run the cycle before skills are deployed (Generic Forge v2 follow-up: migrate to `.agents/skills/forge/` for cross-tool discoverability)
+- `.agents/skills/forge/SKILL.md` is the bootstrap copy — full `/forge` logic mirrored here so fresh clones can run the cycle before skills are deployed; `.claude/skills/forge` is a symlink to it because Claude Code discovers project skills only under `.claude/skills/`; it differs from `core/skills/forge/SKILL.md` only by `user-invocable: true`
 - On fresh clone, Claude Code discovers this bootstrap → user runs `/forge` → full setup (skills + learnings + memory + project scan)
 - No `install.sh` needed — `/forge` handles fresh-machine setup and ongoing sync in the same flow
-- Full mirror (not thin) avoids symlinks (OS-dependent) and drift between bootstrap and deployed copy
+- Full mirror (not thin) avoids drift between the bootstrap and the deployed copy. The repo carries one symlink, `.claude/skills/forge`, because the copy has a single real location and Claude Code reads only `.claude/skills/`; a checkout without symlink support falls back to `bash core/scripts/cast-deploy.sh --all`
 
 ### Frontmatter & Model Tiers (2026-03-15, updated 2026-08-15)
 - Valid SKILL.md frontmatter: `name`, `description`, `user-invocable`, `argument-hint`, `compatibility`, `disable-model-invocation`, `license`, `metadata`, plus `model:` on the deployed Claude copy only.

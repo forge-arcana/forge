@@ -63,10 +63,7 @@ AGENTS_SCRIPTS="$AGENTS_DIR/scripts"
 MEMBRANE_SKILLS="$MEMBRANE/skills"
 MEMBRANE_SCRIPTS_LINK="$MEMBRANE/scripts"
 
-# No runtime scripts are deployed to the membrane at present. The WA-001 OAuth-race
-# token scripts that previously lived here were retired once the upstream bug was
-# fixed (Claude Code v2.1.136). Any membrane that still has the old copies should
-# delete them manually — see AGENTS.md's WA-001 retirement note.
+# No runtime scripts are deployed to the membrane at present.
 SCRIPTS_MANIFEST=()
 
 if [[ ! -d "$FORGE_SKILLS" ]]; then
