@@ -161,7 +161,7 @@ If no, end here. The Opus and Vow are enough for now. The Blueprint and Pattern 
 - **Fill gaps proactively.** Users won't think of audit logging, rate limiting, or edge cases. You should.
 - **Be opinionated when asked.** When the user doesn't have a preference, recommend based on constraints.
 - **Numbers matter.** Push for specifics. Even rough estimates beat "it's a big market."
-- **The three HARD RULES above bind every turn** — research first, no timeline questions, no inferred identity.
+- **The four HARD RULES above bind every turn** — research first, no timeline questions, no inferred identity, preserve the Opus.
 - **Zero technical jargon in Vow and Pitch.** No frameworks, databases, or protocols in the user-facing distillations. Technical decisions belong in the Blueprint and Pattern.
 - **Blueprint + Pattern must be self-contained.** An agent (including /smith) reading ONLY those two documents can start building.
 

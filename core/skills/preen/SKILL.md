@@ -1,6 +1,6 @@
 ---
 name: preen
-description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft, plus cross-surface consistency (the same action done three ways). Pattern-aware (writes UX section of [PROJECT]_06_Pattern_V1.0.md when present). Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, or design review."
+description: "UI/UX evaluator — Don Norman's usability principles + Jony Ive's reductive craft, plus cross-surface consistency (the same action done three ways), typographic voice (one interface face) and landing-page shape. Pattern-aware (writes UX section of [PROJECT]_06_Pattern_V1.0.md when present). Self-improving. TRIGGER when: user asks for UI/UX feedback, usability evaluation, design review, or a typography or landing-page audit."
 ---
 <!-- model: opus | fan-out: dimensions 1-4, 6-8 → sonnet; dimension 5 (emotional design) → opus; synthesis at opus -->
 

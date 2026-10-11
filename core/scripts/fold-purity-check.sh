@@ -72,7 +72,7 @@ ALLOWLIST_TERMS=(
   "WebSocket" "WebSockets" "WebView" "WebRTC" "WebGL" "WebGPU" "WebAssembly" "WebAuthn" "WebCrypto"
   "AudioContext" "MediaStream" "MediaRecorder" "RTCPeerConnection" "IndexedDB" "LocalStorage" "SessionStorage"
   "NotAllowedError" "TypeError" "RangeError" "SyntaxError" "ReferenceError"
-  "DevTools" "HttpOnly" "SameSite"
+  "DevTools" "HttpOnly" "SameSite" "EventSource"
   # Android / iOS API names commonly referenced
   "MainActivity" "BridgeActivity" "WindowCompat" "StatusBar" "ViewController" "AppDelegate" "ActivityResult"
   # Common open-source projects / tools (referenced as examples, not project lock-in)
@@ -177,7 +177,7 @@ scan_file_or_text() {
   backtick_hits=$(echo "$body" \
     | grep -oE '`[a-z][a-zA-Z_]*[A-Z][a-zA-Z_]*`|`[a-z][a-z_]+_[a-z_]+`' \
     | sort -u \
-    | grep -vE '`(camelCase|snake_case|kebab-case|env_var|api_key|access_token|refresh_token|node_modules|user_id|created_at|updated_at|deleted_at|expiresAt|invalid_grant|client_id|client_secret|grant_type|expires_in|token_type|id_token|scope|state|redirect_uri|code_verifier|code_challenge|cf_clearance|cf-mitigated|head_limit|output_mode|files_with_matches|forge-path|file_path|builtAt|startedAt|version_metadata|send_email|sending_not_ready|tier_to_model)`' \
+    | grep -vE '`(camelCase|snake_case|kebab-case|env_var|api_key|access_token|refresh_token|node_modules|user_id|created_at|updated_at|deleted_at|expiresAt|invalid_grant|client_id|client_secret|grant_type|expires_in|token_type|id_token|scope|state|redirect_uri|code_verifier|code_challenge|cf_clearance|cf-mitigated|head_limit|output_mode|files_with_matches|forge-path|file_path|builtAt|startedAt|version_metadata|send_email|sending_not_ready|tier_to_model|getUserMedia|availableModels|scan_wrangler)`' \
     || true)
   if [[ -n "$backtick_hits" ]]; then
     file_violations+="  BACKTICKED-IDENTIFIER (project-specific schema/field names — universalize the principle, drop the names):"$'\n'
@@ -195,7 +195,7 @@ scan_file_or_text() {
   #   - Determiner + noun-phrase patterns (Any/Every/All/Each/Some/No/Many/Few/Most + Word)
   #   - Leading verb + Word (commit-subject style) and verb + Word + digit
   # Whole-line exclusion stays only for structural markers (Apply when:, etc.).
-  local allowed_phrases='Cloud Run|Cloud Tasks|Cloud Storage|Cloud Functions|Cloud SQL|Cloud Spanner|Cloud Pub|Cloud Build|Better Auth|Pub Sub|Service Bus|Lambda Function|Open Source|Active Directory|Big Query|Data Lake|Side Effect|Dead Letter|Last Known|Last Modified|Last Verified|First Class|First Party|Single Sign|Two Factor|Multi Factor|Plain Text|Rich Text|Cross Platform|Cross Origin|Same Origin|Source Of|Out Of|Ahead Of|Behind The|Day One|Phase One|Phase Two|Phase Three|Read Me|Markdown File|Test Driven|Domain Driven|Event Driven|Type Script|Java Script|Web Sockets|Server Sent|Edge Cases|Use Case|Side Project|Republic Act|Data Privacy|Personal Information|Personal Data|Sensitive Personal|Magic Link|Magic Links|Service Account|Service Accounts|Service Identity|Pre Generated|Per Event|Per Check|Per Request|Per Hour|Per Day|Per Year|Per Month|Per User|Per Tenant|Per Customer|Per Page|Auto Scaling|Cold Start|Hot Path|Happy Path|Edge Case|Best Practice|Anti Pattern|Black Box|Black List|White List|Open Source|Closed Source|Quality Gate|Quality Gates|Status Code|Status Codes|Token Refresh|Refresh Token|Republic Act|Firstname Lastname|Foo Bar|Master Builder|Master Aesthetic|Master Tender|Master of|The Smith|The Wedge|The Warden|The Master|The Masters|Smith Master|Wedge Master|Warden Master|Pre Flight|Post Flight|Soul Brief|Soul Briefs|Forbidden Defaults|Banned Defaults|Three Lenses|Council Verdict|Council Fan|Family Tone|Lens Beats|Beats Fielded|The Regenerate|Cloudflare Workers|Cloudflare Email Service|Workers Paid|Tail Worker|TanStack Query|Claude Code|Upgrade Required|Versioned Units|Builds Go|Forge Arts|Agent Skills'
+  local allowed_phrases='Cloud Run|Cloud Tasks|Cloud Storage|Cloud Functions|Cloud SQL|Cloud Spanner|Cloud Pub|Cloud Build|Better Auth|Pub Sub|Service Bus|Lambda Function|Open Source|Active Directory|Big Query|Data Lake|Side Effect|Dead Letter|Last Known|Last Modified|Last Verified|First Class|First Party|Single Sign|Two Factor|Multi Factor|Plain Text|Rich Text|Cross Platform|Cross Origin|Same Origin|Source Of|Out Of|Ahead Of|Behind The|Day One|Phase One|Phase Two|Phase Three|Read Me|Markdown File|Test Driven|Domain Driven|Event Driven|Type Script|Java Script|Web Sockets|Server Sent|Edge Cases|Use Case|Side Project|Republic Act|Data Privacy|Personal Information|Personal Data|Sensitive Personal|Magic Link|Magic Links|Service Account|Service Accounts|Service Identity|Pre Generated|Per Event|Per Check|Per Request|Per Hour|Per Day|Per Year|Per Month|Per User|Per Tenant|Per Customer|Per Page|Auto Scaling|Cold Start|Hot Path|Happy Path|Edge Case|Best Practice|Anti Pattern|Black Box|Black List|White List|Open Source|Closed Source|Quality Gate|Quality Gates|Status Code|Status Codes|Token Refresh|Refresh Token|Republic Act|Firstname Lastname|Foo Bar|Master Builder|Master Aesthetic|Master Tender|Master of|The Smith|The Wedge|The Warden|The Master|The Masters|Smith Master|Wedge Master|Warden Master|Pre Flight|Post Flight|Soul Brief|Soul Briefs|Forbidden Defaults|Banned Defaults|Three Lenses|Council Verdict|Council Fan|Family Tone|Lens Beats|Beats Fielded|The Regenerate|Cloudflare Workers|Cloudflare Email Service|Workers Paid|Tail Worker|TanStack Query|Claude Code|Upgrade Required|Versioned Units|Builds Go|Forge Arts|Agent Skills|Workers Logs|Workers Issues|Key Learnings|Version You|You Can|Can Read'
   local personal_name_hits
   personal_name_hits=$(echo "$body" \
     | awk -v phrases="$allowed_phrases" '
@@ -323,7 +323,7 @@ if [[ "$LEAKS_FOUND" -eq 1 ]]; then
   echo "═══════════════════════════════════════════════════════════════════════"
   echo ""
   echo "The HARD RULE 'No Project Names in Forge' has been violated."
-  echo "See <forge>/AGENTS.md and <forge>/learnings/global-patterns.md"
+  echo "See <forge>/core/rules/forge-governance.md and <forge>/learnings/global-patterns.md"
   echo "(Exhibit A: 'How a Project-Name Leak Happens') for context."
   echo ""
   echo "Violations:"

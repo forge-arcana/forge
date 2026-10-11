@@ -14,7 +14,7 @@
 5. Forge-internal skills under `.claude/skills/` (purge, forge bootstrap) — the easiest to forget because they are not deployed and not in `core/skills/`. The cleansing tool has carried a phantom reference in its own definition.
 6. `core/scripts/forge-purge-scan.sh` — hardcodes the art roster in 3 places (two table loops + the `ARTS` count). An art omitted there is miscounted as a task skill and dropped from both fitness tables, so the audit that detects staleness is itself stale.
 7. User-visible error messages in supporting scripts, learning-file headers ("Absorbed by /old-command" — one line repeated across ~10 files, batch them), settings allowlist paths, `.gitignore` comments and dead deploy-target patterns.
-8. The plan doc that drove the change — once merged it is archaeology; move it from `memory/` to `archive/`.
+8. The plan doc that drove the change — once merged it is archaeology; move it from `plans/` to `archive/`.
 **Rules**: (1) Run `/purge` immediately after any such change. (2) Never assume the skill that performed a removal swept its own references. (3) Fix error messages before commit — they reach users faster than docs. (4) Keep one explicit "replaces the old X" bridge line in the new command's docs; that is migration ergonomics, not a stale ref.
 **Apply when**: A new art lands, a top-level command is retired, renamed or merged, a shared pre-flight step or cross-cutting capability is removed, or a branch carrying renamed top-level paths merges onto `main`.
 **Forge-worthy**: yes — universal: a structural change to a documented system requires sweeping every consumer, including the tooling that performs the sweep.
@@ -35,11 +35,6 @@
 ## Parallel Arts Need Explicit "Parallel" Label (2026-03-22)
 **Learning**: When adding a new evaluative art that runs on a different trigger (e.g., "on UI changes") rather than escalating intensity, explicitly label it as "parallel" from the start. Without the label, it gets inserted into existing sequences by default, creating naming inconsistencies (e.g., "trifecta" with 4 items). The trigger determines placement: same trigger escalation = sequential, different trigger = parallel.
 **Apply when**: Adding new arts or evaluative skills to an existing escalation sequence.
-
-## Tracker "Orphans" Are Not Orphans — the Re-Absorption Incident (2026-03-29)
-**Learning**: A purge orphan scan classified fold-tracker entries with no matching `learnings/*.md` title as removable. Some existed under slightly different titles (fuzzy mismatch); others lived in `memory/*.md` (wrong search scope). Removing them told the next fold they were unprocessed — re-absorption and duplicates in `global-patterns.md`. Purge silently poisoned the tracker, and fold faithfully executed the poison.
-**Rule**: Superseded by the stronger rule now in `purge/SKILL.md` — the tracker is APPEND-ONLY. No verification makes removal safe, because no single user can see every membrane. This entry is the incident record behind that rule (see `reference/2026-03-29-tracker-append-only.md`).
-**Forge-worthy**: yes — universal: a processing tracker that gates idempotent operations must never be pruned on a "no matching output" heuristic.
 
 ## Single-Pass Purge Is Legitimate When the Forge Is Already Clean (2026-05-10)
 **Learning**: The skill prescribes parallel four-dimension subagent fan-out (Knowledge Purity / Memory Hygiene / Skill Fitness / Reference Integrity). When the scan output is mostly clean (no project leaks, no learning duplication, no critical bloat) and the actionable findings cluster in *one* dimension (post-pivot Reference Integrity drift), spawning four subagents that each re-verify the scan output is wasteful — most return "minor things" the master already saw. In that case, master-side consolidation with all evidence read in pre-flight is sufficient and faster. The four-dimension fan-out earns its keep when the forge is genuinely heavy (≥ one trigger threshold breached, or evidence of contamination in multiple dimensions). When the scan comes back light, a single-pass purge respects the user's token budget without compromising the user-gate ceremony.

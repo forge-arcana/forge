@@ -221,8 +221,6 @@ Per the [Forge Protocol](../forge/protocol.md) post-flight, append to `memory/pi
 
 Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/pitch-learnings.md`.
 
-Suggest next steps:
-
 After a `--critique` run, suggest:
 
 - **Critique verdict KILL or NEEDS RETHINK** → revisit `/prime` to revise the Vow's viability thread and the Opus's "Why us" before any build resources are committed.

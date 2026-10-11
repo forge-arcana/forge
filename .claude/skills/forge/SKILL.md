@@ -73,7 +73,7 @@ Below is the flow for `/forge`, `/forge <path>`, `/forge --dry`, `/forge --dry <
 
 ## Phase 0: Preflight
 
-> Execute [Forge Preflight](preflight.md) in **pull** mode (or **fetch** mode if `--dry`).
+> Execute Forge Preflight (`<forge>/core/skills/forge/preflight.md`) in **pull** mode (or **fetch** mode if `--dry`).
 
 Run `<forge>/core/scripts/forge-status.sh --pull` (or `--fetch` for `--dry`).
 
@@ -263,6 +263,7 @@ The procedure — blockers, state table, stale-registry check, version gate, app
 | dev/kill-zombies.sh | Recommended | [exists/missing] | [suggest /srs] |
 | Documentation | `docs/` in-repo OR `## Documentation` section with `**Docs path:**` | [in-repo/external/missing] | [add section] |
 | Logging setup | dev.log + browser forwarding | [present/missing] | [flag for /poke] |
+| Versioning | `## Versions` table in the rules file listing each deployable or publishable unit (conventions item 10) | [present/missing/N/A: no such unit] | [none/report the gap and offer adoption as its own task; never start it in this cycle] |
 ```
 
 Present as console markdown, then ask the user — using your harness's multi-choice prompt if available, otherwise inline: "Apply all / Skip some / Skip all".

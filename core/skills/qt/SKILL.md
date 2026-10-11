@@ -1,6 +1,6 @@
 ---
 name: qt
-description: Quick Test — verify a fix actually works before the user manually tests. Replaces the old "dd" debug dev command. Use when user says "qt" or wants to verify a fix.
+description: Quick Test — verify a fix actually works before the user manually tests. Use when user says "qt" or wants to verify a fix.
 ---
 <!-- model: sonnet | evidence-backed verdicts; no fan-out -->
 

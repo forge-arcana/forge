@@ -1,6 +1,22 @@
 # Forge — Recent History (Archive)
 
-> Older "Recent" entries moved from the forge rules file (`CLAUDE.md` until 2026-10-01, `AGENTS.md` since) during the 2026-04-27, 2026-04-30, four 2026-05-04 wraps, the 2026-05-10 wrap, the 2026-06-13 wrap, the 2026-06-14 purge-trim, the 2026-06-18 wrap, the 2026-07-16 wrap, the 2026-07-19 wrap, the 2026-08-15 wrap, the 2026-09-23 wrap, and the 2026-10-02 fold. Kept inline there: one-line pointer bullets per period plus the newest entry. Full detail lives here.
+> Older "Recent" entries moved from the forge rules file (`CLAUDE.md` until 2026-10-01, `AGENTS.md` since) during the 2026-04-27, 2026-04-30, four 2026-05-04 wraps, the 2026-05-10 wrap, the 2026-06-13 wrap, the 2026-06-14 purge-trim, the 2026-06-18 wrap, the 2026-07-16 wrap, the 2026-07-19 wrap, the 2026-08-15 wrap, the 2026-09-23 wrap, the 2026-10-02 fold, and the 2026-10-11 purge. Kept inline there: one-line pointer bullets per period plus the newest entry. Full detail lives here.
+
+## 2026-10-08 — Haiku tier pin — moved from AGENTS.md 2026-10-11
+
+The mechanical tier pin moved from `claude-haiku-4-5` to `claude-haiku-5-5` (`FORGE_HAIKU_MODEL` in `cast-deploy.sh`, `protocol.md`, the bash reference). Needs Claude Code 2.1.293+ and `claude-haiku-5-5` in the managed `availableModels` list on every machine before the cast; a pin outside an enforced allowlist is silently ignored and the skill runs at the session model. The default session model stays Sonnet 5.5 with an Opus 5.5 advisor: a cheap-tier session is told to write without delegating, so a Haiku default would not orchestrate, and no A/B against Sonnet has been run.
+
+## 2026-10-08 — Leak purge + purity-gate fix — moved from AGENTS.md 2026-10-11
+
+Repo-wide content-leak sweep, 62 rewrites across skills, learnings, memory, plans and reference notes (a contributor handle in example rows, a named reviewer in two notes, one renamed to `reference/2026-03-28-external-assessment.md`, single-market vendor examples, incident anecdotes restated as patterns). `fold-purity-check.sh --staged` now resolves paths from the repo root; before, it skipped every file and always passed. The gate scans `learnings/` and `memory/` only in staged and diff modes (by decision), prints a scan summary, and catches a name beside an allowlisted phrase. Open: `AGENTS.md` is unscanned, identifiers are caught only in backticks. Older commit messages that carry names were left unrewritten by decision.
+
+## 2026-10-07 → 2026-10-08 — Cloudflare-native defaults — moved from AGENTS.md 2026-10-11
+
+Error tracking on Workers is Workers Logs + Workers Issues + source maps, Sentry optional (docs-derived, not yet runtime-verified; `/press` Dim 5, `/probe` baseline and `forge-scan.sh` `scan_wrangler` follow). A product on Cloudflare sends email through Cloudflare Email Service with no fallback; Resend stays the default elsewhere (`/prime` Q36 follows). Both live in the stack-guide table rows + Key Learnings.
+
+## 2026-10-06 — Versioning standard — moved from AGENTS.md 2026-10-11
+
+New HARD RULE "Every Unit Has a Version You Can Read" + `core/skills/forge/versioning.md` (unit register in the project rules file, one SemVer source per unit, `X.Y.(Z+1)-dev.N+<sha7>` build identity, per-kind surfacing, contract versions separate from the release version, deploys verify the running version). Conventions item 10; hooks in `/probe` (Pattern skeleton Versioned Units), `/smith` Heat 3, `/press` Dim 3 + 6 with `forge-scan.sh` evidence, `/plot` node labels, `/wrap` Step 1c, `/vsix`.
 
 ## 2026-10-02 — Status fix (retired entries route incoming) — moved from AGENTS.md 2026-10-06
 

@@ -34,13 +34,9 @@
 **Learning**: When an auth/library dependency carries optional peers of the ORM, pnpm resolves a second ORM instance with an incompatible type identity. Re-export the ORM's query surface from the database package and ban direct ORM imports elsewhere — one instance, one type identity.
 **Apply when**: pnpm monorepo + any ORM whose types cross package boundaries (drizzle/kysely-class failures).
 
-## Final-Gate Convergence: Verify the Fix's REACH, Not Just the Fix (2026-07-05)
-**Learning**: A fix applied to one instance of a defect class left the same class open on two sibling adapters; the re-evaluation caught it only because it re-verified the finding's *reach*, not just that the named file changed. When fixing a defect class, grep for every instance before declaring it closed, and have the next convergence cycle explicitly re-verify reach.
-**Apply when**: Any defect-class fix during convergence.
-
-## Convergence Loop: Decreasing Findings = Converging, Not Stalling (2026-07-05)
-**Learning**: A strictly decreasing serious-finding count across cycles is the healthy convergence signature. Fix-then-re-evaluate with fresh adversarial lenses each cycle surfaces the second-order defects the fixes themselves introduce.
-**Apply when**: Judging whether a final-gate loop is converging or should trip the stall check.
+## Convergence Re-Evaluates the Fix: Its Reach, and What It Added (2026-07-05 → 2026-10-11)
+**Learning**: A fix round is new code, and the next convergence cycle reviews it as such, with fresh adversarial lenses, not a re-run of the original findings. Two checks. (1) **Reach**: a fix applied to one instance of a defect class leaves the class open on siblings; grep for every instance before declaring it closed, and have the next cycle re-verify the finding's reach, not just that the named file changed. (2) **What the fix added**: fixes introduce second-order defects of their own, and a fix that deletes or filters is the sharpest case (see `pound-learnings.md`, "A Delete by Substring Match Must Be Anchored to Its Field and Its Tenant"). A strictly decreasing serious-finding count across cycles is the healthy signature: converging, not stalling.
+**Apply when**: Any defect-class fix during convergence; judging whether a final-gate loop is converging or should trip the stall check.
 
 ## Interim Crash-Safety Commits Inside Long Units (2026-07-04)
 **Learning**: A 15-heat unit is too long for a single gate commit. Committing at the unit's halfway point (tests green, prior heats reviewed) converts hours of exposure into zero without violating the no-per-heat-commit rule. Label it an interim checkpoint in the ledger.
@@ -134,5 +130,5 @@
 **Apply when**: Building any multi-screen app with parallel agents sharing one codebase.
 
 ## Before a Framework Major Upgrade, Build the Regression Checklist From the Project's Own Fix History (2026-10-11)
-**Learning**: The project's fix history is the regression suite an upgrade guide cannot supply. List each native workaround, the bug it fixed and how the fix was proven, then classify each as still-needed or superseded by reading upstream source at the target tag. In one major upgrade most hand-rolled WebView workarounds (scrollbars, overscroll, long-press, back handling) had no upstream replacement and had to be carried forward. Verification rigs must live in the repo: two rigs that memory notes named had been kept under `node_modules` and were gone from disk when needed.
+**Learning**: The project's fix history is the regression suite an upgrade guide cannot supply. List each platform workaround, the bug it fixed and how the fix was proven, then classify each as still-needed or superseded by reading upstream source at the target tag; expect most to need carrying forward. Keep verification rigs in the repo under a tracked path: a rig left under a dependency or build directory is deleted by the next install and is gone when the upgrade needs it. Capacitor 8 instance: `stack-guide.md` → "Capacitor 8 and Xcode 27 Upgrade" → Plugins, last bullet.
 **Apply when**: Planning any framework major upgrade on a project with accumulated platform workarounds, or writing a verification script worth keeping.

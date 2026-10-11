@@ -113,7 +113,7 @@ On first run, confirm the detected platform with the user. If multiple signals d
 ### Non-Production Bot Protection
 
 For staging/preview deploys, verify bot protection is in place:
-- GCP Cloud Run: `--no-allow-unauthenticated` flag
+- GCP Cloud Run: internal staging uses `--no-allow-unauthenticated`; customer-facing staging keeps `--allow-unauthenticated` and relies on app-level bot protection
 - Other platforms: check for equivalent access controls
 - Warn if deploying to non-production without bot protection
 
@@ -122,11 +122,12 @@ For staging/preview deploys, verify bot protection is in place:
 1. Run the platform-specific deploy command
 2. Wait for deployment to complete
 3. Run a smoke test if a health check URL is known (curl the endpoint)
-4. Report result
+4. Read the running version from the deployed unit (`GET /version`, or the surface its `## Versions` row names) and compare it with the build identity just shipped (`X.Y.Z+<sha7>`). A mismatch is a FAILED deploy even when the smoke test passed. If the unit exposes no readable version, report "running version unverifiable" and point to `<forge>/core/skills/forge/versioning.md`; do not report SUCCESS on the smoke test alone.
+5. Report result
 
 ### CD Report
 
-`## CD Report — [PROJECT NAME]`: a table `Aspect | Detail` with rows Platform, Environment, URL, Status, Smoke test, Bot protection, then `**Deploy Status**: SUCCESS | FAILED`.
+`## CD Report — [PROJECT NAME]`: a table `Aspect | Detail` with rows Platform, Environment, URL, Status, Smoke test, Running version, Bot protection, then `**Deploy Status**: SUCCESS | FAILED`.
 
 ## Step 4: Summary
 

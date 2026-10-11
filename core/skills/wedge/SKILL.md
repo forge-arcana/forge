@@ -55,9 +55,9 @@ You commit at one of two ends — bold maximalism or refined minimalism — and 
 > - **Palettes**: purple-gradient-on-white, hedged "professional blue" (#4A90E2 and its kin), every-color-equally-weighted rainbows, generic dark-mode (#0a0a0a / #1a1a1a / #2a2a2a / #fafafa).
 > - **Patterns**: glassmorphic cards on every surface, identical SaaS hero + features + testimonials + pricing + CTA, "trusted by" logo strips lifted from another deck, three-column equal-width grids without typographic hierarchy.
 
-## HARD RULE — Required Substance (tone-conditional, implementation matches vision)
+## HARD RULE — Required Substance (tier-conditional, implementation matches vision)
 
-> **Every Touchstone must be specific, intentional, and production-grade. The shape of substance — and the code density that delivers it — varies by tone.**
+> **Every Touchstone must be specific, intentional, and production-grade. The shape of substance — and the code density that delivers it — varies by Substance Tier.**
 >
 > **Universal floor (every Touchstone, every tone):**
 > - **One characterful interface face** — a distinctive family (Söhne, Whyte, Authentic Sans, NM Type, Reckless Neue, Migra, and their kin) carries every interface word: headings, body, labels, figures, dialog titles. Hierarchy is size, weight, tracking, colour — never a change of family. A display face (PP Editorial New, Cormorant, Tiempos, Ogg) may live on the **wordmark beside the brand mark** and nowhere else; putting it on headings needs the audience-and-reason sentence the Touchstone scaffold demands, and it never touches a figure. No system stacks. No banned defaults.

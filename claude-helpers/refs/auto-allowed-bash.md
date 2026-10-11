@@ -1,9 +1,8 @@
 # Claude Code — Harness Reference (descriptive)
 
-This file is **descriptive, not authoritative**. It is the Claude Code target of `/forge` Phase 3a: approved config rows merge into its harness tables. No script classifies config drift — the model assembles those rows — and the HARD RULES are never synced through it. It records the Claude-Code-specific harness setup: which tools and permissions the reference template grants, editor conventions, and the shorthand/auto-invocation behaviour a Claude Code membrane exhibits.
+This file is **descriptive, not authoritative**. It is the Claude Code target of `/forge` Phase 3a: approved config rows merge into its harness tables. No script classifies config drift — the model assembles those rows — and the HARD RULES are never synced through it. It records the Claude-Code-specific harness setup: which tools and permissions the reference template grants, editor conventions, and the shorthand/auto-invocation behaviour a Claude Code membrane exhibits. Since the rules moved to the FORGE-RULES block, a current membrane rules file carries only `forge-path:` and that block; the sections below describe behaviour delivered by skills and by `core/rules/`, and have no counterpart in the membrane file to diff against.
 
 **The HARD RULES are not owned here.** They live in `<forge>/core/rules/` (`development-discipline.md` + `forge-governance.md`) and deploy one-way into the marker-delimited `FORGE-RULES` block of `~/.claude/CLAUDE.md` on every `/forge` cast (`cast-deploy.sh --rules`). Read `core/rules/` for the current rule text; any rule quoted below is a convenience copy that may lag.
-
 ---
 
 ## Workflow Orchestration
@@ -84,30 +83,13 @@ No separate task/context/todo files are created in the repo — everything lives
 
 ## Shorthand Commands
 
-| Command | Meaning |
-|---------|---------|
-| **wawa** | "Where are we at?" — See details below |
-| **wrap** | Full pre-commit ritual: update learnings, save context, update docs, lint, stage, commit, ask before push |
-| **qt** | Quick test — verify a fix works before user tests manually. Followed by a description of what to test. |
+The shorthand commands are skills, not rules-file text. Their behaviour is owned by the skill files; this table only names them.
 
-### `wawa` — Where Are We At?
-
-Outputs a structured status summary with **no prose preamble** — just data:
-
-1. **Re-read first**: Always re-reads the project's `AGENTS.md` Current Context section AND any active plan file before generating the table. Never relies on conversation memory — it goes stale. Cross-references completed items against plan items.
-2. **Status line**: Branch, last commit, test counts (unit + E2E), type/lint errors.
-3. **Outstanding work table**:
-
-   | # | Category | Task | Priority | Status | Notes |
-   |---|----------|------|----------|--------|-------|
-   | 1 | Phase work | ... | High | ... | ... |
-   | 2 | Deferred | ... | Low | ... | ... |
-   | 3 | Tech debt | ... | Medium | ... | ... |
-
-   Categories group rows into:
-   - **Phase work** — active/next planned phases from the execution plan
-   - **Deferred** — items explicitly deferred in the Current Context section
-   - **Tech debt** — known divergences, migrations, or cleanup tasks
+| Command | Skill | Meaning |
+|---------|-------|---------|
+| **wawa** | `core/skills/wawa/SKILL.md` | "Where are we at?" — sourced status table (Active Work / Outstanding / Parked), with a warning when the rules file has no `## Current Context` |
+| **wrap** | `core/skills/wrap/SKILL.md` | Pre-commit ritual: lint → stage → context → docs → compact → commit |
+| **qt** | `core/skills/qt/SKILL.md` | Quick test — verify a fix works before the user tests manually |
 
 ---
 

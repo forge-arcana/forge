@@ -35,7 +35,7 @@ Checklist (applied to the project's single rules file once the state is resolved
 - [ ] Rules-file state is `OK` (`AGENTS.md` only, no project-root `CLAUDE.md`) per the procedure above
 - [ ] Hard rules live in the harness's global rules file — do NOT duplicate in the project rules file
 - [ ] Has Stack section (frameworks, DB, hosting)
-- [ ] Shorthand commands live in the harness's global rules file — do NOT duplicate in the project rules file
+- [ ] Shorthand commands (`wawa`, `wrap`, `qt`) are deployed skills — do NOT restate them in the project rules file
 - [ ] Has Current Context section (updated by /wrap)
 - [ ] Under 25k chars — compact at 20k (`/wrap` step 5), hard-flag above 25k. Overflow goes to `memory/recent-history.md` as dated sections, leaving a one-line pointer bullet inline.
 
