@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-10-10",
+  "lastRun": "2026-10-11",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -286,7 +286,26 @@
     "Promote to Core: Builds Go Through the Forge Arts by Default",
     "Promote to Core: A Native Fallback Is Not a Successor — Read the Precedence Rule Before Migrating",
     "Advisor Consults Re-Read the Whole Transcript — Session Size Sets Their Price",
-    "Promote to Core: A Status Reader Must Report a Missing Source, Not an Empty Slate"
+    "Promote to Core: A Status Reader Must Report a Missing Source, Not an Empty Slate",
+    "A Missing Label Is Not a Maturity Status: Read the Changelog",
+    "Swapping an HTTP-and-Secret Integration for a Platform Binding Changes the Wiring Surface",
+    "A Vendor Onboarding Command Can Publish a Domain-Wide Policy as a Side Effect",
+    "Reviewer Subagents With Live Data Must Join Threads Before Test Teardown",
+    "Evidence Scan Without Language Detection Reports Zero Matches as Absence of Evidence",
+    "A Fix Introduced in Response to a Gate Finding Needs a Convergence Pass on What It Added",
+    "Xcode 27 Requires the UIScene Life Cycle, So a Capacitor 7 App Cannot Run When Built With It",
+    "One Scene Delegate for Every Scene Session Duplicates the Bridge, and With It Every Purchase Listener",
+    "Pin the Xcode Version on CI and Never Convert to the JSON Project Format",
+    "Audit Every Plugin for a Package.swift Before Choosing Swift Package Manager Over CocoaPods",
+    "Capacitor 8 on Android Registers a SystemBars Plugin That Can Zero the CSS Safe-Area Insets",
+    "For a Plugin on an Auth or Money Path, Diff the Native Source Across the Version Jump",
+    "Before a Framework Major Upgrade, Build the Regression Checklist From the Project's Own Fix History",
+    "A Research Subagent's File Write May Be Refused; Have It Return Text",
+    "A Non-Answer Is Never a Verdict",
+    "One Definition of a State, Shared by Every Reader",
+    "Check the Shipped Commit Before Stating Exposure",
+    "Hardening Each Failure Path Does Not Produce Cross-Row Invariants",
+    "Two Parsers of One File Are Tested With the Same Bytes"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

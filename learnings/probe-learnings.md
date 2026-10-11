@@ -89,3 +89,15 @@
 **Learning**: The hybrid storage pattern — raw external payloads in jsonb (schemas differ, fields deprecate), comparables promoted to typed NULLABLE columns — is load-bearing wherever aggregation happens: Postgres keeps no planner statistics on jsonb internals, percentile/median functions need typed columns, and nullable columns encode "not available ≠ zero" for free. For self-tuning loops fed by such metrics: record outcomes at fixed maturity horizons (e.g., 48h and 7d, horizon stored on the row) rather than "next day," compute baselines over rolling windows, and gate any automated rebalancing on a minimum sample count — medians over tiny samples thrash the system they steer.
 
 **Apply when**: Reviewing metrics ingestion from external platforms or any learn/optimization loop; promote the group-by axes to columns and check horizon + sample-size discipline.
+
+## A Missing Label Is Not a Maturity Status: Read the Changelog (2026-10-10)
+
+**Learning**: A summarizing fetch reported a vendor service as generally available because its product page carried no beta badge. The changelog showed it was still in public beta, with its starting quota published nowhere. Absence of a label is not a status. Before repeating a maturity claim (generally available, beta, deprecated), find the explicit release line in the product changelog or release notes and cite its date. Treat a summarizer's status claim as unverified until the primary line has been read.
+
+**Apply when**: Checking a vendor product's maturity, limits or pricing through a summarizing fetch or search before building on it.
+
+## Swapping an HTTP-and-Secret Integration for a Platform Binding Changes the Wiring Surface (2026-10-10)
+
+**Learning**: A platform binding is not a drop-in for an environment-variable API key. Code shared between a Node runtime and an edge runtime reads configuration from the process environment, where a binding does not appear, so the binding has to be threaded from every handler that can reach the call, in every deployed worker. A change sized as "two fetch calls" was a change to every entry point. Size the swap by counting the call paths that reach the integration, not the call sites.
+
+**Apply when**: Estimating or planning a move from an HTTP API with a secret to a runtime-provided binding, especially in code shared across runtimes.

@@ -71,3 +71,17 @@
 **Learning**: A rule the project wrote down and did not implement is worse than no rule at all — it certifies the gap in every review that checks the code against something else and never checks the code against its own stated claims. Typical unkept promises: a "read-only" comment above code that writes, a design rule about what a payload may carry, a "pinned by hash" claim with no pin. Prior review misses them because it compares code to itself, not to the design docs, comments, and runbook claims sitting beside it.
 
 **Apply when**: Running any review or gate pass — audit stated rules (design docs, code comments, runbook claims) against the actual implementation as a first-class finding category, not as an afterthought once functional correctness is checked.
+
+## Evidence Scan Without Language Detection Reports Zero Matches as Absence of Evidence (2026-10-11)
+
+**Learning**: The shared evidence-scan script used by the review arts greps JavaScript/TypeScript patterns only. On a Python codebase it reported zero matches in every dimension (three separate reviewers hit this in one session) and one run exited non-zero. Until the script detects the stack, a zero-match scan on a non-JS project is not evidence of anything; reviewers must say so and rely on direct reads and executed probes.
+
+**Apply when**: Using a shared evidence scanner on a project in a language it was not designed for, or interpreting a zero-match scan result from a review art.
+
+## A Non-Answer Is Never a Verdict (2026-10-11)
+**Learning**: A subprocess that timed out, never started, or had its output cut short was being read the same way as one that ran and said "no". Each of those is the absence of an answer, and treating it as a negative answer turned transient trouble into a permanent decision. Give the wrapper one predicate for "this run answered" (started, exited on its own, output complete) and make every caller that parses output check it before reading the result.
+**Apply when**: Any code that decides something from a subprocess, HTTP call or query result — separate "answered no" from "did not answer" at the lowest layer, once.
+
+## One Definition of a State, Shared by Every Reader (2026-10-11)
+**Learning**: "Is this row waiting?" was computed in several places — the worker, the status view, the ordering check — each with slightly different conditions, so a row could be waiting to one reader and idle to another. A single named query fragment or predicate, imported by every reader, removed the disagreement and made the set of places that can clear the state small enough to list.
+**Apply when**: A derived state (waiting, held, stale, eligible) is read by more than one module — define it once and import it; never re-derive it.

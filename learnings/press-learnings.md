@@ -55,3 +55,15 @@
 **Learning**: A mechanism can be 5/5 on craft — hash-pinned, locked, fully audited — and still be unready, because craft asks "is the mechanism correct" while posture asks "what does the assembled default do." A well-built decision path sitting behind a default-open route is unready regardless of how good the path is. Gate go-live review on the assembled default a stranger would actually hit, not on the mechanism in isolation, and give the safe posture a supported install path — a flag that cannot survive a restart is not a posture, it is a demo.
 
 **Apply when**: Reviewing a feature that is individually well-engineered but reachable through a default configuration — especially auth, authorization, or anything gating code execution.
+
+## A Vendor Onboarding Command Can Publish a Domain-Wide Policy as a Side Effect (2026-10-10)
+
+**Learning**: Enabling a vendor's sending feature on a domain with no mail-authentication policy record made the command publish the strictest policy, with no reporting address, live at once and applying to every other provider sending as that domain. The command-line tool's own login had read-only DNS scope, so it could not change the record back. Before running an onboarding or "enable" command against a shared resource (a DNS zone, an account, an organization), read which records or settings it will write, decide the policy yourself first, and have a credential ready that can undo it.
+
+**Apply when**: Running any vendor "enable" or setup command against a domain or account that other providers or products already use.
+
+## For a Plugin on an Auth or Money Path, Diff the Native Source Across the Version Jump (2026-10-11)
+
+**Learning**: Plugin version numbers and changelogs do not track behaviour. A biometric plugin made its device-credential fallback option iOS-only on Android between two minor releases with no release note; it was found only by diffing native source, and an app relying on PIN fallback would have locked out users with a PIN and no enrolled biometric. Four rules for a plugin upgrade. (a) For any plugin on an auth or money path, diff the native source across the jump; do not trust the changelog. (b) A plugin whose latest release is one framework major behind can still install through a loose peer range but is untested upstream on the new major; list each such plugin as accepted risk with a device pass. (c) A package-manager patch on a plugin survives a framework major as long as the plugin version is unchanged (pnpm re-keys only the peer suffix); the Podfile and `capacitor.settings.gradle` hold realpath-resolved store paths that the sync command rewrites, so never hand-edit them. (d) Debug builds are not minified, so an upgrade that needs new keep rules fails only as a boot crash on a signed, minified build; a release-build smoke pass belongs in every plugin-upgrade checklist. Status: source-derived, device verification pending.
+
+**Apply when**: Bumping any native plugin, especially biometric, purchase or secure-storage plugins, or reviewing an upgrade that passed only on debug builds.
