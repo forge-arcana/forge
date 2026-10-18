@@ -82,7 +82,11 @@ which fails safe (log, drop the token, type nothing):
   `/clear` it reads the bytes appended since then once, drops a trailing
   partial line from that same buffer, and ignores only:
   - types `last-prompt`, `custom-title`, `agent-name`, `mode`,
-    `permission-mode`, `atis-latch`, `cost-state`, and `system` (any subtype);
+    `permission-mode`, `atis-latch`, `cost-state`, `bridge-session`,
+    `artifact-comment-monitor`, and `system` (any subtype). The same list
+    applies to the post-clear resume guard, so session metadata written at the
+    top of a new transcript (Remote Control, artifact watches) does not read
+    as user activity;
   - `assistant` lines timestamped no later than the Stop start + 2 s (the
     turn's own final message).
 

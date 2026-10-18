@@ -27,7 +27,8 @@
 #   - before `/clear` the transcript bytes appended since the Stop hook started
 #     must be quiet. Allowlist, everything else is activity: only the types
 #     last-prompt, custom-title, agent-name, mode, permission-mode, atis-latch,
-#     cost-state and system (any subtype) are ignored, plus `assistant` lines
+#     cost-state, bridge-session, artifact-comment-monitor and system (any
+#     subtype) are ignored, plus `assistant` lines
 #     whose timestamp is <= the Stop hook's start + 2 s (the turn's own final
 #     message). user, attachment, queue-operation, progress, api-request*,
 #     file-history-snapshot, unknown types, a late assistant line, an
@@ -106,7 +107,7 @@ POST_CLEAR_TRIES=20           # ~20 s for the injected marker + idle screen
 read -r -a TMUXC <<< "${HANDOFF_TMUX:-tmux}"
 [ "${#TMUXC[@]}" -gt 0 ] || TMUXC=(tmux)
 
-PANE="" N="" NAME="-" CPID="" TID=""
+PANE="" N="" NAME="-" CPID="" TID="" PANE_WHY=""
 
 log() {
   mkdir -p "$STATE" 2>/dev/null || return 0
@@ -233,16 +234,25 @@ read_box() {
 # 0 = idle with an empty input box. 1 = not (busy, text, ambiguous). 2 = pane gone.
 pane_state() {
   local rc
+  PANE_WHY=""
   read_box; rc=$?
-  [ "$rc" -eq 0 ] || return "$rc"
-  [ "$BOX_BUSY" -eq 0 ] && [ "$BOX_N" -eq 1 ] && [ -z "$BOX_TEXT" ] || return 1
+  case "$rc" in
+    0) ;;
+    2) PANE_WHY="pane gone"; return 2 ;;
+    *) PANE_WHY="input box not the last box on screen"; return 1 ;;
+  esac
+  [ "$BOX_BUSY" -eq 0 ] || { PANE_WHY="busy (esc to interrupt shown)"; return 1; }
+  [ "$BOX_N" -eq 1 ] && [ -z "$BOX_TEXT" ] || { PANE_WHY="input not empty"; return 1; }
   return 0
 }
 
 # tx_quiet PATH BASE CUTOFF GRACED_JSON MISSING_OK
 # 0 iff nothing but Claude Code's own writes was appended to PATH after byte
 # BASE. Ignored: types last-prompt, custom-title, agent-name, mode,
-# permission-mode, atis-latch, cost-state, system (any subtype); and lines
+# permission-mode, atis-latch, cost-state, bridge-session,
+# artifact-comment-monitor (session metadata, no timestamp, written at the top
+# of a new transcript when Remote Control / artifacts are active), system (any
+# subtype); and lines
 # whose type is in GRACED_JSON (a JSON array) with a timestamp (.timestamp, or
 # .snapshot.timestamp) <= CUTOFF (epoch seconds, fractional ok). A user line
 # carrying promptId / promptSource / turnOrigin is a real prompt and is
@@ -276,7 +286,8 @@ tx_quiet() {
     | (try fromjson catch null) as $o
     | if ($o | type) != "object" then "x"
       elif ($o.type | IN("last-prompt", "custom-title", "agent-name", "mode",
-                         "permission-mode", "atis-latch", "cost-state", "system")) then empty
+                         "permission-mode", "atis-latch", "cost-state", "system",
+                         "bridge-session", "artifact-comment-monitor")) then empty
       elif $o.type == "user" and ($o | has("promptId") or has("promptSource") or has("turnOrigin")) then "x"
       elif ($o.type | IN($g[])) then
         (($o.timestamp // ($o.snapshot | objects | .timestamp) // null) | tsnum) as $t
@@ -369,11 +380,11 @@ run_job() {
     [ "$rc" -eq 2 ] && abort "pane gone"
     sleep 1
   done
-  [ "$rc" -eq 0 ] || abort "aborted: pane busy, not the last box, or input not empty"
+  [ "$rc" -eq 0 ] || abort "aborted: pane not idle after ${POLL_TRIES} checks: ${PANE_WHY:-unknown}"
 
   # Final re-check immediately before typing; transcript last.
   precheck
-  pane_state || abort "aborted: pane not idle at final re-check"
+  pane_state || abort "aborted: pane not idle at final re-check: ${PANE_WHY:-unknown}"
   tx_quiet "$TPATH" "$TBASE" "$(awk -v a="$TSTOP" -v g="$GRACE" 'BEGIN { printf "%.3f", a + g }')" '["assistant"]' 0 \
     || abort "aborted: new activity in transcript"
   rm -f "$injected"
@@ -396,7 +407,7 @@ run_job() {
     drop_token
     log "job: no injected marker, resume prompt not typed"; exit 0
   fi
-  [ "$rc" -eq 0 ] || { rm -f "$injected"; log "job: not idle after clear, resume prompt not typed"; exit 0; }
+  [ "$rc" -eq 0 ] || { rm -f "$injected"; log "job: not idle after clear (${PANE_WHY:-unknown}), resume prompt not typed"; exit 0; }
   ie="$(kv "$injected" epoch)"; ia="$(kv "$injected" at)"
   it="$(kv "$injected" transcript)"; is="$(kv "$injected" size)"
   rm -f "$injected"
@@ -406,7 +417,7 @@ run_job() {
   on="$(optin_name)" || { log "job: opt-in no longer valid after clear, resume prompt not typed"; exit 0; }
   [ "$on" = "$NAME" ] || { log "job: opt-in name changed after clear, resume prompt not typed"; exit 0; }
   proc_ok || { log "job: process check failed after clear, resume prompt not typed"; exit 0; }
-  pane_state || { log "job: pane not idle at resume re-check, resume prompt not typed"; exit 0; }
+  pane_state || { log "job: pane not idle at resume re-check (${PANE_WHY:-unknown}), resume prompt not typed"; exit 0; }
   # Resume guard: the user may already have started a turn in the new context.
   if [ -z "$it" ] || ! [[ "$is" =~ ^[0-9]+$ ]] || ! [[ "$ia" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
     log "job: resume skipped: injected marker has no transcript/size/at"; exit 0
