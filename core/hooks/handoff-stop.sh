@@ -95,6 +95,9 @@ PROMPT_CHAR=$'\xe2\x9d\xaf'   # ❯ U+276F
 BORDER_CHAR=$'\xe2\x94\x80'   # ─ U+2500
 NBSP=$'\xc2\xa0'              # Claude Code renders the empty prompt as "❯" + U+00A0
 RESUME_PROMPT='[auto-handoff] Context was cleared by the handoff hook, not typed by the user. Resume from the injected handoff: re-arm any session-only state it lists, then continue with its next task. Do not run /handoff in this turn.'
+ELLIPSIS=$'\xe2\x80\xa6'      # … U+2026, in the working spinner "Computing… (40s"
+SPIN_RE="${ELLIPSIS}[[:space:]]*\\([0-9]"
+BG_RE='[0-9]+ (shells?|(background )?tasks?)'   # footer background-task segment
 GRACE=2                       # seconds of timestamp slack in tx_quiet
 
 num_or() { [[ "$1" =~ ^[0-9]{1,6}$ ]] && printf '%s' "$1" || printf '%s' "$2"; }
@@ -186,13 +189,15 @@ squash() { local s="${1//"$NBSP"/}"; s="${s//$'\t'/}"; printf '%s' "${s// /}"; }
 #   bottom border (─...) / footer lines only (no further ─ line).
 # Sets BOX_RAW (the ❯ line, trailing space/tab/NBSP stripped), BOX_N (number
 # of content lines), BOX_TEXT (content after ❯ joined across lines, all
-# whitespace removed), BOX_BUSY (1 iff "esc to interrupt" is in the footer or
-# in the 3 lines directly above the top border, where the spinner renders).
+# whitespace removed), BOX_BUSY (1 iff the spinner shows in the 4 lines above the
+# top border ("…" + "(<digit>", or "esc to interrupt"), or the footer says "esc
+# to interrupt" WITHOUT a "N shell(s)" / "N task(s)" segment: with a background
+# shell running the footer keeps that text while idle), BOX_SIGNAL (which fired).
 # Returns 0 found, 1 no well-formed last box, 2 pane gone.
 read_box() {
   local cap i p=-1 q=-1 n s
   local -a lines
-  BOX_RAW="" BOX_N=0 BOX_TEXT="" BOX_BUSY=0
+  BOX_RAW="" BOX_N=0 BOX_TEXT="" BOX_BUSY=0 BOX_SIGNAL=""
   cap="$("${TMUXC[@]}" capture-pane -p -t "$PANE" 2>/dev/null)" || return 2
   mapfile -t lines <<< "$cap"
   n="${#lines[@]}"
@@ -205,14 +210,28 @@ read_box() {
     [[ "${lines[$i]}" == "$BORDER_CHAR"* ]] && { q=$i; break; }
   done
   [ "$q" -gt "$p" ] || return 1
+  local f_esc=0 f_bg=0 spin=0
   for ((i = q + 1; i < n; i++)); do
     [[ "${lines[$i]}" == "$BORDER_CHAR"* ]] && return 1
-    [[ "${lines[$i]}" == *"esc to interrupt"* ]] && BOX_BUSY=1
+    [[ "${lines[$i]}" == *"esc to interrupt"* ]] && f_esc=1
+    [[ "${lines[$i]}" =~ $BG_RE ]] && f_bg=1
   done
-  for ((i = p - 4; i < p - 1; i++)); do
+  # Footer: "esc to interrupt" stays on screen while only a background shell/task
+  # runs, so with a shell/task segment present the spinner alone decides.
+  if [ "$f_esc" -eq 1 ] && [ "$f_bg" -eq 0 ]; then
+    BOX_BUSY=1; BOX_SIGNAL="footer"
+  fi
+  # Spinner: up to 4 lines above the top border ("✽ Computing… (40s · ...").
+  for ((i = p - 5; i < p - 1; i++)); do
     [ "$i" -ge 0 ] || continue
-    [[ "${lines[$i]}" == *"esc to interrupt"* ]] && BOX_BUSY=1
+    if [[ "${lines[$i]}" == *"esc to interrupt"* ]] || [[ "${lines[$i]}" =~ $SPIN_RE ]]; then
+      spin=1
+    fi
   done
+  if [ "$spin" -eq 1 ]; then
+    if [ "$BOX_BUSY" -eq 1 ]; then BOX_SIGNAL="footer+spinner"; else BOX_SIGNAL="spinner"; fi
+    BOX_BUSY=1
+  fi
   s="${lines[$p]}"
   while :; do
     case "$s" in
@@ -241,8 +260,13 @@ pane_state() {
     2) PANE_WHY="pane gone"; return 2 ;;
     *) PANE_WHY="input box not the last box on screen"; return 1 ;;
   esac
-  [ "$BOX_BUSY" -eq 0 ] || { PANE_WHY="busy (esc to interrupt shown)"; return 1; }
-  [ "$BOX_N" -eq 1 ] && [ -z "$BOX_TEXT" ] || { PANE_WHY="input not empty"; return 1; }
+  [ "$BOX_BUSY" -eq 0 ] || { PANE_WHY="busy (${BOX_SIGNAL:-unknown} signal)"; return 1; }
+  if ! { [ "$BOX_N" -eq 1 ] && [ -z "$BOX_TEXT" ]; }; then
+    local ex="${BOX_TEXT//[^[:print:]]/}"
+    ex="${ex//\'/\"}"
+    PANE_WHY="input not empty (lines=$BOX_N text='${ex:0:40}')"
+    return 1
+  fi
   return 0
 }
 
