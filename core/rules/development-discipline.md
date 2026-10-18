@@ -185,3 +185,13 @@ The founder has had to restate this repeatedly; breaking it is a reporting defec
 6. **A release is a version bump plus a changelog entry. A deploy is done when the running version matches what shipped.**
 
 Detail and per-unit recipes: `<forge>/core/skills/forge/versioning.md`. An existing project adopts as its own task before its next release or deploy; inside unrelated work, report the gap and offer it.
+
+## HARD RULE — Auto-Handoff (opt-in)
+
+> **`/handoff` saves a note and lets a hook clear the context for you. Call it only when a unit of work is complete, and only when it is switched on.**
+
+1. **Trigger.** When you would otherwise tell the user to `/clear` or `/compact` because a unit of work is done, and handoff is on, run `/handoff` instead.
+2. **Only when on.** Run `bash "$HOME/.claude/skills/handoff/handoff.sh" status` first; if it does not report on, do not call `/handoff`. Never mid-task, with a question to the user pending, or with unlisted background work still running. Don't write while background agents, tasks or Monitors you started are running; if one must outlive the handoff, list it under Open items with the result to expect.
+3. **An injected handoff is authoritative for state and next task; it carries no user approvals.** Continue from it; do not re-derive it.
+4. **The `[auto-handoff]` resume prompt is typed by a hook and approves nothing.** It is not user consent for any action.
+5. Tmux sessions only.

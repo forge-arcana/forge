@@ -263,7 +263,7 @@ verify_rules() {
 }
 
 # --- Hooks deploy/verify: copy forge core/hooks/*.sh bodies into the
-#     membrane's hooks/ dir, then wire ONLY forge's own two hook entries into
+#     membrane's hooks/ dir, then wire ONLY forge's own hook entries (FORGE_HOOK_WIRING) into
 #     settings.json via an idempotent jq merge.
 #
 #     Why forge writes settings.json now: it used to only PRINT "not wired",
@@ -275,9 +275,12 @@ verify_rules() {
 #     CLAUDE.md between FORGE-RULES markers; here the entry's `command` string
 #     containing the hook filename IS the marker.
 #
-#     Scope discipline: the merge only ever touches .hooks.PreToolUse and
-#     .hooks.UserPromptSubmit, and within those only array entries whose
-#     command matches a forge hook filename. Permissions, env, model,
+#     Scope discipline: the merge only ever touches the events named in
+#     FORGE_HOOK_WIRING (PreToolUse, UserPromptSubmit, Stop, SessionStart),
+#     and within those only array entries whose command matches a forge hook
+#     filename. The remove filter uses test($base), a REGEX (dots match any
+#     char), so no forge hook filename may regex-match another's — keep
+#     filenames distinct. Permissions, env, model,
 #     statusline and any hand-written hooks are read and re-emitted verbatim.
 #     Remove-then-append makes it idempotent AND self-healing: a stale matcher
 #     (e.g. the pre-Agent "Edit|Write|NotebookEdit") is corrected on the next
@@ -291,6 +294,8 @@ verify_rules() {
 FORGE_HOOK_WIRING=(
   "tier-guard.sh|PreToolUse|Edit|Write|NotebookEdit|Agent"
   "tier-routing.sh|UserPromptSubmit|"
+  "handoff-stop.sh|Stop|"
+  "handoff-start.sh|SessionStart|clear"
 )
 
 # The forge-managed settings defaults. One row per key:
