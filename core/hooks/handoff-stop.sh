@@ -6,8 +6,10 @@
 # runs `/handoff`, which writes <root>/pane-<N>.md (the note) and a per-pane
 # "ready" marker. When the turn then ends, this hook consumes the marker and
 # schedules a fully detached job that types `/clear <name>` and, once the fresh
-# context has had the note injected and is idle, a resume prompt into the
-# session's own tmux pane. The SessionStart(clear) twin, handoff-start.sh,
+# context has had the note injected and is idle, `/rename <name>` and then a
+# resume prompt into the session's own tmux pane. /rename is needed because
+# Claude Code titles a cleared session from its first prompt and /clear's
+# argument does not set the title. The SessionStart(clear) twin, handoff-start.sh,
 # injects the note in between.
 #
 # Why keystrokes: there is no hook decision that clears context. Typing
@@ -36,7 +38,7 @@
 #     range is read ONCE into a buffer and a trailing partial line is dropped
 #     from that same buffer. The screen check is secondary;
 #   - typing is verified, never blind: `send-keys -l` (literal) types only a
-#     regex-validated name or the fixed resume prompt; 0.3 s later the input
+#     regex-validated name (in /clear and /rename) or the fixed resume prompt; 0.3 s later the input
 #     box must hold exactly that text (whitespace-normalised across wrapped
 #     lines) or Enter is NOT sent and the text is left as is (nothing is ever
 #     erased); after Enter the box must be empty again within 2.5 s, or the
@@ -47,7 +49,9 @@
 #     shows no user activity since the clear (lines of the clear itself, i.e.
 #     user / attachment / file-history-snapshot timestamped <= injection + 2 s,
 #     are tolerated, except a user line with promptId/promptSource/turnOrigin,
-#     which is a real prompt; any assistant line is activity);
+#     which is a real prompt; any assistant line is activity). The guard runs
+#     before `/rename <name>` is typed, then the pane must be idle again
+#     (up to ~5 tries) before the resume prompt;
 #   - loop guard: no schedule if this pane was auto-cleared less than
 #     HANDOFF_MIN_INTERVAL seconds ago (the helper refuses to set the ready
 #     marker in that window too; this is defence in depth).
@@ -449,6 +453,22 @@ run_job() {
   tx_quiet "$it" "$is" "$(awk -v a="$ia" -v g="$GRACE" 'BEGIN { printf "%.3f", a + g }')" \
     '["user","attachment","file-history-snapshot"]' 1 \
     || { log "job: resume skipped: user already active"; exit 0; }
+  # Restore the session name: Claude Code titles a cleared session from its first
+  # prompt ("Auto-handoff context resume"); /clear's argument does not set it.
+  # The guard above ran first, so /rename's own transcript lines are never
+  # mistaken for user activity.
+  type_verified "/rename $NAME"; rc=$?
+  [ "$rc" -eq 0 ] || { log "job: $(type_fail_msg "$rc") (/rename), resume prompt not typed"; exit 0; }
+  log "job: typed /rename + Enter, submitted"
+  rc=1
+  for ((t = 0; t < 5; t++)); do
+    sleep 0.7
+    pane_state; rc=$?
+    [ "$rc" -eq 0 ] && break
+    [ "$rc" -eq 2 ] && { log "job: pane gone after /rename, stop"; exit 0; }
+  done
+  [ "$rc" -eq 0 ] || { log "job: not idle after /rename (${PANE_WHY:-unknown}), resume prompt not typed"; exit 0; }
+  proc_ok || { log "job: process check failed after /rename, resume prompt not typed"; exit 0; }
   type_verified "$RESUME_PROMPT"; rc=$?
   [ "$rc" -eq 0 ] || { log "job: $(type_fail_msg "$rc") (resume prompt), stop"; exit 0; }
   log "job: typed resume prompt + Enter, submitted, done"

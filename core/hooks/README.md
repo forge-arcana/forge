@@ -47,8 +47,10 @@ Write tool, because `tier-guard.sh` denies Write on top-tier sessions.
 
 - `handoff-stop.sh` — `Stop` hook, no matcher. At turn end, if a ready marker
   exists, it schedules a detached job that types `/clear <name>` into the
-  pane via tmux and, once the note is injected and the pane idle, a resume
-  prompt.
+  pane via tmux and, once the note is injected and the pane idle, `/rename
+  <name>` and then a resume prompt. `/rename` is needed because Claude Code
+  titles a cleared session from its first prompt and `/clear`'s argument does
+  not set the title.
 - `handoff-start.sh` — `SessionStart` hook, matcher `clear`. Injects the note
   as context, archives it to
   `~/.claude/handoffs/archive/<name>-pane-<N>-<YYYYmmdd-HHMMSS>.md` (spaces
@@ -123,9 +125,12 @@ which fails safe (log, drop the token, type nothing):
   flushes them). A `user` line carrying `promptId`, `promptSource` or
   `turnOrigin` is a real prompt and is activity whatever its timestamp; any
   `assistant` line is activity. Activity logs
-  `resume skipped: user already active` and nothing is typed.
-- **Verified typing**: only a regex-checked name or the fixed resume prompt
-  is typed, with `send-keys -l` (literal). Verify before Enter: 0.3 s later
+  `resume skipped: user already active` and nothing is typed. The guard runs
+  before `/rename`, so its own transcript lines never count as activity;
+  after `/rename` the pane must be idle again (up to ~5 checks) before the
+  resume prompt, else `not idle after /rename` and nothing more is typed.
+- **Verified typing**: only a regex-checked name (in `/clear` and `/rename`)
+  or the fixed resume prompt is typed, with `send-keys -l` (literal). Verify before Enter: 0.3 s later
   the last input box must hold exactly that text (`❯` + space/NBSP + text;
   a wrapped prompt is compared joined across its lines, whitespace
   removed), or Enter is not sent and the text is left as is (nothing is
