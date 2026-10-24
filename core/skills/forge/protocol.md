@@ -351,16 +351,22 @@ The trifecta escalates in intensity and broadens in scope:
 
 ## Headless Mode
 
-When `FORGE_HEADLESS=1` is set, a headless caller is driving the run and no human can answer. Every art and master follows these rules, which override their interactive behaviour:
+Headless mode is ON when env `FORGE_HEADLESS=1` is set, or when the art's arguments start with `--headless`. A headless caller is driving the run and no human can answer. The output directory is the `--out <absolute dir>` argument if given, otherwise env `FORGE_OUT`. `$FORGE_OUT` below means "the resolved output directory". The flags come before the task text, for example `/parse --headless --out /abs/dir <task or file>`.
+
+Every art and master follows these rules, which override their interactive behaviour:
 
 1. **Never ask the user.** Where a skill would prompt, take the recommended option and append the decision (what was asked, what was chosen, why) to `$FORGE_OUT/decisions.md`. `/parse` copies these into its result's "Decisions taken without the founder".
-2. **`FORGE_OUT` is required.** It is an absolute directory. If it is missing, write nothing to the repo, print `<art>: FORGE_OUT is required when FORGE_HEADLESS=1`, and stop.
+2. **The output directory (from `--out` or `FORGE_OUT`) is required.** It is an absolute directory. If it is missing, write nothing to the repo, print `<art>: an output directory is required in headless mode (--out <abs dir> or FORGE_OUT)`, and stop.
 3. **Learnings and memory files go to `$FORGE_OUT/learnings/<art>-learnings.md`**, never into the product repo's `memory/`. Pre-flight still READS the repo's and the global learnings.
 4. **No commit, no `/wrap`, no push, no checkpoint or rollback scripts.** Leave changes in the working tree.
 5. **No web access is assumed.** Any claim that would need the web is marked "unverified (no web)", and the web cache is neither read nor written.
 6. **Skills and forge core may be mounted read-only.** Never try to write to them.
+7. **Arguments win over env** when both are given.
+8. **Strip the flags** (`--headless`, `--out <dir>`) before reading the rest as the art's normal arguments.
+9. **Pass the flags down.** When an art or master invokes another art or `/smith`, put `--headless --out <resolved absolute dir>` at the front of that art's arguments. Also export or pass the env if a shell is involved. Don't rely on env alone, because each shell call may be a fresh shell.
+10. **Use a literal path in shell commands.** Write the resolved absolute directory, not `$FORGE_OUT`, since the variable may not exist.
 
-Interactive behaviour is unchanged when the variable is unset.
+Interactive behaviour is unchanged when headless mode is not on.
 
 ## Learning Cycle
 

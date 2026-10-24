@@ -19,10 +19,12 @@ description: "The Sorter — front step for a raw task (bug report, issue, or fe
 - **File path** to a file holding it (`.md`, `.txt`, `.json`)
 - **Nothing** — interactive: ask what to parse (`AskUserQuestion`); headless: write the result with tier `not-actionable` and "no task given" under Findings
 
+The arguments may start with `--headless` and `--out <absolute dir>` (see Headless Mode in the [Forge Protocol](../forge/protocol.md)). These are stripped before reading the task.
+
 ## Mode
 
-- **Headless** when env `FORGE_HEADLESS=1`. Follow Headless Mode in the [Forge Protocol](../forge/protocol.md): never ask, record decisions in `$FORGE_OUT/decisions.md`, no commit, no web. `FORGE_OUT=<absolute dir>` is required; if it is missing, write nothing to the repo, print `parse: FORGE_OUT is required when FORGE_HEADLESS=1`, and stop.
-- **Interactive** otherwise. Report in chat. If `FORGE_OUT` is set, also write the result file.
+- **Headless** when env `FORGE_HEADLESS=1` or `--headless` is given. Follow Headless Mode in the [Forge Protocol](../forge/protocol.md): never ask, record decisions in `$FORGE_OUT/decisions.md`, no commit, no web. The output directory (`$FORGE_OUT`) is `--out` if given, otherwise env `FORGE_OUT`. It is required; if it is missing, write nothing to the repo, print `parse: an output directory is required in headless mode (--out <abs dir> or FORGE_OUT)`, and stop.
+- **Interactive** otherwise. Report in chat. If `--out` or `FORGE_OUT` is set, also write the result file.
 
 ## Phase 0: Pre-Flight
 
@@ -55,13 +57,13 @@ Take a quick, read-only look at the repo. Change nothing in this phase. Establis
 
 ## Phase 4: Run the Tier
 
-Run the arts in the order the tier lists. Scope every evaluative art to the change (the diff, the touched files), not the whole repo. Fix findings in the same pass. Tier arts run as their own skills; where a leg needs a given model tier, spawn it with the explicit model parameter (protocol Model Tiers, rule 6). Under a headless caller, pass `FORGE_HEADLESS` and `FORGE_OUT` through to every art and to `/smith`.
+Run the arts in the order the tier lists. Scope every evaluative art to the change (the diff, the touched files), not the whole repo. Fix findings in the same pass. Tier arts run as their own skills; where a leg needs a given model tier, spawn it with the explicit model parameter (protocol Model Tiers, rule 6). Under a headless caller, pass `--headless --out <resolved dir>` at the front of every art's and `/smith`'s arguments (and the env too, where a shell is involved).
 
 For `not-actionable`, draft the reply to the reporter and stop.
 
 ## Phase 5: Result File
 
-Written whenever `FORGE_OUT` is set (always in headless mode): `$FORGE_OUT/parse-result.md`. A headless caller parses it, so the first two lines are exact:
+Written whenever an output directory is set (always in headless mode): `<out>/parse-result.md`. A headless caller parses it, so the first two lines are exact:
 
 ```
 tier: <not-actionable|minor|standard|substantial>
@@ -80,7 +82,7 @@ Example: `arts: poke,preen`. Then these markdown sections, in order:
 - `## Unverified (no web)` — claims that would need the web
 - `## Reply draft` — required for `not-actionable`; otherwise optional
 
-Interactive without `FORGE_OUT`: present the same content in chat, no file.
+Interactive without an output directory: present the same content in chat, no file.
 
 ## Post-Flight
 
