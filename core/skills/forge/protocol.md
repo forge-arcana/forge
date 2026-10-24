@@ -355,7 +355,7 @@ Headless mode is ON when env `FORGE_HEADLESS=1` is set, or when the art's argume
 
 Every art and master follows these rules, which override their interactive behaviour:
 
-1. **Never ask the user.** Where a skill would prompt, take the recommended option and append the decision (what was asked, what was chosen, why) to `$FORGE_OUT/decisions.md`. `/parse` copies these into its result's "Decisions taken without the founder".
+1. **Never ask the user.** Where a skill would prompt, take the recommended option and append the decision (what was asked, what was chosen, why) to `$FORGE_OUT/decisions.md`. `/parse` copies these into its result's "Decisions taken without the founder". The run's entry point (usually `/parse`) creates `$FORGE_OUT/decisions.md` at the start with the single line `# Decisions taken without the founder`, so the file always exists, even when no decision was taken; every art appends to it and never overwrites it.
 2. **The output directory (from `--out` or `FORGE_OUT`) is required.** It is an absolute directory. If it is missing, write nothing to the repo, print `<art>: an output directory is required in headless mode (--out <abs dir> or FORGE_OUT)`, and stop.
 3. **Learnings and memory files go to `$FORGE_OUT/learnings/<art>-learnings.md`**, never into the product repo's `memory/`. Pre-flight still READS the repo's and the global learnings.
 4. **No commit, no `/wrap`, no push, no checkpoint or rollback scripts.** Leave changes in the working tree.

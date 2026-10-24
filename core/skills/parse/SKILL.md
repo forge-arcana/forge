@@ -28,7 +28,7 @@ The arguments may start with `--headless` and `--out <absolute dir>` (see Headle
 
 ## Phase 0: Pre-Flight
 
-Follow the [Forge Protocol](../forge/protocol.md) pre-flight. In headless mode, learnings are written to `$FORGE_OUT/learnings/parse-learnings.md`.
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight. In headless mode, learnings are written to `$FORGE_OUT/learnings/parse-learnings.md`. In headless mode, first create `$FORGE_OUT/decisions.md` containing the single line `# Decisions taken without the founder` (leave it alone if it already exists). It must exist at the end of every headless run, even an empty one.
 
 ## Phase 1: Read and Restate
 
