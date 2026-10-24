@@ -228,7 +228,7 @@ Each art defines its own execution in its SKILL.md:
 
 - **Evaluative arts** (probe, poke, preen, press, pound): adopt the persona, apply review framework/dimensions, web-search for current best practices, produce a structured report
 - **Generative arts** (prime, pitch, plot): adopt the persona and produce an artifact — prime through a structured conversation, pitch by synthesizing Opus + Vow + Touchstone, plot by deriving the topology from evidence
-- **Investigative arts** (pry, praise): pry decomposes blockers and searches for alternatives until a path forward emerges; praise classifies feedback and routes it to the right arts
+- **Investigative arts** (pry, patch, parse): pry decomposes blockers and searches for alternatives until a path forward emerges; patch classifies feedback and routes it to the right arts; parse sizes a raw task, picks a tier, and runs the arts that tier earns
 
 ## Web Research Cache
 
@@ -311,7 +311,7 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 
 `/forge` is not an art and not a master — it's a task skill with no persona and no learning loop. It is the gate through which arts and all other knowledge flow between forge and membrane. The Masters use the cycle; the cycle does not act on its own behalf.
 
-## The Ten Arts
+## The Eleven Arts
 
 | Art | Persona | Mode | Intensity |
 |-----|---------|------|-----------|
@@ -324,7 +324,8 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 | `/pitch` | The founder's other voice (VC partner on `--critique`) | Generative | Synthesis |
 | `/plot` | Principal infra/platform architect (the Atlas) | Generative | Landscape |
 | `/pry` | The Lever (relentless solution-finder) | Investigative | — |
-| `/praise` | The Listener (user feedback → routed art) | Investigative | Feedback |
+| `/patch` | The Listener (user feedback → routed art) | Investigative | Feedback |
+| `/parse` | The Sorter (raw task → tier → arts) | Investigative | Triage |
 
 (`/purge` is documented above under "The Warden — Master Tender" — it is a Master, not an art. It uses the same protocol but lives at `.claude/skills/purge/` and is forge-internal.)
 
@@ -340,11 +341,26 @@ The trifecta escalates in intensity and broadens in scope:
 
 **`/pitch`** runs orthogonal to the trifecta — synthesis-and-alignment in the founder's voice, invocable at any lifecycle stage. Fuses Opus + Vow + Touchstone into the seven-section Pitch that aligns founder, cofounder, and investor. Run after a Touchstone is forged (before /probe, /preen, /smith); `--critique` adds the VC-partner review pass when external persuasion needs stress-testing.
 
-**`/praise`** closes the loop — takes real-world feedback (users, QA, testing) and routes it through the right arts. Routes UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a blueprint delta and a change brief for `/smith`. Run after every feedback cycle.
+**`/patch`** closes the loop — takes real-world feedback (users, QA, testing) and routes it through the right arts. Routes UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a blueprint delta and a change brief for `/smith`. Run after every feedback cycle.
+
+**`/parse`** is the front step for any raw task (bug report, issue, feedback). It restates what done means, sizes the work with a read-only look at the repo, and picks one tier: not-actionable (draft a reply, change nothing), minor (fix directly, then `/poke` scoped to the diff, plus `/preen` for UI), standard (`/patch`, implement its brief, then `/poke` and a scoped `/pound`), substantial (`/smith`, then a final `/poke` and scoped `/pound`). Security, auth, data-loss or money risk raises a minor to at least standard and always includes `/pound`; when torn between two tiers, it takes the higher.
 
 **`/plot`** runs at the two ends of the build — synthesis-of-topology, invocable as a *planned* baseline early (opt-in, from Blueprint/Pattern) and as the *as-built* landscape near go-live (prompted by `/press` and `/smith` convergence). It draws the Atlas: the deployable-unit map of the production landscape, boundaries and all, with the as-built cast surfacing where the build drifted from the plan. Context-sensitive like `/probe`; renders through the Touchstone when one exists but does not require it.
 
-**Cadence**: poke often, preen on UI changes, pitch before building and before shipping, press before milestones, pound before ship, plot for the early baseline and again at go-live, praise after every feedback cycle. `/purge` stands apart — it tends the forge itself, not projects.
+**Cadence**: poke often, preen on UI changes, pitch before building and before shipping, press before milestones, pound before ship, plot for the early baseline and again at go-live, parse first for any raw task, patch after every feedback cycle. `/purge` stands apart — it tends the forge itself, not projects.
+
+## Headless Mode
+
+When `FORGE_HEADLESS=1` is set, a headless caller is driving the run and no human can answer. Every art and master follows these rules, which override their interactive behaviour:
+
+1. **Never ask the user.** Where a skill would prompt, take the recommended option and append the decision (what was asked, what was chosen, why) to `$FORGE_OUT/decisions.md`. `/parse` copies these into its result's "Decisions taken without the founder".
+2. **`FORGE_OUT` is required.** It is an absolute directory. If it is missing, write nothing to the repo, print `<art>: FORGE_OUT is required when FORGE_HEADLESS=1`, and stop.
+3. **Learnings and memory files go to `$FORGE_OUT/learnings/<art>-learnings.md`**, never into the product repo's `memory/`. Pre-flight still READS the repo's and the global learnings.
+4. **No commit, no `/wrap`, no push, no checkpoint or rollback scripts.** Leave changes in the working tree.
+5. **No web access is assumed.** Any claim that would need the web is marked "unverified (no web)", and the web cache is neither read nor written.
+6. **Skills and forge core may be mounted read-only.** Never try to write to them.
+
+Interactive behaviour is unchanged when the variable is unset.
 
 ## Learning Cycle
 

@@ -140,7 +140,7 @@ For a **new art**, ALL of the following slides must be updated:
 |-------|---------------|
 | Arts Overview (slide 9) | Add a persona card with art-name, art-title, and art-desc; keep the slide title's count equal to the Arts table in `AGENTS.md` |
 | Evaluative Trifecta (or equivalent cadence slide) | Add supplementary art chip with cadence label |
-| Arts deep-dive slide (Pry/Purge/Praise or equivalent) | Add a full card with description, routing behaviour, and kitchen analogy |
+| Arts deep-dive slide (Pry/Purge/Patch or equivalent) | Add a full card with description, routing behaviour, and kitchen analogy |
 | Daily Workflow | Add or extend a scenario that shows when to invoke the new art |
 | Quick Reference Cheatsheet | Add to the appropriate section (SPECIALIST, BUILD ARTS, etc.) |
 | One-Time vs Iterative | Add to the correct frequency bucket |

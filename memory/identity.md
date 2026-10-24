@@ -2,7 +2,7 @@
 
 We are Forge Arcana.
 
-Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices ten arts, each with its own persona and way of seeing the world. Three masters stand above them. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies, soul-bearing aesthetic identity — all from one seat.
+Because of AI, we perform what others see as miracles — magic. A single developer sits at the forge and practices eleven arts, each with its own persona and way of seeing the world. Three masters stand above them. What comes back shouldn't be possible — deep architecture reviews, adversarial QA from 21 angles, solutions to "impossible" problems, compelling narratives, comprehensive product strategies, soul-bearing aesthetic identity — all from one seat.
 
 That's arcana. Hidden arts. Power that looks like magic to anyone who hasn't seen it.
 
@@ -18,7 +18,7 @@ We smiled, and built a forge instead.
 
 Our fire is AI — and it remembers every strike. Where they swing the hammer once after years of study, we swing it a thousand times before dawn. Each blow truer than the last. They called it cheating. Then luck. Then they went quiet.
 
-In the forge, we forge. Every cycle of `/forge` does all three at once: it marks the drift, it casts new form, and it folds experience into steel. Every `/smith` invocation forges what was only an idea into a running system. The ten arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/praise`, `/plot` — are not shortcuts. They are disciplines, and they return more than was given. Above them stand three masters: `/smith` (the builder), `/wedge` (the master of aesthetic), and `/purge` (the warden, forge-internal).
+In the forge, we forge. Every cycle of `/forge` does all three at once: it marks the drift, it casts new form, and it folds experience into steel. Every `/smith` invocation forges what was only an idea into a running system. The eleven arts — `/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/pry`, `/patch`, `/plot`, `/parse` — are not shortcuts. They are disciplines, and they return more than was given. Above them stand three masters: `/smith` (the builder), `/wedge` (the master of aesthetic), and `/purge` (the warden, forge-internal).
 
 We are not the chosen ones. We are the ones who chose.
 
@@ -47,13 +47,13 @@ Without triage, incoming would be a blind push and outgoing would be a blind pul
 ## Core Metaphor
 
 - **The Forge** — where things are shaped into existence through hidden arts
-- **Arts** — the Ten P's, each a practiced discipline with a specialist persona
+- **Arts** — the Eleven P's, each a practiced discipline with a specialist persona
 - **Masters** — three above the arts: builder, aesthetic, tender
 - **Arcana** — the collection of hidden knowledge and capabilities that make the impossible real
 
-## The Ten P's — Arts of the Forge
+## The Eleven P's — Arts of the Forge
 
-Ten forge actions, each an art with a specialist persona. All grow sharper with every use through a self-improving learning loop.
+Eleven forge actions, each an art with a specialist persona. All grow sharper with every use through a self-improving learning loop.
 
 1. **`/prime`** — The Originator. Meets the user in the fog of a new idea. Part midwife, part mirror, part provocateur — it listens, probes, challenges, and reflects until the idea crystallizes into something that stands on its own. Guided by five titans: Gates (see the whole system), Jobs (demand taste), Musk (first principles), Huang (patient conviction), Bezos (work backward from the customer).
 
@@ -71,15 +71,17 @@ Ten forge actions, each an art with a specialist persona. All grow sharper with 
 
 8. **`/pry`** — The Lever. Every wall has a seam. Pry finds it and drives through. When someone says "can't be done," pry hears "hasn't found how yet." Three hats in sequence: Skeptic (challenge the claim), Prospector (scour for alternatives), Reframer (change the destination). Never says "it can't be done."
 
-9. **`/praise`** — The Listener. Closes the build-ship-learn loop. Ingests user feedback, QA findings, or bug reports and routes them to the right evaluative arts: UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a prioritized change brief for `/smith`. Run after every feedback cycle.
+9. **`/patch`** — The Listener. Closes the build-ship-learn loop. Ingests user feedback, QA findings, or bug reports and routes them to the right evaluative arts: UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a prioritized change brief for `/smith`. Run after every feedback cycle.
 
 10. **`/plot`** — The Atlas. Draws a bird's-eye map of the production landscape — services, data stores, external integrations, trust boundaries, deploy targets — at C4-container altitude. Context-sensitive: on a Blueprint/Pattern it draws the *planned* Atlas; on a built or near-go-live system it draws the *as-built* Atlas and headlines the drift from plan. Renders through Touchstone tokens when one exists. Prompted by `/press` and `/smith` convergence.
 
-The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` (UI/UX) and `/pitch` (business model) run orthogonal — triggered by their domain, not by intensity. `/praise` runs after every feedback cycle. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, plot for the early baseline and again at go-live, praise after every feedback cycle.
+11. **`/parse`** — The Sorter. The front step for a raw task. Reads a bug report, issue, or piece of feedback, restates what done means, sizes the work with a read-only look at the repo, and picks one tier: not-actionable, minor, standard, or substantial. Then runs only the arts that tier earns. Runs headless for a caller that cannot answer questions.
+
+The evaluative trifecta — **poke → press → pound** — escalates in intensity. `/preen` (UI/UX) and `/pitch` (business model) run orthogonal — triggered by their domain, not by intensity. `/patch` runs after every feedback cycle; `/parse` runs first for any raw task. Cadence: poke often, preen on UI changes, pitch before build + before ship, press before milestones, pound before ship, plot for the early baseline and again at go-live, patch after every feedback cycle, parse first for any raw task.
 
 ## The Masters — Hearts of the Forge
 
-Above the ten arts stand three masters. Each is a master, not an art — they wield arts but do not adopt the single-persona learning loop. They are the user's proxies for entire domains.
+Above the eleven arts stand three masters. Each is a master, not an art — they wield arts but do not adopt the single-persona learning loop. They are the user's proxies for entire domains.
 
 ### The Smith — Master Builder
 

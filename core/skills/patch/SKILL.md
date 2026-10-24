@@ -1,27 +1,27 @@
 ---
-name: praise
+name: patch
 description: "Feedback-driven improvement loop — ingests user feedback, testing findings, or bug reports, routes them through evaluative arts (probe, preen, poke, press), assesses blueprint impact, and hands off to smith with a prioritized change brief. TRIGGER when: user has feedback to process, wants to close the loop on testing results, end-user reports, or QA findings."
 ---
 <!-- model: opus | fan-out: probe/poke legs → opus; press/preen legs → sonnet; Phase 4 consolidation at opus -->
 
-# /praise — The Feedback Loop
+# /patch — The Feedback Loop
 
-> **Art** (learnings: `praise-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
+> **Art** (learnings: `patch-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 
-> Feedback is a gift. Praise makes it actionable.
+> Feedback is a gift. Patch makes it actionable.
 
-`/praise` closes the build-ship-learn cycle. It takes raw feedback — from end users, QA sessions, analytics, bug reports, or live testing — and converts it into a prioritized set of improvements. It routes findings through the right evaluative arts, checks if the blueprint needs updating, and hands off a change brief to `/smith`.
+`/patch` closes the build-ship-learn cycle. It takes raw feedback — from end users, QA sessions, analytics, bug reports, or live testing — and converts it into a prioritized set of improvements. It routes findings through the right evaluative arts, checks if the blueprint needs updating, and hands off a change brief to `/smith`.
 
 ## Arguments
 
 `$ARGUMENTS` — one of:
 - **File path** to a feedback file (`.md`, `.txt`, `.json`)
 - **Inline description** — "users are confused by the nav" or "login fails on mobile"
-- **Nothing** — praise will ask for feedback interactively
+- **Nothing** — patch will ask for feedback interactively
 
 ## Phase 0: Pre-Flight
 
-Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then scan cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions).
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then scan cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions). Backward compatibility: if the project still has `memory/praise-learnings.md` (this art's older name), read it too.
 
 ## Phase 1: Feedback Ingestion & Classification
 
@@ -63,9 +63,9 @@ Spawn one subagent per active category — **all in parallel** (independent anal
 Spawn each active category with this brief, substituting the art, tier, and closing instruction from the table below:
 
 ```
-You are running /[ART] on behalf of /praise.
+You are running /[ART] on behalf of /patch.
 Focus ONLY on the following feedback — do not run a full audit.
-Skip your standard pre-flight (already done by praise).
+Skip your standard pre-flight (already done by patch).
 
 FEEDBACK TO ANALYZE:
 [the classified items for this category]
@@ -100,20 +100,20 @@ For each **Blueprint Gap** feedback item (and cross-checking all other feedback)
 
 A **Blueprint Delta** block with four sub-sections in this order: **Add to Blueprint** (item → section + what to add), **Update in Blueprint** (item → current text → proposed text), **Out of Scope (defer to Phase N)** (item → rationale), **Implementation Gaps (already in blueprint, not yet built)** (item → blueprint section reference).
 
-## Phase 4: Consolidation — The Praise Report
+## Phase 4: Consolidation — The Patch Report
 
 After all Phase 2 subagents and Phase 3 complete, merge into a single report. Run the consolidation at opus tier: it is the review gate over the sonnet legs (/preen, /press) — re-grade their findings rather than merging them as-is — and it owns the final verdict, including SHIP BLOCKED.
 
-**Persist the report first** to `memory/YYYY-MM-DD-praise-report.md` before displaying.
+**Persist the report first** to `memory/YYYY-MM-DD-patch-report.md` before displaying.
 
 Structure (markdown, sections in this order):
-- **Title + meta**: `# /praise Report — <project>`, then `Date | Feedback items: N | Arts invoked: <list>`.
+- **Title + meta**: `# /patch Report — <project>`, then `Date | Feedback items: N | Arts invoked: <list>`.
 - **Feedback Summary** — 1-3 sentences on what the feedback reveals about the product.
 - **Critical (fix before next ship)** — consolidated CRITICAL findings from all arts, **ordered by user impact**; each as `**<Title>** · *<art>* · File: <path:line or N/A>` with Problem / Fix / Effort (S/M/L) sub-bullets.
 - **Important (fix this sprint)** — IMPORTANT findings, same shape.
 - **Minor (backlog)** — MINOR findings, one line each.
 - **Blueprint Delta** — output from Phase 3.
-- **Praise Verdict** — Arts invoked; counts of Criticals / Importants / Blueprint changes; **Recommendation** (one verdict from the table below); 2-3 sentence executive summary of meaning + next step.
+- **Patch Verdict** — Arts invoked; counts of Criticals / Importants / Blueprint changes; **Recommendation** (one verdict from the table below); 2-3 sentence executive summary of meaning + next step.
 
 ### Verdict Definitions
 
@@ -131,7 +131,7 @@ Structure (markdown, sections in this order):
 
 Before invoking smith, produce a **Build Plan** showing how the work will be executed. Present this to the user for approval — smith only starts after confirmation.
 
-Analyze all findings from the Praise Report and decompose them into discrete tasks. For each task, determine:
+Analyze all findings from the Patch Report and decompose them into discrete tasks. For each task, determine:
 
 - **Scope**: what file(s) and component(s) are touched
 - **Effort**: S (< 30 min) / M (30–90 min) / L (> 90 min)
@@ -150,7 +150,7 @@ Analyze all findings from the Praise Report and decompose them into discrete tas
 
 #### Build Plan Format
 
-**Output as console text, never as a multi-choice prompt.** A **Praise Build Plan** with: header (project + date, then `Total tasks: N | Parallelizable: M | Sequential: K` and overall effort); a task table with columns **# | Task | Scope | Effort | Depends On | Sub-Agent?** (the Sub-Agent? cell names which task it runs parallel with, or `— (must go first)` for a gating task); an **Execution waves** block (which tasks run in which wave + sequential dependencies between waves); and a **Sub-agent allocation** block (which sub-agent takes which task — the main agent keeps the critical path and sequential gates).
+**Output as console text, never as a multi-choice prompt.** A **Patch Build Plan** with: header (project + date, then `Total tasks: N | Parallelizable: M | Sequential: K` and overall effort); a task table with columns **# | Task | Scope | Effort | Depends On | Sub-Agent?** (the Sub-Agent? cell names which task it runs parallel with, or `— (must go first)` for a gating task); an **Execution waves** block (which tasks run in which wave + sequential dependencies between waves); and a **Sub-agent allocation** block (which sub-agent takes which task — the main agent keeps the critical path and sequential gates).
 
 #### Blueprint-first gate
 
@@ -175,7 +175,7 @@ Options:
 - "Adjust the plan first (describe changes)"
 - "Update the blueprint only — skip code changes for now"
 - "Just the criticals (Wave 1 only)"
-- "Show me the full praise report again"
+- "Show me the full patch report again"
 ```
 
 If user selects **"Yes"**: invoke `/smith` and pass the full change brief (including wave breakdown) as context. Smith will use the wave/sub-agent structure directly — no re-planning needed.
@@ -188,7 +188,7 @@ If user selects **"Just the criticals"**: rebuild the plan scoped to Priority 1 
 
 ## Post-Flight
 
-Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/praise-learnings.md`. Capture:
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/patch-learnings.md`. Capture:
 - Which feedback categories consistently triggered which arts
 - Feedback formats that were easy vs. hard to classify
 - Cases where a blueprint delta was found vs. implementation gaps

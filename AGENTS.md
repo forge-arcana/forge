@@ -51,7 +51,7 @@ Invocation forms:
 | `/forge --dry` | Read-only inspection (replaces the old `/mark`) |
 | `/forge on` / `/forge off` | Session toggle — enable/disable all forge skills |
 
-## Arts (Ten P's deployed + /purge forge-internal)
+## Arts (Eleven deployed + /purge forge-internal)
 Arts are skills that adopt a specialist persona and have a self-improving learning loop. Protocol: `core/skills/forge/protocol.md`.
 
 | Art | Persona | Mode |
@@ -65,13 +65,14 @@ Arts are skills that adopt a specialist persona and have a self-improving learni
 | `/pitch` | The founder's other voice (and a VC partner on `--critique`) | Generative — synthesis (with optional review pass) |
 | `/plot` | Principal infra/platform architect (draws the Atlas) | Generative — landscape (planned + as-built casts) |
 | `/pry` | The Lever (relentless solution-finder) | Investigative |
-| `/praise` | The Listener (user feedback → routed art) | Investigative — feedback |
+| `/patch` | The Listener (user feedback → routed art) | Investigative — feedback |
+| `/parse` | The Sorter (raw task → tier → arts) | Investigative — triage |
 
 **Evaluative trifecta** — poke often, press before milestones, pound before ship.
 **When blocked** — `/pry` to crack the wall.
 **For UI/UX** — `/preen` to evaluate interfaces through Don Norman's lens, including cross-surface consistency (Dim 6): the same class of action done three ways, machine rows on human surfaces, and terminology coherence.
 **For alignment + business model** — `/pitch` is mandatory after Touchstone (generates the seven-section Pitch — Bet / Wound / Inversion / Field / Stake / Signal / Stand — in the founder's voice with ballpark numbers, rendered through Touchstone). Same Pitch serves founder, cofounder, and investor; what differs is the room. Run `/pitch --critique` for the seven-dimension VC review pass when external persuasion needs stress-testing.
-**After user feedback** — `/praise` to route feedback to the right arts and close the build-ship-learn loop.
+**After user feedback** — `/patch` to route feedback to the right arts and close the build-ship-learn loop.
 **Near go-live** — `/plot` to draw the Atlas: a bird's-eye map of the production landscape (deployable units, data stores, external integrations, trust boundaries). Opt-in as a *planned* baseline early (from Blueprint/Pattern); prompted as the *as-built* map at go-live, where its headline is the drift from the plan. Prompted by `/press` and `/smith` convergence.
 
 *`/purge` is a forge-internal art for maintainers — cleanses stale knowledge and drift. Lives only at `.claude/skills/purge/` (never deployed to user membranes).*
@@ -112,7 +113,7 @@ Three Masters of the forge — distinct domains, complementary roles. Two deploy
 Every transfer (either direction) runs through `/forge`'s single PLAN table. No back doors.
 
 ## Self-Improving Loop
-Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/plot`, `/pry`, `/praise`) and Masters (`/smith`, `/wedge`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/forge` fold phase scans project memories for `Forge-worthy: yes` entries, genericizes, promotes to `~/.claude/learnings/general.md`, and absorbs into `<forge>/learnings/` → next art/master run reads global learnings in pre-flight.
+Arts (`/prime`, `/probe`, `/poke`, `/preen`, `/press`, `/pound`, `/pitch`, `/plot`, `/pry`, `/patch`, `/parse`) and Masters (`/smith`, `/wedge`) write learnings to project's `memory/*-learnings.md` with `Forge-worthy: yes/no` flags → `/forge` fold phase scans project memories for `Forge-worthy: yes` entries, genericizes, promotes to `~/.claude/learnings/general.md`, and absorbs into `<forge>/learnings/` → next art/master run reads global learnings in pre-flight.
 
 ## HARD RULES
 The forge's governance and development-discipline rules are owned by `core/rules/forge-governance.md` and `core/rules/development-discipline.md` and reach every session through the FORGE-RULES block of the global rules file. They are not restated here. On a fresh clone, before the first `/forge` cast has written that block, read those two files first: Only /forge Writes to Forge, No Project Names in Forge, and Protected Skills Are Never Absorbed Outgoing bind this repo from the first edit.

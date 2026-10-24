@@ -1,6 +1,6 @@
-# Praise Learnings
+# Patch Learnings
 
-> Routing and classification wisdom for `/praise` — merged from project runs by the `/forge` cycle.
+> Routing and classification wisdom for `/patch` — merged from project runs by the `/forge` cycle.
 
 <!-- Add learnings below this line -->
 

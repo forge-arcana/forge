@@ -5,7 +5,7 @@
 <!-- Add learnings below this line -->
 
 ## Animation Package Evaluation: "What Should Migrate?" Not "Should We Add It?" (2026-05-29)
-<!-- relocated from praise-learnings.md by /purge, 2026-08-15 — a dependency-audit + framework-misuse heuristic, which is poke's territory -->
+<!-- relocated from patch-learnings.md by /purge, 2026-08-15 — a dependency-audit + framework-misuse heuristic, which is poke's territory -->
 **Learning**: When a project already has an animation library installed, the right probe question is "what in the codebase should migrate to it?" not "should we add it?" An installed-but-underused dependency is a signal, not a decision point. Also: when a component needs both CSS `transform` for positioning AND an animation library's transforms, all transforms must live inside the animation library's state definitions — never split between className and animated state.
 **Apply when**: Any project with an installed animation library — audit coverage before proposing addition; enforce transform consolidation in code review.
 

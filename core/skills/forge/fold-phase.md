@@ -60,7 +60,7 @@ The gate scans staged `learnings/` and `memory/` files only (skill, rule and hoo
 
 Re-run until exit 0. **Do not unstage and commit anyway.** The script is the gate; bypassing it re-creates exactly the leak that prompted its existence (see `learnings/global-patterns.md` Exhibit A: "How a Project-Name Leak Happens, 2026-04-25").
 
-Target files in `<forge>/learnings/`: route each entry to the learnings file of the art or master it sharpens — `<name>-learnings.md` for prime, probe, poke, preen, press, pound, pitch, plot, pry, praise, smith, wedge — and to `global-patterns.md` only when it is cross-cutting.
+Target files in `<forge>/learnings/`: route each entry to the learnings file of the art or master it sharpens — `<name>-learnings.md` for prime, probe, poke, preen, press, pound, pitch, plot, pry, patch, parse, smith, wedge — and to `global-patterns.md` only when it is cross-cutting.
 
 Format: `## [Title] (YYYY-MM-DD)` + `**Learning**:` + `**Apply when**:`
 

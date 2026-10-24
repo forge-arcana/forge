@@ -49,6 +49,7 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
    - Read `<forge>/core/skills/forge/stack-guide.md` for tech reference
    - Read `memory/smith-ledger.json` if it exists (resume mode — skip to Session Resume)
    - Read `memory/smith-workspec.md` if it exists (plan/conversation mode resume)
+   - **When `FORGE_HEADLESS=1`, skip both of the two reads above** and follow [headless.md](headless.md): never read or resume a repo ledger or workspec; state lives at `$FORGE_OUT/smith/`.
    - Read `memory/smith-learnings.md` if it exists (Layer 1 — orchestration wisdom)
    - Read `memory/smith-apprentice-log.md` if it exists (Layer 3 — delegation wisdom)
 
@@ -64,7 +65,7 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
 
 ## Step 0.5: Scope Gate
 
-Before committing to the full smith ceremony, assess whether the work warrants it.
+Before committing to the full smith ceremony, assess whether the work warrants it. (Headless: skip this interactive advice, the caller already tiered the work — see [headless.md](headless.md).)
 
 ### Work Spec Extraction
 
@@ -241,7 +242,7 @@ Address findings by severity:
 
 ### 2f: Checkpoint
 
-After each heat completes (findings clean or deferred):
+After each heat completes (findings clean or deferred) — headless (`FORGE_HEADLESS=1`): no `smith-checkpoint.sh`, no phase-gate commits, no rollback, state under `$FORGE_OUT/smith/` ([headless.md](headless.md)):
 
 1. **Update `memory/smith-ledger.json`** — heat status, evaluation results, timing (judgment fields only — SHA/timestamp stamps belong to the script in step 3)
 2. **Update `memory/smith-progress.md`** — human-readable progress
@@ -351,7 +352,7 @@ Time at the anvil: [duration]
 
 ## Session Resume
 
-Smith persists state to survive session breaks. On startup, if `memory/smith-ledger.json` exists:
+Smith persists state to survive session breaks. Headless (`FORGE_HEADLESS=1`): never resume, start fresh ([headless.md](headless.md)). Otherwise, on startup, if `memory/smith-ledger.json` exists:
 
 1. Read the ledger
 2. Read `memory/smith-progress.md`

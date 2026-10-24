@@ -142,7 +142,7 @@ Invocation forms:
 
 ---
 
-## Arts (the Ten P's)
+## Arts (the Eleven)
 
 Arts are specialist agent skills — they adopt a persona and have a self-improving learning loop. Protocol: `core/skills/forge/protocol.md`.
 
@@ -180,7 +180,8 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 ### Feedback Loop
 | Art | What it does |
 |-----|-------------|
-| `/praise` | The Listener — ingests user feedback, QA findings, or bug reports; routes through evaluative arts (probe, preen, poke, press) and hands off a prioritized change brief to /smith. Closes the build-ship-learn loop (self-improving) |
+| `/patch` | The Listener — ingests user feedback, QA findings, or bug reports; routes through evaluative arts (probe, preen, poke, press) and hands off a prioritized change brief to /smith. Closes the build-ship-learn loop (self-improving) |
+| `/parse` | The Sorter — the front step for a raw task (bug report, issue, feedback). Restates what done means, sizes the work with a read-only look at the repo, picks one tier (not-actionable / minor / standard / substantial) and runs the matching arts. Runs headless when `FORGE_HEADLESS=1` and writes `parse-result.md` (self-improving) |
 
 > The Masters (`/smith`, `/wedge`, and `/purge`) are documented at the top of this README — they're not arts, they're the ones who wield (Smith), give visual form (Wedge), and tend (Warden) the forge itself.
 
@@ -222,7 +223,7 @@ During any work session (automatic):
   Cast phase deploys forge updates before the fold phase runs.
   Never deletes from user's global space.
 
-Arts (/prime, /probe, /poke, /preen, /press, /pound, /pitch, /plot, /pry, /praise):
+Arts (/prime, /probe, /poke, /preen, /press, /pound, /pitch, /plot, /pry, /patch, /parse):
   → read forge/learnings/ first → smarter decisions
   → write back to project memory/ → auto-accumulates → next /forge absorbs
 ```
@@ -234,8 +235,8 @@ Arts (/prime, /probe, /poke, /preen, /press, /pound, /pitch, /plot, /pry, /prais
 ```
 forge/
 ├── core/
-│   ├── skills/            # Tool-neutral source of truth for all skills (25)
-│   │   ├── prime/ probe/ poke/ preen/ press/ pound/ pitch/ plot/ pry/ praise/   # the ten arts
+│   ├── skills/            # Tool-neutral source of truth for all skills (27)
+│   │   ├── prime/ probe/ poke/ preen/ press/ pound/ pitch/ plot/ pry/ patch/ parse/   # the eleven arts
 │   │   ├── smith/         # The Master Builder — autonomous product forging
 │   │   ├── wedge/         # The Master of Aesthetic — Touchstone
 │   │   ├── forge/         # The forge cycle
