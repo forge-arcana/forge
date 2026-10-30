@@ -25,7 +25,9 @@
 #     carrying THIS job's id (cancel; a cancel + re-handoff leaves only the new
 #     job alive), opt-in still valid, that Claude pid alive and still `claude`,
 #     the pane's foreground command is Claude, the pane is not in copy mode,
-#     and the input box is the LAST box on screen, empty and not busy;
+#     and the input box is the LAST box on screen, empty and not busy (dim text
+#     in the box, i.e. Claude Code's grey suggested prompt, counts as empty:
+#     only SGR 2 is ignored, never a colour, so typed text is never dropped);
 #   - before `/clear` the transcript bytes appended since the Stop hook started
 #     must be quiet. Allowlist, everything else is activity: only the types
 #     last-prompt, custom-title, agent-name, mode, permission-mode, atis-latch,
@@ -188,6 +190,52 @@ proc_ok() {
 # strip every space, tab and NBSP (whitespace normalisation for wrapped text)
 squash() { local s="${1//"$NBSP"/}"; s="${s//$'\t'/}"; printf '%s' "${s// /}"; }
 
+# Dim text is ignored: Claude Code shows a grey suggested prompt in an EMPTY
+# input box, and a plain capture reads it as typed text. The capture keeps
+# escapes (-e); structure tests use the plain view (all CSI removed), the box
+# content uses the undimmed view (SGR 2 runs dropped, then all CSI removed).
+# Only SGR 2 counts, never colour: dropping typed text by colour would let the
+# hook type into the user's input.
+
+# sgr_dim DIM PARAMS -> prints new DIM (0/1) after an SGR parameter list.
+sgr_dim() {
+  local d="$1" ps="$2" i
+  local -a a
+  IFS=';' read -r -a a <<< "$ps;_"   # sentinel keeps a trailing empty param (= 0)
+  [ -n "$ps" ] || { printf 0; return; }
+  for ((i = 0; i < ${#a[@]}; i++)); do
+    case "${a[$i]}" in
+      ""|0|00|22) d=0 ;;
+      2|02) d=1 ;;
+      38|48|58)   # extended colour: skip its operands (38;5;N / 38;2;R;G;B)
+        case "${a[$((i + 1))]:-}" in
+          5) i=$((i + 2)) ;;
+          2) i=$((i + 4)) ;;
+        esac ;;
+    esac
+  done
+  printf '%s' "$d"
+}
+
+# split_sgr LINE DIM -> sets V_PLAIN (all CSI removed), V_UNDIM (dim runs
+# dropped, CSI removed), V_DIM (dim state at end of line).
+split_sgr() {
+  local rest="$1" pre
+  V_DIM="$2" V_PLAIN="" V_UNDIM=""
+  while [[ "$rest" == *$'\e'* ]]; do
+    pre="${rest%%$'\e'*}"
+    V_PLAIN+="$pre"; [ "$V_DIM" -eq 0 ] && V_UNDIM+="$pre"
+    rest="${rest#*$'\e'}"
+    if [[ "$rest" =~ ^\[([0-9:\;\<=\>?]*)([\ -/]*)([@-~]) ]]; then
+      [ "${BASH_REMATCH[3]}" = m ] && [ -z "${BASH_REMATCH[2]}" ] \
+        && V_DIM="$(sgr_dim "$V_DIM" "${BASH_REMATCH[1]}")"
+      rest="${rest:${#BASH_REMATCH[0]}}"
+    fi
+  done
+  V_PLAIN+="$rest"; [ "$V_DIM" -eq 0 ] && V_UNDIM+="$rest"
+  return 0
+}
+
 # Locate the input box, which must be the LAST box on screen:
 #   top border (─...) / "❯" line / continuation lines (wrapped input) /
 #   bottom border (─...) / footer lines only (no further ─ line).
@@ -197,14 +245,23 @@ squash() { local s="${1//"$NBSP"/}"; s="${s//$'\t'/}"; printf '%s' "${s// /}"; }
 # top border ("…" + "(<digit>", or "esc to interrupt"), or the footer says "esc
 # to interrupt" WITHOUT a "N shell(s)" / "N task(s)" segment: with a background
 # shell running the footer keeps that text while idle), BOX_SIGNAL (which fired).
+# Dim text (Claude Code's suggested prompt) is not box content; see above.
 # Returns 0 found, 1 no well-formed last box, 2 pane gone.
 read_box() {
-  local cap i p=-1 q=-1 n s
-  local -a lines
-  BOX_RAW="" BOX_N=0 BOX_TEXT="" BOX_BUSY=0 BOX_SIGNAL=""
-  cap="$("${TMUXC[@]}" capture-pane -p -t "$PANE" 2>/dev/null)" || return 2
-  mapfile -t lines <<< "$cap"
-  n="${#lines[@]}"
+  local cap i p=-1 q=-1 n s dim=0
+  local -a lines raw
+  BOX_RAW="" BOX_PLAIN_RAW="" BOX_PLAIN_TEXT="" BOX_N=0 BOX_TEXT="" BOX_BUSY=0 BOX_SIGNAL=""
+  cap="$("${TMUXC[@]}" capture-pane -e -p -t "$PANE" 2>/dev/null)" || return 2
+  mapfile -t raw <<< "$cap"
+  n="${#raw[@]}"
+  lines=()
+  for ((i = 0; i < n; i++)); do
+    if [[ "${raw[$i]}" == *$'\e'* ]]; then
+      split_sgr "${raw[$i]}" 0; lines[i]="$V_PLAIN"
+    else
+      lines[i]="${raw[$i]}"
+    fi
+  done
   for ((i = n - 1; i >= 0; i--)); do
     [[ "${lines[$i]}" == "$PROMPT_CHAR"* ]] && { p=$i; break; }
   done
@@ -236,7 +293,13 @@ read_box() {
     if [ "$BOX_BUSY" -eq 1 ]; then BOX_SIGNAL="footer+spinner"; else BOX_SIGNAL="spinner"; fi
     BOX_BUSY=1
   fi
-  s="${lines[$p]}"
+  # Box content from the undimmed view; dim state starts clear at the ❯ line
+  # and carries over the continuation lines.
+  local -a ud
+  for ((i = p; i < q; i++)); do
+    split_sgr "${raw[$i]}" "$dim"; dim="$V_DIM"; ud[i]="$V_UNDIM"
+  done
+  s="${ud[$p]}"
   while :; do
     case "$s" in
       *" ")     s="${s% }" ;;
@@ -247,9 +310,23 @@ read_box() {
   done
   BOX_RAW="$s"
   BOX_N=$((q - p))
-  s="${lines[$p]#"$PROMPT_CHAR"}"
-  for ((i = p + 1; i < q; i++)); do s+="${lines[$i]}"; done
+  s="${ud[$p]#*"$PROMPT_CHAR"}"
+  for ((i = p + 1; i < q; i++)); do s+="${ud[$i]}"; done
   BOX_TEXT="$(squash "$s")"
+  # Plain view (dim kept), for type_verified's pre-Enter check only.
+  s="${lines[$p]}"
+  while :; do
+    case "$s" in
+      *" ")     s="${s% }" ;;
+      *$'\t')   s="${s%$'\t'}" ;;
+      *"$NBSP") s="${s%"$NBSP"}" ;;
+      *) break ;;
+    esac
+  done
+  BOX_PLAIN_RAW="$s"
+  s="${lines[$p]#*"$PROMPT_CHAR"}"
+  for ((i = p + 1; i < q; i++)); do s+="${lines[$i]}"; done
+  BOX_PLAIN_TEXT="$(squash "$s")"
   return 0
 }
 
@@ -344,6 +421,18 @@ precheck() {
   [ "$on" = "$NAME" ] || abort "opt-in name changed to '$on'"
 }
 
+# box_holds TEXT: 0 iff the last read_box result holds exactly TEXT in the PLAIN
+# view (dim text kept): anything dim left in the box, e.g. a paste placeholder,
+# means no match, so Enter is never sent over it.
+box_holds() {
+  local text="$1"
+  if [ "$BOX_N" -eq 1 ]; then
+    [ "$BOX_PLAIN_RAW" = "$PROMPT_CHAR $text" ] || [ "$BOX_PLAIN_RAW" = "$PROMPT_CHAR$NBSP$text" ]
+  else
+    [ "$BOX_PLAIN_TEXT" = "$(squash "$text")" ]
+  fi
+}
+
 # type_verified TEXT
 #   send-keys -l TEXT; after 0.3 s the last box must hold exactly TEXT
 #   (single line: "❯" + space/NBSP + TEXT; wrapped: content joined, all
@@ -352,18 +441,11 @@ precheck() {
 # 0 submitted, 1 send-keys failed, 2 box does not hold the text (no Enter
 # sent), 3 pane gone after Enter, 4 Enter swallowed or not submitted.
 type_verified() {
-  local text="$1" t rc ok=1
+  local text="$1" t rc
   "${TMUXC[@]}" send-keys -t "$PANE" -l "$text" 2>/dev/null || return 1
   sleep 0.3
   read_box; rc=$?
-  if [ "$rc" -eq 0 ]; then
-    if [ "$BOX_N" -eq 1 ]; then
-      [ "$BOX_RAW" = "$PROMPT_CHAR $text" ] || [ "$BOX_RAW" = "$PROMPT_CHAR$NBSP$text" ] && ok=0
-    else
-      [ "$BOX_TEXT" = "$(squash "$text")" ] && ok=0
-    fi
-  fi
-  [ "$ok" -eq 0 ] || return 2
+  [ "$rc" -eq 0 ] && box_holds "$text" || return 2
   "${TMUXC[@]}" send-keys -t "$PANE" Enter 2>/dev/null || return 4
   for ((t = 0; t < 10; t++)); do
     sleep 0.25
@@ -474,6 +556,10 @@ run_job() {
   log "job: typed resume prompt + Enter, submitted, done"
   exit 0
 }
+
+# Tests: `HANDOFF_SOURCE_ONLY=1 source handoff-stop.sh` loads the functions only.
+# Everything above is side-effect free (variables, umask, set -uo pipefail).
+[ "${HANDOFF_SOURCE_ONLY:-0}" = 1 ] && return 0 2>/dev/null
 
 if [ "${1:-}" = "--job" ]; then
   shift

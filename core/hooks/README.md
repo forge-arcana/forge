@@ -164,11 +164,14 @@ screen check aborts; typing during the 0.3 s verify gap makes the box
 mismatch, so Enter is not sent and the mixed text stays for the user to
 fix; submitting a prompt or any other new turn appends a non-allowlisted
 line, so the transcript check aborts. Placeholder or suggestion text in
-the input box also blocks the clear, since the line is not empty. The
+the input box blocks the clear unless it is dim (SGR 2, Claude Code's grey
+suggested prompt), which is read as empty; colour alone is never ignored. The
 resume guard's 2 s grace covers only the clear's own lines (no `promptId`);
 it relies on Claude Code keeping that field on real prompts.
 
 Verified against Claude Code 2.1.302. The screen check (prompt box rendering, `esc to interrupt` footer) and the transcript line types depend on the CLI version; after an upgrade, a rendering change makes the hook abort (safe, but silent apart from handoff.log) — re-run a live check.
+
+Test the screen reading (dim suggestion vs typed text, spinner, `BOX_RAW`) with `bash core/hooks/tests/test-handoff-stop.sh`. It runs on a private `tmux -L` server and sources the hook with `HANDOFF_SOURCE_ONLY=1`; it exits non-zero on any failure. Tests live in `core/hooks/tests/`, not beside the hooks, so cast-deploy's `core/hooks/*.sh` glob does not install them.
 
 ## Install
 
