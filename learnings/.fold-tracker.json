@@ -308,7 +308,8 @@
     "Two Parsers of One File Are Tested With the Same Bytes",
     "Measure an agent workflow's token spend from the session transcripts",
     "Selling a Subscription Globally: Fixed Local Prices, Tiered by Income Group, With No Silent Default",
-    "Regional price tiers follow big tech (founder standing order, 2026-10-26)"
+    "Regional price tiers follow big tech (founder standing order, 2026-10-26)",
+    "Real-time transport: SSE by default, Ably to step up, Socket.IO only for a two-way app on one always-on server"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
