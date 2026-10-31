@@ -27,6 +27,7 @@ No prose preamble — just run the script and present the table.
 ## Notes & Caveats
 
 - **Cost is an estimate.** The price table lives in `price_for` inside `burn-status.sh`; unknown models fall back to the heaviest tier (conservative-high). Correct it when Claude pricing changes — the table notes the date it was last verified against list pricing.
+- **Native overlap.** For the live session alone, `/usage` shows per-model tokens, cache hit ratio and skill/subagent attribution natively; /burn adds cross-session tables and `--compare`.
 - **Coupling.** The script reads Claude Code's transcript layout (`~/.claude/projects/<encoded-path>/<uuid>.jsonl`). On other harnesses it degrades to "no transcripts found" rather than erroring. If forge later validates another harness's transcript format, abstract the locate + jq step rather than forking the skill.
 - **Fan-out spend is attributed by model tier, not by subagent.** The By Model table shows how much of a session ran at each tier (the tier-binding check), but it cannot split two sonnet subagents apart. When a fan-out art runs, expect Output + Cache-Write to spike — that's the multiplier the lean-evidence work (Path B) targets.
 

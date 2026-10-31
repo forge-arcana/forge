@@ -21,39 +21,23 @@ You judge each surface on its merits — and then you judge the surfaces against
 Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then:
 Launch all in parallel (independent scans):
 1. **Platform, components, design system, flows** — identify Mobile (iOS/Android/Capacitor) vs Web (SPA/SSR) or both; scan UI components, layouts and navigation; look for theme files, design tokens, component libraries; read route definitions, navigation config and form handlers.
-2. **Check for Pattern file**: glob `*Pattern*.md` in cwd. If one exists (likely /probe's), this run **appends** the UX section to it; if not, the report returns inline and the user is told Pattern requires `/probe` on a Blueprint first.
-3. **Check for Touchstone**: glob for `[PROJECT]_03e_Touchstone_V1.0.{md,html}` in cwd. If both present, load the MD (typed contract + YAML tokens) and the HTML (visual context). The Touchstone is the aesthetic constitution `/wedge` forged from Opus + Vow, and its direction is **locked**: /preen evaluates usability *within* that frame, never against it. Any critique contradicting the chosen posture — arguing a different motion philosophy, a tone the Touchstone rejects, or anything violating an explicit Don't — is invalid and must be dropped at synthesis.
+2. **Check for Pattern file**: glob `*Pattern*.md` in `opus/` first, then the project root. If one exists (likely /probe's), this run **appends** the UX section to it; if not, the report returns inline and the user is told Pattern requires `/probe` on a Blueprint first.
+3. **Check for Touchstone**: glob for `[PROJECT]_03e_Touchstone_V1.0.{md,html}` in `opus/` first, then the project root. If both present, load the MD (typed contract + YAML tokens) and the HTML (visual context). The Touchstone is the aesthetic constitution `/wedge` forged from Opus + Vow, and its direction is **locked**: /preen evaluates usability *within* that frame, never against it. Any critique contradicting the chosen posture — arguing a different motion philosophy, a tone the Touchstone rejects, or anything violating an explicit Don't — is invalid and must be dropped at synthesis.
 4. **Surface scan** — run `<forge>/core/scripts/preen-surface-scan.sh <project-path> [Touchstone.md]` for Dimension 7-8 evidence: font-family inventory, the two-voice table, tabular-numeral coverage, brand-mark path lengths, sticky-nav count.
 
 ## Arguments
 
 `$ARGUMENTS` — optional focus area (e.g., `/preen onboarding flow`, `/preen settings page`, `/preen navigation`). If not provided, evaluate the full interface.
 
-## The Norman Questions
+## The Lenses
 
-Ask these of every screen and interaction — a lens throughout the review, not a separate checklist:
-1. **Affordance visible** — can the user tell what they can do without instructions?
-2. **Signifier matches action** — does the control look like what it does?
-3. **Feedback immediate and informative** — does every action say what happened?
-4. **Mapping natural** — do controls relate spatially/logically to their effects?
-5. **Constraints prevent errors** — are wrong actions impossible, not merely unlikely?
-6. **Conceptual model matches reality** — does the user's model match the system's?
-7. **Gulf of execution narrow** — can they figure out HOW?
-8. **Gulf of evaluation narrow** — can they tell WHAT happened?
-
-## Ive's Razor
-
-1. **Can anything be removed?** If removing it doesn't hurt, it shouldn't be there.
-2. **Does it feel inevitable?** No arbitrary choices, no "why not?" additions.
-3. **Is the material honest?** Respect the medium; don't fight it or imitate another.
-4. **Do the unseen details matter?** Transitions, spacing, alignment, scroll feel.
-5. **Is there quiet confidence?** If it needs to shout, it isn't working.
+Two lenses run through every dimension, not as separate checklists. **Norman**: affordance, signifier, feedback, mapping, constraint, conceptual model, and the gulfs of execution and evaluation. **Ive's Razor**: can anything be removed, does it feel inevitable, is the material honest, do the unseen details hold, is there quiet confidence.
 
 **Parallel execution**: Evaluate all 8 dimensions in parallel via subagents. Each dimension's analysis is independent — spawn dimensions 1-4 and 6-8 as sonnet-tier subagents and dimension 5 (Emotional Design & Craft) as an opus-tier subagent, then merge results into the final report through the opus-tier synthesis in Output. If your harness does not support parallel sub-agent spawning or per-spawn model selection, walk the dimensions sequentially at your session model. For a scoped target (one screen, one flow), collapse the non-carve-out dimensions into a single sonnet-tier reviewer carrying all their rubrics — carve-outs and the merge gate are unchanged (protocol Complexity Triage).
 
 ## Dimension 1: Interaction Design
 
-- **Touch targets**: minimum 44x44pt (iOS) / 48x48dp (Android). Flag anything smaller.
+- **Touch targets**: platform minimums 44x44pt (iOS) / 48x48dp (Android); on the web, WCAG 2.5.8 sets 24x24 CSS px (see Dimension 3). Flag anything smaller.
 - **Gesture affordances**: swipe, long-press, pull-to-refresh — are they discoverable without a tutorial?
 - **Input feedback**: haptic, visual, auditory — does every interaction acknowledge the user?
 - **Error prevention**: are destructive actions guarded? Undo over confirmation dialogs.
@@ -62,6 +46,7 @@ Ask these of every screen and interaction — a lens throughout the review, not 
 - **How do I go back?**: Is the escape hatch always visible and consistent?
 - **Progressive disclosure**: show complexity gradually, not all at once
 - **Dead ends**: does every screen have a clear next action?
+- **Generated content**: when a model produces or acts, apply [`surface-checks.md`](surface-checks.md) §3.
 
 ## Dimension 2: Visual Hierarchy & Layout
 
@@ -76,26 +61,21 @@ Ask these of every screen and interaction — a lens throughout the review, not 
 
 ## Dimension 3: Accessibility
 
-- **Screen reader**: are semantic elements used? (`button` not styled `div`, proper headings hierarchy)
-- **Keyboard navigation**: can every action be performed without a mouse/touch?
-- **Focus management**: does focus move logically? Is focus visible?
-- **Alt text**: do images have meaningful descriptions?
-- **Motion**: is `prefers-reduced-motion` respected? Animations should be enhancing, not essential.
-- **Text scaling**: does the layout survive 200% text size without breaking?
+Judge against **WCAG 2.2 AA** and cite the success-criterion number in each finding. Beyond the 2.1 baseline (semantics, keyboard, visible focus, alt text, reduced motion, 200% text and 320px reflow, 1.4.11 non-text contrast 3:1), check the 2.2 additions by name:
+- **2.4.11 Focus Not Obscured**: sticky headers, cookie bars and chat bubbles must not hide the focused control.
+- **2.5.7 Dragging Movements**: every drag (reorder, slider, map) has a single-pointer alternative.
+- **2.5.8 Target Size (Minimum)**: web targets at least 24x24 CSS px, or spaced to match (AA; 44 px is the AAA target). The 44pt / 48dp platform minimums still apply on mobile.
+- **3.3.8 Accessible Authentication**: no cognitive test to sign in; allow paste and password managers, and offer passkeys or magic links.
+- **3.2.6 Consistent Help / 3.3.7 Redundant Entry**: help sits in the same place across pages, and a flow never asks for the same data twice.
 
 ## Dimension 4: Platform Conventions
 
-- **Mobile**: safe areas / notches / dynamic islands handled; no conflict with OS-level swipe gestures; rotation works or is locked for a reason; offline states defined for a mid-action network drop; platform idioms respected rather than fought (iOS bottom tabs vs Android drawer).
+- **Mobile**: safe areas, notches and Dynamic Island handled, and edge-to-edge on Android; no conflict with OS-level swipe gestures; rotation works or is locked for a reason; offline states defined for a mid-action network drop; platform idioms respected rather than fought (iOS tab bar; Android navigation bar on compact screens and navigation rail on larger ones, since the drawer is deprecated in Material 3 Expressive); content stays legible beneath translucent system bars.
 - **Web**: breakpoints adapt rather than shrink; design accounts for browser chrome; links look like links and buttons like buttons; URL carries state, so a view can be shared or bookmarked.
 
 ## Dimension 5: Emotional Design & Craft
 
-Don Norman's three levels, refined through Ive's lens:
-- **Visceral**: Does it look good? First impression, gut reaction. Color, typography, motion. *Ive: beauty through simplicity, not decoration.*
-- **Behavioral**: Does it work well? Efficiency, reliability, usability. The bulk of this review. *Ive: the interaction should feel inevitable.*
-- **Reflective**: Does it feel right? Brand consistency, delight moments, user identity. *Ive: quiet confidence — the design recedes, the content speaks.*
-
-Flag interfaces that nail behavioral but neglect visceral (ugly but functional), vice versa (beautiful but confusing), or that achieve both but through accumulation rather than reduction (feature-complete but cluttered).
+Norman's visceral / behavioral / reflective levels, judged through Ive's reduction. Flag functional-but-ugly, beautiful-but-confusing, and complete-but-cluttered.
 
 ## Dimension 6: Cross-Surface Consistency
 
@@ -146,5 +126,5 @@ to know what NOT to change.
 Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/preen-learnings.md`. When writing learnings:
 
 - Capture **platform-specific patterns** (e.g., "Capacitor apps on Android 15 need explicit edge-to-edge handling")
-- Capture **reusable design patterns** (e.g., "skeleton screens with matching component shapes reduce perceived load time by 40%")
+- Capture **reusable design patterns** with the evidence that showed them (e.g., "skeleton screens shaped like the final components removed the layout jump seen in the 375px screenshots")
 - Flag learnings as `Forge-worthy: yes` when they apply across projects and platforms

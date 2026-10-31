@@ -13,7 +13,7 @@ Watch GitHub Actions runs on the current branch until all complete. No push — 
 
 ## Primary Path: Automated Polling
 
-Run `<forge>/core/scripts/gh-poll.sh --branch <branch>`, appending the scope flags from Step 1 (`--workflow <name>` to filter to one workflow, `--run <id>` to watch a specific run). The script waits for runs (30s timeout), polls every 60s (10min timeout), auto-drills into failures with logs, and outputs a structured markdown report. Use its output directly.
+Run `<forge>/core/scripts/gh-poll.sh --branch <branch>` with the scope flags from Step 1 (`--workflow <name>`, `--run <id>`) as a background command (Claude Code: Bash `run_in_background: true`), and present its report when it exits. The script waits up to 30s for runs to appear, polls every 60s for up to 10 min, drills into failures with logs, and prints a markdown report; use that report as is. Don't poll with your own `sleep` loop.
 
 ## Step 1: Determine Scope
 
@@ -28,10 +28,10 @@ Run `<forge>/core/scripts/gh-poll.sh --branch <branch>`, appending the scope fla
 
 Only use if gh-poll.sh is missing or cannot run — scope filtering goes through the script's flags, not this path.
 
-1. **Wait for runs** — Poll `gh run list --branch <branch> --limit 3 --json databaseId,status,conclusion,workflowName,createdAt` every 10s up to 30s. Stop if none found.
+1. **Wait for runs** — Poll `gh run list --branch <branch> --limit 3 --json databaseId,status,conclusion,workflowName,createdAt` up to 3 times, a few seconds apart (single short calls, no `sleep` loop). Stop if none found.
 2. **Fetch runs** — `gh run list --limit 10 --json databaseId,displayTitle,status,conclusion,headBranch,workflowName,createdAt,url` (add `--workflow <name>.yml` or `--branch <branch>` to filter).
 3. **Display summary** — Table with columns: Workflow, Branch, Status, Duration, Commit, Link. Status icons: ✅ success/skipped, ❌ failure, 🔄 in_progress/queued/waiting, ⚠️ cancelled/timed_out.
-4. **Poll in-progress** — Re-fetch every 60s until all complete or 10min elapses.
+4. **Wait for in-progress runs** — Run the check as a background command (Claude Code: Bash `run_in_background: true`) and report when it exits; do not poll on a timer or with your own `sleep` loop.
 5. **Drill into failures** — `gh run view <id> --json jobs --jq '.jobs[] | select(.conclusion == "failure")'` then `gh run view <id> --log-failed 2>&1 | tail -40`.
 6. **Next steps** — All green: "All CI checks passing." Failure: describe what failed + local repro command. Timeout: "Run /monci to check again." Deploy fail: check secrets/permissions.
 

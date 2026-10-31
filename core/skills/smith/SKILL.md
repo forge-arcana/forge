@@ -2,7 +2,7 @@
 name: smith
 description: "Master of the forge — consumes a Blueprint + Pattern + Touchstone (or plan file / conversation context) and autonomously builds through iterative heats. Summons apprentices for parallel work, wields every art, and converges on perfection. The Magnum Opus. TRIGGER when: user wants to build/implement a substantial piece of work — from a Blueprint + Pattern + Touchstone, a plan discussed with AI, or conversation context. Assesses scope first; advises against full smith for small work."
 ---
-<!-- model: opus | fan-out: build/fix apprentices → tier by heat grade (T1 → low-effort sonnet, T2 → sonnet gated by scoped opus art pass, T3 → opus apprentice or built inline at the session model, full opus gate either way); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) | pinned opus (2026-09-28): with a cheap default session model, a slash-invoked /smith escalates to the top tier to orchestrate; the ceiling rule still delegates all implementation | local-delegable: true; fan-out-local: T1/T2 build/fix code-generation legs (security/auth/payment heats and ALL review/verdict gates stay on Claude) -->
+<!-- model: opus | fan-out: build/fix apprentices → tier by heat grade (T1 → low-effort sonnet, T2 → sonnet gated by scoped opus art pass, T3 → opus apprentice, full opus gate); art/evaluation + pry subagents → opus; checkpoint/rollback → script (smith-checkpoint.sh / smith-rollback.sh); verify → script (follow-up) | pinned opus (2026-09-28): with a cheap default session model, a slash-invoked /smith escalates to the top tier to orchestrate; the ceiling rule still delegates all implementation | local-delegable: true; fan-out-local: T1/T2 build/fix code-generation legs (security/auth/payment heats and ALL review/verdict gates stay on Claude) -->
 
 # /smith — The Master Builder
 
@@ -16,18 +16,20 @@ The smith is not an art. The smith is the one who wields them all.
 - A path to a Blueprint file (e.g., `ProjectName_Blueprint_V1.0.md`) — smith will also load the paired `[PROJECT]_06_Pattern_V1.0.md`
 - A path to a plan/spec `.md` file (any non-Blueprint markdown with implementation steps)
 - A project directory containing a Blueprint (+ Pattern)
+- A `/patch` Change Brief (file or pasted in conversation) — treated as a work source
 - `--force` flag (can combine with any above) — bypasses the scope gate
 - Empty — smith auto-detects the work source
 
 ### Input Resolution (in priority order)
 
-1. **Explicit path provided** → use it (Blueprint or plan file, detected by content). If Blueprint, also load the paired Pattern file and the Touchstone pair (HTML + MD) if present.
-2. **No path** → scan cwd for `*Blueprint*.md` → load the Blueprint. Then glob for `*Pattern*.md`, `*Touchstone*.md`, and `*Touchstone*.html` and load all three alongside.
-3. **Blueprint exists, Pattern missing** → warn "Pattern not found — Blueprint has not been probed" and invoke `/probe` before proceeding. The Pattern is smith's source of design truth.
-4. **Blueprint exists, Touchstone missing** → warn "Touchstone not found — the project has no aesthetic constitution. Smith will build with default styling, which is rarely what the magnum opus deserves." Offer to invoke `/wedge` first (recommended) or proceed with `--no-touchstone` (the user accepts that screens will lack aesthetic discipline). Touchstone means BOTH `Touchstone.md` (typed contract — normative) AND `Touchstone.html` (rendered vision — visual reference).
-5. **No Blueprint** → check for plan files in your harness's plan directory (e.g., `~/.claude/plans/` for Claude Code) or conversation context
-6. **Conversation context** → if the current conversation contains a discussed spec, architecture, or implementation steps, smith extracts a work spec from it
-7. **Nothing found** → error: "No Blueprint, plan, or work context found. Run `/prime` to create an Opus, Vow, Touchstone, Blueprint, and Pattern, or discuss the work first."
+Founding artifacts (`[PROJECT]_NN_*`: Opus, Vow, Touchstone, Pitch, Blueprint, Pattern) are looked up in `opus/` first, then the project root.
+
+1. **Explicit path provided** → use it (Blueprint, plan file or patch Change Brief, detected by content). If Blueprint, also load the paired Pattern file and the Touchstone pair (HTML + MD) if present.
+2. **No path** → scan `opus/`, then cwd, for `*Blueprint*.md` → load the Blueprint. Then glob for `*Pattern*.md`, `*Touchstone*.md`, and `*Touchstone*.html` and load all three alongside.
+3. **Blueprint exists, Pattern or Touchstone missing** → apply the Pattern gate and Touchstone gate in Step 0 before anything else.
+4. **No Blueprint** → check for plan files in your harness's plan directory (e.g., `~/.claude/plans/` for Claude Code) or conversation context
+5. **Conversation context** → if the current conversation contains a discussed spec, architecture, implementation steps, or a `/patch` Change Brief ("Based on feedback received <date>"), smith extracts a work spec from it. A Change Brief supplies the what and the order constraints; smith does its own heat decomposition and grading.
+6. **Nothing found** → error: "No Blueprint, plan, or work context found. Run `/prime` to create an Opus, Vow, Touchstone, Blueprint, and Pattern, or discuss the work first."
 
 ### Input Modes
 
@@ -43,7 +45,7 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
 
 1. **Resolve forge path** from your harness's global rules file (e.g., `~/.claude/CLAUDE.md` `forge-path:` line for Claude Code, or the equivalent file for other harnesses)
 2. **Launch all reads in parallel** (all independent — sequential if your harness lacks parallel tool calls):
-   - Read the Blueprint file **and the paired Pattern file** (if present), plan file, or extract work spec from conversation context (per Input Resolution)
+   - Read the Blueprint file **and the paired Pattern file** (if present), plan file, patch Change Brief, or extract work spec from conversation context (per Input Resolution; `opus/` first, then root)
    - Read the **Touchstone pair** if present — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter as the normative token block — colors, typography, spacing, rounded, components, plus the Do's/Don'ts prose section) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: load for visual reference). The MD is the aesthetic contract every screen smith builds must inherit; the HTML is the soul that contract serves.
    - Read the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated) for stack, conventions, current state
    - Read `<forge>/core/skills/forge/stack-guide.md` for tech reference
@@ -53,13 +55,13 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
    - Read `memory/smith-learnings.md` if it exists (Layer 1 — orchestration wisdom)
    - Read `memory/smith-apprentice-log.md` if it exists (Layer 3 — delegation wisdom)
 
-**Pattern gate** — if the Blueprint has no paired Pattern file (`[PROJECT]_06_Pattern_V1.0.md` absent OR present but empty Architecture section), invoke `/probe` on the Blueprint before proceeding. The Pattern is smith's source of design truth — architecture must be validated before the smith swings. If the Blueprint has UI-facing features, also invoke `/preen` to append the UX section after `/probe` completes.
+**Pattern gate** — if the Blueprint has no paired Pattern file (`[PROJECT]_06_Pattern_V1.0.md` absent OR present but empty Architecture section), warn "Pattern not found — Blueprint has not been probed" and invoke `/probe` on the Blueprint before proceeding. The Pattern is smith's source of design truth. If the Blueprint has UI-facing features, also invoke `/preen` to append the UX section after `/probe` completes.
 
-**Touchstone gate** — if either `[PROJECT]_03e_Touchstone_V1.0.md` or `[PROJECT]_03e_Touchstone_V1.0.html` is missing, surface a warning: "Touchstone incomplete — the project has no aesthetic constitution to inherit. Build will proceed with framework defaults, which is rarely what the magnum opus deserves." Offer to run `/wedge` before continuing (recommended for any UI-facing work). The user can override with `--no-touchstone` to proceed without one — typically appropriate for backend-only work, CLI tools, or libraries. (A partial Touchstone — only HTML, only MD — is a defect; either re-run `/wedge` or accept `--no-touchstone`.)
+**Touchstone gate** — if either `[PROJECT]_03e_Touchstone_V1.0.md` or `[PROJECT]_03e_Touchstone_V1.0.html` is missing, surface a warning: "Touchstone incomplete — the project has no aesthetic constitution to inherit. Build will proceed with framework defaults." Offer to run `/wedge` before continuing (recommended for any UI-facing work). The user can override with `--no-touchstone` to proceed without one — typically appropriate for backend-only work, CLI tools, or libraries. (A partial Touchstone — only HTML, only MD — is a defect; either re-run `/wedge` or accept `--no-touchstone`.)
 
-**Local-LLM delegation gate** — before the heat cycle, check whether a local Ollama instance is reachable (see `<forge>/core/skills/forge/protocol.md` → "Local LLM Delegation"; probe via `curl -sf http://localhost:11434/api/tags` or the `OLLAMA_URL`). If it is, and `FORGE_LLM_DISABLE` is not set, route the CODE GENERATION of T1/T2 heats through it at zero token cost: the orchestrator spawns a haiku-tier apprentice whose only job is to call `<forge>/core/scripts/llm-delegate.sh` (opus orchestrates → haiku runs the script → local model generates → Claude reviews and, where needed, fixes). This satisfies the tiering rule — the delegating apprentice carries an explicit tier and the local model is reached through the script, not the subagent-model parameter — so it never trips the no-untriaged-spawn guard. Carve-outs are absolute: T3 heats, anything security/auth/payment-touching, and ALL art, review, merge, and verdict gates stay on Claude. Fallback is silent — if `llm-delegate.sh` exits non-zero (Ollama down or model missing), the leg runs at its pinned Claude tier with no user intervention. Empirically local excels at pure-logic and self-contained modules and needs a Claude fix pass on framework-integration code (ORM/query builders, server wiring) and strict typing.
+**Local-LLM delegation gate** — before the heat cycle, if Ollama is reachable and `FORGE_LLM_DISABLE` is unset, route T1/T2 code generation through local delegation per protocol → Local LLM Delegation. T3, security/auth/payment heats and every art, review, merge and verdict gate stay on Claude. Local output needs a Claude fix pass on framework-integration code (ORM/query builders, server wiring) and strict typing.
 
-**Touchstone conformance** — when the Touchstone exists, every UI-facing apprentice receives the MD's YAML token block (colors, typography, spacing, rounded, components) AND the Do's/Don'ts prose section as part of its commission. Apprentices MUST use these tokens (font families, color variables, motion timing) instead of inventing new values, AND comply with the project-specific Do's/Don'ts. Apprentices that introduce non-Touchstone fonts, colors, motion tokens, or violate a Do/Don't are rejected and re-tasked. The `typography.faces` block is part of that commission: `ui_face` carries every interface word, `logotype_face` may reach only the wordmark, and a second family on a heading, figure, or dialog title is a rejected commission unless the Touchstone declares a `heading_face` with its audience and reason.
+**Touchstone conformance** — when the Touchstone exists, every UI-facing apprentice receives the MD's YAML token block (colors, typography, spacing, rounded, components) and the Do's/Don'ts prose section in its commission. Apprentices use these tokens (font families, color variables, motion timing) instead of inventing values, and follow the Do's/Don'ts. An apprentice that introduces non-Touchstone fonts, colors or motion tokens, or violates a Do/Don't, is rejected and re-tasked. The `typography.faces` block is part of that commission: `ui_face` carries every interface word, `logotype_face` may reach only the wordmark, and a second family on a heading, figure, or dialog title is a rejected commission unless the Touchstone declares a `heading_face` with its audience and reason.
 
 **Pitch gate** — if no `[PROJECT]_04_Pitch_V*.md` / `.html` exists AND the Blueprint contains business model sections (pricing, revenue, monetization, go-to-market), offer to run `/pitch` before starting (it requires the Touchstone — see the Touchstone gate above). Ask the user — using your harness's multi-choice prompt if available, otherwise inline — with options: "Yes, write the Pitch first" / "Skip, proceed without a Pitch". If a Pitch exists, read the `<!-- PITCHED: [VERDICT] — [date] -->` marker at the top of `<body>` in the Pitch HTML: a `KILL` or `NEEDS RETHINK` verdict surfaces to the user before any heat starts — building toward a broken business model is waste. The marker is written only by `/pitch --critique`; no marker means no review pass was requested, and smith proceeds normally.
 
@@ -134,11 +136,7 @@ When working from a plan file or conversation context, use the work spec from St
 4. **Infer a Hardening unit** if the work has 5+ heats (testing, verification)
 5. **Reference steps by description** instead of blueprint section numbers (e.g., "Provider abstraction" instead of "Section 13")
 
-Phase gates are **adapted** for plan/conversation mode:
-- Foundation gate → still applies if there's a foundation unit
-- Unit completion gates → still apply (evaluate each completed unit)
-- Final gate → still applies (convergence loop)
-- `/probe` gates are skipped (no blueprint architecture to validate) — replaced by `/poke` + `/press`
+Phase gates adapt: foundation, unit and final gates still apply; `/probe` gates are replaced by `/poke` + `/press`.
 
 ### Dependency Graph
 
@@ -158,30 +156,13 @@ Grade every heat by complexity per the protocol's Complexity Triage table (`core
 |-------|---------------|------------|----------------------|
 | **T1** | Scaffolding, config, codegen wiring, static pages, boilerplate CRUD with no business rules | Low-effort sonnet-tier apprentice (haiku-tier for pure boilerplate) | Verify (2c) only; art review batched into the next phase gate |
 | **T2** | Ordinary feature slices, UI screens against the Touchstone, straightforward integrations | Sonnet-tier apprentice | Scoped opus-tier art pass (2d) |
-| **T3** | Auth/authz, payments, concurrency, data migrations, security-touching code, novel algorithms, anything the Pattern flags as a risk | Smith builds inline at the session model, or an opus-tier apprentice | Full opus-tier art pass; the security dimension always runs |
+| **T3** | Auth/authz, payments, concurrency, data migrations, security-touching code, novel algorithms, anything the Pattern flags as a risk | Opus-tier apprentice | Full opus-tier art pass; the security dimension always runs |
 
 The protocol's grading rules apply unchanged; the smith-specific binding is that a T1 heat's diff lands inside the next phase gate's scope.
 
 ### Present the Plan
 
-Output the full build plan as a table:
-
-```markdown
-## Build Plan — [Project Name]
-
-| # | Unit | Heat | Source | Grade | Dependencies | Parallel? |
-|---|------|------|--------|-------|--------------|-----------|
-| 1 | Foundation | Scaffolding + schema | §13, §16 | T1 | — | — |
-| 2 | Foundation | Auth system | §3, §15 | T3 | Heat 1 | — |
-| 3 | Foundation | Dev tooling | — | T1 | Heat 1 | Yes (with Heat 2) |
-| ...| ... | ... | ... | ... | ... | ... |
-
-Estimated heats: N | Parallelizable: M
-```
-
-The **Source** column references blueprint section numbers (§N) in blueprint mode, or free-form step descriptions in plan/conversation mode.
-
-Proceed to build. The master doesn't ask permission to start — the work spec is the permission.
+Output the plan as a table headed `## Build Plan — [Project Name]` with columns `# | Unit | Heat | Source | Grade | Dependencies | Parallel?` (Source = §N in blueprint mode, the step description otherwise), then `Estimated heats: N | Parallelizable: M`. Proceed to build without asking; the work spec is the permission.
 
 ## Step 2: The Heat Cycle
 
@@ -192,7 +173,7 @@ Each heat follows: **Plan → Build → Verify → Evaluate → Fix → Checkpoi
 - Read the current heat's target from the ledger
 - Identify relevant source (blueprint sections or workspec steps) to implement
 - List files to create/modify
-- Check dependency graph — if independent heats exist, spawn apprentices at the tier the heat's grade prescribes (T1 → low-effort sonnet, T2 → sonnet, T3 → opus or built inline; see Grade Each Heat and Apprentice System)
+- Check dependency graph — if independent heats exist, spawn apprentices at the tier the heat's grade prescribes (T1 → low-effort sonnet, T2 → sonnet, T3 → opus; see Grade Each Heat and Apprentice System)
 - **Visual-identity gate** — if the heat changes a typeface, colour token, brand mark, or page architecture (the "Visual decisions are shown, then built" rule), smith does not edit the repo first. It publishes a comparison prototype — the current state and each candidate, at 375 and ≥1280, light and dark, rendered through Touchstone tokens — asks the founder to pick via the harness's multi-choice prompt, records the pick in the ledger's `visualPicks`, and only then builds to it. Reaching 2b with a visual-identity change and no recorded pick is a defect: stop and prototype. Exception: a change that only *restores* Touchstone conformance (a non-Touchstone font crept in, a token drifted) needs no pick — the Touchstone is the pick; record it as such.
 
 ### 2b: Build
@@ -203,9 +184,7 @@ Write code following:
 - The forge conventions checklist for logging, structure, dev tooling, and versioning
 - Vertical slices — DB schema → service/business logic → API route → UI component (where applicable)
 
-Smith builds the code itself. The arts evaluate. Apprentices handle independent parallel work.
-
-Smith refuses to touch visual-identity files (font imports, typography and colour tokens, brand-mark assets, page-level layout of a marketing or logged-out page) in a heat that has no `visualPicks` entry for that decision — see the 2a gate.
+Smith designs each heat and writes the apprentice brief; an apprentice at the heat's graded tier writes the code. Smith keeps the brief, the merge, the review and the verdict (protocol → ceiling rule). The arts evaluate.
 
 ### 2c: Verify
 
@@ -225,7 +204,7 @@ Verify results go to the evaluation arts as evidence. If verify fails, smith fix
 Select art(s) per the Escalation Ladder, then:
 
 1. **Collect evidence** — run `<forge>/core/scripts/forge-scan.sh <art> <project-path>` for /poke and /press evaluations
-2. **Invoke art(s) via subagents — gate depth follows the heat's grade.** **T1 heats skip 2d entirely**: verify (2c) is their per-heat gate, and their diffs are reviewed at the next phase gate (batched, never trimmed). **T2 heats** get the standard scoped pass: each art runs in an opus-tier subagent with pre-loaded evidence and context, commissioned with "focus only on this heat's diff; skip pre-flight; no internal fan-out" — these passes ARE the review gate for sonnet-built code. **T3 heats** get a full opus-tier art pass with the security dimension always included; scoping to the heat's diff still applies, but the commission drops "no internal fan-out" so the art may spawn its own security carve-out. Full fan-out art runs remain reserved for phase and final gates. Heats smith built inline may instead take a sonnet-tier scoped pass, gated by smith's own findings synthesis (T2 only — inline T3 heats still take the opus pass). Multiple arts on the same heat run in parallel where the harness supports it (evaluate fan-out).
+2. **Invoke art(s) via subagents — gate depth follows the heat's grade.** **T1 heats skip 2d entirely**: verify (2c) is their per-heat gate, and their diffs are reviewed at the next phase gate (batched, never trimmed). **T2 heats** get the standard scoped pass: each art runs in an opus-tier subagent with pre-loaded evidence and context, commissioned with "focus only on this heat's diff; skip pre-flight; no internal fan-out" — these passes ARE the review gate for sonnet-built code. **T3 heats** get a full opus-tier art pass with the security dimension always included; scoping to the heat's diff still applies, but the commission drops "no internal fan-out" so the art may spawn its own security carve-out. Full fan-out art runs remain reserved for phase and final gates. Multiple arts on the same heat run in parallel where the harness supports it (evaluate fan-out).
 3. **Collect findings** — parse subagent outputs for CRITICAL / IMPORTANT / MINOR classifications
 
 ### 2e: Fix
@@ -276,17 +255,9 @@ Gate arts spawn at opus tier and run with their full fan-out — the single-agen
 
 ### Phase Gate Commits
 
-Smith commits at every phase gate via `/wrap`. This is a **smith-specific override of the No Auto-Commit rule** — the user delegates commit authority to smith when invoking it. The rationale:
+Smith commits at every phase gate via `/wrap`. This is a bounded override of the No Auto-Commit rule: invoking smith delegates commit authority for this build. Heats inside a phase are not committed separately.
 
-- **Safety**: Long builds (10+ heats) accumulate risk. A session crash without commits loses everything since the last gate.
-- **Clean history**: Each commit maps to a logical phase — foundation, core workflow, supporting unit. Reviewable, revertable.
-- **Rollback granularity**: `git revert` targets a specific phase, not the entire build.
-
-Smith does NOT ask "ready to commit?" at each gate — that would break flow on a 20-heat build. The user gave smith authority to build; committing at phase gates is part of building.
-
-**When smith invokes `/wrap`**: skip ALL multi-choice prompts (commit confirmation, push decision, doc updates). Lint, stage, save context, commit — straight through, no interruptions. Do NOT push — keep local. The user pushes when they're ready.
-
-Individual heats within a phase are NOT committed separately — too granular. The phase gate is the natural commit boundary.
+When smith invokes `/wrap`, skip all of wrap's prompts (commit confirmation, push decision, doc updates): lint, stage, save context, commit. Do not push.
 
 ### The Final Gate — Convergence Loop
 
@@ -315,7 +286,7 @@ MAX REACHED (5 cycles without convergence):
 
 **Cycle scoping**: the first cycle runs `/temper` + `/pound` in full. Subsequent cycles re-run only the personas and dimensions with still-open findings. The final pre-ship pass runs one full `/temper` + `/pound` regardless.
 
-The smith keeps hammering until the blade rings clean. Only MINOR findings are accepted as-is. The 5-cycle cap prevents infinite loops — but the user can always raise it.
+Only MINOR findings are accepted as-is; the user can raise the 5-cycle cap.
 
 After convergence: invoke `/wrap` with full context.
 
@@ -339,16 +310,8 @@ When the final gate converges (zero CRITICAL + IMPORTANT):
    - **Plan file mode** → update the source plan file (mark steps complete, add implementation notes)
    - **Conversation mode** → no source to update (workspec in `memory/smith-workspec.md` serves as the record)
 3. Invoke `/wrap` for the final commit
-4. Output the forge mark:
-
-```
-The blade is forged.
-[Project Name] — [N] heats, [M] cycles, [K] findings resolved.
-Arts wielded: [list with invocation counts]
-Time at the anvil: [duration]
-```
-
-5. **Prompt the Atlas.** The blade is forged — this is the as-built moment. Offer, via the harness's multi-choice prompt, to run `/plot` (As-Built cast): *"The build has converged. Want the Atlas — a bird's-eye map of what you actually built (services, stores, integrations, trust boundaries), with the drift from the Pattern/Planned-Atlas surfaced before go-live?"* This is an offer, not a gate — completion stands whether or not the founder takes it. When a Planned Atlas or Pattern Architecture exists, the As-Built Atlas shows exactly where the heats deviated from the plan.
+4. Output the forge mark: `The blade is forged.`, then one line each for project, heats, cycles, findings resolved, arts wielded (with counts) and time at the anvil.
+5. **Offer the Atlas.** Via the harness's multi-choice prompt, offer `/plot` (As-Built cast): a bird's-eye map of what was built (services, stores, integrations, trust boundaries), with drift from the Pattern or Planned Atlas surfaced before go-live. An offer, not a gate; completion stands either way.
 
 ## Session Resume
 
@@ -365,15 +328,15 @@ For plan/conversation mode: run `--hash-check workspec` instead (and `--hash-che
 
 ## The Apprentice System
 
-> Full details: [apprentice-system.md](apprentice-system.md) — fan-out patterns, waste principle, rules.
+> Full details: [apprentice-system.md](apprentice-system.md) — fan-out patterns, rules.
 
-**Core principle**: Sequential execution of independent work is waste — when the harness supports parallel sub-agent spawning. Before each heat, smith scans the dependency graph and spawns apprentices for all satisfied inputs at each heat's graded tier — low-effort sonnet for T1, sonnet for T2, opus for T3 (or smith builds T3 inline) — or executes them sequentially at the session model when the harness lacks parallel subagent spawning or per-spawn model selection. Cap: 3-4 concurrent. Timeout: 3 minutes without progress.
+**Core principle**: independent work that is big enough to earn its own context fans out; the dependency graph decides. Before each heat, smith spawns apprentices for satisfied inputs at each heat's graded tier — low-effort sonnet for T1, sonnet for T2, opus for T3 — or runs them sequentially at the session model when the harness lacks parallel subagent spawning or per-spawn model selection. Cap: 3-4 concurrent.
 
 ## Art Selection & Escalation
 
 > Full details: [art-selection.md](art-selection.md) — selection matrix, detection rules, escalation ladder.
 
-**Five rungs**: Light (/poke) → Light+Design (+/preen) → Medium (+/press) → Heavy (/temper) → Convergence (/temper+/pound loop). Intensity never decreases. UI heats trigger /preen. Security-critical heats (auth, payments, session) MUST add /press — this detection rule is non-optional; heats touching OWASP-relevant surfaces escalate to /pound.
+**Review depth** follows the heat's grade; gate intensity rises with build position and never decreases. UI heats add /preen. Security-critical heats (auth, payments, session) always add /press — non-optional; OWASP-relevant surfaces escalate to /pound.
 
 ## The Learning Membrane
 
@@ -391,10 +354,7 @@ Two files persist smith state:
 
 ## Hard Rules
 
-1. **NEVER** chain bash commands with `&&`, `;`, or `||`. This applies to smith AND all apprentices — include the rule verbatim in every apprentice prompt.
-2. **Auto-wrap** at unit boundaries and phase gates. No asking — just invoke `/wrap`.
-3. **Multi-choice prompts** ONLY when arts produce conflicting recommendations that smith cannot resolve. The master decides everything else autonomously.
-4. **NEVER** skip evaluation on a T2 or T3 heat because the code "looks fine." T1 heats take verify (2c) as their per-heat gate and their diffs are reviewed, batched and untrimmed, at the next phase gate — no diff leaves a phase unevaluated.
-5. **NEVER** proceed past the final gate with CRITICAL or IMPORTANT findings unless the user explicitly accepts them after convergence stalls or max cycles.
-6. **ALWAYS** persist the ledger before any milestone or potential interruption point.
-7. **ALWAYS** follow the stack guide conventions when building. The blueprint defines *what*, the stack guide defines *how*.
+1. No `&&`, `;` or `||` chaining in any shell call, by smith or apprentices. Paste this rule into every apprentice brief.
+2. No diff leaves a phase unevaluated: T2 and T3 heats take their 2d pass even when the code looks fine; T1 diffs are reviewed, batched and untrimmed, at the next phase gate.
+3. Ask the user only at the prompts this skill names (Touchstone, Pitch, visual-identity pick, convergence stall or cap, blueprint-intent change, Atlas offer) or when arts conflict and smith cannot resolve it. Decide everything else.
+4. Persist the ledger before any milestone or likely interruption.

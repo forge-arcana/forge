@@ -198,10 +198,11 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 | `/ponci` | Push to remote and monitor CI |
 | `/vsix` | Publish a VS Code extension |
 | `/dig` | Think deeper — reframe agent as staff engineer for current discussion |
-| `/temper` | Hardened evaluation — runs poke + press N times, consolidates with confidence scoring |
+| `/temper` | Hardened evaluation — runs poke + press N times plus one opus security pass per art, consolidates with confidence scoring |
 | `/cicd` | Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures |
 | `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
 | `/burn` | Token Burn — per-session token and estimated-cost report read from the harness's own transcripts |
+| `/handoff` | Opt-in auto-handoff — writes a note, clears the session and resumes on the next piece of work (tmux only) |
 
 ---
 
@@ -248,10 +249,10 @@ forge/
 │   │   │   ├── fold-phase.md          # Phase 3 (fold) procedure
 │   │   │   ├── versioning.md          # Unit versioning standard
 │   │   │   └── pattern-skeleton.md    # Pattern document skeleton
-│   │   └── burn/ cicd/ dig/ eli5/ monci/ ponci/ qt/ srs/ temper/ vsix/ wawa/ wrap/   # task skills
+│   │   └── burn/ cicd/ dig/ eli5/ handoff/ monci/ ponci/ qt/ srs/ temper/ vsix/ wawa/ wrap/   # task skills
 │   ├── scripts/           # Tool-neutral runtime scripts (21)
 │   ├── rules/             # HARD RULES (development-discipline.md, forge-governance.md)
-│   └── hooks/             # Tier work-router hook pair (tier-guard.sh, tier-routing.sh)
+│   └── hooks/             # Membrane hooks: tier work-router (tier-guard.sh, tier-routing.sh) + auto-handoff (handoff-stop.sh, handoff-start.sh)
 ├── bin/forge-build        # Emits build/.agents/ (FORGE.md, skills/, rules/) + build/scripts/
 ├── build/                 # Generated output (gitignored)
 ├── claude-helpers/        # Optional Claude Code reference docs + transient migration glue

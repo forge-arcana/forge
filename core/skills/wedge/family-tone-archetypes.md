@@ -12,7 +12,7 @@ Optional grounding when the lens calls for a lineage-anchored vocabulary.
 
 - **Editorial / typographic** — Obys, Locomotive type, magazine-tradition, Swiss-poster.
 - **Motion-driven / immersive** — Locomotive motion, Active Theory, Resn, Fantasy.
-- **Refined craft / high-end** — Clay, Daniel Korpai, MDS, Tiempos-luxury.
+- **Refined craft / high-end** — Clay, Daniel Korpai, MDS, high-contrast-serif luxury.
 - **Artistic / illustrative** — Zhenya Rynzhuk, Leo Natsume, hand-drawn maximalism.
 - **Brutalist / raw** — Memphis, brutalist concrete, Constructivist propaganda.
 - **Liquid / atmospheric** — Liquid Glass, gradient mesh worlds, Kuznetsov motion.

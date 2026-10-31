@@ -1,8 +1,8 @@
 ---
 name: pound
-description: "Deep QA analysis using 21 adversarial personas. Generates tests, finds edge cases, audits security/accessibility/compliance. Self-improving. TRIGGER when: user wants thorough QA, comprehensive testing, edge case analysis, or 'break this.'"
+description: "Deep QA analysis using 21 adversarial personas (billing lifecycle, AI-feature attacks, current law and security standards). Generates tests, finds edge cases, audits security/accessibility/compliance. Self-improving. TRIGGER when: user wants thorough QA, comprehensive testing, edge case analysis, or 'break this.'"
 ---
-<!-- model: opus | fan-out: personas 6,7,9,17 → opus; other personas + Part 3 inputs → sonnet; fan-out-local: sonnet-tier personas (not 6,7,9,17); consolidation at opus -->
+<!-- model: opus | fan-out: personas 6,7,9,11,17 → opus; other personas + Part 3 inputs → sonnet; fan-out-local: sonnet-tier personas (not 6,7,9,11,17); consolidation at opus -->
 
 # /pound — Deep Testing & Analysis
 
@@ -20,17 +20,17 @@ You are pounding this project on the anvil — running a comprehensive QA and ad
 
 2. **Scope detection** — `$ARGUMENTS` if provided, else git log + project rules file. Identify `[PRODUCT_NAME]`, `[TECH_STACK]`, `[FEATURE_SCOPE]`, `[JURISDICTION]` (ask user for jurisdiction if not obvious) and fill them into the framework.
 
-**Scale the fan-out to the target** (protocol Complexity Triage): the full 21-persona assault is for whole-product or pre-ship runs. For a scoped target — one flow, one heat's diff — select the personas whose rubric actually touches that surface (always including 6, 7, 9, 17 at opus tier) and collapse the remainder into a single sonnet-tier reviewer carrying their rubrics. The opus consolidation gate never shrinks; only the legwork width does.
+**Scale the fan-out to the target** (protocol Complexity Triage): the full 21-persona assault is for whole-product or pre-ship runs. For a scoped target — one flow, one heat's diff — select the personas whose rubric actually touches that surface (always including 6, 7, 9, 17 at opus tier, plus 11 when the target has an LLM or MCP surface) and collapse the remainder into a single sonnet-tier reviewer carrying their rubrics. The opus consolidation gate never shrinks; only the legwork width does.
 
 3. **Execute the framework's three parts**:
    - **Part 1**: Practical QA review — runs first to establish baseline context.
    - **After Part 1, launch Parts 2 + 3 in parallel** as parallel subagents (or sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection):
-     - **Part 2**: Persona-based simulation — spawn parallel subagents across the 21 personas defined in `qa-framework.md`. Spawn personas 6, 7, 9, and 17 (lawyer, security expert, fraudster, architect) as opus-tier subagents — their adversarial reasoning is open-ended, the rubrics only seed it. Spawn the other 17 personas as sonnet-tier subagents — each carries an explicit rubric in the framework. Each persona's review is independent. **Assemble each spawn prompt** (script tier) as: `<forge>/core/scripts/pound-persona.sh <framework-path> <N>` output (shared preamble + that persona's block only — never the full ~20KB framework) + the filled context variables + `POUND_EVIDENCE` + "Do NOT run forge-scan.sh — evidence is provided" + "NEVER use &&, ; or || to chain bash commands — one command per call". If your harness lacks the script, fall back to pasting the framework with the other personas' sections removed by hand.
+     - **Part 2**: Persona-based simulation — spawn parallel subagents across the 21 personas defined in `qa-framework.md`. Spawn personas 6, 7, 9, 11 and 17 (lawyer, security expert, fraudster, AI-feature attacker, architect) as opus-tier subagents — their adversarial reasoning is open-ended, the rubrics only seed it. Spawn the other 16 personas as sonnet-tier subagents — each carries an explicit rubric in the framework. Each persona's review is independent. **Assemble each spawn prompt** (script tier) as: `<forge>/core/scripts/pound-persona.sh <framework-path> <N>` output (shared preamble + that persona's block only, never the full framework) + the filled context variables + `POUND_EVIDENCE` + "Do NOT run forge-scan.sh — evidence is provided" + "NEVER use &&, ; or || to chain bash commands — one command per call" + a write fence (read-only unless told otherwise). Persona 11 is skipped when the product has no LLM or MCP surface. Founding artifacts (`[PROJECT]_NN_*`) are read from `opus/` first, then the project root. If your harness lacks the script, fall back to pasting the framework with the other personas' sections removed by hand.
      - **Part 3**: Adversarial input generation — craft malicious/edge-case inputs, as a sonnet-tier subagent.
 
 4. **Consolidate at opus tier and output findings** grouped by severity — this consolidation is the review gate for the sonnet-tier legs: dedup overlapping findings across personas, challenge any finding lacking evidence, reconcile severity disagreements, and own the final severity verdicts:
 
-Output as `# QA Deep Dive — [FEATURE_SCOPE]` with a date/product line, a severity-count summary table (CRITICAL / IMPORTANT / MINOR), then findings ordered by severity and keyed `[SEVERITY-NNN]`. Each finding carries: originating persona, `file:line`, current vs expected behavior, reproduction steps, and the suggested fix.
+Output as `# QA Deep Dive — [FEATURE_SCOPE]` with a date/product line, a severity-count summary table (CRITICAL / IMPORTANT / MINOR), then findings ordered by severity and keyed `[SEVERITY-NNN]`. Each finding carries: originating persona, severity, `file:line`, current vs expected behavior, reproduction steps, and the suggested fix. Personas test from their own angle; code quality belongs to /poke, so persona 17 reviews design and failure modes only. Legal and standards citations in the framework are starting points: personas web-check dates at run time.
 
 5. **Optionally generate test files** for critical findings — ask the user if they want test code generated.
 

@@ -59,7 +59,7 @@ The top level re-judges each returned verdict against its evidence when assembli
 
 ### Phase 3: Lateral Approaches
 
-For assumptions that survive Phase 2, **investigate all lateral paths in parallel per assumption** — each path is independent. Spawn parallel opus-tier subagents — creative exploration, one per surviving assumption covering all five paths — or walk the paths sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection:
+For assumptions that survive Phase 2, spawn one opus-tier subagent per surviving assumption, in parallel, each covering all five paths below. If your harness lacks parallel sub-agent spawning or per-spawn model selection, walk them sequentially at your session model:
 
 1. **Adjacent tools** — different library, different service, different protocol that achieves the same outcome
 2. **Composition** — can two simpler capabilities be combined to achieve the blocked capability?
@@ -88,7 +88,7 @@ If no path found: **Confirmed Hard Wall** — list verified assumptions, exhaust
 
 ## Post-Flight
 
-Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to the **project's** `memory/pry-learnings.md` — the project-memory store (`~/.claude/projects/<project-slug>/memory/` on Claude Code), NOT `~/.claude/skills/pry/memory/`. `/pry` is frequently run outside a repo, so never resolve `memory/` against this skill's own base directory; if there's no active project, use the harness project-memory store.
+Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/pry-learnings.md` as its path-resolution rule defines. /pry often runs outside a repo, so that means the harness project-memory store, never this skill's folder.
 
 Learnings should capture:
 - Assumptions that looked true but were false (common misconceptions)

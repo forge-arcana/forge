@@ -20,7 +20,7 @@ Started: [YYYY-MM-DD]
 
 ## Phase 2 — The Shape
 
-### [Direction check / external-vs-personal]
+### [Vow — the pledge in the user's words]
 ...
 
 ### [Viability thread]

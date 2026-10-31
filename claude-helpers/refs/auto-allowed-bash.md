@@ -17,21 +17,17 @@ Complex work is parallelized using **subagents** — lightweight child contexts 
 
 ### 3. Self-Improvement Loop
 
-After any correction from the user, Claude **immediately updates its learnings** (in memory files or the project's `AGENTS.md`). It writes rules for itself to prevent the same mistake from recurring. This creates a feedback loop where error rates drop over time as the rule set grows.
+After any correction from the user, Claude records the learning in the project's `memory/` (art learnings in `memory/*-learnings.md`, flagged `Forge-worthy` where it generalizes). `AGENTS.md` holds rules, not storage; a correction becomes a rule there only when the user approves it as one.
 
 ### 4. Verification Before Done
 
 Owned by `core/rules/development-discipline.md` ("Verification Before Done" and "Visual Changes Require Screenshots") and deployed in the FORGE-RULES block. Not restated here.
 
-### 5. Demand Elegance (Balanced)
-
-For non-trivial changes, Claude pauses to consider whether there's a more elegant approach. If a fix feels hacky, it restarts with full context. However, this is balanced — simple, obvious fixes don't get over-engineered.
-
-### 6. Autonomous Bug Fixing — Logs First, Always
+### 5. Autonomous Bug Fixing — Logs First, Always
 
 Owned by `core/rules/development-discipline.md` ("Logs First, Always") and deployed in the FORGE-RULES block. Not restated here.
 
-### 7. Documentation & Context Updates
+### 6. Documentation & Context Updates
 
 Before committing, Claude follows a strict flow:
 1. Confirm doc updates with the user
@@ -62,14 +58,6 @@ No separate task/context/todo files are created in the repo — everything lives
 
 ---
 
-## Shell & Platform
-
-- Always uses **bash** (Unix shell syntax), never Windows cmd/PowerShell — even on Windows
-- Forward slashes in paths, `/dev/null` not `NUL`, `rm -rf` not `rmdir /s /q`
-- For `.cmd`/`.bat` tools (e.g., `gcloud.cmd`), uses Node/Python subprocess with explicit argument arrays to avoid Windows shell quoting issues
-
----
-
 ## Shorthand Commands
 
 The shorthand commands are skills, not rules-file text. Their behaviour is owned by the skill files; this table only names them.
@@ -79,14 +67,6 @@ The shorthand commands are skills, not rules-file text. Their behaviour is owned
 | **wawa** | `core/skills/wawa/SKILL.md` | "Where are we at?" — sourced status table (Active Work / Outstanding / Parked), with a warning when the rules file has no `## Current Context` |
 | **wrap** | `core/skills/wrap/SKILL.md` | Pre-commit ritual: lint → stage → context → docs → compact → commit |
 | **qt** | `core/skills/qt/SKILL.md` | Quick test — verify a fix works before the user tests manually |
-
----
-
-## Testing Strategy
-
-- **E2E debugging**: Fix each failing test individually (single test runs), then re-run the full suite only after all individual fixes pass
-- **E2E long runs**: Run full E2E suites in foreground with `timeout: 300000` (5 min). Config has `maxFailures: 1` so it stops on first failure. If running in background for any reason, check output at the 3-minute mark proactively.
-- **E2E pre-flight**: Kill zombie processes, verify DB connectivity, sync schema if changed
 
 ---
 
@@ -121,7 +101,7 @@ If forge is disabled (via `/forge off`), ALL forge skills are suspended except `
 
 ### Skill Model Recommendations
 
-Skills carry a neutral `<!-- model: opus/sonnet/haiku/inherit -->` hint, which `cast-deploy.sh` translates into a `model:` frontmatter field on the Claude copy at deploy time, as an exact model id (`claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5`) — a floating alias that resolves outside the org's availableModels allowlist is silently ignored. Two mechanisms exist and they behave differently (measured 2026-08-16 and 2026-09-28 — see `core/skills/forge/protocol.md` → Model Tiers, rules 6 and 7):
+Skills carry a neutral `<!-- model: opus/sonnet/haiku/inherit -->` hint, which `cast-deploy.sh` translates into a `model:` frontmatter field on the Claude copy at deploy time, as an exact model id (`claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5`) — a floating alias that resolves outside the org's availableModels allowlist is silently ignored. `claude-fable-5-1` (above Opus; for demanding reasoning and long-horizon agentic work) has no tier hint; any use of it is a spawn-level choice, not a skill pin (checked 2026-10-31). Two mechanisms exist and they behave differently (measured 2026-08-16 and 2026-09-28 — see `core/skills/forge/protocol.md` → Model Tiers, rules 6 and 7):
 
 - **`model:` frontmatter is an escalation floor, not a ceiling — and only on a user slash invocation.** It raises a session that sits *below* the skill's needed tier when the user types the slash command. A model-initiated Skill-tool invocation runs at the session model regardless of frontmatter. It does **not** pull a session down: a skill pinned one tier down, invoked inline on a higher-tier session, runs every turn — including the invocation turn — at the session model.
 - **A spawn's model parameter binds in both directions, including downward.** Subagents spawned from a top-tier session run at whatever tier the spawn names, for the whole of their work. This is the only reliable lever for running a leg below the session.
@@ -152,13 +132,3 @@ For a **description change**: update the matching persona card's `art-desc` text
 For a **skill rename**: grep for all occurrences in the file and update every one.
 
 The presentation is the canonical human-readable overview of what forge does. Letting it drift from the actual skill set makes it misleading. A new art that only appears in one slide is as misleading as no mention at all.
-
----
-
-## Core Principles
-
-| Principle | Description |
-|-----------|-------------|
-| **Simplicity First** | Every change should be as simple as possible, impacting minimal code |
-| **No Laziness** | Find root causes. No temporary fixes. Senior developer standards. |
-| **Minimal Impact** | Changes only touch what's necessary. Avoid introducing bugs. |

@@ -52,17 +52,24 @@ if ! command -v jq &>/dev/null; then
 fi
 
 # --- Pricing (USD per 1M tokens): input / output / cache-write / cache-read ---
-# ESTIMATE ONLY — verified against Claude API list pricing 2026-08-15
-# (cache write = 1.25x input, cache read = 0.1x input). Edit when pricing moves.
-# Unknown models fall back to the Fable tier (the heaviest), so estimates are
-# conservative-high, never low.
+# ESTIMATE ONLY — verified against Claude API list pricing 2026-10-31 for the
+# 5.5 generation (older-generation fallbacks unchanged; re-check them before
+# relying on them). Cache-write column is the 1h-TTL rate (2x input), which
+# Claude Code's main conversation uses on a subscription; the 5m rate is 1.25x
+# input. Edit when pricing moves. Unknown models fall back to the Fable tier
+# (the heaviest), so estimates are conservative-high, never low.
+# Columns: input output cache-write(1h) cache-read
 price_for() {
   case "$1" in
-    *fable*|*mythos*) echo "10 50 12.50 1.00" ;;
-    *opus*)           echo "5 25 6.25 0.50" ;;
-    *sonnet*)         echo "3 15 3.75 0.30" ;;
-    *haiku*)          echo "1 5 1.25 0.10" ;;
-    *)                echo "10 50 12.50 1.00" ;;   # default → Fable tier
+    *fable-5-1*)      echo "10 50 20 0.25" ;;
+    *fable*|*mythos*) echo "10 50 20 1.00" ;;
+    *opus-5-5*)       echo "4 20 8 0.20" ;;
+    *opus*)           echo "5 25 10 0.50" ;;
+    *sonnet-5-5*)     echo "2 10 4 0.10" ;;
+    *sonnet*)         echo "3 15 6 0.30" ;;
+    *haiku-5-5*)      echo "0.10 0.50 0.20 0.01" ;;
+    *haiku*)          echo "1 5 2 0.10" ;;
+    *)                echo "10 50 20 1.00" ;;   # default → Fable tier
   esac
 }
 

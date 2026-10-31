@@ -19,13 +19,13 @@ Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then resolve the *
 
 1. **Explicit argument given** — use it (file path → read it; description → scope the review to that topic)
 2. **No argument — infer from context**:
-   - If a Blueprint file exists (`*Blueprint*` or `*ProductBlueprint*` in cwd) → probe the Blueprint (output goes to Pattern)
+   - If a Blueprint file exists (`*Blueprint*` or `*ProductBlueprint*` in `opus/` or cwd) → probe the Blueprint (output goes to Pattern)
    - If `/prime` just ran in this conversation → probe that output
    - If the conversation has a clear architectural topic (plan, design, RFC) → probe that (inline review)
    - **If ambiguous** → ask: "What should I probe? A Blueprint, the current plan, or something else?"
-3. Read/review the full probe target before proceeding. **Also read `[PROJECT]_06_Pattern_V1.0.md`** if it exists — preserve and update its Architecture section rather than overwriting; leave the UX section untouched (that belongs to /preen).
-4. **Read `<forge>/core/skills/forge/stack-guide.md` in full.** The **framework layer** (Hono + Drizzle + Better Auth + React/Vite + TanStack + Tailwind + monitoring per the stack-guide Monitoring row: Pino/Sentry+OTLP on Node, platform-native Workers Logs + Issues on Cloudflare Workers) is the hard default baseline — not one option among many. **Hosting and data are *selected*, not pinned:** the stack-guide's **Hosting Decision Framework** picks container-first (Cloud Run / CF Containers as co-defaults; Fly/Railway peers; Hetzner / Runpod / Workers-edge as signal-driven escalations), and **Neon is the default prod DB** (Cloud SQL / PlanetScale on escalation, with an explicit DR line item). Web results that surface trendy combos (Next.js on Vercel, Supabase-over-Better-Auth) do **not** override the framework-layer defaults; hosting/DB picks must follow the Decision Framework's **scale/needs** signals — not popularity (see "Deviation rule" below).
-5. **Read the Touchstone pair if it exists** — `[PROJECT]_03e_Touchstone_V1.0.md` (typed contract: load YAML frontmatter for tokens, prose Overview + Do's-and-Don'ts for posture) and `[PROJECT]_03e_Touchstone_V1.0.html` (rendered vision: visual context). The Touchstone is the aesthetic constitution `/wedge` forged from the Opus + Vow. Architecture decisions that fight the Touchstone's contract or posture (e.g., a chosen framework that cannot deliver the locked motion philosophy, or a state-management pattern that contradicts the interaction tempo declared in the MD's Components section) should be flagged. Probe is not the aesthetic art — it does not override Touchstone choices — but it should surface architecture-aesthetic conflicts as part of its critique.
+3. Founding artifacts (`[PROJECT]_NN_*`: Opus, Blueprint, Pattern, Touchstone) are looked up in `opus/` first, then the project root. Read/review the full probe target before proceeding. **Also read `[PROJECT]_06_Pattern_V1.0.md`** if it exists — preserve and update its Architecture section rather than overwriting; leave the UX section untouched (that belongs to /preen).
+4. **Read `<forge>/core/skills/forge/stack-guide.md` in full.** Its framework layer is the hard default; hosting and data are selected through its Hosting Decision Framework. The Deviation rule below governs every departure.
+5. **Read the Touchstone pair if it exists** (look in `opus/` first, then the project root: `[PROJECT]_03e_Touchstone_V1.0.md` for tokens and Do's/Don'ts, plus the `.html`). Probe does not override aesthetic choices, but it flags architecture that cannot deliver them, such as a framework that cannot meet the locked motion philosophy or state management that fights the declared interaction tempo.
 
 ## Process
 
@@ -76,6 +76,23 @@ Additionally, verify the blueprint includes:
 - **Dev setup plan** that includes `dev/restart.sh` and `dev/kill-zombies.sh` (see `<forge>/core/skills/forge/forge-conventions.md` item 7, Dev Stack). If absent, flag it.
 - **Language justification**: Section 13 must include explicit reasoning for the backend language choice — not just "we're using TypeScript" but WHY it fits this project's signals. If the justification is missing or generic ("it's popular"), flag as IMPORTANT.
 - **Testing strategy**: Section 18 must go beyond tool names — it must specify (1) which layers get which test types and why, (2) the critical user flows requiring E2E coverage, and (3) how test data is provisioned. If purely declarative (just naming tools without architectural decisions), flag as IMPORTANT.
+- **LLM integration** (only when the product calls a model or runs agents): exact model ids pinned in one place; cost per user action estimated against the price tiers, with a spend cap; an eval set gating model or prompt changes; behaviour on refusal, rate limit and provider outage; a prompt-injection boundary wherever untrusted content reaches a model that holds tools or secrets, with least-privilege tool scopes and a human confirm on irreversible actions; and stored prompts and outputs covered by the data-retention policy. A missing injection boundary on a tool-holding agent is CRITICAL; the rest are IMPORTANT.
+
+## Scaling Runway
+
+"Does this design scale?" is an architecture question, so /probe answers it; /press scores only the current deployment's launch load. A scaling ceiling is a design flaw, not a deployment gap. Assess:
+
+1. **Stateless request handling**: no per-instance state that blocks adding instances (sessions, in-memory limits, local files).
+2. **Database scaling path**: pooling, then read replicas, then partitioning, then sharding.
+3. **External dependency scaling**: the AI provider, CDN, queue and any metered third party.
+4. **Trigger per tier**: which user count forces each change.
+
+Present it as a table and carry it into the Pattern's Architecture section (inline review otherwise):
+
+| User range | Required change | Effort |
+|------------|-----------------|--------|
+| e.g. 0 - 1k | (the day-1 design as specced) | none |
+| next tier | the change that tier forces, per items 1-3 | S / M / L |
 
 ## Output
 

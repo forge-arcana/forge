@@ -8,10 +8,10 @@
   considering the Touchstone forged.
 
   HARD RULES (enforced mechanically by the Wedge skill):
-    1. Replace BOTH font links with characterful pairings — never Inter/Roboto/Arial/Space Grotesk.
+    1. Set ONE interface face (--font-ui) for every interface word. An optional logotype face (--font-logotype) is reached only from the .wordmark selector. Never Inter/Roboto/Arial/Space Grotesk.
     2. Set --color-dominant and --color-accent to ONE direction's palette — not three equal brand colors.
-    3. Replace the placeholder atmospheric background with a real treatment.
-    4. Implement the orchestrated page-load motion in --motion-* tokens and CSS animations.
+    3. Set the atmospheric backdrop to the direction's Substance Tier: gradient mesh, noise or depth for maximalist/atmospheric; a hairline, flat field or nothing for minimal.
+    4. Implement motion per the tier: orchestrated page-load (maximalist), ambient (atmospheric), one gesture or none (minimal).
     5. Fill ALL five regions: Atmospheric Backdrop, Hero, Primary Task, Moment of Delight, Token Legend.
 
   Persisted artifact name: [PROJECT]_03e_Touchstone_V1.0.html
@@ -24,22 +24,13 @@
 
   <!--
     REGION 0: Font import.
-    Replace these <link> tags with the chosen direction's pairing.
-    Display + body. Real Google Fonts URLs (or self-hosted).
-    EXAMPLES of acceptable distinctive choices (do not all use these — vary across projects):
-      - PP Editorial New + Söhne
-      - Migra + Inter Tight (Inter Tight is the variable cousin, allowed; Inter base is banned)
-      - Cormorant Garamond + JetBrains Mono
-      - Reckless Neue + Authentic Sans
-      - Tiempos Headline + Söhne Buch
-      - Whyte + ABC Diatype
-      - NM Type families
+    One UI face, plus an optional wordmark face. Load via a Google Fonts <link> or a self-hosted @font-face for a licensed face, and name the source in the Token Legend. Choose fresh per project from the Soul Brief; do not reuse a list.
     BANNED: Inter (regular), Roboto, Arial, Helvetica, Open Sans, Lato, Source Sans, Space Grotesk, default system stacks.
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="<!-- WEDGE: replace with display font URL -->">
-  <link rel="stylesheet" href="<!-- WEDGE: replace with body font URL -->">
+  <link rel="stylesheet" href="<!-- WEDGE: UI face URL -->">
+  <!-- WEDGE: optional logotype face URL; delete if the wordmark uses the UI face -->
 
   <style>
     /* =========================================================
@@ -49,8 +40,8 @@
        ========================================================= */
     :root {
       /* Typography */
-      --font-display: '<!-- WEDGE: display font name -->', serif;
-      --font-body: '<!-- WEDGE: body font name -->', sans-serif;
+      --font-ui: '<!-- WEDGE: UI face name -->', sans-serif;
+      --font-logotype: var(--font-ui); /* WEDGE: logotype face name if declared; wordmark only */
       --font-mono: '<!-- WEDGE: mono font name -->', monospace;
 
       /* Type scale (modular, project-tuned) */
@@ -111,7 +102,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-      font-family: var(--font-body);
+      font-family: var(--font-ui);
       font-size: var(--type-body);
       line-height: 1.5;
       color: var(--color-ink);
@@ -121,7 +112,8 @@
       /* Touchstone must opt into atmospheric backdrop, not flat solid */
     }
 
-    h1, h2, h3 { font-family: var(--font-display); line-height: 1.1; }
+    h1, h2, h3 { line-height: 1.1; }
+    .wordmark { font-family: var(--font-logotype); }
     h1 { font-size: var(--type-h1); }
     h2 { font-size: var(--type-h2); }
     h3 { font-size: var(--type-h3); }
@@ -195,7 +187,7 @@
       padding: var(--space-3) var(--space-5);
       background: var(--color-dominant);
       color: var(--color-canvas);
-      font-family: var(--font-body);
+      font-family: var(--font-ui);
       font-weight: 600;
       border-radius: var(--radius-md);
       text-decoration: none;
@@ -270,7 +262,7 @@
     }
 
     .legend__cell { padding: var(--space-3) 0; }
-    .legend__cell strong { display: block; font-family: var(--font-body); margin-bottom: var(--space-2); }
+    .legend__cell strong { display: block; font-family: var(--font-ui); margin-bottom: var(--space-2); }
 
     .swatch {
       display: inline-block;
@@ -316,8 +308,8 @@
     <div class="legend__grid">
       <div class="legend__cell">
         <strong>Typography</strong>
-        Display: <!-- WEDGE: name --><br>
-        Body: <!-- WEDGE: name --><br>
+        UI face: <!-- WEDGE: name + source --><br>
+        Wordmark: <!-- WEDGE: name, or "same" --><br>
         Mono: <!-- WEDGE: name -->
       </div>
       <div class="legend__cell">

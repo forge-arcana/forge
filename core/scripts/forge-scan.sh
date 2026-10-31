@@ -769,8 +769,8 @@ if [[ "$SCAN_TYPE" == "poke" ]]; then
     '^\s{24,}\S' \
     "py"
 
-  # --- Dimension 6: Dependency Direction & Law of Demeter ---
-  echo "## Dimension 6: Dependency Direction & Law of Demeter"
+  # --- Dimension 6: Dependency Direction, Demeter & Composition ---
+  echo "## Dimension 6: Dependency Direction, Demeter & Composition"
   echo ""
 
   scan_pattern "Shared importing from features (wrong direction)" \
@@ -806,8 +806,8 @@ if [[ "$SCAN_TYPE" == "poke" ]]; then
     '\?\.\w+\?\.\w+\?\.' \
     "ts"
 
-  # --- Dimension 7: Composition over Inheritance ---
-  echo "## Dimension 7: Composition over Inheritance"
+  # --- Dimension 6 (cont.): Composition over Inheritance ---
+  echo "### Composition over Inheritance (Dimension 6)"
   echo ""
 
   scan_pattern "Class inheritance (extends)" \
@@ -821,6 +821,26 @@ if [[ "$SCAN_TYPE" == "poke" ]]; then
   scan_pattern "Mixin patterns" \
     'mixin|Mixin|applyMixin' \
     "ts" "-i"
+
+  # --- Dimension 7: Agent-Written Code Drift (cheap heuristics only) ---
+  echo "## Dimension 7: Agent-Written Code Drift"
+  echo ""
+
+  scan_pattern "Comments narrating a change (not explaining code)" \
+    '(//|/\*|\*)\s*(changed|updated|modified|replaced|refactored|fixed|added|removed|now)\s+(to|from|so|the|with|by)\b' \
+    "ts" "-i"
+
+  scan_pattern "Comments narrating a change (not explaining code) (Python)" \
+    '#\s*(changed|updated|modified|replaced|refactored|fixed|added|removed|now)\s+(to|from|so|the|with|by)\b' \
+    "py" "-i"
+
+  scan_pattern "Empty catch / swallowed errors" \
+    'catch\s*(\([^)]*\))?\s*\{\s*\}' \
+    "ts"
+
+  scan_pattern "Leftover old-version markers (dead code from earlier iterations)" \
+    '(_old|_legacy|_deprecated|_backup|OldImpl|LegacyImpl)\b|\b(old|legacy)(Version|Impl|Handler)\b' \
+    "ts"
 
   # --- File Size Analysis ---
   echo "## File Size Analysis"

@@ -210,16 +210,17 @@ echo ""
 echo "# Dimension 3: Skill Fitness"
 echo ""
 
-echo "### Art SKILL.md sizes"
+echo "### Skill SKILL.md sizes (every core/skills/*)"
 echo ""
 echo "| Art | Lines | Chars | Has Protocol Ref? |"
 echo "|-----|-------|-------|-------------------|"
-for art in prime probe poke preen press pound pitch plot pry patch parse; do
-  skill_file="$FORGE_PATH/core/skills/$art/SKILL.md"
+for skill_file in "$FORGE_PATH"/core/skills/*/SKILL.md; do
+  art=$(basename "$(dirname "$skill_file")")
   if [[ -f "$skill_file" ]]; then
     lines=$(wc -l < "$skill_file")
     chars=$(wc -c < "$skill_file")
-    has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$skill_file" 2>/dev/null | head -1)
+    has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$skill_file" 2>/dev/null | head -1 || true)
+    has_protocol="${has_protocol:-0}"
     proto_status="YES"
     [[ "$has_protocol" -eq 0 ]] && proto_status="**MISSING**"
     echo "| $art | $lines | $chars | $proto_status |"
@@ -232,11 +233,29 @@ purge_file="$FORGE_PATH/.claude/skills/purge/SKILL.md"
 if [[ -f "$purge_file" ]]; then
   lines=$(wc -l < "$purge_file")
   chars=$(wc -c < "$purge_file")
-  has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$purge_file" 2>/dev/null | head -1)
+  has_protocol=$(grep -c 'protocol.md\|Forge Protocol' "$purge_file" 2>/dev/null | head -1 || true)
+  has_protocol="${has_protocol:-0}"
   proto_status="YES"
   [[ "$has_protocol" -eq 0 ]] && proto_status="**MISSING**"
   echo "| purge (forge-internal) | $lines | $chars | $proto_status |"
 fi
+echo ""
+
+echo "### Always-loaded rules (core/rules/*.md)"
+echo ""
+echo "| File | Lines | Chars |"
+echo "|------|-------|-------|"
+rules_lines=0
+rules_chars=0
+for rf in "$FORGE_PATH"/core/rules/*.md; do
+  [[ ! -f "$rf" ]] && continue
+  rl=$(wc -l < "$rf")
+  rc=$(wc -c < "$rf")
+  rules_lines=$((rules_lines + rl))
+  rules_chars=$((rules_chars + rc))
+  echo "| $(basename "$rf") | $rl | $rc |"
+done
+echo "| **combined** | $rules_lines | $rules_chars |"
 echo ""
 
 echo "### Section-level bloat analysis (all skills)"
@@ -325,8 +344,8 @@ echo ""
 # would report MISSING for every art (noise). Only neutral-source fields are checked.
 echo "| Art | name | description |"
 echo "|-----|------|-------------|"
-for art in prime probe poke preen press pound pitch plot pry patch parse; do
-  skill_file="$FORGE_PATH/core/skills/$art/SKILL.md"
+for skill_file in "$FORGE_PATH"/core/skills/*/SKILL.md; do
+  art=$(basename "$(dirname "$skill_file")")
   if [[ -f "$skill_file" ]]; then
     # `|| true` neutralizes pipefail when grep -c finds 0 matches (exit 1); grep
     # still prints "0", so the count stays correct and the script does not abort.

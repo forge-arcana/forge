@@ -95,7 +95,7 @@ The version object, the same shape wherever a machine reads it:
 | Library or data repository | The manifest version or a release tag, and a changelog entry | No endpoint |
 | Container image | Labels `org.opencontainers.image.version`, `.revision` (full SHA), `.created`, `.source` | Tag images with the release version and the SHA, never only `latest` |
 | Mobile app | Version name = release version; build number a monotonically increasing integer never reused; both shown in settings | |
-| Error tracker | `release` set to `<name>@<version>+<short sha>` | Without it, an error cannot be tied to the build that raised it |
+| Error tracker | `release` set to `<name>@<version>+<short sha>` where the tracker has the field | Without it, an error cannot be tied to the build that raised it. Cloudflare Workers Issues has no `release` field: there, the per-instance startup log line carries the identity (stack guide → "Cloudflare Workers — error tracking") |
 | Logs | The startup line; no per-line version. A runtime with no startup moment logs it once per instance, on first request | |
 
 Unauthenticated responses carry only `name`, `version` and `build.short`: that covers `/version`, `/health` and a publicly served static `version.json`, and those three fields are enough for a stale tab to compare. The full SHA, the timestamps, `startedAt` and `dirty`, and anything about branches, filesystem paths, hostnames or dependencies, are served only to authenticated callers, or over a local socket that the network cannot reach. Never infer a local caller from the request address: behind a reverse proxy every request looks local.

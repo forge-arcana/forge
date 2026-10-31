@@ -2,7 +2,7 @@
 name: patch
 description: "Feedback-driven improvement loop — ingests user feedback, testing findings, or bug reports, routes them through evaluative arts (probe, preen, poke, press), assesses blueprint impact, and hands off to smith with a prioritized change brief. TRIGGER when: user has feedback to process, wants to close the loop on testing results, end-user reports, or QA findings."
 ---
-<!-- model: opus | fan-out: probe/poke legs → opus; press/preen legs → sonnet; Phase 4 consolidation at opus -->
+<!-- model: opus | fan-out: probe/poke legs → opus; preen + non-security press legs → sonnet; security/auth/compliance press items → own opus leg; Phase 4 consolidation at opus -->
 
 # /patch — The Feedback Loop
 
@@ -18,10 +18,11 @@ description: "Feedback-driven improvement loop — ingests user feedback, testin
 - **File path** to a feedback file (`.md`, `.txt`, `.json`)
 - **Inline description** — "users are confused by the nav" or "login fails on mobile"
 - **Nothing** — patch will ask for feedback interactively
+- `--brief-only` (with any of the above) — stop after the Change Brief (Step 5a) and return it; no prompt, no `/smith`. `/parse` passes this.
 
 ## Phase 0: Pre-Flight
 
-Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then scan cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions). Backward compatibility: if the project still has `memory/praise-learnings.md` (this art's older name), read it too.
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then scan `opus/` and then cwd for Blueprint + Pattern files (`*Blueprint*.md` and `*Pattern*.md` — the Pattern is /smith's design source; feedback often challenges its decisions). Backward compatibility: if the project still has `memory/praise-learnings.md` (this art's older name), read it too.
 
 ## Phase 1: Feedback Ingestion & Classification
 
@@ -52,7 +53,7 @@ Parse all feedback and classify into one or more categories. A single feedback i
 
 ## Phase 2: Parallel Art Dispatch
 
-Spawn one subagent per active category — **all in parallel** (independent analyses). Spawn the /probe and /poke legs as opus-tier subagents (their diagnoses have no downstream verification gate); spawn the /preen and /press legs as sonnet-tier subagents — Phase 4 consolidation runs at opus tier, re-grades their findings, and owns the verdicts (including SHIP BLOCKED). If your harness does not support parallel sub-agent spawning or per-spawn model selection, run the categories sequentially at your session model.
+Spawn one subagent per active category, all in parallel. Spawn the /probe and /poke legs as opus-tier subagents (their diagnoses have no downstream verification gate). Spawn the /preen leg and the non-security /press items as sonnet-tier subagents. Any /press item about security, auth or compliance goes to its own opus-tier leg, matching /press's carve-out. Phase 4 consolidation runs at opus tier, re-grades the sonnet findings, and owns the verdicts (including SHIP BLOCKED). Bind each tier through the spawn's explicit model parameter (protocol Model Tiers rule 6). If your harness does not support parallel sub-agent spawning or per-spawn model selection, run the categories sequentially at your session model.
 
 ### Routing Rules
 
@@ -81,7 +82,7 @@ PROJECT CONTEXT:
 | `/preen` | UX / Design | sonnet | Apply Don Norman's principles and Ive's Razor to each item. For each: the component/screen/flow affected, the principle violated, the concrete fix. Output: Critical / Improvements / Reduce / Polish. |
 | `/probe` | Architecture / Tech | opus | For each item: architectural gap, wrong decision, or scaling concern? Check the web for current best practices on the specific concern. Severity: CRITICAL / IMPORTANT / MINOR. |
 | `/poke` | Code Quality / Performance | opus | For each item: trace the likely code location, diagnose the root cause, propose the fix. Output FILE, PROBLEM, FIX, EFFORT with severity CRITICAL / IMPORTANT / MINOR. |
-| `/press` | Readiness / Operations | sonnet | For each item: name the readiness dimension (Security, Scalability, Operations, Compliance, Observability, Deployment, Documentation), score 1–5, identify the gap, propose the remediation. |
+| `/press` | Readiness / Operations | sonnet (security, auth, compliance items: opus) | For each item: name the readiness dimension (Security, Scalability, Operations, Compliance, Observability, Deployment, Documentation), score 1–5, identify the gap, propose the remediation. |
 
 ## Phase 3: Blueprint Delta Assessment
 
@@ -127,64 +128,27 @@ Structure (markdown, sections in this order):
 
 ## Phase 5: Smith Handoff
 
-### Step 5a: Build Plan
+### Step 5a: Change Brief
 
-Before invoking smith, produce a **Build Plan** showing how the work will be executed. Present this to the user for approval — smith only starts after confirmation.
-
-Analyze all findings from the Patch Report and decompose them into discrete tasks. For each task, determine:
-
-- **Scope**: what file(s) and component(s) are touched
-- **Effort**: S (< 30 min) / M (30–90 min) / L (> 90 min)
-- **Dependencies**: which tasks must complete before this one can start
-- **Parallelizable**: can this run concurrently with other tasks in a sub-agent?
-
-#### Parallelization Rules
-
-| Condition | Decision |
-|-----------|----------|
-| Tasks touch different files/components with no shared state | **Parallel** — spawn sub-agents |
-| Task B reads output of Task A (e.g., schema change → API update → UI) | **Sequential** — A before B |
-| Blueprint must be updated before code changes | **Sequential** — blueprint first |
-| Multiple isolated bug fixes in unrelated modules | **Parallel** — spawn sub-agents |
-| Single critical path (auth flow, payment, data migration) | **Sequential** — too risky to parallelize |
-
-#### Build Plan Format
-
-**Output as console text, never as a multi-choice prompt.** A **Patch Build Plan** with: header (project + date, then `Total tasks: N | Parallelizable: M | Sequential: K` and overall effort); a task table with columns **# | Task | Scope | Effort | Depends On | Sub-Agent?** (the Sub-Agent? cell names which task it runs parallel with, or `— (must go first)` for a gating task); an **Execution waves** block (which tasks run in which wave + sequential dependencies between waves); and a **Sub-agent allocation** block (which sub-agent takes which task — the main agent keeps the critical path and sequential gates).
-
-#### Blueprint-first gate
-
-If **any** Blueprint Delta items exist, they become **Wave 0** — always sequential and always first, labelled "Wave 0 (blueprint updates — must complete before code)" with each blueprint change listed. Code changes that depend on blueprint decisions cannot start until Wave 0 completes.
-
-### Step 5b: Change Brief
-
-After the Build Plan table, append the **Change Brief for /smith** (the artifact smith consumes), opening with "Based on feedback received <date>". Sections in priority order:
-- **Priority 1 — Critical**: each as `<Finding> → <File:line> → <Fix> | Effort: S/M/L`.
+Write the **Change Brief for /smith**, the input smith decomposes into heats. Open it with "Based on feedback received <date>", then list in priority order:
+- **Blueprint deltas first**: any Add or Update items from Phase 3, as `<Delta item> → <Section to update>`. They land before any code that depends on them.
+- **Priority 1 — Critical**: `<Finding> → <File:line> → <Fix> | Effort: S/M/L`.
 - **Priority 2 — Important**: same shape.
-- **Priority 3 — Blueprint updates (Wave 0)**: `<Delta item> → <Section to update>`.
-- **Execution plan**: paste the wave breakdown + sub-agent allocation from the Build Plan.
+- **Dependencies and risk notes**: ordering constraints the findings imply (schema before API before UI), and any auth, payment or migration item smith must grade T3.
 
-### Step 5c: User Confirmation
+Smith does its own heat decomposition, grading and parallelization. Patch supplies the what and the order constraints, not the waves.
 
-After presenting the Build Plan and Change Brief, ask the user — using your harness's multi-choice prompt if available, otherwise inline:
+### Step 5b: User Confirmation
 
-```
-"Ready to forge? Review the build plan above."
-Options:
-- "Yes — execute this plan with smith"
-- "Adjust the plan first (describe changes)"
-- "Update the blueprint only — skip code changes for now"
-- "Just the criticals (Wave 1 only)"
-- "Show me the full patch report again"
-```
+Ask the user with your harness's multi-choice prompt if available, otherwise inline. The recommended option comes first:
+- "Yes — hand this brief to /smith"
+- "Just the criticals" (blueprint deltas plus Priority 1)
+- "Update the blueprint only"
+- "Adjust the brief first"
 
-If user selects **"Yes"**: invoke `/smith` and pass the full change brief (including wave breakdown) as context. Smith will use the wave/sub-agent structure directly — no re-planning needed.
+On **Yes** or **Just the criticals**, invoke `/smith` with the brief, scoped as chosen, as its work source. On **Blueprint only**, apply the deltas, then offer the brief again. On **Adjust**, incorporate the changes and ask again.
 
-If user selects **"Adjust"**: incorporate their changes into the plan, re-present, confirm again.
-
-If user selects **"Blueprint only"**: apply Wave 0 blueprint updates, then offer the full plan again.
-
-If user selects **"Just the criticals"**: rebuild the plan scoped to Priority 1 only, confirm, invoke smith.
+With `--brief-only` (as `/parse` passes), stop after 5a and return the brief. Do not ask, and do not invoke `/smith`.
 
 ## Post-Flight
 

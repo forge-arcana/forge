@@ -4,9 +4,9 @@
 
 <!-- Add learnings below this line -->
 
-## SessionStorage Guard for Counters on Content Sites (2026-05-29)
-**Learning**: Client-side visit counters that fire on every page load inflate metrics and can be gamed trivially. A sessionStorage guard (set a flag after first increment, check before firing) limits the counter to once per browser session — no auth required, no server changes needed.
-**Apply when**: Any client-side counter, analytics ping, or "once per visit" event — default to sessionStorage guard.
+## A Client-Side Once-Per-Session Guard Dedupes Counters; It Neither Stops Gaming Nor Avoids Consent (2026-05-29, revised 2026-10-31)
+**Learning**: A visit counter that fires on every page load inflates metrics; a `sessionStorage` flag checked before firing cuts it to once per tab session. That handles accidental double counts only: anyone can clear the flag, so abuse resistance needs a server-side dedupe or rate limit. The flag is a counter's storage on the user's device, so it needs consent unless the narrow first-party analytics exemption below applies (see "Consent Follows Purpose, Not Storage Mechanism" below).
+**Apply when**: Reviewing any client-side counter or "once per visit" ping. Check both the dedupe and the consent gate.
 
 ## NEXT_PUBLIC_ Env Vars Are Always Public — Use API Routes for Third-Party Endpoints (2026-05-29)
 **Learning**: Any `NEXT_PUBLIC_*` environment variable is bundled into client JavaScript and visible in browser DevTools. Third-party service endpoints that should not be public (webhooks, form handlers, non-publishable keys) must route through a Next.js API route reading a server-only env var. This prevents endpoint scraping and abuse.
@@ -17,7 +17,7 @@
 **Apply when**: Any Next.js or web project adding a Content-Security-Policy header — enforce the script-src boundary explicitly.
 
 ## Consent Follows Purpose, Not Storage Mechanism (2026-05-29, corrected 2026-10-02)
-**Learning**: ePrivacy Art. 5(3) is technology-neutral: cookies, `localStorage`, `sessionStorage` and IndexedDB are all "storing information on the user's terminal equipment" (EDPB Guidelines 2/2023). Moving a value from a cookie to `sessionStorage` changes nothing legally. What decides consent is PURPOSE: storage strictly necessary for a service the user explicitly requested (a language or theme choice they made, a cart, a login session) is exempt in any mechanism; analytics, visit counters and tracking need consent in any mechanism, including a session-only flag. Choose the mechanism on functional grounds — must the server read it (cookie), must it outlive the tab (`localStorage`), or is per-tab enough (`sessionStorage`) — and disclose it in the privacy notice either way.
+**Learning**: ePrivacy Art. 5(3) is technology-neutral: cookies, `localStorage`, `sessionStorage` and IndexedDB are all "storing information on the user's terminal equipment" (EDPB Guidelines 2/2023). Moving a value from a cookie to `sessionStorage` changes nothing legally. What decides consent is PURPOSE: storage strictly necessary for a service the user explicitly requested (a language or theme choice they made, a cart, a login session) is exempt in any mechanism; analytics, visit counters and tracking need consent in any mechanism, including a session-only flag, with one UK exception: the Data (Use and Access) Act 2025 (in force 5 Feb 2026) exempts narrow first-party, aggregate-only analytics from consent when users get clear information and an easy way to object. Everything else (advertising, cross-site, identifiable tracking) and EU users under ePrivacy still need consent. Choose the mechanism on functional grounds — must the server read it (cookie), must it outlive the tab (`localStorage`), or is per-tab enough (`sessionStorage`) — and disclose it in the privacy notice either way.
 **Apply when**: Any app storing preferences or client-side flags — classify each stored item by purpose before picking a mechanism; never accept "it's only sessionStorage" as a compliance argument.
 
 ## Mocks Must Model the Vendor's Real Contract, Not the Code's Assumption (2026-09-19)

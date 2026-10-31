@@ -23,10 +23,16 @@
 #   FORGE_LLM_SYSTEM         Default system prompt override
 #   FORGE_LLM_NUM_PREDICT    Default num_predict override
 #   FORGE_LLM_TIMEOUT        Default timeout override
+#   FORGE_LLM_DISABLE        Set to 1 to skip delegation (exits 1 at once so callers fall back to Claude)
 #
 # Exit codes: 0=success, 1=unavailable/timeout, 2=empty, think-only, or truncated at num_predict (partial text still on stdout)
 
 set -euo pipefail
+
+if [ "${FORGE_LLM_DISABLE:-}" = "1" ]; then
+    echo "llm-delegate.sh: FORGE_LLM_DISABLE=1, local delegation disabled; fall back to the pinned Claude tier" >&2
+    exit 1
+fi
 
 DEFAULT_SYSTEM="You are a coding assistant. Output exactly ONE solution. Never provide alternatives, variations, or here-is-also versions. No usage examples unless asked. Be concise. Prefer standard library solutions."
 

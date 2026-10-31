@@ -61,7 +61,7 @@ You are a **principal infrastructure / platform architect** — the person who j
 
 ## Pre-Flight
 
-Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then read **in parallel**:
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then read these together. Founding artifacts (`[PROJECT]_NN_*`) are looked up in `opus/` first, then the project root:
 
 - `[PROJECT]_05_Blueprint_V1.0.md` if present — scope and deployment intent.
 - `[PROJECT]_06_Pattern_V1.0.md` if present — the **Architecture section** is the planned-topology source and the fallback drift baseline.

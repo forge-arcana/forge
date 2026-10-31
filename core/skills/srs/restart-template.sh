@@ -96,6 +96,7 @@ $DRY_RUN && { echo "Dry run complete."; exit 0; }
 sleep 0.5
 
 # ── Port Health Check (WSL2 WFP blackhole detection) ─────────────────
+if grep -qi microsoft /proc/version 2>/dev/null; then
 echo ""
 echo "🔍 Checking port health..."
 BLOCKED=()
@@ -136,6 +137,7 @@ if [ ${#BLOCKED[@]} -gt 0 ]; then
   exit 1
 fi
 echo "  ✅ All ports OK."
+fi
 
 # ── Database Readiness ───────────────────────────────────────────────
 # [DB_SECTION — customize or remove if using external DB like Neon]

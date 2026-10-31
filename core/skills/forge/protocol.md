@@ -52,18 +52,17 @@ After pre-flight, proceed to the art's own `## Process` or `## Dimensions` secti
 
 ## Parallel Execution Principle
 
-> **HARD RULE**: Independent work MUST run in parallel when the harness supports it. Never block on sequential execution when tasks have no dependencies and parallel sub-agent spawning is available.
+- **Parallel tool calls are the default** for independent reads, searches and scans: issue them in one message.
+- **Subagent fan-out is for sizeable independent legs**: dimensions, sections, personas or passes that each carry their own rubric or tier. A leg that is a handful of tool calls stays inline, and narrow targets collapse their legs per Complexity Triage rule 5. Fan-out multiplies cost, and current models already delegate readily, so a skill names its legs and their tiers rather than urging more spawning.
+- **Sync point**: when a downstream step depends on upstream results, name it ("After all legs return, ...").
+- **Batch uncached web searches** into one parallel call.
+- **Evidence-then-fan-out**: collect evidence once (script or reads), then fan the analysis out. Legs receive the evidence and never re-explore.
 
-- **Fan-out**: When multiple analyses, dimensions, sections, or web searches are independent, spawn them as parallel subagents or parallel tool calls in a single message. If your harness lacks parallel sub-agent spawning or per-spawn model selection, walk them sequentially at your session model.
-- **Sync point**: Only wait when a downstream step depends on upstream results. State the sync point explicitly: "After all parallel tasks complete, proceed to..."
-- **Batch web searches**: When multiple web searches are needed (e.g., one per section/dimension), launch all uncached searches in a single parallel batch.
-- **Evidence-then-fan-out pattern**: Many arts collect evidence once (script or reads), then analyze across multiple dimensions. The analysis phase is the parallelization target — spawn one subagent per dimension/section/persona.
-
-This principle applies to ALL arts and skills. When in doubt, ask: "Does this step depend on the previous step's output?" If no, run them in parallel (when supported).
+If your harness lacks parallel subagent spawning or per-spawn model selection, run the legs sequentially at your session model.
 
 ## Model Tiers
 
-Fan-out is not just *where* work splits — it's *what strength of model* each leg runs on. The tier names `opus`, `sonnet`, `haiku`, `script`, and `local` are the neutral vocabulary: flow text says "spawn each dimension as a sonnet-tier subagent" or "run the merge at opus tier", and each harness maps tiers to its own models.
+Fan-out is not just *where* work splits — it's *what strength of model* each leg runs on. The tier names `opus`, `sonnet`, `haiku`, `script`, and `local` are the neutral vocabulary: flow text says "spawn each dimension as a sonnet-tier subagent" or "run the merge at opus tier", and each harness maps tiers to its own models. A model above the `opus` tier may exist (Fable 5.1 sits above Opus); it is not a named tier, and no flow spawns it unless the user asks for it.
 
 ### Tier semantics
 
@@ -104,9 +103,9 @@ Fan-out is not just *where* work splits — it's *what strength of model* each l
 7. **Delegation is the reliable lever; frontmatter is not a ceiling.** Two mechanisms are easy to conflate, and they behave differently. Both were measured on 2026-08-16, on a session running a tier above the work:
 
    - **A spawn's model parameter binds — in both directions, including downward.** Subagents spawned from a top-tier session ran on a bottom-tier model for the whole of their work. This is the mechanism to reach for whenever a leg should run below the session; it is not fragile, and it is not harness-specific in principle (any harness exposing per-spawn model selection behaves this way).
-   - **A skill's `model:` frontmatter does *not* pull a session below what it is already running.** A task skill pinned one tier down was invoked on a higher-tier session, and every turn of that invocation — including the invocation turn — ran at the session model. Frontmatter binds upward and is correct the moment a session sits *below* a skill's needed tier; it is simply not a cap.
+   - **A skill's `model:` frontmatter is never a ceiling and only sometimes a floor.** It never pulls a session below the session's model (measured 2026-08-16: every turn of a down-pinned skill, including the invocation turn, ran at the session model). It raises the model only on a user slash invocation. A model-initiated Skill-tool call runs at the session model, and a floating alias that resolves outside the availableModels allowlist is ignored (measured 2026-09-28).
 
-   **Measured 2026-09-28:** Frontmatter escalates upward only on a user slash invocation; a model-initiated Skill-tool invocation runs at the session model regardless of frontmatter. A floating alias (`model: sonnet`) that resolves outside the availableModels allowlist is silently ignored — the skill ran at the session model. Consequence: on a cheap default session model, users should invoke opus arts themselves (slash commands), and any flow that needs an art at opus from inside another skill must spawn a subagent with an explicit model parameter (rule 6), not call the Skill tool.
+   Consequence: on a cheap default session model, users invoke opus arts as slash commands. A flow that needs an art at opus from inside another skill spawns a subagent with an explicit model parameter (rule 6), never the Skill tool.
 
    The structural consequence: **a skill that does its work inline in the session runs at the session's tier, whatever its frontmatter says.** Invoking a mechanical task-skill from a top-tier session spends top-tier tokens on mechanical work. This is not a delegation failure — an inline skill invocation is not a delegation at all.
 
@@ -178,7 +177,7 @@ The orchestrating session spawns a haiku-tier subagent whose only job is to call
 Opus (orchestrate) → Haiku subagent (call llm-delegate.sh) → Local LLM ($0.00) → Opus (review)
 ```
 
-The haiku subagent costs ~$0.001 per spawn. The local LLM output costs $0.00. Claude pays only for the orchestration prompt and the review pass.
+The local LLM output costs $0.00; Claude pays for the haiku relay, the orchestration prompt and the review pass.
 
 ### Rules
 
@@ -186,41 +185,19 @@ The haiku subagent costs ~$0.001 per spawn. The local LLM output costs $0.00. Cl
 2. **Merge/verdict gates never go local.** The opus merge, consolidation, and final verdict steps that review subagent output stay on Claude.
 3. **Fallback is silent.** If `llm-delegate.sh` exits non-zero, the orchestrator spawns the leg at its pinned Claude tier without user intervention. Local delegation is an optimization, not a requirement.
 4. **Quality gate.** The reviewing Claude (opus) treats local LLM output the same as sonnet output — it deduplicates, challenges unevidenced findings, and owns the final verdict. If the local output fails the quality gate, the orchestrator may retry on Claude.
-5. **User opt-out.** Setting `FORGE_LLM_DISABLE=1` skips local delegation entirely — all work routes through Claude tiers as before.
+5. **User opt-out.** Setting `FORGE_LLM_DISABLE=1` skips local delegation entirely: `llm-delegate.sh` exits 1 at once and all work routes through Claude tiers as before.
 
 ### Validated skills (battery 2026-09-12)
 
 | Skill | Local Score | Claude Score | Delegable Legs |
 |-------|------------|--------------|----------------|
-| `/poke` | 3.9/5 | 5.0 | Dimensions 1,3,4,5,6,7 (not dim 2 security) |
+| `/poke` | 3.9/5 | 5.0 | Dimensions 1,3,4,5,6 (Dependency Direction, Demeter & Composition),7 (Agent-Written Code Drift) (not dim 2 security) |
 | `/srs` | 4.0/5 (tuned) | 4.5 | Primary code generation |
-| `/pound` | est. 3.5-4.0 | 5.0 | Non-security personas |
+| `/pound` | not yet run (unvalidated) | 5.0 | Sonnet-tier personas (not 6, 7, 9, 11, 17) |
 
-### Setup
+### Setup and configuration
 
-Any user on the machine can use local LLM delegation.
-
-1. **Install Ollama**: `curl -fsSL https://ollama.com/install.sh | sh`
-2. **Pull a coding model**: `ollama pull qwen3-coder:30b` (or any coding-capable model)
-3. **Verify**: the delegation script auto-detects a running Ollama at `localhost:11434`
-
-### Configuration
-
-Environment variables control model selection and endpoint routing. Set in your shell profile or per-session.
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `OLLAMA_URL` | `http://localhost:11434` | Primary Ollama endpoint |
-| `FORGE_LLM_MODEL` | `qwen3-coder:30b` | Model to use for delegation |
-| `FORGE_LLM_SYSTEM` | Built-in concise prompt | System prompt override |
-| `FORGE_LLM_REMOTE_URL` | (none) | Fallback remote Ollama endpoint |
-| `FORGE_LLM_DISABLE` | (none) | Set to `1` to skip all local delegation |
-
-**Endpoint fallback chain**: `OLLAMA_URL` → `--url` flag → `localhost:11434` → `FORGE_LLM_REMOTE_URL`. First reachable endpoint wins.
-
-**Using a different model**: Any Ollama-compatible model works. Set `FORGE_LLM_MODEL` to the model tag (e.g. `deepseek-coder-v2:16b`, `codestral:22b`). The default system prompt is tuned for concise single-solution output — override with `FORGE_LLM_SYSTEM` if your model needs different instructions.
-
-**Remote Ollama**: To delegate to an Ollama instance on another machine, set `FORGE_LLM_REMOTE_URL=http://<host>:11434`. The remote endpoint is tried last in the fallback chain — local always takes priority.
+Install Ollama and pull a coding model (default `qwen3-coder:30b`); `llm-delegate.sh` auto-detects `localhost:11434`. Its header documents the flags, the env vars (`OLLAMA_URL`, `FORGE_LLM_MODEL`, `FORGE_LLM_SYSTEM`, `FORGE_LLM_REMOTE_URL`, timeouts) and the endpoint order (`OLLAMA_URL` → `--url` → localhost → `FORGE_LLM_REMOTE_URL`). `FORGE_LLM_DISABLE=1` makes the script exit 1 at once with a message, so the normal fallback applies; orchestrators may also check it before delegating.
 
 ## Execution (art-specific)
 
@@ -318,7 +295,7 @@ The Warden lives only at `.claude/skills/purge/` (never deployed to user membran
 | `/prime` | The originator (ideation → blueprint) | Generative | — |
 | `/probe` | Senior solutions architect | Evaluative | — |
 | `/poke` | Staff engineer (code quality + tech debt) | Evaluative | Light |
-| `/preen` | UI/UX evaluator (Don Norman's design principles) | Evaluative | Design |
+| `/preen` | UI/UX evaluator (Norman's usability + Ive's reduction) | Evaluative | Design |
 | `/press` | Staff engineer (go-live readiness) | Evaluative | Medium |
 | `/pound` | 21 adversarial QA personas | Evaluative | Heavy |
 | `/pitch` | The founder's other voice (VC partner on `--critique`) | Generative | Synthesis |
@@ -337,13 +314,13 @@ The trifecta escalates in intensity and broadens in scope:
 - **`/press`** — go-live readiness. Run before launches, major releases, or environment promotions. Covers security, scalability, operations, compliance, observability, deployment, documentation.
 - **`/pound`** — full adversarial assault. Run before critical launches or after major changes. 21 personas hammer from every angle.
 
-**`/preen`** runs parallel to the trifecta — UI/UX design quality, triggered by interface changes rather than intensity escalation. Covers affordances, feedback, mapping, accessibility, platform conventions. The design eye.
+**`/preen`** runs parallel to the trifecta — UI/UX design quality, triggered by interface changes rather than intensity escalation. Covers usability, accessibility, platform conventions, cross-surface consistency, typographic voice and landing shape. The design eye.
 
 **`/pitch`** runs orthogonal to the trifecta — synthesis-and-alignment in the founder's voice, invocable at any lifecycle stage. Fuses Opus + Vow + Touchstone into the seven-section Pitch that aligns founder, cofounder, and investor. Run after a Touchstone is forged (before /probe, /preen, /smith); `--critique` adds the VC-partner review pass when external persuasion needs stress-testing.
 
 **`/patch`** closes the loop — takes real-world feedback (users, QA, testing) and routes it through the right arts. Routes UX issues to `/preen`, architecture concerns to `/probe`, code bugs to `/poke`, ops concerns to `/press`. Produces a blueprint delta and a change brief for `/smith`. Run after every feedback cycle.
 
-**`/parse`** is the front step for any raw task (bug report, issue, feedback). It restates what done means, sizes the work with a read-only look at the repo, and picks one tier: not-actionable (draft a reply, change nothing), minor (fix directly, then `/poke` scoped to the diff, plus `/preen` for UI), standard (`/patch`, implement its brief, then `/poke` and a scoped `/pound`), substantial (`/smith`, then a final `/poke` and scoped `/pound`). Security, auth, data-loss or money risk raises a minor to at least standard and always includes `/pound`; when torn between two tiers, it takes the higher.
+**`/parse`** is the front step for any raw task (bug report, issue, feedback). It restates what done means, sizes the work with a read-only look at the repo, and picks one tier: not-actionable (draft a reply, change nothing), minor (delegated to a sonnet-tier subagent, then `/poke` scoped to the diff, plus `/preen` for UI), standard (`/patch`, implement its brief, then `/poke` and a scoped `/pound`), substantial (`/smith`, then a final `/poke` and scoped `/pound`). Security, auth, data-loss or money risk raises a minor to at least standard and always includes `/pound`; when torn between two tiers, it takes the higher.
 
 **`/plot`** runs at the two ends of the build — synthesis-of-topology, invocable as a *planned* baseline early (opt-in, from Blueprint/Pattern) and as the *as-built* landscape near go-live (prompted by `/press` and `/smith` convergence). It draws the Atlas: the deployable-unit map of the production landscape, boundaries and all, with the as-built cast surfacing where the build drifted from the plan. Context-sensitive like `/probe`; renders through the Touchstone when one exists but does not require it.
 

@@ -77,16 +77,15 @@ Canonical names:
 - Wedge intermediates are sub-indexed (`03a` → `03e`) because they are heat-ordered sub-artifacts of step 03 (the Touchstone forging). The user only needs to read `03e_Touchstone` to use the Touchstone; the earlier sub-indices are scaffolding preserved for traceability.
 
 ### 4. Workflow Rules
+Verification before done, logs-first debugging and screenshots for visual changes are HARD RULES in `<forge>/core/rules/`, deployed to the global rules file. Do not restate them here or in the project rules file.
+
 - [ ] Plan mode for non-trivial tasks (3+ steps or architectural decisions, where the harness supports it)
 - [ ] Subagent usage for research and parallel analysis (where the harness supports it)
 - [ ] Self-improvement loop (corrections → update learnings)
-- [ ] Verification before done (tests, logs, demonstrate correctness)
-- [ ] Logs-first debugging (never speculate from code alone)
 
 ### 5. Testing
 - [ ] E2E pre-flight: kill zombies → check DB → fresh state
 - [ ] E2E debugging: fix individual tests before re-running full suite
-- [ ] Visual changes require Playwright screenshots
 
 ### 6. Logging
 - [ ] Human-initiated actions logged with context

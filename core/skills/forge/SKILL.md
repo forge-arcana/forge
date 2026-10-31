@@ -10,25 +10,11 @@ description: The forge cycle — unified bidirectional sync between the forge re
 
 The single gate between your membrane (the harness's per-tool config directory — e.g., `~/.claude/` for Claude Code, `~/.bob/` for Bob, `~/.cursor/` for Cursor — referenced below as `<membrane>`) and the forge repo. One command, three motions, one decision point.
 
-The command absorbs what used to be three separate skills:
+It runs three internal phases in order — **mark** (inspect drift), **cast** (forge → membrane), **fold** (membrane → forge) — and presents one PLAN table where you decide, per row, what flows and in which direction.
 
-| Old | New (internal phase) | Meaning |
-|-----|----------------------|---------|
-| `/mark` | **mark** — inspect drift | Classify everything without acting |
-| `/cast` | **cast** — apply incoming | Pour forge → membrane |
-| `/fold` | **fold** — absorb outgoing | Layer membrane → forge |
-
-You no longer summon these individually. `/forge` runs them in order and presents a single PLAN table where you decide, per row, what flows and in which direction.
-
-## HARD RULE — /forge is the ONLY gate
-> No project, no skill, no manual edit moves knowledge between forge and membrane outside this command.
-> Direct edits to forge repo files are only for skill development (editing source files in `core/skills/`).
-
-## HARD RULE — Protected skills are never absorbed outgoing
-> `forge` and `purge` can never be absorbed from membrane → forge within this command.
-> Absorbing `/forge` mid-execution would silently overwrite the rules currently running.
-> Absorbing `/purge` could break the next cleanse. Both are excluded at PLAN table level.
-> If either appears as `DEPLOYED-DIFFERS`, it is shown in the ⚠ CONFLICTS section with note "protected — reconcile manually." User may choose `[↓] accept forge` to overwrite local, but `[↑] keep membrane` is disabled.
+## HARD RULES
+> - **/forge is the only gate** between forge and membrane; direct forge edits are for skill development in `core/skills/` only.
+> - **Protected skills** (`forge`, `purge`) are never absorbed outgoing. A `DEPLOYED-DIFFERS` row lands in ⚠ CONFLICTS as "protected — reconcile manually": `[↓] accept forge` is allowed, `[↑] keep membrane` is disabled. `forge-plan.sh` enforces this.
 
 ## Arguments
 
@@ -128,15 +114,9 @@ forge @ <sha> ⇄ membrane @ <last-cast-sha>                     N items
   [a]ll  [N] toggle  [v N] view  [ENTER] apply  [q]uit
 ```
 
-### Direction routing (fallback — forge-plan.sh applies this mechanically)
+### Direction routing (fallback)
 
-Use `forge-status.sh` classifications:
-
-| Classification | Section |
-|----------------|---------|
-| `FORGE-UPDATED` / `ADDED` (forge-side) / `RETIRED` (memory file removed from forge) | ↓ INCOMING |
-| `DEPLOYED-DIFFERS` / `REMOVED` (membrane-side) | ↑ OUTGOING |
-| `CONFLICT` / `CONFLICT (no-baseline)` | ⚠ CONFLICTS |
+Route per `preflight.md` Step 3, plus `RETIRED` (memory file removed from forge) → ↓ INCOMING.
 
 ### Row content rules (fallback — forge-plan.sh does the mechanical part; model review still applies the essence/attribution judgment either way)
 
@@ -180,7 +160,7 @@ For each approved incoming row (and each conflict row where user chose `[↓]`):
 - Run `bash <forge>/core/scripts/cast-deploy.sh skill1 skill2 ...` for approved `FORGE-UPDATED` / `ADDED`
 - Run `rm -rf <membrane>/skills/<name>/` for approved `REMOVED`
 - Verify: `bash <forge>/core/scripts/cast-deploy.sh --verify`
-- **Never use `cp -r` directly.** Always go through `cast-deploy.sh`.
+- Do not use `cp -r`; go through `cast-deploy.sh`.
 
 Fresh machine (no deployed skills): create `<membrane>/learnings/`, `<membrane>/memory/`, then deploy ALL with `cast-deploy.sh --all`.
 
@@ -191,8 +171,6 @@ Always run `bash <forge>/core/scripts/cast-deploy.sh --rules` (every cast, no PL
 ### Hooks
 
 Always run `bash <forge>/core/scripts/cast-deploy.sh --hooks` (every cast, no PLAN row needed). This installs the hook bodies from `<forge>/core/hooks/` into `<membrane>/hooks/` **and wires them** into the membrane's `settings.json`, via an idempotent `jq` merge scoped to forge's own two entries — every other key, including hand-written hooks, is re-emitted verbatim. Verify with `cast-deploy.sh --verify-hooks`, which now fails on `UNWIRED` or `STALE-MATCHER` as well as body drift.
-
-> The earlier rule — *settings wiring is per-user and is NEVER auto-edited by forge* — was **retired 2026-08-30**. It assumed a single-user membrane whose owner would act on a printed `not wired` nudge; on a shared box it became N manual steps nobody performed, and an audit found every human membrane carrying hook bodies with no registration at all. Bodies without nerves are worse than neither: the membrane reads as enforced and enforces nothing. See `<forge>/core/hooks/README.md`.
 
 ### Settings defaults
 
@@ -301,10 +279,4 @@ Do NOT commit the project's own changes. Ask the user — using your harness's m
 
 ## No Project Names Rule
 
-This rule governs every write to forge during the fold phase:
-
-> Forge is a shared repo. NEVER include project-specific details in learnings, memory, commit messages, or any absorbed content.
-> Strip all project names, specific file paths, domains, and business logic before writing.
-> Learnings must read as universal principles. Commit messages must describe *what* was absorbed, not *where* it came from.
-
-When in doubt, genericize. When a finding is too project-specific to genericize, don't absorb it.
+The deployed HARD RULE "No Project Names in Forge" governs every fold write. Fold step 3e defines genericizing and the purity gate enforces it. When a finding is too project-specific to genericize, don't absorb it.

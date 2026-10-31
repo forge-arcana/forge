@@ -2,11 +2,11 @@
 name: wrap
 description: Pre-commit ritual. Lints, stages, saves context, updates docs, compacts, commits. Use when the user types "wrap" or wants to commit with full context.
 ---
-<!-- model: sonnet | escalate: Step 5 memory compaction → opus; no other fan-out -->
+<!-- model: sonnet | escalate: Step 4 memory compaction → opus; no other fan-out -->
 
 # /wrap — Pre-Commit Ritual
 
-Execute the following steps in order. Do NOT skip steps. Do NOT commit without completing all prior steps.
+Run the steps in order; the commit comes only after every earlier step.
 
 ---
 
@@ -66,9 +66,9 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
 
 **If no docs directory is found** (neither in-repo nor external), skip this step.
 
-## Step 5: Compact (gated — skip entirely in the common case)
+## Step 4: Compact (gated — skip entirely in the common case)
 - Check the size of the project's `AGENTS.md` (legacy: `CLAUDE.md` if not yet migrated) — a cheap `wc -c`.
-- **If it is under ~20k characters, skip this entire step.** Do NOT read or scan `memory/` files just to confirm they're fine. This is the common case and the single biggest cost lever in `/wrap` — an unconditional memory dedup re-reasons over the whole corpus on every commit.
+- **If it is under ~20k characters, skip this entire step.** Don't read or scan `memory/` files just to confirm they're fine. This is the common case and the single biggest cost lever in `/wrap` — an unconditional memory dedup re-reasons over the whole corpus on every commit.
 - **Only if the rules file exceeds ~20k characters:**
   - Hand the compaction to an opus-tier subagent — curating long-term memory is judgment work, and a wrong keep/move call loses knowledge permanently. If your harness lacks subagent spawning or per-spawn model selection, defer: flag the oversized rules file to the user and skip compaction rather than running it at the current tier.
   - Move verbose history, phase notes, and detailed learnings to `memory/` files.
@@ -76,19 +76,17 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
   - Link moved content from `MEMORY.md` index.
   - Deduplicate **only the memory files you touched this session** — not the whole `memory/` corpus. Full memory hygiene is a separate, deliberate tending pass, not part of a routine commit.
 
-## Step 6: Commit
+## Step 5: Commit
 - Draft a concise commit message (1-2 sentences) focusing on the "why" not the "what"
-- Do NOT add AI/agent attribution metadata (no `Co-Authored-By` footers)
+- No AI/agent attribution metadata (no `Co-Authored-By` footers)
 - Create the commit
 
-## Step 7: Push Decision
-- Ask the user — using your harness's multi-choice prompt if available, otherwise inline — do NOT push automatically
+## Step 6: Push Decision
+- Ask the user — using your harness's multi-choice prompt if available, otherwise inline — and don't push automatically
   - Options: "Yes, push" / "No, keep local"
 - This prompt is the user-review gate for the sonnet-tier work above: present the commit message and a summary of any doc updates in full alongside it, so the user reviews them before anything leaves the machine
 - Only push after explicit user confirmation
 - If the user declines, skip the push
 
-## Step 8: Context Window Compact
-- After the commit (and optional push), remind the user: "Run `/compact` or start a new conversation for a fresh context window."
-- `/compact` is a built-in CLI command (where the harness exposes one) — only the user can invoke it, not the agent
-- The commit is the natural break point — next task benefits from a clean context
+## Step 7: Fresh Context
+- The commit is the natural break point. If `bash "$HOME/.claude/skills/handoff/handoff.sh" status` reports on, run `/handoff`. Otherwise tell the user in one line: "`/clear` for unrelated next work, `/compact` to carry this context on." Both are user commands; the agent can't run them.

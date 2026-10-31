@@ -8,11 +8,9 @@ description: "The Pitch — one synthesis artifact in seven sections (The Bet, T
 
 > **Art** (learnings: `pitch-learnings.md`) — follow the [Forge Protocol](../forge/protocol.md) for pre-flight and post-flight.
 
-## Why One Pitch (not two)
+## One Pitch
 
-A great founder/cofounder pitch *is* a great investor pitch. The Bet, the Wound, the Inversion, the Field, the Stake, the Signal, the Stand are the same content for whoever reads it. The only honest difference between a wall-pinned founder pitch and a fundraising-deck VC pitch is *the room it's read in* — same HTML, different audience. There is no "internal vs external" pitch; there is **the pitch**, and there is *who happens to be reading it today*.
-
-What used to live as a separate "VC critique" is not a different pitch at all — it is a **review pass** on the same pitch. That pass is available via `--critique`, but it is feedback, not a second artifact. Treat the relationship the way `/probe` relates to a Pattern or `/preen` relates to a UX surface: the artifact is the artifact; the review is the review.
+One pitch serves founder, cofounder and investor; only the room differs. `--critique` is a review pass on it, not a second artifact.
 
 ## Persona
 
@@ -24,7 +22,7 @@ When invoked with `--critique`, you adopt a second mode: a VC partner who has ev
 
 ### HARD RULE — Touchstone is Required
 
-> **No Touchstone, no Pitch.** `/pitch` reads `[PROJECT]_03e_Touchstone_V1.0.md` (the contract, normative for tokens) AND `[PROJECT]_03e_Touchstone_V1.0.html` (the vision, visual reference). If either is missing, halt and instruct the user: *"Run `/wedge` first. The Pitch is rendered through the Touchstone's typed tokens; without a Touchstone, the rendered Pitch has no aesthetic constitution and would inherit generic styling."*
+> No Touchstone, no Pitch. `/pitch` reads `[PROJECT]_03e_Touchstone_V1.0.md` (the contract, normative for tokens) AND `[PROJECT]_03e_Touchstone_V1.0.html` (the vision, visual reference). If either is missing, halt and instruct the user: *"Run `/wedge` first. The Pitch is rendered through the Touchstone's typed tokens; without a Touchstone, the rendered Pitch has no aesthetic constitution and would inherit generic styling."*
 
 ### HARD RULE — Founder Voice, Not Marketing Voice
 
@@ -47,18 +45,19 @@ When invoked with `--critique`, you adopt a second mode: a VC partner who has ev
 
 ## Pre-Flight
 
-Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then read **in parallel**:
+Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then read in parallel. Look in `opus/` first, then the project root for projects founded before the `opus/` convention:
 
-- `[PROJECT]_01_Opus_V1.0.md` — the manuscript. **Required.**
-- `[PROJECT]_02_Vow_V1.0.md` — the pledge (and viability thread, which seeds The Field, Stake, Signal). **Required.**
-- `[PROJECT]_03e_Touchstone_V1.0.md` AND `[PROJECT]_03e_Touchstone_V1.0.html` — the visual constitution. **Required.**
+- `[PROJECT]_01_Opus_V1.0.md` — the manuscript. Required.
+- `[PROJECT]_02_Vow_V1.0.md` — the pledge (and viability thread, which seeds The Field, Stake, Signal). Required.
+- `[PROJECT]_03e_Touchstone_V1.0.md` AND `[PROJECT]_03e_Touchstone_V1.0.html` — the visual constitution. Required.
 - `[PROJECT]_03a_SoulBrief_V1.0.md` if present — the council's commission letter from `/wedge`; useful for sensorial language and Forbidden Defaults that should also bind the Pitch's rendered HTML.
 - Any existing `[PROJECT]_04_Pitch_V*.html` / `.md` — for awareness, especially on a `--refine` pass.
 - `pitch-learnings.md` — last 3 projects' alignment outcomes (which sections proved load-bearing, which kill conditions actually killed, which signals actually validated).
 
 If Opus / Vow / Touchstone is missing, halt and instruct the user accordingly.
 
----
+
+**Where artifacts go.** New runs write the Pitch MD and HTML to `opus/` beside the Opus and Vow (create it if absent); if the project's artifacts live at the root, write beside them. Cross-references stay basename-relative. Never migrate existing root artifacts.
 
 ## Process — Generate the Pitch (default)
 
@@ -115,23 +114,10 @@ Why us — why this team, why now. Distilled from the Opus's "Why us" thread. No
 
 | Artifact | Form | Role |
 |----------|------|------|
-| `[PROJECT]_04_Pitch_V1.0.md` | Markdown source, seven sections | The text, the founder's voice |
-| `[PROJECT]_04_Pitch_V1.0.html` | Rendered HTML through Touchstone tokens | **The pitch** — pinned to the wall, read with the cofounder, sent to the investor |
+| `opus/[PROJECT]_04_Pitch_V1.0.md` | Markdown source, seven sections | The text, the founder's voice |
+| `opus/[PROJECT]_04_Pitch_V1.0.html` | Rendered HTML through Touchstone tokens | **The pitch** — pinned to the wall, read with the cofounder, sent to the investor |
 
-The HTML reads the Touchstone contract at the top of `<head>` and translates the YAML tokens to CSS variables:
-
-```html
-<!-- Pitch — inherits the Touchstone's aesthetic constitution -->
-<!-- Contract: [PROJECT]_03e_Touchstone_V1.0.md (normative) -->
-<!-- Vision:   [PROJECT]_03e_Touchstone_V1.0.html (visual reference) -->
-<style>
-  :root {
-    /* Translate Touchstone.md's YAML tokens to CSS variables.
-       e.g., colors.primary → --color-primary, typography.body-md → --font-body, etc.
-       Keep names mechanical so future Touchstone updates re-translate cleanly. */
-  }
-</style>
-```
+The HTML translates the Touchstone MD's YAML tokens to `:root` CSS variables with mechanical names (`colors.primary` → `--color-primary`, `typography.faces.ui_face` → `--font-ui`, key path verified in touchstone-md-scaffold.md:27-28), and a `<head>` comment cites the MD (contract, normative) and the HTML (vision), so a Touchstone update re-translates cleanly.
 
 The HTML structure is seven full-viewport (or near-viewport) sections in order: Bet (hero, display typography at scale) → Wound (intimate prose, atmospheric backdrop pulled from Touchstone) → Inversion (typographic emphasis on the load-bearing word) → Field (table or list of named segments with ballpark numbers) → Stake (contract-style ledger or warning panel) → Signal (timeline or proof-point list) → Stand (closing statement at scale, attribution line if cofounder exists).
 
@@ -148,62 +134,9 @@ A **Pitch forged — [PROJECT]** notice: absolute paths to the HTML and the MD; 
 - **Want a stress-test before sending to investors** → `/pitch --critique`.
 - **Resistance surfaced** → `/pitch --refine`, or revisit `/prime` if the resistance is at the Opus / Vow / Touchstone level.
 
----
-
 ## Optional — `/pitch --critique`
 
-Runs the seven-dimension VC-style review pass on the existing Pitch. **This is feedback on the pitch, not a different pitch.**
-
-### Process
-
-**Spawn parallel subagents** — one per dimension, each at **sonnet tier**, except **Execution Risk** and **Revenue Model**, which spawn at **opus tier** (or walk dimensions sequentially at your session model if your harness lacks parallel sub-agent spawning or per-spawn model selection). Each subagent independently:
-
-1. **Analyzes** the corresponding section of the Pitch through its dimension's lens
-2. **Searches the web** for market benchmarks and current best practices — check the web research cache first per [Forge Protocol](../forge/protocol.md#web-research-cache). **Batch all uncached web searches in parallel.**
-3. **Challenges** the assumption:
-   - What evidence supports this?
-   - What would have to be true for this to work?
-   - What kill condition does this expose that The Stake missed?
-4. **Scores** the dimension 1–5 with specific findings
-
-**After all parallel dimension subagents complete, the merge runs at opus tier as an authoritative review, not a collation: validate each dimension's findings, re-score any dimension whose evidence does not support its score, add kill conditions the dimension legs missed, and compute the verdict from the opus-revised scores.**
-
-### Dimensions (7 total — one per Pitch section)
-
-| Dimension | Reviews Section | Key questions |
-|-----------|----------------|---------------|
-| Problem & Market | The Wound | Real and painful, or manufactured? Right timing? Vitamin or painkiller? |
-| Value Proposition | The Inversion | 10× better than alternatives or marginal? Unique insight? Switching cost? Durable or copyable in 12 months? |
-| Field Economics | The Field | First-100 numbers credible? Compounding lever real? Market-in-our-terms grounded? Switching gain real? |
-| Revenue Model | The Field + The Signal | Pricing aligned with value? Unit economics (CAC, LTV, gross margin, payback)? Path to profitability? Hidden risks? |
-| Competitive Moat | The Inversion | What stops a well-funded incumbent? Network effects, switching costs, proprietary data, regulatory, brand? Growing or eroding? |
-| Go-to-Market | The Field | First customer credibly acquired? GTM matched to buyer type? Loop compounds or stays linear? Distribution advantages vs. incumbents? |
-| Execution Risk | The Stake + The Signal | Kill conditions complete? Capital exposure honest? Cheapest test of riskiest assumption? Stop-the-bet metric falsifiable? |
-
-### Output Format
-
-Report headed `# Pitch Review — [PROJECT]` with a date / review-by / source line, then:
-
-- **Scorecard** — one row per dimension from the table above, columns `Dimension | Reviews | Score (1-5) | Key Finding | Signal`, closing with a bolded **Overall** row out of 35.
-- **Verdict** — FUNDABLE / WORTH BUILDING / NEEDS RETHINK / KILL.
-- **Kill Conditions Missing from The Stake** — each with assumption, what would invalidate it, and which Stake bullet should carry it.
-- **Important Concerns** — significant risks the Pitch acknowledges but understates.
-- **Strengthen the Pitch** — specific edits to surface in `/pitch --refine`.
-- **The One Question** — the single question this pitch must answer, phrased so the founder knows whether to refine, revisit `/prime`, or proceed.
-
-Scoring: 1 = broken/absent, 2 = weak, 3 = adequate, 4 = strong, 5 = exceptional. Signal: red = 1–2, yellow = 3, green = 4–5. Verdict thresholds: FUNDABLE = 28–35, WORTH BUILDING = 21–27, NEEDS RETHINK = 14–20, KILL = ≤13.
-
-### Marker Integration
-
-After the critique runs, mark the verdict at the top of `<body>` in `[PROJECT]_04_Pitch_V1.0.html` as an HTML comment:
-
-```
-<!-- PITCHED: [VERDICT] — [date] -->
-```
-
-This marker is read by `/smith` during Step 0 preflight. A `KILL` or `NEEDS RETHINK` verdict surfaces to the user before build resources are committed.
-
-When `--critique` is *not* run, no PITCHED marker is written — the absence tells `/smith` only that *"a Pitch exists, no review pass was requested,"* and `/smith` proceeds normally. Absence is not a defect.
+A seven-dimension VC-style review of the existing Pitch: feedback, not a second pitch. Read and follow [critique.md](critique.md): dimension fan-out (sonnet; Execution Risk and Revenue Model at opus), an opus merge that re-scores, the scorecard and verdict thresholds, and the `<!-- PITCHED: [VERDICT] — [date] -->` marker that `/smith` reads. No marker means no review was requested; that is not a defect.
 
 ## Self-Improvement Loop
 
@@ -220,8 +153,3 @@ Per the [Forge Protocol](../forge/protocol.md) post-flight, append to `memory/pi
 ## Post-Flight
 
 Follow the [Forge Protocol](../forge/protocol.md) post-flight, writing learnings to `memory/pitch-learnings.md`.
-
-After a `--critique` run, suggest:
-
-- **Critique verdict KILL or NEEDS RETHINK** → revisit `/prime` to revise the Vow's viability thread and the Opus's "Why us" before any build resources are committed.
-- **Critique verdict WORTH BUILDING or FUNDABLE** → proceed to `/probe` then `/smith` with conviction.

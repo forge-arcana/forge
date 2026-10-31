@@ -88,7 +88,7 @@ components:
 
 ## Overview
 
-[Brand & Style — holistic prose: brand personality, target audience posture, the emotional response the UI must evoke, whether it should feel dense or spacious, playful or solemn. Foundational context for any agent making a stylistic decision when no token covers it. Pull directly from WedgeBrief + Chosen Direction.]
+[Brand & Style — holistic prose: brand personality, target audience posture, the emotional response the UI must evoke, whether it should feel dense or spacious, playful or solemn. Foundational context for any agent making a stylistic decision when no token covers it. Pull directly from the Soul Brief's What it IS + the Chosen Direction.]
 
 ## Colors
 
@@ -134,6 +134,6 @@ These are project-specific. Generate them from the Chosen Direction's commitment
 2. **Prose is contextual.** Use descriptive color names ("Furnace Ember Red") in prose; reference systematic tokens (`{colors.tertiary}`) in components.
 3. **No invented sections.** Stick to: Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts. Omit any that don't apply (e.g., a Touchstone with no components defined yet may omit the Components section); never reorder.
 4. **Token references** use `{path.to.token}` syntax — `{colors.primary}`, `{rounded.md}`, `{typography.label-md}`. Composite references permitted only inside `components:`.
-5. **Do's and Don'ts are project-specific** — derived from the Chosen Direction's commitments and the WedgeBrief's Refused Tones. Generic guardrails ("maintain contrast") permitted only if directly load-bearing for this Touchstone.
+5. **Do's and Don'ts are project-specific** — derived from the Chosen Direction's commitments and the Soul Brief's What it ISN'T and Forbidden Defaults. Generic guardrails ("maintain contrast") permitted only if directly load-bearing for this Touchstone.
 6. **One interface face.** `typography.faces.ui_face` is required and every non-logotype token's `fontFamily` resolves to it (or to `heading_face` under rule 7). `logotype_face` may be applied only to the wordmark adjacent to the brand mark — the HTML must not reach it from any heading, figure, or dialog title selector. `code_face` covers code, identifiers, and log output only. The line "One family for the interface. The wordmark may keep its own. Nothing else may." is always emitted in Do's and Don'ts — it is the one generic guardrail that is always load-bearing.
 7. **A second heading face must be argued.** `heading_face` is permitted only when `heading_face_audience` and `heading_face_reason` are each filled with one sentence, and it never reaches `figures`. A blank or generic sentence ("for elegance") fails the Heat 6 review. Figures are always `{typography.faces.ui_face}` with `tabular-nums`; hierarchy is size, weight, tracking, colour — never a change of family.

@@ -29,3 +29,15 @@ Applies to any logged-out or marketing page. Evidence: screenshots at 375×667 a
 Severity: 1–3 IMPORTANT; 4 CRITICAL on overflow, else IMPORTANT; 5–6 IMPORTANT; 7 CRITICAL when a layout change silently rewrote copy.
 
 **Cluster**: these findings name two absent primitives — *the page has no shape rule* and *the page never shows the product*. Propose the hero-with-product and the section-shape alternation as rules, then sweep.
+
+## §3 Generated content and agent actions (Dimension 1)
+
+Applies wherever a model drafts, summarizes or acts for the user.
+1. **Progress that tells the truth**: streamed output, or a named stage for long runs, plus a visible Stop. A spinner for a 20-second generation is a dead end.
+2. **The user commits, not the model**: generated text is editable before it is sent or published, and the commit control is the user's.
+3. **Attribution and uncertainty**: content from a model is labelled where a reader could mistake it for the user's own or for fact; sources are linked where claims are factual.
+4. **Recoverable actions**: an agent action is undoable, or confirmed in proportion to its consequence (Dimension 6 monotonicity), with a log the user can read.
+5. **Failure and refusal states**: a refusal, rate limit or timeout says what happened and what to do next, never a blank card or a raw error.
+6. **Regenerate keeps the user's edits** or warns before discarding them.
+
+Severity: 2 and 4 CRITICAL when the content leaves the product (sent, posted, paid); the rest IMPORTANT.

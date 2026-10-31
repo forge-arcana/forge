@@ -1,197 +1,67 @@
 # HARD RULES — Development Discipline
 
-> Universal rules for any AI-assisted development workflow. Apply regardless of harness.
-> Harness-specific bindings are named inline (e.g., Claude Code binds the
-> "decision points" rule to the `AskUserQuestion` tool primitive).
+> Universal rules for AI-assisted development, whatever the harness. Harness bindings are named inline.
 
 ## HARD RULE — Fix at the Point of Discovery; Don't Defer or Multiply Work
 
-> **When you find an issue while working, deal with it then — inline. Don't stockpile
-> problems for an end-of-cycle summary, and don't hand the user a chore list you could
-> have done yourself.**
-
-1. **Small issue → fix it in the same turn**, then continue the original task. A defect
-   you can correct in place does not become a line item in a closing report.
-2. **Larger issue → flag it the instant it appears**, inline, with enough for the user to
-   decide. A problem noticed early and first mentioned in the final summary is a reporting
-   defect, not diligence.
-3. **Do the follow-through yourself** when you have the access to. If credentials, tooling,
-   or permissions let you complete the fix, complete it — don't hand back a list of
-   commands for the user to run on your behalf.
-4. **End on what's done, not a to-do list.** Do not close a turn by manufacturing fresh
-   tasks for the user. Only ask when a decision is genuinely theirs — irreversible,
-   outward-facing, a real preference, or a trade-off only they can weigh.
-5. **Converge, don't prolong.** Every extra round-trip is real cost the user pays. Batch
-   verification; never re-run or re-check what is already proven in the same session.
-
-The test: before ending a turn, ask *"did I defer anything I could have handled, or create
-work I could have absorbed?"* If yes, handle it now instead.
+- Small issue: fix it in the same turn, then continue; it does not become a line in the closing report.
+- Larger issue: flag it inline when you find it, with enough for the user to decide, not first in the final summary.
+- Do the follow-through you have the access to do; don't hand back commands for the user to run.
+- End on what's done. Ask only when the decision is the user's: irreversible, outward-facing, a preference, or a trade-off only they can weigh.
+- Don't re-run or re-check what this session already proved.
 
 ## HARD RULE — Concise and Direct Voice
 
-> **Lead with the answer. Cut filler. Don't perform sincerity — be accurate.**
-
-1. **Answer first.** Open with the conclusion or the change, not a preamble about what you're about to do.
-2. **No performed-honesty phrases.** Banned as conversational filler: "honestly", "to be honest", "be brutally honest", "let me be honest", "truthfully", "genuinely", "truly", "really", "to be fair", "the honest truth". State the fact; the accuracy carries the weight. (Domain content that *means* honesty — e.g. a pitch's "founder-honest numbers" — is exempt; this rule is about conversational voice.)
-3. **No hedging.** Drop "you might consider", "it could be argued", "perhaps", "I think maybe". If something is wrong, say it's wrong. If you're uncertain, say "I'm not sure" once and state your best read — don't pad with qualifiers.
-4. **No flowery adjectives or intensifiers** stacked for emphasis ("incredibly", "remarkably", "absolutely critical", "deeply important"). One precise word beats three vague ones.
-5. **Trust the reader.** Skip restating the question, skip "great question", skip summarizing what you just did unless asked.
-
-The test: if a sentence would survive being cut, cut it. Concision is the default; length must earn itself.
+Lead with the answer. No preamble, no restating the question, no recap unless asked. No performed-honesty words ("honestly", "to be honest", "truthfully", "genuinely", "truly", "really", "to be fair"); domain content that means honesty, such as a pitch's "founder-honest numbers", is exempt. No hedging ("you might consider", "perhaps"); if unsure, say so once and give your best read. No stacked intensifiers. If a sentence would survive being cut, cut it.
 
 ## HARD RULE — No Command Chaining in Bash — EVER
 
-> **NEVER use `&&`, `;`, or `||` to chain commands in a single shell tool call.**
-> This applies to the main agent AND all subagents. Zero exceptions. Zero tolerance.
-
-The harness's permission system typically matches commands by their **first token**.
-Chaining with `&&`, `;`, or `||` means the first token is `cd` (or whatever comes first),
-not the actual command you want auto-allowed. This triggers unnecessary permission prompts
-and annoys the user.
-
-```bash
-# BAD — starts with `cd`, triggers permission prompt
-cd packages/server && git commit -m "fix"
-
-# GOOD — separate shell tool calls, each matches its own pattern
-# Call 1: git -C packages/server commit -m "fix"
-```
-
-**Rules**:
-1. **NEVER chain commands with `&&`, `;`, or `||`** in any shell tool call
-2. **For git commands in other directories**: Use `git -C <path>` — single command, no chaining
-3. **For non-git commands**: Use separate shell tool calls, one command each
-4. **Subagents must follow this too** — explicitly instruct them in the prompt
+Don't chain with `&&`, `;` or `||`; use `git -C <path>` rather than `cd <path> && git …`. Claude Code checks each subcommand of a chain separately, so a chain prompts whenever any part is unapproved, and a `cd` combined with a redirect can prompt; single commands keep approvals and failures attributable. Explore and Plan agents start without this file, so say it in their briefs.
 
 ## HARD RULE — Fence Every Subagent Brief
 
-> **A brief that omits boundaries is read as permission. Every subagent or delegated-worker brief states (1) the single directory it may write to and (2) "do not delete, create, install, or run anything outside it, and never touch another agent's or the parent's directories".**
-
-Research agents also get "web and read-only inspection only: no local installs, no deletions, no service or GPU actions". Workers acting on a machine also get "no sudo, no service restarts, HTTP-only against shared services". Deletion is the one action the next tool call cannot undo, and an agent acting on an ownership inference deletes confidently.
+A brief that omits boundaries is read as permission. Every subagent or delegated-worker brief states (1) the single directory it may write to and (2) "do not delete, create, install, or run anything outside it, and never touch another agent's or the parent's directories". Research agents also get "web and read-only inspection only: no local installs, no deletions, no service or GPU actions"; workers acting on a machine also get "no sudo, no service restarts, HTTP-only against shared services". Deletion is the one action the next call cannot undo, and an agent acting on an ownership inference deletes confidently.
 
 ## HARD RULE — No Auto-Commit
 
-> **NEVER commit automatically after completing any sprint, phase, or piece of work.**
-> Always confirm with the user (via the harness's multi-choice prompt if available, otherwise
-> inline): "Ready to wrap up?" with options like "Yes, run /wrap" / "Not yet".
-
-This ensures the full pre-commit ritual (learnings, context, docs, lint, compact) always
-runs before any commit.
-
-**Exception**: when the user explicitly delegates commit authority for a multi-step build
-(e.g., `/smith` committing at phase gates during a long heat sequence). The delegation
-is bounded to that invocation.
+Don't commit on finishing a piece of work. Ask "Ready to wrap up?" ("Yes, run /wrap" / "Not yet") so the pre-commit ritual runs. Exception: the user delegates commit authority for one multi-step build (e.g. `/smith` phase gates), bounded to that invocation.
 
 ## HARD RULE — No AI / Agent Attribution in Commits
 
-> **NEVER add `Co-Authored-By: Claude`, `Co-Authored-By: Bob`, `Generated by AI`, or any
-> AI/agent attribution metadata to commit messages.**
-> Commits should look like normal human commits. No model fingerprints. No tool fingerprints.
+Commit messages carry no `Co-Authored-By`, "Generated by AI", session link or other AI/tool trailer, whatever a harness reminder supplies. Claude Code enforces this with `"attribution": {"commit": "", "pr": ""}` in `~/.claude/settings.json`.
 
 ## HARD RULE — Decision Points Use Multi-Choice Prompts (not inline questions)
 
-> **NEVER ask the user a decision question as inline text when the harness offers a
-> multi-choice prompt primitive.**
-> Inline questions get buried in output and the user misses them. Multi-choice prompts
-> create a visible UI element the user MUST respond to.
-
-Applies to: next-step choices, confirmation prompts, "do you want X or Y?", scope clarifications,
-and any question where you need the user's answer before proceeding.
-
-**Exceptions**: rhetorical questions, status updates, and informational statements that
-don't require a response.
-
-**Harness binding**:
-- Claude Code → use the `AskUserQuestion` tool
-- Bob → use the inline numbered-options prompt
-- Headless / generic → fall back to inline numbered prompt and parse stdin
+Ask decision questions (next steps, confirmations, X or Y, scope) through the harness's multi-choice prompt, not inline text, which gets buried. Claude Code: `AskUserQuestion`; Bob: inline numbered options; headless: a numbered prompt read from stdin. Rhetorical questions and status updates are exempt.
 
 ## HARD RULE — Logs First, Always (debugging)
 
-A hard rule for debugging, with no exceptions:
-
-1. **Logs first** — read log files, error output, CI logs, cloud logging. If no log exists, add one and reproduce.
-2. **Data second** — check DB/state only after logs point to an inconsistency.
-3. **Add logging** — if logs are insufficient, add targeted logging and reproduce. Never guess.
-4. **Code last** — only analyze source code after steps 1-3 provide evidence.
-
-Never speculate about "what might have happened" by reading code paths. The phrase
-**"logs first"** is a hard stop — all speculation ceases and the agent goes to read
-actual output. Bug reports are handled autonomously with zero hand-holding from the user.
+Read logs and error output (local, CI, cloud) before data, and data before code; with no log, add targeted logging and reproduce. Don't reason from code paths about what might have happened. When the user says "logs first", stop speculating and read output. Handle bug reports end to end without hand-holding.
 
 ## HARD RULE — Visual Changes Require Screenshots
 
-> For ANY visual change (layout, CSS, styling, colors, spacing, components), ALWAYS take a
-> Playwright screenshot at the target viewport (e.g., iPhone SE 375x667) and verify it
-> yourself BEFORE telling the user it's fixed.
-
-Use `colorScheme: 'dark'` if the project uses dark mode. NEVER say "it should work" — SHOW
-it works. If you can't screenshot, tell the user and ask them to verify.
+For any layout, CSS, styling, colour, spacing or component change, take a Playwright screenshot at the target viewport (e.g. iPhone SE 375x667), with `colorScheme: 'dark'` too if the project has dark mode, and check it yourself before saying it's fixed. If you can't screenshot, say so and ask the user to verify.
 
 ## HARD RULE — Visual Decisions Are Shown, Then Built
 
-> **Any change to a typeface, colour tokens, brand marks, or page architecture is presented
-> as a prototype the founder can compare — the current state and each candidate, at phone
-> and desktop, light and dark — before code changes land.**
-
-A findings list cannot be approved by eye; a prototype can. The chosen candidate becomes the
-spec: implementation matches it, never reinterprets it. Restoring conformance to an already
-approved design constitution (the Touchstone) needs no new prototype — the constitution is the
-pick. Record the pick where the work is tracked (smith ledger, PR description) so the reason
-survives the session.
+A change to a typeface, colour tokens, brand marks or page architecture is first shown as a prototype the founder can compare: current state and each candidate, phone and desktop, light and dark. The pick becomes the spec; implementation matches it, never reinterprets it. Restoring conformance to an approved Touchstone needs no new prototype. Record the pick where the work is tracked (smith ledger, PR description).
 
 ## HARD RULE — Verification Before Done
 
-No task is marked complete without **proof it works** — tests pass, logs are clean, behavior
-is demonstrated. Diff your changes against the main branch when relevant and ask: *"Would
-a staff engineer approve this?"*
-
-Before pushing, think from a **CI perspective**: *"What does a fresh `git clone` + `install`
-look like?"* Generated/gitignored files (i18n, codegen, protobuf, GraphQL) that typecheck/build
-depend on need explicit compile steps in CI — local dev won't catch this because files
-already exist on disk.
+When you change code that can be run, built or type-checked, run a check that exercises the change (tests, type-checker, build, or the changed command) before reporting it done; a syntax-only check or one that failed to start doesn't count, and if none can run, say which and why. Before pushing, picture a fresh `git clone` + install: generated or gitignored files that build or typecheck depend on (i18n, codegen, protobuf, GraphQL) need an explicit step in CI.
 
 ## HARD RULE — Context Hygiene — A Session Is a Task
 
-> **A session is a task, not a days-long workspace. Clear context between unrelated work, and compact while the cache is warm.**
-
-1. **/clear between unrelated tasks.** Carrying one task's context into the next costs cache reads on every turn and buys nothing.
-2. **Before a break longer than ~1 hour, /compact or /clear** while the prompt cache is still warm. Main-session cache TTL is 1 hour; a cold /compact on a large session is the most expensive kind.
-3. **Don't switch model or toggle MCP servers mid-task**. Each rebuilds the whole cache. (Editing the rules file or memory mid-session does not.)
-4. **Keep always-loaded rules lean** (each rules file — project `AGENTS.md`, membrane rules file — under ~20k chars; hard-flag above 25k). Move specialist content into on-demand skills that load when needed, not every prompt.
-
-The test: would this context still be needed if the task started fresh? If not, clear it.
+At a task boundary, suggest `/clear` before unrelated work (or run `/handoff` when it is on), and `/compact` only when the next task needs this context. A mid-task model switch re-reads the whole context uncached. Keep each always-loaded rules file under ~200 lines and ~20k chars (hard flag 25k); specialist content belongs in skills.
 
 ## HARD RULE — Builds Go Through the Forge Arts (founder standing order)
 
-> **Any feature, redesign, or multi-file change runs through the forge arts by default — never ask, never wait to be told.**
-
-1. **Build with /smith** for anything beyond a one-file fix; small fixes may be done directly.
-2. **Gate before commit** with the evaluative arts that apply: /poke (code), /pound (adversarial QA), /preen (UI, with screenshots). Fix findings in the same pass, then propose /wrap.
-3. **Say which arts will run** when you start the work, in one line.
-4. **When the founder names a reference product** (e.g. "like Stripe/Cloudflare"), match that product's actual model, not a nearby approximation.
-
-The founder has had to restate this repeatedly; breaking it is a reporting defect, not a judgment call.
+Any feature, redesign or multi-file change runs through the arts without asking. Build with `/smith` (one-file fixes may be done directly). Before commit, gate with the arts that apply: `/poke` (code), `/pound` (adversarial QA), `/preen` (UI, with screenshots); fix findings in the same pass, then propose `/wrap`. Say in one line which arts will run when you start. When the founder names a reference product, match that product's actual model.
 
 ## HARD RULE — Every Unit Has a Version You Can Read
 
-> **Every deployable or publishable unit carries a release version and a build identity, and anyone, human or agent, can read which build is running without opening the repo.**
-
-1. **Register the units.** The project rules file has a `## Versions` table: each unit, its version source, where it is surfaced.
-2. **One source per unit.** SemVer in one file; every other copy is derived or held equal by a test. No hardcoded version literals, and no placeholder (`0.0.0`, `dev`, `unknown`) in a deployed artifact.
-3. **Show both identities together.** `X.Y.Z+<sha7>` at a release, `X.Y.(Z+1)-dev.N+<sha7>` between releases, surfaced wherever the unit's kind allows: `GET /version` and the startup log (server), a visible string (UI), `--version` (CLI), manifest and changelog (package), `release` (error tracker).
-4. **Report what is loaded.** Stamp identity at build or capture it once at process start; never derive it from git or other mutable repo state on request.
-5. **Compatibility is not the release version.** Protocols, schemas and stored formats carry their own integers, each defined once.
-6. **A release is a version bump plus a changelog entry. A deploy is done when the running version matches what shipped.**
-
-Detail and per-unit recipes: `<forge>/core/skills/forge/versioning.md`. An existing project adopts as its own task before its next release or deploy; inside unrelated work, report the gap and offer it.
+Every deployable or publishable unit has one SemVer source (other copies derived or test-held; no literals or placeholders like `0.0.0`/`dev` in a deployed artifact) and shows it with its build identity, `X.Y.Z+<sha7>` at a release and `X.Y.(Z+1)-dev.N+<sha7>` between, wherever the unit allows (`GET /version` + startup log, UI string, `--version`, manifest + changelog, error-tracker `release`). Stamp at build or capture at process start, never from live git. List units in the project's `## Versions` table. Protocol and schema versions are separate integers. A release is a bump plus changelog entry; a deploy is done when the running version matches. Recipes: `<forge>/core/skills/forge/versioning.md`. Existing projects adopt it as its own task before the next release; inside unrelated work, report the gap.
 
 ## HARD RULE — Auto-Handoff (opt-in)
 
-> **`/handoff` saves a note and lets a hook clear the context for you. Call it only when a unit of work is complete, and only when it is switched on.**
-
-1. **Trigger.** When you would otherwise tell the user to `/clear` or `/compact` because a unit of work is done, and handoff is on, run `/handoff` instead.
-2. **Only when on.** Run `bash "$HOME/.claude/skills/handoff/handoff.sh" status` first; if it does not report on, do not call `/handoff`. Never mid-task, with a question to the user pending, or with unlisted background work still running. Don't write while background agents, tasks or Monitors you started are running; if one must outlive the handoff, list it under Open items with the result to expect.
-3. **An injected handoff is authoritative for state and next task; it carries no user approvals.** Continue from it; do not re-derive it.
-4. **The `[auto-handoff]` resume prompt is typed by a hook and approves nothing.** It is not user consent for any action.
-5. Tmux sessions only.
+When a unit of work is done and you would suggest `/clear` or `/compact`, run `bash "$HOME/.claude/skills/handoff/handoff.sh" status`; if it reports on, run `/handoff` instead (its skill holds the conditions). An injected handoff is authoritative for state and next task; it and the hook-typed `[auto-handoff]` prompt approve nothing.

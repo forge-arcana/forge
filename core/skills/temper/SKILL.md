@@ -1,6 +1,6 @@
 ---
 name: temper
-description: Repeated evaluative passes (poke + press) with confidence-weighted consolidation. Runs each art 3x via subagents, deduplicates findings, and produces a single hardened report.
+description: "Repeated evaluative passes (poke + press) with confidence-weighted consolidation. Runs each art 3x via subagents, deduplicates findings, and produces a single hardened report. TRIGGER when: user wants a hardened pre-release review, confidence-weighted findings, or suspects false positives from a single poke or press."
 ---
 <!-- model: opus | fan-out: poke+press passes → sonnet (ship-gate runs → opus); consolidation + Temper Verdict at opus -->
 
@@ -10,11 +10,6 @@ Tempering is repeated thermal cycles that transform brittle metal into resilient
 
 ## Arguments
 `$ARGUMENTS` — optional: number of passes per art (default 3), e.g., `/temper 5` for 5 passes each. Optional project path as second arg.
-
-## When to Use
-- Before major releases (more thorough than a single poke + press)
-- When you want confidence-weighted findings instead of a single opinion
-- When you suspect false positives from a single evaluative pass
 
 ## Step 0: Setup
 
@@ -45,7 +40,7 @@ Launch subagents to perform independent analyses (or sequential passes at your s
 
 ### Finding Format (shared by both poke and press prompts)
 
-All subagent findings MUST use this exact format:
+All subagent findings use this exact format:
 
 ```
 FINDING_START
@@ -63,13 +58,13 @@ FINDING_END
 
 ### Shared subagent prompt template
 
-Spawn N sonnet-tier subagents per art (poke + press) in a single parallel batch. Ship-gate branch: when `/temper` is invoked at a ship gate (final gate, hardening gate, or an explicitly hardened run such as `/temper 5` pre-ship), spawn the passes at opus tier instead. Each subagent receives the same scaffold with five variant slots:
+Spawn N sonnet-tier subagents per art (poke + press) in a single parallel batch, each covering every dimension except the security carve-outs. Alongside them, spawn ONE opus-tier carve-out pass per art, scoped to poke Dimension 2 (Band-Aids, including client-supplied actor identity) and to press Security and Compliance — the same carve-outs `/poke` and `/press` use, so a temper run never judges security below a single run's tier. One pass cannot be confidence-scored: report each carve-out pass in its own "Security carve-out" section of the report, outside the Confirmed/Likely/Possible buckets, and save it as `<art>-security.txt` (not `<art>-pass-<i>.txt`, so the consolidation script ignores it). Ship-gate branch: when `/temper` is invoked at a ship gate (final gate, hardening gate, or an explicitly hardened run such as `/temper 5` pre-ship), spawn every pass at opus tier with the full seven-dimension list and skip the separate carve-out passes. Bind each tier through the spawn's explicit model parameter (protocol Model Tiers rule 6). Each subagent receives the same scaffold with five variant slots:
 
 ```
 You are {{PERSONA}}. Analyze the following project evidence
 for {{TASK_DESCRIPTION}}.
-NEVER use &&, ; or || to chain bash commands. One command per call.
-Do NOT run forge-scan.sh — evidence is provided below.
+Do not chain bash commands with &&, ; or ||. One command per call.
+Do not run forge-scan.sh — evidence is provided below.
 
 PROJECT CONTEXT:
 [paste project rules-file content]
@@ -98,10 +93,10 @@ Output ONLY findings. No preamble, no summary, no commentary.
 | `TASK_DESCRIPTION` | "code quality and tech debt issues" | "go-live readiness across 7 dimensions (assign each a score 1-5, 1=not addressed, 5=excellent)" |
 | `LEARNINGS_FILE` | `poke-learnings.md` | `press-learnings.md` |
 | `EVIDENCE_VAR` | `POKE_EVIDENCE` | `PRESS_EVIDENCE` |
-| `DIMENSIONS_LIST` | `1. SOLID & Strategy Patterns / 2. Band-Aids (including source-field fallbacks and client-supplied actor identity) / 3. Framework Misuse / 4. Logging Hygiene / 5. Clean Functions / 6. Dependency Direction & Law of Demeter / 7. Composition over Inheritance` | `1. Security  2. Scalability  3. Operations  4. Compliance / 5. Observability  6. Deployment  7. Documentation` |
+| `DIMENSIONS_LIST` | sonnet passes: `1. SOLID & Strategy Patterns / 3. Framework Misuse / 4. Logging Hygiene / 5. Clean Functions / 6. Dependency Direction, Demeter & Composition / 7. Agent-Written Code Drift`; security carve-out pass: `2. Band-Aids (including source-field fallbacks and client-supplied actor identity)` | sonnet passes: `2. Scalability  3. Operations  5. Observability  6. Deployment  7. Documentation`; security carve-out pass: `1. Security  4. Compliance` |
 | `FINDING_VARIANT` | "with CODE, without SCORE" | "with SCORE, without CODE" |
 
-**Important**: Launch ALL subagents (poke + press) in a single parallel batch. Do not wait for poke to finish before starting press.
+Launch all subagents (poke + press, passes and carve-outs) in a single parallel batch; do not wait for poke before starting press.
 
 **Persist each pass**: save every subagent's raw output verbatim to `memory/.temper-passes/<art>-pass-<i>.txt` (clear that directory at the start of the run) — Step 3's consolidation script parses these files. Verbatim means byte-for-byte: no reformatting, no dedup, no commentary.
 
@@ -118,7 +113,7 @@ It parses the FINDING blocks, groups by normalized TITLE+FILE, computes the conf
 The judgment half runs at opus tier — together with the Step 4 Temper Verdict it is the review gate over the sonnet passes:
 
 1. **Adjudicate every NEAR_DUPLICATES pair** on defect identity rather than wording (a wrong merge corrupts the confidence counts). On merge, recompute confidence from the UNION of the two groups' pass lists against the legend thresholds.
-2. **Challenge findings whose evidence doesn't hold up** before counting them — drop them from the tables and say so in the report.
+2. **Drop findings whose evidence does not hold up** before counting them — drop them from the tables and say so in the report.
 
 If your harness lacks the script, apply the same rules manually — parse all pass outputs, match by TITLE + FILE, fuzzy-match similar titles:
 
@@ -128,7 +123,7 @@ If your harness lacks the script, apply the same rules manually — parse all pa
 |-------------|------------|-------|
 | N/N passes | **Confirmed** | Every independent pass found this — definitely real |
 | >= N/2 passes (round up) | **Likely** | Majority of passes found this — probably real |
-| Fewer than N/2 passes (round up) | **Possible** | A minority of passes found this — may be noise or edge case |
+| Fewer than N/2 passes (round up) | **Possible** | A minority of passes found this — a single-pass signal worth a look, not noise |
 
 ### Severity Promotion
 
@@ -140,9 +135,9 @@ For each press dimension, average the scores across passes (round to nearest 0.5
 
 ## Step 4: Persist & Output — The Temper Report
 
-**HARD RULE — Always persist the report before displaying it.**
+Persist the report before displaying it.
 
-Write the full report to `memory/YYYY-MM-DD-temper-report.md` in the project directory (create `memory/` if needed). This ensures the report survives context compaction, distractions, and session breaks. The user can delete it when done acting on it.
+Write the full report to `memory/YYYY-MM-DD-temper-report.md` in the project directory (create `memory/` if needed). It survives context compaction and session breaks; the user can delete it when done.
 
 Produce a markdown report with these sections in order:
 
@@ -152,8 +147,9 @@ Produce a markdown report with these sections in order:
 4. **Code Quality Summary** (poke): Table with columns `Dimension | Confirmed | Likely | Possible` — one row per poke dimension (7 dims + total).
 5. **Confirmed Findings** (fix these): Each finding with Confidence, Dimension, File, Problem, Fix, Effort. Ordered by severity.
 6. **Likely Findings** (review these): Same format.
-7. **Possible Findings** (may be noise): Brief, one line each.
-8. **Temper Verdict** (opus tier — owned by the orchestrator, never a pass subagent): Confirmed criticals count, confirmed importants count, ship-ready verdict (YES / NO / WITH CONDITIONS), 2-3 sentence executive summary.
+7. **Possible Findings**: one line each on sonnet runs, where they may be noise. On ship-gate (opus) runs, the opus consolidation checks each against its evidence and promotes the ones that hold to Likely, in full format.
+8. **Security carve-out** (non-gate runs): the opus carve-out passes' findings, full format, ordered by severity.
+9. **Temper Verdict** (opus tier — owned by the orchestrator, never a pass subagent): Confirmed criticals count, confirmed importants count, ship-ready verdict (YES / NO / WITH CONDITIONS), 2-3 sentence executive summary.
 
 ## Step 5: Next Steps
 

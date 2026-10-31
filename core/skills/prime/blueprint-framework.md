@@ -298,17 +298,9 @@ Only after the founder confirms (or redirects), proceed to Q31. Language choice 
     - "Which combination makes sense for your users?"
 
 33. **"Where should this be hosted?"**
-    - **Day-1 default: dogfood single-box** (stack-guide → Day-1 Topology). One VPS + Docker Compose + Cloudflare tunnel as sole ingress, shipped WITH its two guardrails (offsite backup + tested restore drill; single-instance constraint until a job queue + shared store exists). Blueprint at this altitude — don't over-plan the managed platform.
-    - **Record the public-launch phase explicitly.** The managed target — one Node image portable across **Cloud Run, Cloudflare Containers, Fly, Railway**, picked per the stack-guide's **Hosting Decision Framework** by scale and needs with an agentic-operability tie-bias — goes into the Blueprint as a named deferred phase with its trigger (real concurrency, open signup, live billing). **Production Postgres defaults to Neon** (scale-to-zero, branch-per-PR, one MCP dev→prod); Drizzle abstracts the DB so environment = a connection-string change.
-    - Lead the founder with: *"I'll start this on a single box behind a Cloudflare tunnel — trivial ops, tighter security than most managed platforms, and it's what actually ships first. The Blueprint names the managed target — a portable container, Cloud Run or Cloudflare Containers, with Neon as the database — as the public-launch phase we enter when you hit real concurrency, open signup, or live billing. That keeps you un-locked-in and the plan honest."*
-    - **Walk the escalation signals (following these IS the framework, not deviating from it):**
-      - **Cost-dominant / always-on / egress-heavy / EU residency** → **Hetzner** (via Kamal 2; ~10× cheaper, near-$0 egress — you own ops + DB durability, and its tokens are coarse bearers).
-      - **GPU / self-hosted open-weight models / embeddings at scale** → **Runpod** hosts the Python ML sidecar (not the general app host).
-      - **Region-survivable DR / HIPAA-BAA / hard data residency / existing GCP commitment** → **Cloud Run + Cloud SQL** (GCP is a re-justified peer, chosen on merit).
-      - **Sustained throughput / horizontal scale over scale-to-zero** → **PlanetScale** for the DB.
-      - **Stateless latency-critical routes** → peel onto **Cloudflare Workers** (edge) — a taxed option, container stays the default.
-    - **Capture the DR posture explicitly.** During dogfood it reduces to guardrail 1 (offsite backup + tested restore). At public launch: Neon has no cross-region replication — note the floor (Launch plan + a scheduled cross-region `pg_dump`), and if the product needs region-survivable DR or HIPAA/BAA, name **Cloud SQL** as the DB in the Blueprint now, not at go-live.
-    - **The discipline is anti-*trend*, not anti-movement.** Move freely across the framework's peers when a scale/needs signal points there; never swap on popularity alone. "It's trending" is not a signal — a concrete cost/scale/latency/DR/residency requirement is.
+    - Read the stack guide's **Day-1 Topology** (single box behind a Cloudflare tunnel, with its two guardrails) and **Hosting Decision Framework** (managed public-launch target, database default, escalation signals, DR floor), and follow them. Do not restate them here.
+    - Record in the Blueprint: the day-1 host; the public-launch phase as a named deferred phase with its trigger (real concurrency, open signup, live billing); and the DR posture, naming a region-survivable database now if the product needs one.
+    - Move between the framework's peers only on a concrete cost, scale, latency, DR or residency signal, never on popularity.
 
 34. **"How important is testing and CI/CD from day one?"**
     - Some founders want "just ship it." Others want production-grade from the start.
@@ -410,7 +402,7 @@ Incorporate feedback. Remove all agent instructions and interview artifacts. The
 
 Convert the final `.md` to PDF for sharing:
 ```bash
-npx md-to-pdf [PROJECT]_BuildScope_V1.0.md
+npx md-to-pdf [PROJECT]_05_Blueprint_V1.0.md
 ```
 
 ---

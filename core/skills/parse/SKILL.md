@@ -36,7 +36,7 @@ Read the task in full. Write one line: **Done means** — the observable outcome
 
 ## Phase 2: Size It (read-only)
 
-Take a quick, read-only look at the repo. Change nothing in this phase. Establish:
+Take a quick, read-only look at the repo (founding artifacts live in `opus/` first, then the project root). Change nothing in this phase. Establish:
 - Files likely touched, and how many
 - Whether UI is involved
 - Risk: security, auth, data loss, money
@@ -47,8 +47,8 @@ Take a quick, read-only look at the repo. Change nothing in this phase. Establis
 | Tier | When | Arts that run |
 |------|------|---------------|
 | `not-actionable` | Nothing to change: a question, duplicate, works-as-intended, or not enough information | None. Draft a reply; change nothing |
-| `minor` | A one-file or narrow fix | State what the fix must achieve, fix it directly, then `/poke` scoped to the diff, plus `/preen` if it touches UI |
-| `standard` | Several items, or one feature-sized change of about 1-2 heats | `/patch`, then implement its brief, then `/poke` and a `/pound` scoped to the change (plus `/preen` if UI) |
+| `minor` | A one-file or narrow fix | State what the fix must achieve, delegate it to a sonnet-tier subagent (explicit model parameter), then `/poke` scoped to the diff, plus `/preen` if it touches UI |
+| `standard` | Several items, or one feature-sized change of about 1-2 heats | `/patch --brief-only`, then implement its brief through sonnet-tier subagents, then `/poke` and a `/pound` scoped to the change (plus `/preen` if UI) |
 | `substantial` | 3+ heats, new architecture, or a cross-cutting change | `/smith` (it runs its own gates), then a final `/poke` and a scoped `/pound` |
 
 **Escalation.** Security, auth, data-loss or money risk raises a `minor` to at least `standard` and always includes `/pound`. When torn between two tiers, take the higher.

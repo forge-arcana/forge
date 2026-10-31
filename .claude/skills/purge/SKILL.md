@@ -20,7 +20,7 @@ You are summoned, never scheduled. When the forge grows heavy, when the learning
 ## HARD RULE — Tracker is APPEND-ONLY
 > **NEVER remove entries from `processedEntries` in `.fold-tracker.json`.**
 > The tracker tells fold "I already processed this membrane entry." Removing an entry causes fold to re-absorb it from the membrane, creating duplicates. A tracker entry without a matching forge file is harmless residue — fold just skips it. The cost of keeping a stale entry is zero. The cost of removing one is duplicate re-absorption.
-> **No exceptions. No cleanup. No "orphan" removal. No compaction. Append only.**
+> Append only — no cleanup, orphan removal or compaction.
 > The tracker is shared across all forge users. Each user has their own membrane. No single user — and no skill (not even fold) — can safely remove tracker entries, because no single user can see all users' membranes. A tracker with 1000 entries is ~10KB. Let it grow.
 
 ## Pre-Flight
@@ -47,7 +47,6 @@ These thresholds indicate when the forge needs purging. `/forge --dry` can flag 
 
 When triggered, classify each entry/file: **CURRENT** (keep), **STALE** (remove — web-search to verify), **MERGED** (consolidate with duplicate), **EVOLVED** (rewrite with updated info), **PROMOTED** (already in SKILL.md — redundant).
 
-**Do NOT touch the fold tracker or memory tracker.** Both are append-only. See HARD RULE above.
 
 ## Evidence Collection
 
@@ -148,8 +147,10 @@ Scan ALL files in `<forge>/memory/` for:
 For ALL skills in `<forge>/core/skills/*/SKILL.md` (not just arts):
 
 ### 3a: Bloat Analysis
-Use the scan script's section-level breakdown. Flag any skill where:
-- **Total lines > 150** — an art may need trimming (poke's accepted ceiling is ~210 after absorbing 7 dimensions). The three orchestration skills (`/forge`, `/smith`, `/wedge`) carry a 400-line ceiling instead, per `protocol.md` → Convention; above it, flag the inline multi-step payloads to move into sibling scaffold files
+Use the scan script's size table (every `core/skills/*/SKILL.md`) and section-level breakdown. Flag any skill where:
+- **Total lines > 150** — an art or task skill may need trimming (poke's accepted ceiling is ~210 after absorbing 7 dimensions). The three orchestration skills (`/forge`, `/smith`, `/wedge`) carry a 400-line ceiling instead, per `protocol.md` → Convention; at or above 390, flag the inline multi-step payloads to move into sibling scaffold files
+- **Always-loaded rules** — `core/rules/*.md` deploy into every membrane prompt. Report the scan's rules table and the assembled FORGE-RULES block; flag above ~20k chars or ~200 lines combined, and flag any rule a skill restates (keep it in one place) or whose stated reason no longer matches the harness docs
+- **Native-feature check** — for each task skill, web-check whether the harness now ships it natively (built-in commands, tools); classify as REDUNDANT-WITH-NATIVE only with a doc URL. Ask the user to run `/doctor prompt-audit` (a user command) as a cheap first pass for instructions written for older models, and fold its output in
 - **Any single section > 30% of file** — section is doing too much, consider splitting or referencing external docs
 - **Inline grep patterns** — these belong in `forge-scan.sh`, not in SKILL.md. The scan script runs them mechanically; duplicating in the skill is maintenance burden.
 - **Restated reference content** — logging rules, conventions, framework lists that already live in `forge-conventions.md` or `stack-guide.md`. Reference the doc, don't restate.
@@ -186,7 +187,7 @@ After all four dimension subagents complete, the master collects every FINDING b
 Report structure:
 1. **Header**: date, purified by /purge (the Warden), pass count of dimension subagents
 2. **Summary table**: rows per dimension, columns: Findings | Critical | Important | Minor
-3. **Findings** (ordered by severity): each with File, Dimension, Problem, Action (REMOVE/REWRITE/CONSOLIDATE/UPDATE), Before/After text, Rationale
+3. **Findings** (ordered by severity), in the FINDING block fields above
 4. **Cleansing Plan table**: columns: # | Action | File | Details
 
 Present the full report, then ask the user to confirm before applying changes.
@@ -195,7 +196,7 @@ Present the full report, then ask the user to confirm before applying changes.
 
 After user confirms:
 1. Apply all approved changes (remove, rewrite, consolidate, update)
-2. **Do NOT touch the tracker.** Tracker is append-only. See HARD RULE above.
+2. Leave both trackers untouched (HARD RULE above).
 3. Report totals: X removed, X rewritten, X consolidated, X updated
 4. **Commit & push** — `/purge` owns its own commit flow (forge has no linter/docs):
    - **Conflict check**: Run `git -C <forge> diff --name-only --diff-filter=U`. If ANY unresolved files exist, **STOP** and list them.

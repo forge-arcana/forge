@@ -48,7 +48,7 @@ Use the template from `restart-template.sh` (same directory as this skill) and c
 1. **Header**: Port layout documentation, usage instructions
 2. **Port variables**: All ports as variables at the top for easy editing
 3. **Process cleanup**: Kill processes on all project ports + orphaned node processes + stale Playwright browsers
-4. **WSL2 port health check**: Python socket test to detect WFP blackholed ports
+4. **WSL2 port health check** (only when `/proc/version` contains `microsoft`; omit the section otherwise): Python socket test to detect WFP-blackholed ports
 5. **DB readiness**: Docker compose up + pg_isready wait loop (skip if no Docker DB)
 6. **Codegen**: Run any required codegen steps (paraglide, prisma generate, etc.)
 7. **Start servers**: `pnpm dev` piped to `logs/dev.log`

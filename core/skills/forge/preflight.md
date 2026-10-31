@@ -31,7 +31,7 @@ After the sync command:
 
 Compare forge source (`<forge>/core/skills/`) against deployed membrane (`<membrane>/skills/`) using diff.
 
-For each skill directory in `<forge>/core/skills/` (`forge/` is included — it is a deployable skill whose directory also holds the shared reference docs `protocol.md`, `preflight.md`, `stack-guide.md`, `forge-conventions.md`; those `.md` files ride along with the skill and are compared with it):
+For each skill directory in `<forge>/core/skills/` (`forge/` is included — it is a deployable skill whose directory also holds every shared reference doc (`protocol.md`, `preflight.md`, `fold-phase.md`, `stack-guide.md`, `forge-conventions.md`, `versioning.md`, `pattern-skeleton.md`); all of them ride along with the skill and are compared with it):
 
 1. Check if deployed copy exists at `<membrane>/skills/<name>/`
 2. If both exist, compare using: `diff -rq --strip-trailing-cr <forge>/core/skills/<name> <membrane>/skills/<name>`

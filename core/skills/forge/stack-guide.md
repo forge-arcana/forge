@@ -2,7 +2,7 @@
 
 A reference architecture for new projects. Derived from production decisions across multiple projects, refined through full rewrites.
 
-**Core bias:** We favor technologies that AI coding assistants have deep familiarity with — maximizing AI-assisted development velocity. We will not sacrifice solution quality for this, but when two options are comparable, we pick the one most major models know best.
+**Core bias:** Between comparable options, pick the one with the larger ecosystem, the better documentation and the stabler API. Those are what make any developer, human or agent, fast. Solution quality comes first.
 
 **Infrastructure bias (agentic era):** For hosting, data, and deploy we no longer optimize for *ease of human console management* — that criterion has faded now that agents drive day-2 ops via MCP servers, scoped tokens, and agent-operable CLIs. We optimize instead, in weighted order, for: **portability (container-first, no lock-in)** · **scale-to-zero / idle cost** · **egress economics at 10×/100×** · then **agentic-operability** as a tie-filter (now table-stakes — even GCP ships a Cloud Run MCP server, so it disqualifies laggards rather than breaking ties) · **credential safety** · **DR / residency / compliance** (an explicit line item, not an implicit DB property). GCP is no longer the mandatory default: Cloud Run is now one of two co-equal container defaults (with Cloudflare Containers), re-justified on merit. There is no single hosting winner — the **Hosting Decision Framework** below picks per project by scale and needs. The guardrail is container-first: capturing the agentic wins tempts proprietary primitives (Durable Objects, Vectorize) that are *tighter* lock-in than a portable container, so "more portable" only holds if we stay container-first. (Hyperdrive is lighter — a pass-through accelerator for standard Postgres; exit = repoint the connection string.)
 
@@ -12,19 +12,19 @@ A reference architecture for new projects. Derived from production decisions acr
 
 | Layer | Choice | Rationale |
 |---|---|---|
-| **Language** | TypeScript | Type safety DB-to-UI. AI assistants generate far better TS than JS — catch errors at write time, not runtime. |
-| **Runtime** | Node.js | Stable, mature, universal tooling. Capacitor-compatible. The strongest backend runtime for AI-assisted work. |
-| **Backend** | Hono | ESM-native, 14KB, typed routes, Zod middleware built-in. Express 5 is active, but Hono uses Web Standard APIs (portable to CF Workers, Deno, Bun) — that edge portability is why we default to it. Well-supported by current models. |
-| **ORM** | Drizzle | No codegen step, no generate-before-typecheck gate (the CI trap Prisma's client generation creates). Note: the old "Prisma ships a 2-3MB Rust engine binary" argument is dead — Prisma 7 (GA 2025-11-19) replaced it with a TS/WASM query compiler (~1.6MB). Pick Drizzle for the SQL-shaped API and zero-codegen build, not for bundle size. SQL-like API, native pgvector support, faster cold starts. Schema-as-code in TypeScript. |
+| **Language** | TypeScript (7.x, native Go compiler) | Type safety DB-to-UI — catch errors at write time, not runtime. TypeScript 7.0 (2026-07-08; npm `latest` 7.0.2 on 2026-10-31) ships no programmatic API until 7.1: tools that embed the compiler (Vue, Svelte, Astro, MDX, some lint and codegen plugins) stay on 6.x for now. 7.0 defaults `strict: true`, `module: esnext` and `types: []` — a project that relied on auto-included `@types/*` (e.g. `@types/node`) must list them in `types`. Record the major at scaffold time. |
+| **Runtime** | Node.js | Stable, mature, universal tooling. Capacitor-compatible. |
+| **Backend** | Hono | ESM-native, 14KB, typed routes, a built-in `validator` (`hono/validator`) with Zod through `@hono/zod-validator`. Express 5 is active, but Hono uses Web Standard APIs (portable to CF Workers, Deno, Bun) — that edge portability is why we default to it. (npm `next` is hono 5.0.0-rc.1, latest 4.13.14 on 2026-10-31: re-check this row when 5.0 ships.) |
+| **ORM** | Drizzle | No codegen step, no generate-before-typecheck gate (the CI trap Prisma's client generation creates). Note: the old "Prisma ships a 2-3MB Rust engine binary" argument is dead — Prisma 7 (GA 2025-11-19) replaced it with a TS/WASM query compiler (~1.6MB). Pick Drizzle for the SQL-shaped API and zero-codegen build, not for bundle size. SQL-like API, native pgvector support, faster cold starts. Schema-as-code in TypeScript. Version state (2026-10-31): npm `latest` is 0.45.4; 1.0 is at `rc` (1.0.0-rc.5, 2026-10-21) with a reworked relational query API — pick one line at scaffold time and record it, and do not mix 0.45 docs with 1.0 code. Since 2026-03-03 PlanetScale employs the Drizzle core team; the project states it stays independent with its own roadmap. |
 | **Auth** | Better Auth | Framework-agnostic, Drizzle adapter, signed sessions, refresh rotation, CSRF, plugins for 2FA/passkeys/RBAC/bearer. Replaces hand-rolled auth and NextAuth alike. |
 | **Database** | PostgreSQL — Neon (default) | Neon for **all environments including production** — serverless, scale-to-zero, copy-on-write branch-per-PR (an agent runs migrations on a temp branch, then promotes — arguably safer than the human-console path), native pgvector (**require >= 0.8.2** — CVE-2026-3172, integer underflow → buffer overflow in parallel HNSW build, affects 0.6.0-0.8.1, lets an authenticated user read across relations or crash the server. Current: 0.8.7 as of 2026-10-11.). Cloud SQL and PlanetScale are situational escalations (see Database Strategy + DR/Residency). Drizzle abstracts the provider — only the connection string changes. |
 | **Real-time** | SSE (default); Ably (upgrade tier) | Server-Sent Events for fanout workloads (notifications, live list updates, modest concurrency): browser-native `EventSource`, auto-reconnect with `Last-Event-ID` resume, plain HTTP through every proxy and CDN, no SDK, no vendor. Ably when presence, durable history with replay, multi-region delivery or true bidirectional channels is a stated requirement, or when the deploy target limits long-lived connections (some serverless container runtimes, edge workers). Push notifications are a separate decision with separate infrastructure. |
-| **Frontend** | React 19 + Vite | Component model, hooks (use, useOptimistic, useFormStatus), massive ecosystem. The strongest frontend framework for AI-assisted work by far. Vite 8 (Rolldown — single Rust bundler, 10–30× faster builds) for sub-second HMR. |
+| **Frontend** | React 19 + Vite | Component model, hooks (use, useOptimistic, useFormStatus), massive ecosystem. Vite 8 (Rolldown — single Rust bundler, 10–30× faster builds) for sub-second HMR. |
 | **Routing** | TanStack Router | Type-safe params + search validation, file-based routing, loaders, pending UI. Better TypeScript story than React Router. |
 | **Server State** | TanStack Query | Caching, background refetch, optimistic updates, request deduplication, pagination. Essential for offline-first use on slow or unreliable connections. |
 | **Client State** | useState + React Context | TanStack Query handles server state. No Zustand/Redux needed — useState + context is sufficient for UI state. |
 | **Forms** | React Hook Form + Zod | Performant (uncontrolled), Zod resolvers shared with backend validation. One schema, two runtimes. |
-| **Styling** | Tailwind CSS v4 | Utility-first, consistent, fast to build. AI assistants generate Tailwind fluently — no class-naming debates. |
+| **Styling** | Tailwind CSS v4 | Utility-first, consistent, fast to build — no class-naming debates. |
 | **UI Components** | shadcn/ui | Copy-paste components (not a dependency), accessible, Tailwind-based. Buttons, modals, sheets, tables, forms — all pre-built. |
 | **i18n** | Paraglide | Compile-time, zero runtime cost, fully typed (`m.key()` not `t('key')`). Typos caught by TypeScript. Ideal for 2-5 languages. |
 | **Email** | On Cloudflare: Cloudflare Email Service. Elsewhere: Resend | **Product already running on Cloudflare** (Workers or Containers, Workers Paid already bought): send through Cloudflare Email Service — no third-party provider and no fallback provider; the capacity is already paid for, so build what is needed on it. It is a public beta: read Key Learnings → "Cloudflare Email Service" before enabling it on a domain. **Product hosted elsewhere:** Resend — simple API, React Email templates, good deliverability. Either way: transactional only (receipts, notifications, disputes), and every send goes through one project-local send function, so the provider is one adapter and not scattered calls. |
@@ -129,7 +129,7 @@ During dogfood, the DR/Residency line item reduces to guardrail 1; the full post
 | Most projects (default) | **Cloud Run *or* CF Containers** (co-equal); Fly / Railway are peers | One Node image, near-zero migration between them. Both are agent-operable (Cloud Run MCP GA; CF Containers GA Apr 2026) and scale to zero. Portable container = the deploy target stays swappable. |
 | Cost-dominant / always-on / egress-heavy / EU residency | **Hetzner** (via Kamal 2) | ~3-4× compute-per-dollar and near-$0 egress vs hyperscalers (Hetzner repriced 2026-06-15 — CCX ~2.1-2.7×, CPX ~2.4-3.1×, CX/CAX ~1.3-1.4× increases; the pre-2026 "~10×" figure is dead. Egress remains the durable lever, not raw compute. Re-derive before quoting.); EU residency; dedicated + GPU boxes. Kamal 2 (text-only CLI over SSH, auto-TLS) makes an IaaS box genuinely agent-operable. Cost: no scale-to-zero, you own the DB + patching + backups, and its API tokens are **coarse project-scoped bearers (no OIDC / no short-lived)** — the weakest credential model here, so rotate hard and isolate blast radius by per-env projects. |
 | GPU / self-hosted open-weight models / embeddings at scale / fine-tuning | **Runpod** | The GPU / self-hosted-model tier that hosts the Python ML sidecar (see Language Decision Framework's ML/AI row). Serverless GPU scales to zero, per-second billing, official MCP + scoped keys. **Not a general app host** — the TS+Hono+Postgres core stays put. A hosted inference API (Anthropic/OpenAI/Together/Fireworks) is the more-agentic, less-ops default for low/bursty volume; reach for Runpod when you own a fixed open-weight model at sustained volume. A leaked full-scope key is radioactive — the default spend limit is an $80/**hour** rate cap, not a budget cap, so sustained abuse still compounds to ~$1.9k/day; mint endpoint-scoped, least-privilege keys. |
-| Latency-critical **stateless** routes | Cloudflare Workers (edge) | A documented, **taxed** option — not a default. Edge is not a lateral move from a container; agentic-ops does *not* lower the tax (an agent hits these code-level breakages exactly as a human would): the `neon-http` driver has no interactive transactions and Better Auth signup needs them (better-auth#4747), so edge Postgres must be Hyperdrive+pg or neon-serverless-over-WebSocket, never neon-http; Pino dies on workerd (Node build unsupported — use `console.log`-JSON there; the lines land in Workers Logs, and errors in Workers Issues, see Key Learnings); Better Auth's scrypt formerly blew the Worker CPU budget (better-auth#8860 — fixed by PR #8685, a non-blocking scrypt from `@better-auth/utils`, shipped in v1.6.0 (2026-04-06); `node:crypto` scryptSync was a community workaround discussed in the thread, not the shipped fix; verify you're on a post-fix version). Keep Hono as portability insurance and peel *stateless* latency slices onto Workers later — do not go edge-first. |
+| Latency-critical **stateless** routes | Cloudflare Workers (edge) | A documented, **taxed** option — not a default. Edge is not a lateral move from a container; agentic-ops does *not* lower the tax (an agent hits these code-level breakages exactly as a human would): the `neon-http` driver has no interactive transactions and Better Auth signup needs them (better-auth#4747), so edge Postgres must be Hyperdrive+pg or neon-serverless-over-WebSocket, never neon-http; Pino dies on workerd (Node build unsupported — use `console.log`-JSON there; the lines land in Workers Logs, and errors in Workers Issues, see Key Learnings); Better Auth's scrypt blew the Worker CPU budget (better-auth#8860, closed 2026-04-01 by PR #8685). v1.6.0 (2026-04-06) shipped "non-blocking scrypt for password hashing to avoid blocking the event loop" — non-blocking is not cheaper: Workers bill CPU time, and no one in the issue confirmed the limit is gone after upgrading. Measure signup/login CPU on a deployed Worker before relying on it; if it still trips the limit, supply a custom `password.hash/verify` (native `node:crypto` scrypt under `nodejs_compat`, or a separate hashing Worker). Keep Hono as portability insurance and peel *stateless* latency slices onto Workers later — do not go edge-first. |
 | Region-survivable DR / HIPAA-BAA / GCP-committed | Cloud Run + Cloud SQL | GCP is a re-justified peer (now agent-operable), not the default. It wins when managed cross-region DR, compliance gating, or an existing GCP commitment genuinely tips the balance. |
 
 **The guardrail again:** going all-in on any one provider's proprietary primitives (CF Durable Objects/Vectorize; GCP-native everything) is *tighter* lock-in than a portable container. (Hyperdrive doesn't count — it's a pass-through for standard Postgres; exit is repointing the connection string.) Stay container-first; adopt proprietary features only when a signal demands it, the same discipline the Language Framework applies to languages.
@@ -156,14 +156,7 @@ Every new project must ship with structured server-side logging from day one. Lo
 
 In dev and staging, verbose logging is the foundation of evidence-based debugging. With few users, logs stay readable and directly traceable to reported issues.
 
-When writing code for dev/testing, every route handler and service method should log its outcomes. This means when a bug is reported, the AI debugging workflow is:
-
-1. Read the server log (`logs/dev.log` or Cloud Logging)
-2. Correlate with browser dev tools console output (errors, network responses)
-3. Trace what actually happened from the combined evidence
-4. Only then look at code — guided by what the logs revealed
-
-Without logs, AI debugging degrades into speculative code reading, which wastes time and often reaches wrong conclusions. Logs turn debugging from guesswork into forensics.
+Every route handler and service method logs its outcomes in dev and staging, so the "Logs First, Always" HARD RULE (`core/rules/development-discipline.md`) has evidence to read. Never log passwords, tokens or full card numbers.
 
 ### Production — Action Audit Trail
 
@@ -207,22 +200,6 @@ These events drown out the signal. If a polling cycle *does* detect something no
 - Pino outputs JSON to `logs/dev.log` (or stdout with `pino-pretty` for readability)
 - Every API route logs on the happy path *and* every rejection — a route with no logging is incomplete
 
-### Anti-pattern
-
-```typescript
-// BAD: Silent on success, only logs crashes
-catch (error) { logger.error(error); }
-```
-
-### Correct pattern
-
-```typescript
-// GOOD: Every outcome leaves a trace
-logger.info({ userId, orderId, amount }, 'order_placed');
-logger.warn({ userId, issues: parsed.error.issues }, 'order_validation_failed');
-logger.error({ err, userId, orderId }, 'order_placement_failed');
-```
-
 ---
 
 ## Key Learnings (Hard-Won)
@@ -265,9 +242,9 @@ Verified on workerd at runtime across multiple ports — not theory:
   ```
 - **What Issues captures:** uncaught exceptions, failed invocations, `5xx` responses and logged errors. A **caught** error is invisible unless the handler passes it to `console.error()`; a catch block that logs at info level or swallows the error hides it.
 - **Browser errors are not covered by anything on the platform** (and a Worker-side Sentry never covered them either). Pattern: a small `error` + `unhandledrejection` listener that beacons to a same-origin route on the project's own Worker, which logs at error level so the report lands in the same logs and Issues. That route is an unauthenticated write endpoint: rate-limit it, cap the body size, and log the payload as data, never as a format string.
-- **Retention is short:** Workers Logs keeps 3 days on Free (200,000 events a day) and 7 days on Paid (20 million a month included). At `head_sampling_rate = 1` a busy Worker can exhaust the Free allowance; lower the rate only with a stated reason. Anything that must outlive the window (audit trail) goes to the project's own store, not the platform logs.
+- **Retention is short:** until 2026-11-30, Workers Logs keeps 3 days on Free (200,000 events a day) and 7 days on Paid (20 million events a month included). From 2026-12-01 all Cloudflare logs and traces share one model: Free 0.5 GB ingested a day with 7-day retention; Paid 50 GB ingested and 10 GB-month stored per billing cycle, then 0.25 USD per GB ingested and 0.10 USD per GB-month stored, default 7-day retention (read 2026-10-31). At `head_sampling_rate = 1` a busy Worker can exhaust the Free allowance; lower the rate only with a stated reason. Anything that must outlive the window (audit trail) goes to the project's own store, not the platform logs.
 - **Source maps:** 15 MB gzipped limit; mapped stack traces appear in logs, Tail Workers and Issues, not inside the running Worker.
-- **Open caveats:** Issues is an open beta, free during the beta, and its grouping rule is undocumented. Alert destinations documented are a coding agent, webhook, chat service or incident tool; email is not confirmed. Workers Logs moves to "Cloudflare Observability pricing" on 2026-12-01; re-check cost then.
+- **Open caveats:** Issues is an open beta, free during the beta, and its grouping rule is undocumented. Alert destinations documented are a coding agent, webhook, chat service or incident tool; email is not confirmed. The 2026-12-01 pricing above is GB-based, not event-based; size a busy Worker in GB before launch.
 - **Sentry stays an optional fallback** (`@sentry/cloudflare`) for a project with a concrete signal: longer retention, cross-platform error correlation, or release-health features.
 - **Build identity:** there is no tracker `release` field; the per-instance startup log line carrying the version string (see `versioning.md`) is what ties an error to a build.
 
@@ -298,32 +275,26 @@ Verified on workerd at runtime across multiple ports — not theory:
 ### Drizzle
 - `drizzle-kit` can't resolve `.js` extensions in TS files — use extensionless imports in schema files
 - No native `upsert()` — use `onConflictDoUpdate` or manual find-then-update-or-insert
-- `db.transaction()` gives `PgTransaction` type, not `Database` — use `type DbOrTx = any` for tx params
-- `count()` import gets shadowed by function params named `count` — rename import to `dbCount`
+- `db.transaction()` gives `PgTransaction`, which extends `PgDatabase`: type shared db-or-tx params as `PgDatabase<PgQueryResultHKT, typeof schema>` (both `db` and `tx` satisfy it), never `any`.
 - `innerJoin` results use capitalized table name as key (`{ Order: order, Item: item }`)
 - `pgEnum` columns reject plain strings in `eq()` — export `enumEq(col, val)` and `enumInArray(col, vals)` helpers that centralize the single `as never` cast
 - JSON/JSONB columns return `unknown` — casting `as T` is the standard workaround. A `typedJson<T>()` helper can centralize it, but Drizzle has no native solution. Don't flag as critical debt.
-- Self-referencing FK (e.g., `parentId → table.id`) requires `(): any` return type on the `.references()` callback — TypeScript can't resolve the table type during its own definition
+- Self-referencing FK (e.g., `parentId → table.id`): annotate the callback `.references((): AnyPgColumn => table.id)` (import `type AnyPgColumn` from `drizzle-orm/pg-core`), or use the standalone `foreignKey()` operator — TypeScript can't resolve the table type during its own definition. Not `any`.
 
 ### Hono
 - `secureHeaders()` without args — CSP not included by default (unlike Helmet)
-- Request context: `c.get('userId')`, not `req.userId`
-- Body: `await c.req.json()`, not `req.body`
-- Response: `return c.json(data, statusCode)`
 
 ### Better Auth
 - Claims `/api/auth/*` — plan routes around this
 - Bearer plugin for Capacitor clients (token in header, not cookie). Cookie auth also works if using `androidScheme: "https"` + same-origin serving.
 - Social auth in Capacitor: see **Capacitor → Social Auth** section below
 - Phone-first users need placeholder email
-- `freshAge` session cache: direct DB writes (e.g., role switch) won't be reflected in `auth.api.getSession()` until cache expires. Read mutable fields directly from DB in session endpoints.
+- `session.cookieCache` (not `freshAge`): with the cookie cache on, `auth.api.getSession()` reads a signed cookie until its `maxAge` expires, so direct DB writes (a role switch, a revoked session) are not seen until then. Read mutable fields from the DB in session endpoints, or pass `disableCookieCache: true` where freshness matters. `freshAge` is unrelated: it only decides whether a session's `createdAt` is recent enough for sensitive endpoints.
 - Hono middleware `c.header()` before `await next()` corrupts Better Auth's raw Response cookies. Only set headers on the rejection response (e.g., 429), never on pass-through.
 - Any HttpOnly cookie session (Better Auth or otherwise): XHR requests (file uploads) must set `xhr.withCredentials = true`, and `fetch` must pass `credentials: "include"`. Without it the cookie is not sent and the request gets 401.
 
 ### Paraglide
-- Compile-time = zero runtime bundle cost
-- `m.welcome_title()` not `t('welcome_title')` — typos caught by TypeScript
-- Vite plugin handles message extraction
+- Use `paraglideVitePlugin` from `@inlang/paraglide-js` (v2): it compiles the message files into typed, tree-shakable ESM functions at build time. Nothing extracts strings from source; messages are authored in the message files.
 
 ### GCS
 - Use `getSignedUrl({ action: 'write' })` (XML API) — `createResumableUpload()` (JSON API) ignores bucket CORS
@@ -370,7 +341,7 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 
 **Vite `envDir` in monorepos:** Vite reads `.env` from the package root by default, not the monorepo root. Set `envDir: path.resolve(__dirname, "../..")` in every SPA's vite.config.ts so shared `VITE_*` vars from the root `.env.local` reach all SPAs in local dev. Docker builds are unaffected (use `--build-arg`).
 
-**Android edge-to-edge (Capacitor 8 / Android 16+):** Edge-to-edge is mandatory — Android 16 (API 36) disables `windowOptOutEdgeToEdgeEnforcement`. The Google Play targetSdk 36 floor has been in force since **2026-08-31** (binding for new apps *and all updates*; the extension requested via the Policy Status page in Play Console expires 2026-11-01). **Android 17 (API 37) shipped 2026-06-16**; no Play targetSdk 37 deadline is published as of 2026-10-02 (the annual cadence points to roughly 2027-08-31 — unverified); its forced migration is fixed-orientation / non-resizable flags being ignored on tablets and foldables — a separate concern from edge-to-edge. **Capacitor 8 removed the `adjustMarginsForEdgeToEdge` config** in favor of the new **System Bars** core plugin (bundled with `@capacitor/core`), which is registered unconditionally with `insetsHandling: 'css'` by default; use the `SystemBars` API for fine control. This change is absent from the upgrade guide's breaking list: on WebView below 140, or without `viewport-fit=cover`, the plugin pads the decor view natively and zeroes the insets passed down, so `env(safe-area-inset-*)` reads 0 and the bar bands show the window background. An app with its own insets handling must set `plugins.SystemBars.insetsHandling` explicitly (`native`, `css` or `disable`; the 8.5.3 CLI declarations mark `native` as recommended, and the docs page lists only `css` and `disable`) and re-test on an old and a current WebView; Capacitor 9 will make `native` the default (from one reading of upstream source, not found in the 8.5.3 tag or on `main` on 2026-10-11; device verification pending). (Capacitor 7 only: the legacy fix was `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts` — do not carry it into Cap 8; `StatusBar.setOverlaysWebView(false)` never fixed it, and bare `env(safe-area-inset-top)` reports wrong values on Android WebView below 140; from 140 with `viewport-fit=cover` it is correct.) SDK and Node minimums: see "Capacitor 8 and Xcode 27 Upgrade" below.
+**Android edge-to-edge (Capacitor 8 / Android 16+):** Edge-to-edge is mandatory — Android 16 (API 36) disables `windowOptOutEdgeToEdgeEnforcement`. The Google Play targetSdk 36 floor has been in force since **2026-08-31** (binding for new apps *and all updates*; the one extension Google offered ended 2026-11-01, so no app can ship below API 36). **Android 17 (API 37) shipped 2026-06-16**; no Play targetSdk 37 deadline is published as of 2026-10-02 (the annual cadence points to roughly 2027-08-31 — unverified); its forced migration is fixed-orientation / non-resizable flags being ignored on tablets and foldables — a separate concern from edge-to-edge. **Capacitor 8 removed the `adjustMarginsForEdgeToEdge` config** in favor of the new **System Bars** core plugin (bundled with `@capacitor/core`), which is registered unconditionally with `insetsHandling: 'css'` by default; use the `SystemBars` API for fine control. This change is absent from the upgrade guide's breaking list: on WebView below 140, or without `viewport-fit=cover`, the plugin pads the decor view natively and zeroes the insets passed down, so `env(safe-area-inset-*)` reads 0 and the bar bands show the window background. An app with its own insets handling must set `plugins.SystemBars.insetsHandling` explicitly (`native`, `css` or `disable`; the 8.5.3 CLI declarations mark `native` as recommended, and the docs page lists only `css` and `disable`) and re-test on an old and a current WebView; Capacitor 9 may make `native` the default: unconfirmed at 2026-10-11 (not in the 8.5.3 tag or on `main`). As of 2026-10-31 npm has `@capacitor/core` 8.6.0 as `latest` and 9.0.0-beta.0 as `next`; Ionic forecasts the 9.0 release for late November 2026. Check the System Bars default in the 9.0.0 beta tag before relying on either value. (Capacitor 7 only: the legacy fix was `android: { adjustMarginsForEdgeToEdge: "force" }` in `capacitor.config.ts` — do not carry it into Cap 8; `StatusBar.setOverlaysWebView(false)` never fixed it, and bare `env(safe-area-inset-top)` reports wrong values on Android WebView below 140; from 140 with `viewport-fit=cover` it is correct.) SDK and Node minimums: see "Capacitor 8 and Xcode 27 Upgrade" below.
 
 **Android SDK in WSL:** Gradle needs native Linux binaries — Windows `.exe` tools don't execute under WSL. Install cmdline-tools + build-tools natively (e.g., `/root/android-sdk`). Emulator stays on Windows (needs GPU passthrough) — manage via `powershell.exe` or a Node.js helper script for reliable argument handling.
 
@@ -405,22 +376,18 @@ Two scripts in `scripts/` handle the build-to-release pipeline:
 - **Before the upgrade, list every native workaround** with its original bug and how the fix was proven, and classify each as still-needed or superseded against upstream source at the target tag. Most hand-rolled WebView workarounds (scrollbars, overscroll, long-press, back handling) had no upstream replacement in 8.
 
 ### pnpm
-- v10+ blocks dependency build scripts by default. pnpm 11+ (11.0 released 2026-04-28; pnpm 12 is current since 2026-08-26 and keeps the v11 settings and lockfile): allow them via the `allowBuilds` map in `pnpm-workspace.yaml` — pnpm 11 stopped reading the `pnpm` field in `package.json` and removed `onlyBuiltDependencies`; pnpm 12 errors on unknown `pnpm-workspace.yaml` keys. pnpm 10 holdout path: `pnpm.onlyBuiltDependencies` in root `package.json`. pnpm 11+ requires Node 22+.
+- v10+ blocks dependency build scripts by default. pnpm 11+ (11.0 released 2026-04-28; pnpm 12 is current since 2026-08-26 and keeps the v11 settings and lockfile): allow them via the `allowBuilds` map in `pnpm-workspace.yaml` — pnpm 11 stopped reading the `pnpm` field in `package.json` and removed `onlyBuiltDependencies`; pnpm 12 reports unknown `pnpm-workspace.yaml` keys (suggesting the nearest valid name) and fails with `ERR_PNPM_UNRECOGNIZED_WORKSPACE_SETTINGS` only when the project pins a pnpm version the running pnpm satisfies — otherwise it warns. pnpm 10 holdout path: `pnpm.onlyBuiltDependencies` in root `package.json`. pnpm 11+ requires Node 22+.
 - `dotenv` in monorepo: `import 'dotenv/config'` looks in CWD, not package root — use explicit path
-- `pnpm --filter <pkg> <arg>` treats `<arg>` as a package.json script name. To run a binary (tsx, tsc, vitest) scoped to a workspace package use `pnpm --filter <pkg> exec <binary> <args>`. Without `exec`, older pnpm fails with `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`; a fix merged to pnpm `main` on 2026-09-24 adds an exec fallback for the filtered and recursive shorthand when no selected package has that script (pnpm PR #15430; not in the 11.28.5, 12.9.0, 12.10.0 or 12.11.0 release notes, carrying release unidentified as of 2026-10-11), but a same-named script still wins, so `exec` stays the unambiguous form. Bites CI workflows written as raw shell rather than package scripts.
+- `pnpm --filter <pkg> <arg>` treats `<arg>` as a package.json script name. To run a binary (tsx, tsc, vitest) scoped to a workspace package use `pnpm --filter <pkg> exec <binary> <args>`. Without `exec`, older pnpm fails with `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`; a fix merged to pnpm `main` on 2026-09-24 adds an exec fallback for the filtered and recursive shorthand when no selected package has that script (pnpm PR #15430, commit b7918f1; first carried by 12.7.0 and 11.28.0 by tag ancestry, though no release note mentions it — checked 2026-10-31), but a same-named script still wins, so `exec` stays the unambiguous form. Bites CI workflows written as raw shell rather than package scripts.
 
 ### TypeScript
-- `as const` gives literal types — when mutating, explicitly type as `number`
-- `Record<string, unknown>` return values need explicit annotations or arithmetic fails downstream
 - For monorepo dev workflow: `moduleResolution: "bundler"` — workspace packages resolve from source without `tsc --build`
 - `array.filter(Boolean)` does NOT narrow away `null`/`undefined`. Use `array.filter((x): x is T => Boolean(x))` for proper type narrowing.
-- Never `catch (e: any)` — use `catch (e: unknown)` + a `parseError(e)` helper that handles Error, string, and unknown. Catches `(e as Error).message` crashes on non-Error throws.
 - Define runtime arrays `as const` FIRST, then derive types: `export const ROLES = ['a', 'b'] as const; export type Role = (typeof ROLES)[number];`. Standalone `type Role = 'a' | 'b'` can't be used in `.includes()`, `z.enum()`, or `pgEnum`.
 - `z.coerce.number()` has input type `unknown` — `useForm<ExplicitType>()` with zodResolver causes type conflicts. Use untyped `useForm()` and cast in onSubmit.
 - Shared workspace packages (pnpm or npm) use relative imports, never `@/` aliases: when app A's tsc processes the shared package's files via path mapping, `@/` resolves against app A's tsconfig, not the package's.
 
 ### React
-- Never place a conditional `return` between hooks — React counts hooks per render. Changing the count throws "Rendered fewer hooks than expected". Move early returns before all hooks or remove them.
 - Radix UI `DialogContent` uses `{...props}` which silently overrides internal `style` (positioning). Destructure and merge: `style={{ ...basePositioning, ...style }}`.
 - React video `srcObject` timing: conditionally rendered `<video>` elements need `useEffect` to assign `srcObject` after re-render — can't set it in the same function that triggers the render.
 - Multi-SPA apps (a separate Vite build per role or portal, any client router): cross-role redirects (login, role switch, route guards) must use `window.location.href`. A framework router's `navigate()` only works inside one SPA boundary and cannot cross to a different build.
@@ -464,7 +431,7 @@ The default stack above is optimized for **server-rendered APIs + client-side Re
 
 ### AI-Assisted Development
 
-Modern AI coding assistants write production-quality code in TypeScript, Go, Rust, and Python. AI-assisted velocity is no longer a TypeScript-only advantage. The differentiator is ecosystem depth — most current models' knowledge of TypeScript libraries (React, Drizzle, Hono, Better Auth) is deeper than their knowledge of Go/Rust web frameworks, but this gap narrows over time.
+Current coding agents write production code in TypeScript, Go, Rust and Python. Choose by ecosystem fit (signals table above), not by which language a model knows best.
 
 ### The Rule
 

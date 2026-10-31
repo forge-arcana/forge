@@ -148,3 +148,28 @@ The tell is that the invented laws were *good*. They deserved to exist, which is
 **Apply when**: A purge plans relocations, or archives a rules-file section into a scanned directory. Budget a gate pass before the commit and expect it to fail the first time.
 
 **Forge-worthy**: no — forge-internal
+
+## Standards and Law Citations Go Stale Within a Year — Name the Instrument, Check Its Status at Run Time (2026-10-31)
+**Learning**: Evaluative arts that hard-pin standards and law (OWASP lists, WCAG versions, privacy and consumer-law provisions) carry a built-in expiry. Versions are superseded, guidance is re-numbered, and statutes are amended or commenced in stages. A pinned list reads as current long after it stopped being so, and the art reports stale requirements as findings.
+**Rule**: Name the current instrument by its body and family (for example, "the current OWASP Top 10", "the latest WCAG release", "the applicable privacy statute"), not a frozen list. Tell the agent to web-check the status, version and effective dates at run time, and to cite the date it checked. Run a currency pass on every such art at least yearly.
+**Apply when**: Writing or revising any art, dimension or checklist that cites a security, accessibility, privacy or consumer-law standard, or during the yearly currency pass.
+**Forge-worthy**: yes — universal: any rule that cites an external standard needs a checked-on date and a refresh cadence, or it silently becomes a source of false findings.
+
+## Guardrails Written for Older Models Over-Trigger on Current Ones (2026-10-31)
+**Learning**: Prompt guardrails tuned for earlier models now cause the failures they were meant to prevent. Shouted emphasis (CRITICAL, MUST, NEVER in capitals), "always parallelise" and "verify again" scaffolding make current models over-trigger: they spawn subagents for work one agent does in a single pass, and they re-verify results already proven in the same session. The cost is tokens and round-trips, not accuracy.
+**Rule**: Keep the rule, drop the emphasis and the rationale that no longer applies. State the condition under which the behaviour is wanted (for example, "fan out only when the work splits into independent parts"), and state the stop condition ("verify once, before declaring done"). Re-test guardrails when the model changes, and remove any whose original failure no longer reproduces.
+**Apply when**: Writing or reviewing skill, art or brief instructions that use capitalised emphasis, mandatory parallelism or repeated verification steps, or after a model change.
+**Forge-worthy**: yes — universal: emphasis that was a correction for an older model becomes an over-correction for a newer one, and it costs more than it prevents.
+
+## Parallel Fenced Edit Agents Need a Disjoint File Set and a Final Cross-Repo Sweep (2026-10-31)
+**Learning**: Parallel edit agents work when each owns a disjoint set of files and the fence is explicit. They fail at cross-file renames. A token name, dimension number, persona number or count that appears in files owned by several agents is changed in some and missed in others, and no single agent sees the whole set. Each agent's own check passes because its files are internally consistent.
+**Rule**: Assign file ownership before fan-out so no two agents write the same file. Where a change renames something that is referenced elsewhere, run one grep sweep of the whole forge for the old token, number or count after every agent has finished, and treat any hit as a defect to fix before the commit.
+**Apply when**: Fanning out edit agents over a shared repo, or any change that renames a token, a dimension or persona number, or a count.
+**Forge-worthy**: yes — universal: per-agent verification cannot catch cross-file inconsistency; only a whole-repo sweep after the last writer can.
+
+## A Scan Script That Replaces a Hardcoded List With Discovery Gets New Inputs, and Must Be Run to Completion (2026-10-31)
+**Learning**: Moving a scan script from a hardcoded list to directory discovery admits inputs the list never contained, including directories with zero matches. Under `set -euo pipefail`, a `grep -c` with zero matches exits 1, pipefail propagates it, and errexit aborts the script without an error message. The script stops partway, so the later checks print nothing and read as clean. This is the same latent-abort class recorded on 2026-06-20, now reached by a new code path. `bash -n` passes because the fault is at runtime.
+**Rule**: After editing any scan script, run it to completion and confirm it exits 0 and prints its final marker. Do not stop at a syntax check. Guard zero-match counts with `|| true` or a default expansion.
+**Purity check on purge diffs**: the purity check reports whole files, so a purge that touches a large file sees old, unrelated content flagged as new. To judge a purge's own changes, scan only the lines it adds, taken from the diff, and treat whole-file flags as a separate backlog.
+**Apply when**: Editing any `set -e` or `pipefail` scan script, changing its input list from fixed to discovered, or interpreting purity-check output for a purge.
+**Forge-worthy**: yes — universal: a syntax check does not prove a script runs, and a whole-file gate is not a measure of one change's cleanliness.
