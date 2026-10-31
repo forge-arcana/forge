@@ -2,6 +2,9 @@
 # handoff.sh — opt-in auto-handoff helper (state keyed by tmux pane, bound to
 # the Claude Code process that ran `on`).
 # Subcommands: on <name...> | off | status | write (note on stdin) | cancel
+# Exit codes: 0 ok, 1 error / empty note, 2 note over the length cap, 3 not
+# opted in (write), 4 note lacks a '## Done last session' line (write; checked
+# after the opt-in, so a session that is not opted in gets 3 first), 64 usage.
 # State contract: see core/hooks/handoff-stop.sh header.
 set -euo pipefail
 umask 077
@@ -156,6 +159,11 @@ case "$cmd" in
       [ "$rc" -eq 2 ] && echo "handoff: stale opt-in removed" >&2
       echo "handoff: not opted in — run /handoff on <name> first"
       exit 3
+    fi
+    if ! printf '%s\n' "$note" | tr -d '\r' | grep -qx '## Done last session[[:space:]]*'; then
+      echo "handoff: nothing saved — add a line that is exactly '## Done last session' (right after the title is conventional) listing what was done/shipped + key decisions, then re-run write." >&2
+      log write "$OPT_NAME" "rejected-no-done-section"
+      exit 4
     fi
     dest="$ROOT/pane-$N.md"
     tmp="$(mktemp "$ROOT/.pane-$N.XXXXXX")"

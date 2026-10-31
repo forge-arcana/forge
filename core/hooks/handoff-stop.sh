@@ -29,14 +29,19 @@
 #     in the box, i.e. Claude Code's grey suggested prompt, counts as empty:
 #     only SGR 2 is ignored, never a colour, so typed text is never dropped);
 #   - before `/clear` the transcript bytes appended since the Stop hook started
-#     must be quiet. Allowlist, everything else is activity: only the types
-#     last-prompt, custom-title, agent-name, mode, permission-mode, atis-latch,
-#     cost-state, bridge-session, artifact-comment-monitor and system (any
-#     subtype) are ignored, plus `assistant` lines
-#     whose timestamp is <= the Stop hook's start + 2 s (the turn's own final
-#     message). user, attachment, queue-operation, progress, api-request*,
-#     file-history-snapshot, unknown types, a late assistant line, an
-#     unparseable complete line, or a shrunk/missing file abort. The appended
+#     must be quiet. Ignored: an explicit list of known metadata types
+#     (last-prompt, custom-title, agent-name, ai-title, mode, permission-mode,
+#     atis-latch, cost-state, bridge-session, tools-used, artifact-comment-monitor,
+#     artifact-autoreact-ledger, frame-link and system, any subtype; load-bearing
+#     for TIMESTAMPED metadata such as system and mode), plus a fail-closed
+#     waiver for an untimestamped line of a lower-case metadata-looking type
+#     that is not a known activity type (details at tx_quiet), plus `assistant`
+#     lines whose timestamp is <= the Stop hook's start + 2 s (the turn's own
+#     final message). Everything else is activity: user, attachment,
+#     queue-operation, progress, file-history-* and api-request* (all even when
+#     untimestamped), typeless, non-string or oddly-cased types, timestamped
+#     unknown types, a late assistant line, an unparseable complete
+#     line, or a shrunk/missing file abort. The appended
 #     range is read ONCE into a buffer and a trailing partial line is dropped
 #     from that same buffer. The screen check is secondary;
 #   - typing is verified, never blind: `send-keys -l` (literal) types only a
@@ -353,19 +358,44 @@ pane_state() {
 
 # tx_quiet PATH BASE CUTOFF GRACED_JSON MISSING_OK
 # 0 iff nothing but Claude Code's own writes was appended to PATH after byte
-# BASE. Ignored: types last-prompt, custom-title, agent-name, mode,
-# permission-mode, atis-latch, cost-state, bridge-session,
-# artifact-comment-monitor (session metadata, no timestamp, written at the top
-# of a new transcript when Remote Control / artifacts are active), system (any
-# subtype); and lines
-# whose type is in GRACED_JSON (a JSON array) with a timestamp (.timestamp, or
-# .snapshot.timestamp) <= CUTOFF (epoch seconds, fractional ok). A user line
-# carrying promptId / promptSource / turnOrigin is a real prompt and is
-# activity whatever its timestamp (the clear's own user lines carry none).
-# Everything else, including an unparseable complete line, is activity. The range is read
+# BASE. On activity it sets TX_WHY (first offending line: "<type> line <N>",
+# plus " no-ts" when it has no timestamp) for the caller's log. Ignored:
+#   - an explicit list of known metadata types: last-prompt, custom-title,
+#     agent-name, ai-title, mode, permission-mode, atis-latch, cost-state,
+#     bridge-session, tools-used, artifact-comment-monitor,
+#     artifact-autoreact-ledger, frame-link (session metadata written at the
+#     top of a new transcript when Remote Control / artifacts are active),
+#     system (any subtype). The list is load-bearing: it covers these types
+#     when they are TIMESTAMPED (system, mode, ...), where the waiver below does
+#     not apply;
+#   - a fail-closed waiver for an UNTIMESTAMPED line, only when ALL hold:
+#     (a) .type is a string matching ^[a-z][a-z-]*$ (so "User", "user ", ""
+#     and "USER" are not waived); (b) .type is not an activity type (user,
+#     assistant, attachment, queue-operation, progress, summary, system,
+#     tool_result) and does not start with file-history- or api-request;
+#     (c) the line has no "timestamp" key at all (has(), so "timestamp":null,
+#     false or "" counts as timestamped); (d) it has no .snapshot.timestamp
+#     key. A line failing any of these takes the normal path below, where an
+#     unknown type, or a graced type without a usable timestamp, is activity;
+#   - lines whose type is in GRACED_JSON (a JSON array) with a timestamp
+#     (.timestamp, or .snapshot.timestamp) <= CUTOFF (epoch seconds, fractional
+#     ok).
+# A user line carrying promptId / promptSource / turnOrigin is a real prompt and
+# is activity whatever its timestamp (the clear's own user lines carry none).
+# attachment, queue-operation, progress, file-history-* and api-request* are
+# activity even when untimestamped. user and assistant lines are judged only by
+# the graced rule: an untimestamped user line is activity. Everything else,
+# including an unparseable complete line, is activity. The range is read
 # ONCE; a trailing partial line in that buffer is dropped. A shrunk file is
 # activity; a missing file is activity unless MISSING_OK=1 and BASE=0.
+# Evidence for the waiver: 3 days of real transcripts showed every untimestamped
+# type is metadata (agent-name, ai-title, api-request-blob,
+# artifact-autoreact-ledger, artifact-comment-monitor, atis-latch,
+# bridge-session, cost-state, custom-title, last-prompt, mode, permission-mode,
+# tools-used) and all 2000 queue-operation lines carry a timestamp.
+# api-request-blob is untimestamped but deliberately kept as activity.
 tx_quiet() {
+  TX_WHY=""
   local path="$1" base="$2" cut="$3" graced="$4" missing_ok="${5:-0}" size buf bad rc
   if [ ! -e "$path" ]; then
     [ "$missing_ok" = 1 ] && [ "$base" -eq 0 ] && return 0
@@ -387,18 +417,35 @@ tx_quiet() {
         | if . == null then null
           else ((.s + "Z") | fromdateiso8601) + (("0." + (.f // "0")) | tonumber) end
       else null end;
+    def ts: .timestamp // (.snapshot | objects | .timestamp) // null;
+    def nots: (has("timestamp") | not) and ([.snapshot | objects | has("timestamp")] | any | not);
+    def waived:
+      (.type | type) == "string" and (.type | test("^[a-z][a-z-]*$"))
+      and (.type | IN("user", "assistant", "attachment", "queue-operation", "progress",
+                      "summary", "system", "tool_result") | not)
+      and (.type | startswith("file-history-") | not) and (.type | startswith("api-request") | not)
+      and nots;
     ($cut | tonumber) as $c
+    | input_line_number as $n
     | (try fromjson catch null) as $o
-    | if ($o | type) != "object" then "x"
-      elif ($o.type | IN("last-prompt", "custom-title", "agent-name", "mode",
+    | (if ($o | type) == "object" then
+         "x \($o.type | tostring | .[0:40]) line \($n)" + (if ($o | nots) then " no-ts" else "" end)
+       else "x unparseable line \($n)" end) as $x
+    | if ($o | type) != "object" then $x
+      elif ($o.type | IN("last-prompt", "custom-title", "agent-name", "ai-title", "mode",
                          "permission-mode", "atis-latch", "cost-state", "system",
-                         "bridge-session", "artifact-comment-monitor")) then empty
-      elif $o.type == "user" and ($o | has("promptId") or has("promptSource") or has("turnOrigin")) then "x"
+                         "bridge-session", "tools-used", "artifact-comment-monitor",
+                         "artifact-autoreact-ledger", "frame-link")) then empty
+      elif $o.type == "user" and ($o | has("promptId") or has("promptSource") or has("turnOrigin")) then $x
+      elif ($o | waived) then empty
       elif ($o.type | IN($g[])) then
-        (($o.timestamp // ($o.snapshot | objects | .timestamp) // null) | tsnum) as $t
-        | if $t != null and $t <= $c then empty else "x" end
-      else "x" end
+        ($o | ts | tsnum) as $t
+        | if $t != null and $t <= $c then empty else $x end
+      else $x end
   ' "$buf" 2>/dev/null)"; rc=$?
+  bad="${bad%%$'\n'*}"
+  bad="${bad//[^[:print:]]/}"
+  [ -z "$bad" ] || TX_WHY="${bad#x }"
   rm -f "$buf"
   [ "$rc" -eq 0 ] && [ -z "$bad" ]
 }
@@ -496,7 +543,7 @@ run_job() {
   precheck
   pane_state || abort "aborted: pane not idle at final re-check: ${PANE_WHY:-unknown}"
   tx_quiet "$TPATH" "$TBASE" "$(awk -v a="$TSTOP" -v g="$GRACE" 'BEGIN { printf "%.3f", a + g }')" '["assistant"]' 0 \
-    || abort "aborted: new activity in transcript"
+    || abort "aborted: new activity in transcript${TX_WHY:+: $TX_WHY}"
   rm -f "$injected"
   clear_epoch="$(date +%s)"
   type_verified "/clear $NAME"; rc=$?
@@ -534,7 +581,7 @@ run_job() {
   fi
   tx_quiet "$it" "$is" "$(awk -v a="$ia" -v g="$GRACE" 'BEGIN { printf "%.3f", a + g }')" \
     '["user","attachment","file-history-snapshot"]' 1 \
-    || { log "job: resume skipped: user already active"; exit 0; }
+    || { log "job: resume skipped: transcript activity${TX_WHY:+: $TX_WHY}"; exit 0; }
   # Restore the session name: Claude Code titles a cleared session from its first
   # prompt ("Auto-handoff context resume"); /clear's argument does not set it.
   # The guard above ran first, so /rename's own transcript lines are never

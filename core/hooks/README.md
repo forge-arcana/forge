@@ -42,6 +42,12 @@ Lets a long-running tmux session clear its own context at a clean boundary
 without losing the thread. A session opts in with `/handoff on <name>`; when
 a unit of work is complete the model runs `/handoff`, which writes a note to
 `~/.claude/handoffs/pane-<N>.md` (N = the tmux pane id) plus a ready marker.
+The note must contain a line that is exactly `## Done last session` (what was
+done or shipped, plus key decisions, at most about 5 bullets; trailing
+whitespace on the heading is accepted). It may appear anywhere in the note,
+right after the title by convention; position is not enforced. Decisions are
+written as what was decided, never as approvals for future actions. `handoff.sh write` rejects a note without it (exit 4 once opted in, no note, no ready
+marker). Old notes and archives without it still inject.
 The note is written via the skill's `handoff.sh` helper through Bash, not the
 Write tool, because `tier-guard.sh` denies Write on top-tier sessions.
 
@@ -55,7 +61,11 @@ Write tool, because `tier-guard.sh` denies Write on top-tier sessions.
   as context, archives it to
   `~/.claude/handoffs/archive/<name>-pane-<N>-<YYYYmmdd-HHMMSS>.md` (spaces
   in the name become `_`; the newest 20 per pane are kept), then writes an
-  `injected` marker.
+  `injected` marker. Its preamble also tells the model to open its first reply
+  with a short status block ("Last session" from `## Done last session`,
+  "Next" from `## Next task` and `## Open items`), whether the first turn is the
+  hook's resume prompt or one the user typed; a note without the section gets a
+  one-line "no such section" instead. The hook never requires the section.
 
 Hook payloads carry no session name, so state is keyed by the tmux pane
 (`$TMUX_PANE`), bound to the pane's pid and to the Claude Code process. The
@@ -85,10 +95,23 @@ which fails safe (log, drop the token, type nothing):
   partial line from that same buffer, and ignores only:
   - types `last-prompt`, `custom-title`, `agent-name`, `mode`,
     `permission-mode`, `atis-latch`, `cost-state`, `bridge-session`,
-    `artifact-comment-monitor`, and `system` (any subtype). The same list
-    applies to the post-clear resume guard, so session metadata written at the
-    top of a new transcript (Remote Control, artifact watches) does not read
-    as user activity;
+    `tools-used`, `ai-title`, `artifact-autoreact-ledger`, `frame-link`,
+    `artifact-comment-monitor`, and `system` (any subtype);
+  - a waiver for any complete line with no timestamp (neither `.timestamp`
+    nor `.snapshot.timestamp`) whose type is a lower-case string (`^[a-z][a-z-]*$`) that is not an
+    activity type (`user`, `assistant`, `attachment`, `queue-operation`,
+    `progress`, `summary`, `system`, `tool_result`, `file-history-*`,
+    `api-request*`), and which has no `timestamp` key at all (`"timestamp":null`
+    counts as timestamped): unknown untimestamped types are
+    session metadata. Typeless, non-string-typed and oddly-cased types are
+    never waived. `attachment`, `queue-operation`, `progress`,
+    `file-history-*` and `api-request*` are activity even when untimestamped.
+    The explicit list stays load-bearing for TIMESTAMPED metadata such as
+    `system` and `mode`. The same rules
+    apply to the post-clear resume guard, so session metadata written at the
+    top of a new transcript (Remote Control, artifact watches, tools-used)
+    does not read as user activity. `user` and `assistant` lines are never
+    waived through this way (an untimestamped `user` line is activity).
   - `assistant` lines timestamped no later than the Stop start + 2 s (the
     turn's own final message).
 
@@ -125,7 +148,8 @@ which fails safe (log, drop the token, type nothing):
   flushes them). A `user` line carrying `promptId`, `promptSource` or
   `turnOrigin` is a real prompt and is activity whatever its timestamp; any
   `assistant` line is activity. Activity logs
-  `resume skipped: user already active` and nothing is typed. The guard runs
+  `resume skipped: transcript activity: <type> line <N>` (with ` no-ts` when
+  the line has no timestamp; the pre-clear abort logs the same detail) and nothing is typed. The guard runs
   before `/rename`, so its own transcript lines never count as activity;
   after `/rename` the pane must be idle again (up to ~5 checks) before the
   resume prompt, else `not idle after /rename` and nothing more is typed.
@@ -172,6 +196,8 @@ it relies on Claude Code keeping that field on real prompts.
 Verified against Claude Code 2.1.302. The screen check (prompt box rendering, `esc to interrupt` footer) and the transcript line types depend on the CLI version; after an upgrade, a rendering change makes the hook abort (safe, but silent apart from handoff.log) — re-run a live check.
 
 Test the screen reading (dim suggestion vs typed text, spinner, `BOX_RAW`) with `bash core/hooks/tests/test-handoff-stop.sh`. It runs on a private `tmux -L` server and sources the hook with `HANDOFF_SOURCE_ONLY=1`; it exits non-zero on any failure. Tests live in `core/hooks/tests/`, not beside the hooks, so cast-deploy's `core/hooks/*.sh` glob does not install them.
+
+The transcript check (`test-handoff-quiet.sh`), the start hook's status-block instruction (`test-handoff-start.sh`) and the `write` section check (`test-handoff-write.sh`) have their own tests there; they need no tmux and use temp dirs and fake transcripts.
 
 ## Install
 

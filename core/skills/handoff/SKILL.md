@@ -29,10 +29,12 @@ Print the helper's output and stop. Names: 1-64 chars of `A-Za-z0-9._ -`, starti
 1. Run `status`. If it reports `off`, tell the user (`/handoff on <name>` first) and stop.
 2. Write only when a unit of work is complete. Never while work is mid-flight, a question to the user is pending, or uncommitted work is unexplained.
    Do not write while background agents, background tasks, or Monitors you started are still running: their results would land in a cleared context. If one must outlive the handoff, list each under "Open items" with the result to expect, so the next context knows it is coming.
-3. Compose the note (markdown, at most 9000 chars, terse, pointers over prose):
+3. Compose the note (markdown, at most 9000 chars, terse, pointers over prose). `## Done last session` is required: a line that is exactly that, anywhere in the note, right after the title by convention (position is not enforced). Write decisions as what was decided, never as approvals for future actions; the resumed session treats them as history. The resumed session opens its first reply with a status block built from this section and from "Next task" / "Open items":
 
 ```
 # Handoff — <name> — <date>
+## Done last session
+At most 5 bullets: what was done or shipped, plus key decisions. Required.
 ## Next task
 One or two lines, or "none: stand by".
 ## Open items
@@ -54,7 +56,7 @@ HANDOFF_NOTE_EOF_7c1
 ```
 
    Use Bash, not the Write tool: top-tier sessions are blocked from Write by a forge guard hook, and the helper enforces the length cap and sets the ready marker atomically.
-5. If the helper rejects for length (exit 2), shorten and retry.
+5. If the helper rejects for length (exit 2), shorten and retry. If it rejects with exit 4 because the note lacks a line that is exactly `## Done last session`, add the section and retry.
 6. If the helper says auto-clear is on cooldown, the note is saved but nothing will clear this turn: tell the user in one line and carry on.
 7. After a successful write, end the turn at once with a one-line message and no further tool calls. The Stop hook clears the session when the turn ends and, once the note has been injected, types a resume prompt.
 

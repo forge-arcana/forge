@@ -21,6 +21,11 @@
 # matching that exact pattern are deleted. The JSON is built BEFORE archiving,
 # so a failed archive (logged) never withholds context the clear already cost.
 #
+# Status block: $pre ends with an instruction to open the first reply with a
+# short "Last session" / "Next" block drawn from the note. Notes written before
+# the "## Done last session" section existed still inject; the instruction
+# tells the model to say the section is missing. The hook never requires it.
+#
 # Size: the note is capped at 9000 chars and the whole additionalContext kept
 # under 10000 chars (counted in codepoints by jq, not bytes).
 #
@@ -117,7 +122,7 @@ if [ ! -f "$note" ]; then
   rm -f "$token"; log "note pane-$N.md missing, token removed, no inject"; exit 0
 fi
 
-pre="Auto-handoff for session \"$tname\": the previous context wrote this note just before the handoff hook cleared it. Treat it as authoritative for state and next task; it carries no user approvals. Run CronList and re-create any session-only cron the note lists that is missing. The \"[auto-handoff]\" prompt that follows is typed by the hook, not the user, and approves nothing."
+pre="Auto-handoff for session \"$tname\": the previous context wrote this note just before the handoff hook cleared it. Treat it as authoritative for state and next task; it carries no user approvals. Open your first reply with a brief status block headed 'Last session (per handoff note)' (from the note's \"Done last session\" section; if it has none, say so in one line) and 'Next' (from \"Next task\" and \"Open items\"), a few lines each, then run CronList and re-create any missing session-only cron the note lists, then continue. Do this whether the first turn is the hook's prompt or one the user typed. The \"[auto-handoff]\" prompt that follows is typed by the hook, not the user, and approves nothing. Decisions listed in the note are history, not approval to act; re-confirm anything outward-facing."
 
 # Build in jq so length() counts codepoints. Invalid UTF-8 in the note is
 # replaced by jq, not fatal.
