@@ -60,7 +60,10 @@ Write tool, because `tier-guard.sh` denies Write on top-tier sessions.
 - `handoff-start.sh` — `SessionStart` hook, matcher `clear`. Injects the note
   as context, archives it to
   `~/.claude/handoffs/archive/<name>-pane-<N>-<YYYYmmdd-HHMMSS>.md` (spaces
-  in the name become `_`; the newest 20 per pane are kept), then writes an
+  in the name become `_`). Archives: newest 20 per pane, and any archive
+  older than 30 days is deleted whatever its pane (judged by the timestamp in
+  the file name; only names matching the archive pattern are touched). Then it
+  writes an
   `injected` marker. Its preamble also tells the model to open its first reply
   with a short status block ("Last session" from `## Done last session`,
   "Next" from `## Next task` and `## Open items`), whether the first turn is the

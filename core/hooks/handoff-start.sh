@@ -17,8 +17,9 @@
 #
 # Why archive after injecting: each note is single-use. Once injected it moves
 # to <root>/archive/<namekey>-pane-<N>-<ts>.md (mode 600), so a later clear
-# cannot re-read it. The newest 20 archives per pane are kept; older ones
-# matching that exact pattern are deleted. The JSON is built BEFORE archiving,
+# cannot re-read it. Archives: newest 20 per pane, and any archive older than
+# 30 days is deleted whatever its pane. Only names matching that exact pattern
+# are ever deleted. The JSON is built BEFORE archiving,
 # so a failed archive (logged) never withholds context the clear already cost.
 #
 # Status block: $pre ends with an instruction to open the first reply with a
@@ -46,6 +47,7 @@ NAME_RE='^[A-Za-z0-9][A-Za-z0-9._ -]{0,63}$'
 TTL="${HANDOFF_TOKEN_TTL:-180}"
 [[ "$TTL" =~ ^[0-9]{1,6}$ ]] || TTL=180
 KEEP_ARCHIVES=20
+ARCHIVE_MAX_DAYS=30
 
 PANE="${TMUX_PANE:-}" NAME="-"
 
@@ -78,11 +80,14 @@ claude_ancestor() {
   return 1
 }
 
-# Keep the newest $KEEP_ARCHIVES archives of pane N; touch only names that
-# match this hook's own archive pattern exactly.
+# Two rules, touching only names that match this hook's own archive pattern
+# exactly: keep the newest $KEEP_ARCHIVES archives of pane N, and delete any
+# archive of ANY pane whose name timestamp is older than $ARCHIVE_MAX_DAYS days
+# (judged by the timestamp in the name, not mtime).
 prune_archives() {
-  local dir="$ROOT/archive" re f
+  local dir="$ROOT/archive" re any cutoff f ts
   re="^[A-Za-z0-9][A-Za-z0-9._-]{0,63}-pane-$N-([0-9]{8}-[0-9]{6}(-[0-9]+)?)\\.md\$"
+  any="^[A-Za-z0-9][A-Za-z0-9._-]{0,63}-pane-[0-9]+-([0-9]{8}-[0-9]{6})(-[0-9]+)?\\.md\$"
   [ -d "$dir" ] || return 0
   for f in "$dir"/*; do
     f="${f##*/}"
@@ -90,6 +95,16 @@ prune_archives() {
   done | sort -r | tail -n +"$((KEEP_ARCHIVES + 1))" | while read -r _ f; do
     rm -f -- "$dir/$f" && log "pruned archive/$f"
   done
+  cutoff="$(date -d "-${ARCHIVE_MAX_DAYS} days" +%Y%m%d-%H%M%S 2>/dev/null)" || return 0
+  [[ "$cutoff" =~ ^[0-9]{8}-[0-9]{6}$ ]] || return 0
+  for f in "$dir"/*; do
+    f="${f##*/}"
+    if [[ "$f" =~ $any ]]; then
+      ts="${BASH_REMATCH[1]}"
+      [[ "$ts" < "$cutoff" ]] && rm -f -- "$dir/$f" && log "pruned archive/$f (older than $ARCHIVE_MAX_DAYS days)"
+    fi
+  done
+  return 0
 }
 
 command -v jq >/dev/null 2>&1 || exit 0

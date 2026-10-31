@@ -20,6 +20,7 @@ run_hook() {
   printf "%s" "$HANDOFF_DIR" > "$TMPD/lastdir"   # run_hook runs in a $(...) subshell
   mkdir -p "$HANDOFF_DIR/state"
   cp "$1" "$HANDOFF_DIR/pane-7.md"
+  [ -z "${SEED:-}" ] || "$SEED" "$HANDOFF_DIR"
   # inside the fake claude: write the token naming its own pid, then run the hook
   "$TMPD/claude" -c '
     printf "epoch=%s\nid=1.1\nname=%s\nclaude_pid=%s\n" "$(date +%s)" "$SESS" "$$" > "$HANDOFF_DIR/state/pane-7.clearing"
@@ -51,6 +52,28 @@ big_n="$(wc -m < "$TMPD/big.md")"
 out="$(run_hook "$TMPD/big.md")"
 ctx="$(printf '%s' "$out" | jq -r '.hookSpecificOutput.additionalContext' 2>/dev/null)"
 [[ "$ctx" != *'[truncated]'* && "$big_n" -le 9000 ]] && check "5 near-cap note is not truncated ($big_n chars)" 0 || check "5 near-cap note is not truncated" 1 "n=$big_n"
+
+# Archive pruning: age rule (any pane, by name timestamp) and per-pane cap.
+seed_archives() {
+  local a="$1/archive" d40 d10 i
+  mkdir -p "$a"
+  d40="$(date -d '-40 days' +%Y%m%d-%H%M%S)"; d10="$(date -d '-10 days' +%Y%m%d-%H%M%S)"
+  : > "$a/old-pane-3-$d40.md"          # 40 days, other pane: deleted
+  : > "$a/old-pane-3-$d40-123.md"      # same with -n suffix: deleted
+  : > "$a/recent-pane-3-$d10.md"       # 10 days, other pane: kept
+  : > "$a/notes.md"                    # non-matching: kept
+  : > "$a/x-pane-3-garbage.md"         # non-matching: kept
+  touch -d '-90 days' "$a/notes.md" "$a/x-pane-3-garbage.md" "$a/recent-pane-3-$d10.md"
+  for i in $(seq 1 24); do : > "$a/cap-pane-7-$(date -d "-${i} hours" +%Y%m%d-%H%M%S).md"; done
+}
+SEED=seed_archives out="$(run_hook "$TMPD/new.md")"
+AD="$(cat "$TMPD/lastdir")/archive"
+ls "$AD"/old-pane-3-* >/dev/null 2>&1 && check "6 40-day-old archive of another pane deleted" 1 "$(ls "$AD")" || check "6 40-day-old archive of another pane deleted" 0
+ls "$AD"/recent-pane-3-* >/dev/null 2>&1 && check "7 10-day-old archive of another pane kept" 0 || check "7 10-day-old archive of another pane kept" 1
+[ -f "$AD/notes.md" ] && [ -f "$AD/x-pane-3-garbage.md" ] && check "8 non-matching files kept" 0 || check "8 non-matching files kept" 1 "$(ls "$AD")"
+cnt="$(ls "$AD" | grep -c -- '-pane-7-')"
+[ "$cnt" = 20 ] && check "9 per-pane cap keeps newest 20 ($cnt)" 0 || check "9 per-pane cap keeps newest 20" 1 "cnt=$cnt"
+grep -q 'older than 30 days' "$(cat "$TMPD/lastdir")/state/handoff.log" && check "10 age deletion logged" 0 || check "10 age deletion logged" 1
 
 if [ "$FAILS" -ne 0 ]; then echo "$FAILS FAILED"; exit 1; fi
 echo "all passed"
