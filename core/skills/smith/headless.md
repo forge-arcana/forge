@@ -1,6 +1,6 @@
 # Smith — Headless Branch
 
-> Applies when `FORGE_HEADLESS=1`. Follows the Headless Mode section of the [Forge Protocol](../forge/protocol.md). Interactive behaviour in `SKILL.md` is unchanged when the variable is unset.
+> Applies when `FORGE_HEADLESS=1` is set or the arguments start with `--headless`. The output dir (`$FORGE_OUT` below) is `--out <abs dir>` if given, else env `FORGE_OUT`; arguments win over env, and the flags are stripped before the task is read. Follows the Headless Mode section of the [Forge Protocol](../forge/protocol.md). Interactive behaviour in `SKILL.md` is unchanged when neither is present.
 
 A headless caller already tiered the work and chose smith. Nobody can answer questions, and the product repo's `memory/` is not smith's to write.
 

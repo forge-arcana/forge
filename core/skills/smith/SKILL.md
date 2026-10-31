@@ -20,6 +20,8 @@ The smith is not an art. The smith is the one who wields them all.
 - `--force` flag (can combine with any above) — bypasses the scope gate
 - Empty — smith auto-detects the work source
 
+Headless callers prefix `--headless --out <abs dir>`; strip those flags before reading the rest as the work source (arguments win over env; see the Headless Mode rules 7 and 8 in the [Forge Protocol](../forge/protocol.md) and [headless.md](headless.md)).
+
 ### Input Resolution (in priority order)
 
 Founding artifacts (`[PROJECT]_NN_*`: Opus, Vow, Touchstone, Pitch, Blueprint, Pattern) are looked up in `opus/` first, then the project root.
@@ -51,7 +53,7 @@ In **plan file** and **conversation** modes, smith synthesizes a work spec (see 
    - Read `<forge>/core/skills/forge/stack-guide.md` for tech reference
    - Read `memory/smith-ledger.json` if it exists (resume mode — skip to Session Resume)
    - Read `memory/smith-workspec.md` if it exists (plan/conversation mode resume)
-   - **When `FORGE_HEADLESS=1`, skip both of the two reads above** and follow [headless.md](headless.md): never read or resume a repo ledger or workspec; state lives at `$FORGE_OUT/smith/`.
+   - **When headless (`FORGE_HEADLESS=1` or `--headless`), skip both of the two reads above** and follow [headless.md](headless.md): never read or resume a repo ledger or workspec; state lives at `$FORGE_OUT/smith/`.
    - Read `memory/smith-learnings.md` if it exists (Layer 1 — orchestration wisdom)
    - Read `memory/smith-apprentice-log.md` if it exists (Layer 3 — delegation wisdom)
 
@@ -221,7 +223,7 @@ Address findings by severity:
 
 ### 2f: Checkpoint
 
-After each heat completes (findings clean or deferred) — headless (`FORGE_HEADLESS=1`): no `smith-checkpoint.sh`, no phase-gate commits, no rollback, state under `$FORGE_OUT/smith/` ([headless.md](headless.md)):
+After each heat completes (findings clean or deferred) — headless (`FORGE_HEADLESS=1` or `--headless`): no `smith-checkpoint.sh`, no phase-gate commits, no rollback, state under `$FORGE_OUT/smith/` ([headless.md](headless.md)):
 
 1. **Update `memory/smith-ledger.json`** — heat status, evaluation results, timing (judgment fields only — SHA/timestamp stamps belong to the script in step 3)
 2. **Update `memory/smith-progress.md`** — human-readable progress
@@ -315,7 +317,7 @@ When the final gate converges (zero CRITICAL + IMPORTANT):
 
 ## Session Resume
 
-Smith persists state to survive session breaks. Headless (`FORGE_HEADLESS=1`): never resume, start fresh ([headless.md](headless.md)). Otherwise, on startup, if `memory/smith-ledger.json` exists:
+Smith persists state to survive session breaks. Headless (`FORGE_HEADLESS=1` or `--headless`): never resume, start fresh ([headless.md](headless.md)). Otherwise, on startup, if `memory/smith-ledger.json` exists:
 
 1. Read the ledger
 2. Read `memory/smith-progress.md`

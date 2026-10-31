@@ -124,6 +124,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 
 ## Current Context
 
+- **2026-10-31 /smith headless**: /smith now turns on headless mode for the `--headless` argument as well as `FORGE_HEADLESS=1`, and strips `--headless --out <dir>` before reading the task, per the protocol's headless-mode rules 7 and 8. Before this, a headless /parse that called /smith with no env set could resume a repo ledger and make phase-gate commits. The stack guide's Real-time row now says where Socket.IO fits.
 - **Branch**: `main`. Push state is NOT mirrored here — run `git log origin/main..HEAD` (empty means fully pushed). This line previously carried a SHA that went stale twice; a mirror with no confirmation date is indistinguishable from a correct one (see the provenance learning in `global-patterns.md`).
 - **Active work**: No active workarounds. Generic Forge v2 Outstanding items tracked below.
 - **2026-08-17 → 2026-10-08** (archived): model-tier ceiling and delegation doctrine, tier hooks, one-face typography and landing defaults, context hygiene and the Sonnet-plus-advisor default, AGENTS.md-only project rules, the versioning standard, Cloudflare-native error tracking and email defaults, the leak purge and purity-gate fix, the haiku 5.5 tier pin. Full detail per entry: `memory/recent-history.md`.

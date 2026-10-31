@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-10-30",
+  "lastRun": "2026-10-31",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -380,6 +380,7 @@
     "Theme applies to the calm state; the critical/alarm state is theme-independent",
     "A Missing Label Is Not a Maturity Status: Read the Changelog",
     "Swapping an HTTP-and-Secret Integration for a Platform Binding Changes the Wiring Surface",
-    "A Vendor Onboarding Command Can Publish a Domain-Wide Policy as a Side Effect"
+    "A Vendor Onboarding Command Can Publish a Domain-Wide Policy as a Side Effect",
+    "Real-time transport: SSE by default, Ably to step up, Socket.IO only for a two-way app on one always-on server"
   ]
 }
