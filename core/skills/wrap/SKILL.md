@@ -17,6 +17,7 @@ Run the steps in order; the commit comes only after every earlier step.
 - **Why first:** Lint can change code, which affects what gets staged, documented, and learned.
 
 ## Step 1b: Rules-file Shadow Check
+- Check for `CLAUDE.md` with a command that does not fail when it is absent, such as one `ls -a <project-root>` listing (read the names) or the harness's file-search tool; absent is the passing result.
 - If `CLAUDE.md`'s whole content is exactly `@AGENTS.md` (a leftover import shim), it shadows nothing — note it in one line, suggest `/forge` to remove it, and continue the wrap. Do not stop.
 - Otherwise, if BOTH `AGENTS.md` and `CLAUDE.md` (real content) exist at the project root, stop and flag it before staging. On Claude Code only `CLAUDE.md` loads, so `AGENTS.md` (the real rules) is silently ignored. This usually means `/init` or a memory-append shortcut recreated `CLAUDE.md`.
 - Show the stray `CLAUDE.md` content and ask the user — using your harness's multi-choice prompt if available, otherwise inline: "Propose a merge into AGENTS.md for my approval" / "Leave it (I'll resolve)". On the first, show the proposed merged `AGENTS.md`; write it and delete `CLAUDE.md` only after the user approves that result.
