@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 # handoff.sh — opt-in auto-handoff helper (state keyed by tmux pane, bound to
 # the Claude Code process that ran `on`).
-# Subcommands: on <name...> | off | status | write (note on stdin) | cancel
-# Exit codes: 0 ok, 1 error / empty note, 2 note over the length cap, 3 not
-# opted in (write), 4 note lacks a '## Done last session' line (write; checked
-# after the opt-in, so a session that is not opted in gets 3 first), 64 usage.
+# Subcommands: on <name...> | off | status | write [name...] (note on stdin) | cancel
+# Exit codes: 0 ok, 1 error / empty note, 2 note over the length cap, 3 retired
+# (write no longer needs an opt-in), 4 note lacks a '## Done last session' line
+# (write), 64 usage / invalid name.
+# write order: empty (1) -> length cap (2) -> invalid name arg (64) -> section
+# check (4) -> only then, if not opted in, a ONE-SHOT opt-in is created (same file
+# as `on` plus a line oneshot=1; name = name arg, else tmux session name
+# sanitised, else "handoff"). A rejected note never leaves an opt-in behind.
+# A one-shot opt-in is left in place after the clear (the hooks need it through
+# the resume); it dies with the Claude process (claude_pid binding). `status`
+# reports it as off, so the model-initiated auto-handoff rule never fires on it.
 # State contract: see core/hooks/handoff-stop.sh header.
 set -euo pipefail
 umask 077
@@ -17,7 +24,7 @@ read -r -a TMUXC <<< "${HANDOFF_TMUX:-tmux}"
 [ "${#TMUXC[@]}" -gt 0 ] || TMUXC=(tmux)
 
 usage() {
-  echo "usage: handoff.sh on <name...> | off | status | write | cancel" >&2
+  echo "usage: handoff.sh on <name...> | off | status | write [name...] | cancel" >&2
   exit 64
 }
 
@@ -30,7 +37,7 @@ cmd="${1:-}"
 shift || true
 case "$cmd" in on|off|status|write|cancel) ;; *) usage ;; esac
 
-if [ "$cmd" = on ] && ! valid_name "$*"; then
+if { [ "$cmd" = on ] || { [ "$cmd" = write ] && [ $# -gt 0 ]; }; } && ! valid_name "$*"; then
   echo "handoff: invalid name; 1-64 chars of A-Za-z0-9._ - (space allowed), starting with a letter or digit, no trailing space" >&2
   exit 64
 fi
@@ -84,10 +91,10 @@ claude_ancestor() {
 
 CPID="$(claude_ancestor || true)"
 
-# Sets OPT_NAME; returns 0 valid, 1 none, 2 stale (and removes it).
+# Sets OPT_NAME, OPT_ONESHOT; returns 0 valid, 1 none, 2 stale (and removes it).
 # Valid iff pane_pid is the live one AND claude_pid is this helper's Claude.
 load_optin() {
-  OPT_NAME=""
+  OPT_NAME=""; OPT_ONESHOT=""
   [ -f "$OPTIN" ] || return 1
   local name pid cp live
   name="$(sed -n 's/^name=//p' "$OPTIN" | head -n1)"
@@ -97,6 +104,7 @@ load_optin() {
   if [ -n "$name" ] && [ -n "$live" ] && [ "$pid" = "$live" ] \
      && [ -n "$CPID" ] && [ "$cp" = "$CPID" ]; then
     OPT_NAME="$name"
+    OPT_ONESHOT="$(sed -n 's/^oneshot=//p' "$OPTIN" | head -n1)"
     return 0
   fi
   rm -f "$OPTIN" "$READY" "$CLEARING"
@@ -134,6 +142,10 @@ case "$cmd" in
     if [ "$rc" -eq 0 ]; then
       ready=no
       [ -f "$READY" ] && ready=yes
+      if [ "$OPT_ONESHOT" = 1 ]; then
+        echo "off (one-shot handoff pending name=$OPT_NAME ready=$ready)"
+        exit 1
+      fi
       echo "on name=$OPT_NAME pane=$PANE ready=$ready"
       exit 0
     fi
@@ -153,17 +165,38 @@ case "$cmd" in
       log write "-" "rejected-too-long($n)"
       exit 2
     fi
+    argname="$*"
     rc=0
     load_optin || rc=$?
-    if [ "$rc" -ne 0 ]; then
-      [ "$rc" -eq 2 ] && echo "handoff: stale opt-in removed" >&2
-      echo "handoff: not opted in — run /handoff on <name> first"
-      exit 3
-    fi
+    [ "$rc" -eq 2 ] && echo "handoff: stale opt-in removed" >&2
     if ! printf '%s\n' "$note" | tr -d '\r' | grep -qx '## Done last session[[:space:]]*'; then
       echo "handoff: nothing saved — add a line that is exactly '## Done last session' (right after the title is conventional) listing what was done/shipped + key decisions, then re-run write." >&2
-      log write "$OPT_NAME" "rejected-no-done-section"
+      log write "${OPT_NAME:--}" "rejected-no-done-section"
       exit 4
+    fi
+    if [ "$rc" -ne 0 ] || { [ "$OPT_ONESHOT" = 1 ] && [ -n "$argname" ] && [ "$argname" != "$OPT_NAME" ]; }; then
+      # No opt-in (or a one-shot being renamed): create/rewrite a one-shot one.
+      name="$argname"
+      if [ -z "$name" ]; then
+        name="$("${TMUXC[@]}" display-message -p -t "$PANE" '#{session_name}' 2>/dev/null || true)"
+        name="$(printf '%s' "$name" | LC_ALL=C tr -c 'A-Za-z0-9._ -' '-' | LC_ALL=C sed 's/^[^A-Za-z0-9]*//' | cut -c1-64 | sed 's/ *$//')"
+        valid_name "$name" || name=handoff
+      fi
+      if [ -z "$CPID" ]; then
+        echo "handoff: no Claude Code process found above this shell; run /handoff from inside Claude Code" >&2
+        exit 1
+      fi
+      live="$(cur_pid)"
+      [ -n "$live" ] || { echo "handoff: cannot read pane pid for $PANE" >&2; exit 1; }
+      mkdir -p "$STATE"
+      chmod 700 "$ROOT" "$STATE"
+      tmp="$(mktemp "$STATE/.optin.XXXXXX")"
+      printf 'name=%s\npane_pid=%s\nclaude_pid=%s\noneshot=1\n' "$name" "$live" "$CPID" >"$tmp"
+      mv -f "$tmp" "$OPTIN"
+      OPT_NAME="$name"
+      log write "$name" "oneshot-optin(claude_pid=$CPID)"
+    elif [ -n "$argname" ] && [ "$argname" != "$OPT_NAME" ]; then
+      echo "handoff: session is opted in as '$OPT_NAME'; ignoring name '$argname'" >&2
     fi
     dest="$ROOT/pane-$N.md"
     tmp="$(mktemp "$ROOT/.pane-$N.XXXXXX")"

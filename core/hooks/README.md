@@ -39,15 +39,15 @@ signal is exposed to a hook payload today.
 ## Handoff pair (opt-in, tmux only)
 
 Lets a long-running tmux session clear its own context at a clean boundary
-without losing the thread. A session opts in with `/handoff on <name>`; when
+without losing the thread. A session opts in to model-initiated handoff with `/handoff on <name>`; an explicit `/handoff` also works without it (`write` creates a one-shot opt-in, `oneshot=1`, that `status` reports as off); when
 a unit of work is complete the model runs `/handoff`, which writes a note to
 `~/.claude/handoffs/pane-<N>.md` (N = the tmux pane id) plus a ready marker.
 The note must contain a line that is exactly `## Done last session` (what was
 done or shipped, plus key decisions, at most about 5 bullets; trailing
 whitespace on the heading is accepted). It may appear anywhere in the note,
 right after the title by convention; position is not enforced. Decisions are
-written as what was decided, never as approvals for future actions. `handoff.sh write` rejects a note without it (exit 4 once opted in, no note, no ready
-marker). Old notes and archives without it still inject.
+written as what was decided, never as approvals for future actions. `handoff.sh write` rejects a note without it (exit 4, no note, no ready
+marker, no opt-in created). Old notes and archives without it still inject.
 The note is written via the skill's `handoff.sh` helper through Bash, not the
 Write tool, because `tier-guard.sh` denies Write on top-tier sessions.
 

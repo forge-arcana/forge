@@ -9,7 +9,14 @@ HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../../skills/handoff"
 TMPD="$(mktemp -d)"
 trap 'rm -rf "$TMPD"' EXIT
 cp "$(command -v bash)" "$TMPD/claude"
-printf '#!/bin/sh\necho 4242\n' > "$TMPD/tmux"; chmod +x "$TMPD/tmux"
+cat > "$TMPD/tmux" <<'STUB'
+#!/bin/sh
+case "$*" in
+  *session_name*) echo 'my sess:1/x' ;;
+  *) echo 4242 ;;
+esac
+STUB
+chmod +x "$TMPD/tmux"
 export HANDOFF_DIR="$TMPD/h" HANDOFF_TMUX="$TMPD/tmux" TMUX_PANE="%5" HANDOFF_MIN_INTERVAL=600
 FAILS=0
 check() { if [ "$2" = 0 ]; then echo "PASS  $1"; else echo "FAIL  $1  (${3:-})"; FAILS=$((FAILS + 1)); fi; }
@@ -42,12 +49,12 @@ write_note "$TMPD/crlf.md"
 [ "$RC" = 0 ] && check "3b CRLF note with the section is accepted" 0 || check "3b CRLF note with the section is accepted" 1 "rc=$RC err=$ERR"
 rm -f "$HANDOFF_DIR/state/pane-5.ready" "$HANDOFF_DIR/state/pane-5.lastclear" "$HANDOFF_DIR/pane-5.md"
 
-# not opted in AND missing section: exit 3 (opt-in is checked first)
+# not opted in AND missing section: exit 4, and no opt-in left behind
 ERR="$("$TMPD/claude" -c '
   bash "'"$HERE"'/handoff.sh" write < "'"$TMPD"'/bad.md" 2>&1
   exit $?' 2>&1)"; RC=$?
-[ "$RC" = 3 ] && [[ "$ERR" == *"not opted in"* ]] \
-  && check "3c not opted in + missing section: exit 3 first" 0 || check "3c not opted in + missing section: exit 3 first" 1 "rc=$RC err=$ERR"
+[ "$RC" = 4 ] && [ ! -e "$HANDOFF_DIR/state/pane-5.optin" ] \
+  && check "3c not opted in + missing section: exit 4, no optin" 0 || check "3c not opted in + missing section: exit 4, no optin" 1 "rc=$RC err=$ERR"
 
 printf '# Handoff\n## Done last session   \n- did x\n' > "$TMPD/trail.md"
 write_note "$TMPD/trail.md"
@@ -59,6 +66,49 @@ write_note "$TMPD/late.md"
 write_note "$TMPD/good.md"
 [ "$RC" = 0 ] && [ -s "$HANDOFF_DIR/pane-5.md" ] && [ -f "$HANDOFF_DIR/state/pane-5.ready" ] \
   && check "4 note with the section: saved, ready marker set" 0 || check "4 note with the section: saved, ready marker set" 1 "rc=$RC err=$ERR"
+
+# --- one-shot handoff (not opted in) ---
+clean() { rm -rf "$HANDOFF_DIR"; }
+O="$HANDOFF_DIR/state/pane-5.optin"; R="$HANDOFF_DIR/state/pane-5.ready"
+
+# run BODY inside one fake claude; sets RC and OUT
+in_claude() { OUT="$("$TMPD/claude" -c "$1" 2>&1)"; RC=$?; }
+
+clean
+in_claude 'bash "'"$HERE"'/handoff.sh" write afp < "'"$TMPD"'/good.md" >/dev/null 2>&1
+  rc=$?
+  bash "'"$HERE"'/handoff.sh" status
+  echo "status_rc=$?"
+  exit $rc'
+[ "$RC" = 0 ] && [ -s "$HANDOFF_DIR/pane-5.md" ] && grep -qx 'name=afp' "$R" && grep -qx 'oneshot=1' "$O" && grep -qx 'name=afp' "$O" \
+  && check "A one-shot write with name arg: saved, ready+optin name=afp, oneshot=1" 0 || check "A one-shot write with name arg: saved, ready+optin name=afp, oneshot=1" 1 "rc=$RC out=$OUT"
+[[ "$OUT" == "off (one-shot handoff pending name=afp"* ]] && [[ "$OUT" == *"status_rc=1"* ]] \
+  && check "B status after one-shot: exit 1, 'off (one-shot handoff pending name=afp'" 0 || check "B status after one-shot: exit 1, 'off (one-shot handoff pending name=afp'" 1 "out=$OUT"
+
+clean
+in_claude 'bash "'"$HERE"'/handoff.sh" write < "'"$TMPD"'/good.md" 2>&1'
+[ "$RC" = 0 ] && grep -qx 'name=my sess-1-x' "$O" && grep -qx 'name=my sess-1-x' "$R" \
+  && check "C no name arg: falls back to sanitised tmux session name" 0 || check "C no name arg: falls back to sanitised tmux session name" 1 "rc=$RC out=$OUT $(cat "$O" 2>&1)"
+
+clean
+in_claude 'bash "'"$HERE"'/handoff.sh" on tester >/dev/null
+  bash "'"$HERE"'/handoff.sh" write other < "'"$TMPD"'/good.md" >/dev/null 2>&1'
+[ "$RC" = 0 ] && grep -qx 'name=tester' "$O" && ! grep -q oneshot "$O" && grep -qx 'name=tester' "$R" \
+  && check "D real opt-in keeps its name; name arg ignored, no oneshot" 0 || check "D real opt-in keeps its name; name arg ignored, no oneshot" 1 "rc=$RC out=$OUT $(cat "$O" 2>&1)"
+
+clean
+in_claude 'bash "'"$HERE"'/handoff.sh" write -bad < "'"$TMPD"'/good.md" 2>&1'
+[ "$RC" = 64 ] && [ ! -e "$O" ] \
+  && check "E invalid name arg: exit 64, no optin" 0 || check "E invalid name arg: exit 64, no optin" 1 "rc=$RC out=$OUT"
+
+clean
+in_claude 'bash "'"$HERE"'/handoff.sh" write one < "'"$TMPD"'/good.md" >/dev/null 2>&1
+  rm -f "'"$HANDOFF_DIR"'/state/pane-5.lastclear" "'"$R"'"
+  bash "'"$HERE"'/handoff.sh" write two < "'"$TMPD"'/good.md" >/dev/null 2>&1
+  bash "'"$HERE"'/handoff.sh" on real >/dev/null
+  bash "'"$HERE"'/handoff.sh" status; true'
+[[ "$OUT" == "on name=real"* ]] && ! grep -q oneshot "$O" \
+  && check "F one-shot renamed by a differing arg; 'on' overwrites it" 0 || check "F one-shot renamed by a differing arg; 'on' overwrites it" 1 "out=$OUT"
 
 if [ "$FAILS" -ne 0 ]; then echo "$FAILS FAILED"; exit 1; fi
 echo "all passed"
