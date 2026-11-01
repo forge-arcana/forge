@@ -22,8 +22,8 @@
 #   cast-deploy.sh --verify                           verify all skills match forge
 #   cast-deploy.sh --scripts                          deploy runtime scripts only
 #   cast-deploy.sh --verify-scripts                   verify runtime scripts match forge
-#   cast-deploy.sh --rules                            deploy forge core/rules → membrane global rules file
-#   cast-deploy.sh --verify-rules                     verify membrane rules block matches forge core/rules
+#   cast-deploy.sh --rules                            deploy forge core/rules → full block in $AGENTS_DIR/AGENTS.md + @-import pointer block in $MEMBRANE/CLAUDE.md
+#   cast-deploy.sh --verify-rules                     verify both blocks (AGENTS.md full rules, CLAUDE.md import pointer)
 #   cast-deploy.sh --hooks                            deploy forge core/hooks/*.sh → membrane hooks/ (+ wire forge's own entries into settings.json)
 #   cast-deploy.sh --verify-hooks                     verify membrane hook bodies match forge core/hooks
 #   cast-deploy.sh --settings                         apply forge settings defaults to membrane settings.json (SET-IF-ABSENT)
@@ -34,6 +34,7 @@
 #   FORGE_PATH       path to forge repo (canonical) — falls back to CLAUDE.md forge-path: line
 #   FORGE_MEMBRANE   harness config dir (default $HOME/.claude)
 #   FORGE_AGENTS_DIR canonical Open Agent Skills dir (default $HOME/.agents)
+#   FORGE_AGENTS_RULES_FILE  global cross-tool rules file (default $AGENTS_DIR/AGENTS.md)
 
 set -euo pipefail
 
@@ -53,7 +54,8 @@ fi
 FORGE_SKILLS="$FORGE_PATH/core/skills"
 FORGE_SCRIPTS="$FORGE_PATH/claude-helpers/scripts"
 FORGE_RULES="$FORGE_PATH/core/rules"
-MEMBRANE_RULES_FILE="$MEMBRANE/CLAUDE.md"   # global rules file; AGENTS.md split will retarget this later
+AGENTS_RULES_FILE="${FORGE_AGENTS_RULES_FILE:-$AGENTS_DIR/AGENTS.md}"   # global cross-tool file: holds the full forge rules
+MEMBRANE_RULES_FILE="$MEMBRANE/CLAUDE.md"   # Claude Code's global file: holds only a short block that @-imports $AGENTS_RULES_FILE (Claude Code reads no user-level AGENTS.md itself)
 FORGE_HOOKS="$FORGE_PATH/core/hooks"
 MEMBRANE_HOOKS="$MEMBRANE/hooks"
 MEMBRANE_SETTINGS_FILE="$MEMBRANE/settings.json"
@@ -176,8 +178,11 @@ skill_diff() {
   fi
 }
 
-# --- Rules deploy: write forge's core/rules/ into the membrane's global rules
-#     file as a single marker-delimited managed block. Idempotent — regenerated
+# --- Rules deploy: write forge's core/rules/ into the global cross-tool
+#     $AGENTS_RULES_FILE (~/.agents/AGENTS.md) as a single marker-delimited managed
+#     block, and put only a short block with an `@~/.agents/AGENTS.md` import line
+#     into the membrane's CLAUDE.md (Claude Code does not read a user-level
+#     AGENTS.md itself; the import makes it load every rule). Idempotent — regenerated
 #     every cast, so editing a rule in forge core/rules/ + re-casting updates the
 #     block in place with no duplication. Personal content outside the markers is
 #     never touched (same contract as the forge-path: line /forge manages). This
@@ -191,7 +196,7 @@ build_rules_block() {
   echo ""
   echo "# Forge-Managed HARD RULES"
   echo ""
-  echo "_Deployed from the forge's \`core/rules/\` on each \`/forge\` cast. To change these, edit the forge source and re-run \`/forge\` — edits between the markers are overwritten._"
+  echo "_Deployed from the forge's \`core/rules/\` on each \`/forge\` cast to the global \`AGENTS.md\` (cross-tool; Claude Code imports it from \`CLAUDE.md\`). To change these, edit the forge \`core/rules/\` source and re-cast with \`/forge\` — edits between the markers are overwritten._"
   echo ""
   for f in "$FORGE_RULES"/*.md; do
     [[ -f "$f" ]] || continue
@@ -201,22 +206,33 @@ build_rules_block() {
   echo "$RULES_END"
 }
 
-deploy_rules() {
-  echo "## Deploying forge core/rules → $MEMBRANE_RULES_FILE"
-  echo ""
-  if [[ ! -d "$FORGE_RULES" ]]; then
-    echo "| rules | SKIP | $FORGE_RULES not found |"
-    return 0
+build_pointer_block() {
+  # Emits the short CLAUDE.md block (same markers) that @-imports the global AGENTS.md.
+  local import_path="$AGENTS_RULES_FILE"
+  if [[ "$import_path" == "$HOME"/* ]]; then
+    import_path="~${import_path#"$HOME"}"
   fi
+  echo "$RULES_START"
+  echo ""
+  echo "# Forge-Managed HARD RULES"
+  echo ""
+  echo "The full forge rules live in the global cross-tool AGENTS.md and are imported below; they are regenerated each cast, so edit the forge \`core/rules/\` source, not either file."
+  echo ""
+  echo "@$import_path"
+  echo ""
+  echo "$RULES_END"
+}
 
-  local block tmp
-  block=$(mktemp)
-  build_rules_block > "$block"
-
-  if [[ ! -f "$MEMBRANE_RULES_FILE" ]]; then
-    cat "$block" > "$MEMBRANE_RULES_FILE"
-    echo "| rules | CREATED | wrote managed block to new $MEMBRANE_RULES_FILE |"
-  elif grep -qF 'FORGE-RULES:START' "$MEMBRANE_RULES_FILE"; then
+# upsert_block <file> <blockfile>: create the file, replace the marker-delimited
+# block in place, or append it. Content outside the markers is never touched.
+# Prints the action word (CREATED / UPDATED / DEPLOYED).
+upsert_block() {
+  local file="$1" block="$2" tmp
+  mkdir -p "$(dirname "$file")"
+  if [[ ! -f "$file" ]]; then
+    cat "$block" > "$file"
+    echo "CREATED"
+  elif grep -qF 'FORGE-RULES:START' "$file"; then
     tmp=$(mktemp)
     awk -v blockfile="$block" '
       index($0, "FORGE-RULES:START") {
@@ -227,39 +243,66 @@ deploy_rules() {
       }
       index($0, "FORGE-RULES:END") { skip = 0; next }
       skip != 1 { print }
-    ' "$MEMBRANE_RULES_FILE" > "$tmp"
-    mv "$tmp" "$MEMBRANE_RULES_FILE"
-    echo "| rules | UPDATED | refreshed managed block in place |"
+    ' "$file" > "$tmp"
+    mv "$tmp" "$file"
+    echo "UPDATED"
   else
-    printf '\n' >> "$MEMBRANE_RULES_FILE"
-    cat "$block" >> "$MEMBRANE_RULES_FILE"
-    echo "| rules | DEPLOYED | appended managed block (personal content preserved) |"
+    printf '\n' >> "$file"
+    cat "$block" >> "$file"
+    echo "DEPLOYED"
   fi
+}
+
+deploy_rules() {
+  echo "## Deploying forge core/rules → $AGENTS_RULES_FILE (full) + $MEMBRANE_RULES_FILE (import pointer)"
+  echo ""
+  if [[ ! -d "$FORGE_RULES" ]]; then
+    echo "| rules | SKIP | $FORGE_RULES not found |"
+    return 0
+  fi
+
+  local block action
+  block=$(mktemp)
+  build_rules_block > "$block"
+  action=$(upsert_block "$AGENTS_RULES_FILE" "$block")
+  echo "| agents-rules | $action | full managed block in $AGENTS_RULES_FILE (personal content preserved) |"
+
+  build_pointer_block > "$block"
+  action=$(upsert_block "$MEMBRANE_RULES_FILE" "$block")
+  echo "| claude-pointer | $action | import pointer block in $MEMBRANE_RULES_FILE (personal content preserved) |"
   rm -f "$block"
   echo ""
   echo "**Rules deploy complete**"
 }
 
+# _verify_block <label> <file> <expected-block-builder>: one OK/MISSING/DRIFT row.
+_verify_block() {
+  local label="$1" file="$2" builder="$3"
+  if [[ ! -f "$file" ]] || ! grep -qF 'FORGE-RULES:START' "$file"; then
+    echo "| $label | MISSING | no managed block in $file — run cast-deploy.sh --rules |"
+    return 1
+  fi
+  local block current rc=0
+  block=$(mktemp); current=$(mktemp)
+  "$builder" > "$block"
+  awk 'index($0,"FORGE-RULES:START"){f=1} f{print} index($0,"FORGE-RULES:END"){f=0}' "$file" > "$current"
+  if diff -q --strip-trailing-cr "$block" "$current" >/dev/null 2>&1; then
+    echo "| $label | OK | $file block matches expected |"
+  else
+    echo "| $label | DRIFT | $file block differs from expected — run cast-deploy.sh --rules |"
+    rc=1
+  fi
+  rm -f "$block" "$current"
+  return $rc
+}
+
 verify_rules() {
   echo "## Rules Verification"
   echo ""
-  if [[ ! -f "$MEMBRANE_RULES_FILE" ]] || ! grep -qF 'FORGE-RULES:START' "$MEMBRANE_RULES_FILE"; then
-    echo "| rules | MISSING | no managed block in $MEMBRANE_RULES_FILE — run cast-deploy.sh --rules |"
-    return 1
-  fi
-  local block current
-  block=$(mktemp); current=$(mktemp)
-  build_rules_block > "$block"
-  awk 'index($0,"FORGE-RULES:START"){f=1} f{print} index($0,"FORGE-RULES:END"){f=0}' "$MEMBRANE_RULES_FILE" > "$current"
-  if diff -q --strip-trailing-cr "$block" "$current" >/dev/null 2>&1; then
-    echo "| rules | OK | membrane block matches forge core/rules/ |"
-    rm -f "$block" "$current"
-    return 0
-  else
-    echo "| rules | DRIFT | membrane block differs from forge core/rules/ — run cast-deploy.sh --rules |"
-    rm -f "$block" "$current"
-    return 1
-  fi
+  local rc=0
+  _verify_block agents-rules "$AGENTS_RULES_FILE" build_rules_block || rc=1
+  _verify_block claude-pointer "$MEMBRANE_RULES_FILE" build_pointer_block || rc=1
+  return $rc
 }
 
 # --- Hooks deploy/verify: copy forge core/hooks/*.sh bodies into the

@@ -48,7 +48,7 @@ The procedure lives in `forge-conventions.md` §1, which Phase 4 reads fresh fro
 
 ## Deliberately left alone
 
-- The membrane rules file `~/.claude/CLAUDE.md` (forge-path line, FORGE-RULES block): Claude Code reads no user-level `AGENTS.md`.
+- The membrane rules file `~/.claude/CLAUDE.md` (forge-path line, FORGE-RULES block): Claude Code reads no user-level `AGENTS.md`. Now handled via import: `cast-deploy.sh --rules` writes the full rules to `~/.agents/AGENTS.md` and leaves only an `@~/.agents/AGENTS.md` pointer block in `CLAUDE.md`.
 - The `claude-md-and-agents-md` setting.
 - `core/rules/` text.
 - `core/skills/forge/preflight.md`: its only hit is the membrane rules-file definition. Not modified.

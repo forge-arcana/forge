@@ -103,7 +103,7 @@ The same six classifications from Step 3 apply to **every pillar** — not just 
 - Compare `<forge>/memory/*.md` against `<membrane>/memory/*.md`
 - Skip `.json` tracker files and `MEMORY.md` index
 
-**Config**: Unit = rule/section within `<rules-file>` vs the harness's descriptive rules reference (e.g., `<forge>/claude-helpers/refs/auto-allowed-bash.md` for Claude Code; equivalent ref dir for other harnesses). The forge-managed HARD RULES themselves are not classified here — they deploy one-way from `<forge>/core/rules/` into the marker-delimited `FORGE-RULES` block in `<rules-file>` via `cast-deploy.sh --rules`.
+**Config**: Unit = rule/section within `<rules-file>` vs the harness's descriptive rules reference (e.g., `<forge>/claude-helpers/refs/auto-allowed-bash.md` for Claude Code; equivalent ref dir for other harnesses). The forge-managed HARD RULES themselves are not classified here — they deploy one-way from `<forge>/core/rules/` into the marker-delimited `FORGE-RULES` block of the global cross-tool `~/.agents/AGENTS.md` via `cast-deploy.sh --rules`, and `<rules-file>` carries only a `FORGE-RULES` import pointer (`@~/.agents/AGENTS.md`) to it.
 - Match by HARD RULE titles, section headings, and permission entries
 - Machine-specific content (hooks, additional working directories, forge-path) is **never classified** — always skipped
 

@@ -187,7 +187,7 @@ Fresh machine (no deployed skills): create `<membrane>/learnings/`, `<membrane>/
 
 ### Global rules
 
-Always run `bash <forge>/core/scripts/cast-deploy.sh --rules` (every cast, no PLAN row needed). This regenerates the forge-owned HARD RULES block (from `<forge>/core/rules/`) in the membrane global rules file, between `FORGE-RULES` markers — same forge-owned contract as the `forge-path:` line. Personal content outside the markers is never touched. This is how a HARD RULE authored in `core/rules/` reaches every teammate's membrane on their next `/forge`. Verify with `cast-deploy.sh --verify-rules`.
+Always run `bash <forge>/core/scripts/cast-deploy.sh --rules` (every cast, no PLAN row needed). This regenerates the forge-owned HARD RULES block (from `<forge>/core/rules/`) in the global cross-tool `~/.agents/AGENTS.md`, between `FORGE-RULES` markers, and writes into the membrane global rules file (`~/.claude/CLAUDE.md` for Claude Code) only a short `FORGE-RULES` block holding an `@~/.agents/AGENTS.md` import line (Claude Code reads no user-level AGENTS.md itself) — same forge-owned contract as the `forge-path:` line. Personal content outside the markers in either file is never touched. This is how a HARD RULE authored in `core/rules/` reaches every teammate's membrane on their next `/forge`. Verify with `cast-deploy.sh --verify-rules`.
 
 ### Hooks
 

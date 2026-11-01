@@ -5,7 +5,7 @@
 ### 3a: Config sync (harness reference)
 
 For approved config rows: merge the selected change into the harness reference — for Claude Code, `<forge>/claude-helpers/refs/auto-allowed-bash.md` and `<forge>/claude-helpers/refs/permissions-template.json`; other harnesses bind their own ref file. Sync rules:
-- The membrane's global rules file carries only the `forge-path:` line and the forge-owned FORGE-RULES block, so no rules-file section syncs in either direction. Shorthand commands, auto-invocation and model recommendations are delivered by skills and `core/rules/`; the reference describes them and is corrected by hand when they change
+- The membrane's global rules file carries only the `forge-path:` line and the forge-owned FORGE-RULES import-pointer block (the full rules live in `~/.agents/AGENTS.md`), so no rules-file section syncs in either direction. Shorthand commands, auto-invocation and model recommendations are delivered by skills and `core/rules/`; the reference describes them and is corrected by hand when they change
 - Permissions: the reference documents the blanket-allow template as shipped. A membrane's own `permissions.ask` / `permissions.deny` entries are personal — never sync
 - HARD RULES never sync through this file — they deploy from `<forge>/core/rules/`
 - Hooks, additional working directories, `forge-path` are machine-specific — never sync
