@@ -50,6 +50,10 @@ A change to a typeface, colour tokens, brand marks or page architecture is first
 
 When you change code that can be run, built or type-checked, run a check that exercises the change (tests, type-checker, build, or the changed command) before reporting it done; a syntax-only check or one that failed to start doesn't count, and if none can run, say which and why. Before pushing, picture a fresh `git clone` + install: generated or gitignored files that build or typecheck depend on (i18n, codegen, protobuf, GraphQL) need an explicit step in CI.
 
+## HARD RULE — Clean Up the Worktrees and Clones You Create
+
+A git worktree, isolated subagent worktree or release clone you create is yours to remove when its work ends. Remove a release clone once that release is live, keeping only the current one. Remove a side worktree once its branch is merged or abandoned (`git worktree remove`, then `git branch -d`). Remove a subagent's worktree once its commits are merged, in the same turn. First check for uncommitted files and commits not on main, and keep anything that holds work. Write the clean-up into the procedure that creates them (runbook, build script), not into memory.
+
 ## HARD RULE — Context Hygiene — A Session Is a Task
 
 At a task boundary, suggest `/clear` before unrelated work (or run `/handoff` when it is on), and `/compact` only when the next task needs this context. A mid-task model switch re-reads the whole context uncached. Keep each always-loaded rules file under ~200 lines and ~20k chars (hard flag 25k); specialist content belongs in skills.
