@@ -322,8 +322,11 @@ verify_rules() {
 #     FORGE_HOOK_WIRING (PreToolUse, UserPromptSubmit, Stop, SessionStart),
 #     and within those only array entries whose command matches a forge hook
 #     filename. The remove filter uses test($base), a REGEX (dots match any
-#     char), so no forge hook filename may regex-match another's — keep
-#     filenames distinct. Permissions, env, model,
+#     char, unanchored), so no forge hook filename may regex-match another's
+#     command — keep filenames distinct (cycle-stop.sh and cycle-start.sh do
+#     not match each other, and neither matches a FORGE_HOOK_RETIRED name).
+#     Retired names are matched exactly instead (see _retired_jq_defs).
+#     Permissions, env, model,
 #     statusline and any hand-written hooks are read and re-emitted verbatim.
 #     Remove-then-append makes it idempotent AND self-healing: a stale matcher
 #     (e.g. the pre-Agent "Edit|Write|NotebookEdit") is corrected on the next
@@ -337,9 +340,30 @@ verify_rules() {
 FORGE_HOOK_WIRING=(
   "tier-guard.sh|PreToolUse|Edit|Write|NotebookEdit|Agent"
   "tier-routing.sh|UserPromptSubmit|"
-  "handoff-stop.sh|Stop|"
-  "handoff-start.sh|SessionStart|clear"
+  "cycle-stop.sh|Stop|"
+  "cycle-start.sh|SessionStart|clear"
 )
+
+# Hook bodies forge used to ship and no longer does (renamed or dropped). The
+# cast strips their settings.json entries from EVERY event, not just the one
+# they were wired under, so a renamed hook never double-fires next to its new
+# name. The old bodies are LEFT IN PLACE, unwired, for one release: a live
+# session that misses the settings.json hot-reload still calls the old path on
+# every Stop / clear, and a missing file there errors each time. verify reports
+# them as a RETIRED-BODY warning only. The next release adds the unlink — by
+# rm -f only, never cp/overwrite in place: a detached job may still be
+# executing the old body and bash reads scripts incrementally; unlinking keeps
+# the open inode alive until that job exits.
+FORGE_HOOK_RETIRED=(handoff-stop.sh handoff-start.sh)
+
+# jq helpers shared by wire_hooks and verify_hooks. A command references a
+# retired body when any whitespace-separated token (quotes stripped) has a
+# final path component EXACTLY equal to the name — no regex, so a hand-written
+# "/opt/x/my-handoff-stop.sh.bak-runner" is not a match.
+_retired_jq_defs='
+  def refs_name($n): (if type == "string" then . else "" end) | [splits("[[:space:]]+") | gsub("[\"'"'"']"; "") | split("/") | last] | any(. == $n);
+  def refs_any($ns): . as $c | any($ns[]; . as $n | $c | refs_name($n));
+'
 
 # The forge-managed settings defaults. One row per key:
 #   <key>|<json-value>
@@ -352,6 +376,15 @@ FORGE_HOOK_WIRING=(
 FORGE_SETTINGS_DEFAULTS=(
   "autoCompactWindow|250000"
 )
+
+# Give a settings.json temp file the original's mode before it replaces it
+# (mktemp-free redirect creates it under the umask, which may widen 0600).
+_keep_settings_mode() {
+  if [[ -e "$MEMBRANE_SETTINGS_FILE" ]]; then
+    chmod --reference="$MEMBRANE_SETTINGS_FILE" "$1" 2>/dev/null || return 1
+  fi
+  return 0
+}
 
 # Split a FORGE_HOOK_WIRING row into base/event/matcher (matcher may contain |).
 _wiring_parts() {
@@ -378,7 +411,41 @@ wire_hooks() {
   if [[ ! -f "$MEMBRANE_SETTINGS_FILE.pre-forge-hooks.bak" ]]; then
     cp "$MEMBRANE_SETTINGS_FILE" "$MEMBRANE_SETTINGS_FILE.pre-forge-hooks.bak"
   fi
-  local row tmp
+  local row tmp name ev retired_json retired_msgs=""
+  # Strip retired hook entries from every event before (re)wiring. Only the
+  # retired hooks[] items are dropped; an entry left with no hooks is dropped;
+  # an event array is dropped only if this removal emptied it (pre-existing
+  # empty arrays and every other key are re-emitted verbatim).
+  retired_json=$(printf '%s\n' "${FORGE_HOOK_RETIRED[@]}" | jq -R . | jq -sc .)
+  for name in "${FORGE_HOOK_RETIRED[@]}"; do
+    while IFS= read -r ev; do
+      [[ -n "$ev" ]] && retired_msgs+="| $name | RETIRED | entry removed from $ev |"$'\n'
+    done < <(jq -r --arg n "$name" "$_retired_jq_defs"'
+      (.hooks // {}) | if type == "object" then to_entries[] else empty end
+      | select((.value | type) == "array")
+      | select([.value[]?.hooks[]?.command] | any(refs_name($n)))
+      | .key' "$MEMBRANE_SETTINGS_FILE" 2>/dev/null)
+  done
+  tmp="$MEMBRANE_SETTINGS_FILE.tmp.$$"
+  if jq --argjson ns "$retired_json" "$_retired_jq_defs"'
+    if (.hooks | type) == "object" then
+      .hooks |= reduce keys_unsorted[] as $k (.;
+        if (.[$k] | type) == "array" and (.[$k] | length) > 0 then
+          [ .[$k][]
+            | if (.hooks | type) == "array" and ([.hooks[]?.command] | any(refs_any($ns)))
+              then .hooks = [.hooks[] | select((.command | refs_any($ns)) | not)]
+                   | select((.hooks | length) > 0)
+              else . end ] as $new
+          | if ($new | length) == 0 then del(.[$k]) else .[$k] = $new end
+        else . end)
+    else . end
+  ' "$MEMBRANE_SETTINGS_FILE" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]] \
+     && _keep_settings_mode "$tmp" && mv "$tmp" "$MEMBRANE_SETTINGS_FILE"; then
+    printf '%s' "$retired_msgs"
+  else
+    rm -f "$tmp"
+    echo "| retired hooks | ERROR | jq strip failed — settings.json left unchanged |"
+  fi
   for row in "${FORGE_HOOK_WIRING[@]}"; do
     _wiring_parts "$row"
     [[ -f "$MEMBRANE_HOOKS/$_w_base" ]] || continue
@@ -393,8 +460,8 @@ wire_hooks() {
              | map(select([.hooks[]?.command // ""] | any(test($base)) | not)))
           + [{matcher: $matcher, hooks: [{type: "command", command: $cmd}]}]
         )
-    ' "$MEMBRANE_SETTINGS_FILE" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]]; then
-      mv "$tmp" "$MEMBRANE_SETTINGS_FILE"
+    ' "$MEMBRANE_SETTINGS_FILE" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]] \
+       && _keep_settings_mode "$tmp" && mv "$tmp" "$MEMBRANE_SETTINGS_FILE"; then
       echo "| $_w_base | WIRED | $_w_event matcher='${_w_matcher:-<all>}' |"
     else
       rm -f "$tmp"
@@ -422,6 +489,7 @@ deploy_hooks() {
     chmod +x "$dest"
     echo "| $base | DEPLOYED | $(stat -c %s "$f") bytes |"
   done
+  # Retired bodies are left in place this release (see FORGE_HOOK_RETIRED).
   if [[ "$any" -eq 0 ]]; then
     echo "| hooks | SKIP | no *.sh files found in $FORGE_HOOKS |"
     echo ""
@@ -492,6 +560,27 @@ verify_hooks() {
     fi
   done
 
+  # Retired hooks: still wired anywhere is an error (it fires next to, or
+  # instead of, its replacement); a leftover body that nothing runs is only a
+  # warning and does not count.
+  local name ev
+  for name in "${FORGE_HOOK_RETIRED[@]}"; do
+    if [[ -f "$MEMBRANE_SETTINGS_FILE" ]]; then
+      while IFS= read -r ev; do
+        [[ -n "$ev" ]] || continue
+        echo "| $name | RETIRED-WIRED | still wired in settings.json under $ev — run cast-deploy.sh --hooks |"
+        errors=$((errors + 1))
+      done < <(jq -r --arg n "$name" "$_retired_jq_defs"'
+        (.hooks // {}) | if type == "object" then to_entries[] else empty end
+        | select((.value | type) == "array")
+        | select([.value[]?.hooks[]?.command] | any(refs_name($n)))
+        | .key' "$MEMBRANE_SETTINGS_FILE" 2>/dev/null)
+    fi
+    if [[ -e "$MEMBRANE_HOOKS/$name" ]]; then
+      echo "| $name | RETIRED-BODY | warning: retired body still in $MEMBRANE_HOOKS (unused; left in place this release; removed next release) |"
+    fi
+  done
+
   echo ""
   if [[ $errors -eq 0 ]]; then
     echo "**All hooks verified OK — bodies in sync and wired**"
@@ -537,8 +626,8 @@ apply_settings_defaults() {
       fi
     else
       tmp="$MEMBRANE_SETTINGS_FILE.tmp.$$"
-      if jq --arg k "$key" --argjson v "$value" '. + {($k): $v}' "$MEMBRANE_SETTINGS_FILE" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]]; then
-        mv "$tmp" "$MEMBRANE_SETTINGS_FILE"
+      if jq --arg k "$key" --argjson v "$value" '. + {($k): $v}' "$MEMBRANE_SETTINGS_FILE" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]] \
+         && _keep_settings_mode "$tmp" && mv "$tmp" "$MEMBRANE_SETTINGS_FILE"; then
         echo "| $key | SET | $value |"
       else
         rm -f "$tmp"

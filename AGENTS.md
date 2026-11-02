@@ -12,7 +12,7 @@ Forge is the shared tooling, conventions, and reference documentation repo used 
 | `core/skills/` | Tool-neutral SKILL.md + refs — the sole source of truth for skills |
 | `core/scripts/` | Tool-neutral runtime scripts (read `FORGE_PATH` env var) |
 | `core/rules/` | Tool-neutral HARD RULES (forge-governance + development-discipline) |
-| `core/hooks/` | Tool-neutral membrane hook bodies (tier work-router + opt-in auto-handoff) — installed **and wired into `settings.json`** by `cast-deploy.sh --hooks` (forge's own four entries only) |
+| `core/hooks/` | Tool-neutral membrane hook bodies (tier work-router + opt-in auto-cycle) — installed **and wired into `settings.json`** by `cast-deploy.sh --hooks` (forge's own four entries only) |
 | `bin/forge-build` | Build script — agnostic mode, no `<adapter>` argument; emits `build/.agents/FORGE.md` + `build/.agents/skills/` + `build/.agents/rules/` + `build/scripts/` |
 | `claude-helpers/` | `README.md` + `refs/` |
 | `bin/` | Repo-level entry-point scripts (currently just `forge-build`) |
@@ -102,7 +102,7 @@ Three Masters of the forge — distinct domains, complementary roles. Two deploy
 | `/cicd` | Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures, escalates to /pry |
 | `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
 | `/burn` | Token Burn — per-session token + est-cost report read from the harness's own transcripts (zero deps). Measure before/after any token-saving change. |
-| `/handoff` | Opt-in auto-handoff (`on <name>` / `off` / `status` / `cancel`, or no argument to write a note): saves a handoff note, clears the session through the Stop/SessionStart hooks and resumes on the next task. Tmux only. |
+| `/cycle` | Opt-in auto-cycle (`auto` / `manual` / `status` / `cancel`, or no argument to write a note; name taken from the /rename title): saves a cycle note, clears the session through the Stop/SessionStart hooks and resumes on the next task. Tmux only. |
 
 ## Three Pillars (all bidirectional via /forge)
 | Pillar | DOWN (forge → user) | UP (user → forge) |
@@ -130,6 +130,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **2026-08-17 → 2026-10-08** (archived): model-tier ceiling and delegation doctrine, tier hooks, one-face typography and landing defaults, context hygiene and the Sonnet-plus-advisor default, AGENTS.md-only project rules, the versioning standard, Cloudflare-native error tracking and email defaults, the leak purge and purity-gate fix, the haiku 5.5 tier pin. Full detail per entry: `memory/recent-history.md`.
 - **2026-10-10 → 2026-10-31** (archived): status-slate fix and mobile upgrade fold, the opt-in `/handoff` skill with its hooks and hardening, `/parse` and headless mode (`FORGE_HEADLESS`, `--headless --out`), /smith headless, and the October purge currency pass. Full detail: `memory/recent-history.md`.
 - **2026-11-01 one-shot /handoff**: an explicit `/handoff` no longer needs `/handoff on`; `handoff.sh write [name]` creates a one-shot opt-in (`oneshot=1`) that `status` reports as off, so model-initiated auto-handoff stays opt-in. Exit 3 retired; hooks unchanged.
+- **2026-11-02 /handoff renamed /cycle**: `auto`/`manual` replace `on`/`off` (aliases kept one release), the name comes from the session's /rename title (then tmux window, then session name), state moves to `~/.claude/cycles` (legacy dir migrated, symlink left), the cast strips retired handoff-* hook entries, and a `handoff` alias shim stays one release.
 
 ### Outstanding — Generic Forge v2 follow-ups
 
@@ -138,6 +139,7 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **Cross-tool end-to-end validation**: Codex CLI confirmed (2026-05-10). Gemini CLI 0.59.0 discovers the deployed skills in `~/.agents/skills/` (`gemini skills list`, 2026-10-11); invoking one there is untested. DeepSeek TUI is pending: it is not installed on this machine and its discovery path is unknown. Codex run detail: `memory/recent-history.md`.
 - **Haiku 5.5 pin preconditions** — every machine needs Claude Code 2.1.293+ and `claude-haiku-5-5` in the managed `availableModels` list before a cast; a pin outside the allowlist is silently ignored. No A/B of a Haiku default against Sonnet has been run.
 - **Workers error-tracking default is docs-derived** — confirm a test error reaches Workers Issues at runtime (stack guide, "Cloudflare Workers — error tracking").
+- **/cycle next release**: delete the `core/skills/handoff/` alias shim, drop the `on`/`off` aliases, and add the `rm -f` unlink of the retired `handoff-*` hook bodies in `cast-deploy.sh` (left in place this release). Live-check once in a pane whether `CLAUDE_CODE_SESSION_ID` changes after `/clear` (if not, a post-clear /rename is missed by the name refresh; fails safe).
 
 ### Earlier phases + Recent work
 

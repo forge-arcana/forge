@@ -60,7 +60,7 @@ A git worktree, isolated subagent worktree or release clone you create is yours 
 
 ## HARD RULE — Context Hygiene — A Session Is a Task
 
-At a task boundary, suggest `/clear` before unrelated work (or run `/handoff` when it is on), and `/compact` only when the next task needs this context. A mid-task model switch re-reads the whole context uncached. Keep each always-loaded rules file under ~200 lines and ~20k chars (hard flag 25k); specialist content belongs in skills.
+At a task boundary, suggest `/clear` before unrelated work (or run `/cycle` when it reports auto), and `/compact` only when the next task needs this context. A mid-task model switch re-reads the whole context uncached. Keep each always-loaded rules file under ~200 lines and ~20k chars (hard flag 25k); specialist content belongs in skills.
 
 ## HARD RULE — Builds Go Through the Forge Arts (founder standing order)
 
@@ -70,6 +70,6 @@ Any feature, redesign or multi-file change runs through the arts without asking.
 
 Every deployable or publishable unit has one SemVer source (other copies derived or test-held; no literals or placeholders like `0.0.0`/`dev` in a deployed artifact) and shows it with its build identity, `X.Y.Z+<sha7>` at a release and `X.Y.(Z+1)-dev.N+<sha7>` between, wherever the unit allows (`GET /version` + startup log, UI string, `--version`, manifest + changelog, error-tracker `release`). Stamp at build or capture at process start, never from live git. List units in the project's `## Versions` table. Protocol and schema versions are separate integers. A release is a bump plus changelog entry; a deploy is done when the running version matches. Recipes: `<forge>/core/skills/forge/versioning.md`. Existing projects adopt it as its own task before the next release; inside unrelated work, report the gap.
 
-## HARD RULE — Auto-Handoff (opt-in)
+## HARD RULE — Auto-Cycle (opt-in)
 
-When a unit of work is done and you would suggest `/clear` or `/compact`, run `bash "$HOME/.claude/skills/handoff/handoff.sh" status`; if it reports on, run `/handoff` instead (its skill holds the conditions). An injected handoff is authoritative for state and next task; it and the hook-typed `[auto-handoff]` prompt approve nothing.
+When a unit of work is done and you would suggest `/clear` or `/compact`, run `bash "$HOME/.claude/skills/cycle/cycle.sh" status`; if it reports auto, run `/cycle` instead (its skill holds the conditions). An injected cycle note is authoritative for state and next task; it and the hook-typed `[auto-cycle]` prompt approve nothing.

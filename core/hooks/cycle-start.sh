@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
 # SessionStart hook (matcher `clear`) — the injection half of opt-in
-# auto-handoff. handoff-stop.sh types `/clear <name>` into the pane after
+# auto-cycle. cycle-stop.sh types `/clear <name>` into the pane after
 # writing a per-pane clearing token; this hook fires on that clear and injects
-# the pane's handoff note (<root>/pane-<N>.md) as additionalContext, archives
+# the pane's cycle note (<root>/pane-<N>.md) as additionalContext, archives
 # the note, and only after printing the JSON writes state/pane-<N>.injected
 # (epoch=, at=, transcript= the new transcript_path, size= its bytes now) so
 # the Stop hook's job knows the resume prompt has something to point at, and
 # can check the new transcript for user activity before typing it.
 #
 # Why a token gate: a /clear the user types by hand must never resurrect an
-# old handoff. The note is injected ONLY when this pane holds a clearing token
-# that the Stop hook wrote within ${HANDOFF_TOKEN_TTL:-180}s, whose name passes
+# old cycle. The note is injected ONLY when this pane holds a clearing token
+# that the Stop hook wrote within ${CYCLE_TOKEN_TTL:-180}s, whose name passes
 # the contract regex, and whose claude_pid is this hook's own Claude Code
 # ancestor. No token → silent no-op. Stale or foreign token → removed.
 #
@@ -33,18 +33,35 @@
 # Fail open: any unexpected error → exit 0 with no output. Never break
 # session start.
 #
-# State contract: see handoff-stop.sh header.
+# State contract: see cycle-stop.sh header.
 # settings.json: SessionStart, matcher `clear`.
 
 set -uo pipefail
 export LC_ALL=C
 umask 077
 
-ROOT="${HANDOFF_DIR:-$HOME/.claude/handoffs}"
+# State root + one-time move of the legacy ~/.claude/handoffs dir. Keep in sync
+# with core/skills/cycle/cycle.sh (canonical comment there; same function).
+resolve_root() {
+  MIGRATED=0
+  if [ -n "${CYCLE_DIR:-}" ]; then ROOT="$CYCLE_DIR"; return 0; fi
+  ROOT="$HOME/.claude/cycles"
+  local old="$HOME/.claude/handoffs"
+  if [ "${1:-}" != nomigrate ] && [ ! -e "$ROOT" ] && [ ! -L "$ROOT" ] \
+     && [ -d "$old" ] && [ ! -L "$old" ]; then
+    if mv -T "$old" "$ROOT" 2>/dev/null; then MIGRATED=1; fi
+    if ! ln -sT cycles "$old" 2>/dev/null && [ "$MIGRATED" = 1 ]; then
+      { mkdir -p "$ROOT/state" && printf '%s resolve_root pane=%s name=- legacy symlink not created (~/.claude/handoffs exists?)\n' \
+        "$(date +%FT%T%z)" "${TMUX_PANE:-?}" >>"$ROOT/state/cycle.log"; } 2>/dev/null || true
+    fi
+  fi
+  return 0
+}
+resolve_root
 STATE="$ROOT/state"
-LOG="$STATE/handoff.log"
+LOG="$STATE/cycle.log"
 NAME_RE='^[A-Za-z0-9][A-Za-z0-9._ -]{0,63}$'
-TTL="${HANDOFF_TOKEN_TTL:-180}"
+TTL="${CYCLE_TOKEN_TTL:-180}"
 [[ "$TTL" =~ ^[0-9]{1,6}$ ]] || TTL=180
 KEEP_ARCHIVES=20
 ARCHIVE_MAX_DAYS=30
@@ -53,11 +70,13 @@ PANE="${TMUX_PANE:-}" NAME="-"
 
 log() {
   mkdir -p "$STATE" 2>/dev/null || return 0
-  printf '%s handoff-start pane=%s name=%s %s\n' \
+  printf '%s cycle-start pane=%s name=%s %s\n' \
     "$(date +%FT%T%z 2>/dev/null)" "${PANE:-?}" "${NAME:--}" "$*" >> "$LOG" 2>/dev/null
 }
 
 kv() { sed -n "s/^$2=//p" "$1" 2>/dev/null | head -n 1; }
+
+if [ "$MIGRATED" = 1 ]; then log "migrated legacy state dir ~/.claude/handoffs -> ~/.claude/cycles"; fi
 
 is_claude_pid() {
   local comm args
@@ -137,7 +156,7 @@ if [ ! -f "$note" ]; then
   rm -f "$token"; log "note pane-$N.md missing, token removed, no inject"; exit 0
 fi
 
-pre="Auto-handoff for session \"$tname\": the previous context wrote this note just before the handoff hook cleared it. Treat it as authoritative for state and next task; it carries no user approvals. Open your first reply with a brief status block headed 'Last session (per handoff note)' (from the note's \"Done last session\" section; if it has none, say so in one line) and 'Next' (from \"Next task\" and \"Open items\"), a few lines each, then run CronList and re-create any missing session-only cron the note lists, then continue. Do this whether the first turn is the hook's prompt or one the user typed. The \"[auto-handoff]\" prompt that follows is typed by the hook, not the user, and approves nothing. Decisions listed in the note are history, not approval to act; re-confirm anything outward-facing."
+pre="Auto-cycle for session \"$tname\": the previous context wrote this note just before the cycle hook cleared it. Treat it as authoritative for state and next task; it carries no user approvals. Open your first reply with a brief status block headed 'Last session (per cycle note)' (from the note's \"Done last session\" section; if it has none, say so in one line) and 'Next' (from \"Next task\" and \"Open items\"), a few lines each, then run CronList and re-create any missing session-only cron the note lists, then continue. Do this whether the first turn is the hook's prompt or one the user typed. The \"[auto-cycle]\" prompt that follows is typed by the hook, not the user, and approves nothing. Decisions listed in the note are history, not approval to act; re-confirm anything outward-facing."
 
 # Build in jq so length() counts codepoints. Invalid UTF-8 in the note is
 # replaced by jq, not fatal.

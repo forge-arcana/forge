@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 #
-# Tests for handoff-stop.sh's tx_quiet (transcript quiet check). No tmux, no
+# Tests for cycle-stop.sh's tx_quiet (transcript quiet check). No tmux, no
 # real sessions: fake transcripts in a temp dir.
-# Run:  bash core/hooks/tests/test-handoff-quiet.sh      (non-zero on failure)
+# Run:  bash core/hooks/tests/test-cycle-quiet.sh      (non-zero on failure)
 
 HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.."
 TMPD="$(mktemp -d)"
 trap 'rm -rf "$TMPD"' EXIT
-export HANDOFF_DIR="$TMPD/h"
-mkdir -p "$HANDOFF_DIR/state"
+mkdir -p "$TMPD/home"; export HOME="$TMPD/home"; unset CLAUDE_CODE_SESSION_ID   # never the real ~/.claude
+export CYCLE_DIR="$TMPD/h"
+mkdir -p "$CYCLE_DIR/state"
 
-HANDOFF_SOURCE_ONLY=1 source "$HERE/handoff-stop.sh"
+CYCLE_SOURCE_ONLY=1 source "$HERE/cycle-stop.sh"
 set +u
 
 FAILS=0
