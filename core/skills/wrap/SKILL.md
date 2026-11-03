@@ -90,4 +90,4 @@ The skill also recognizes paths in parentheses — e.g., `(/path/to/docs-repo)` 
 - If the user declines, skip the push
 
 ## Step 7: Fresh Context
-- The commit is the natural break point. If `bash "$HOME/.claude/skills/cycle/cycle.sh" status` reports auto, run `/cycle`. Otherwise tell the user in one line: "`/clear` for unrelated next work, `/compact` to carry this context on." Both are user commands; the agent can't run them.
+- The commit is the natural break point. If `bash "$HOME/.claude/skills/pass/pass.sh" status` reports auto, run `/pass`. Otherwise tell the user in one line: "`/clear` for unrelated next work, `/compact` to carry this context on." Both are user commands; the agent can't run them.

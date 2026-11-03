@@ -202,7 +202,7 @@ The evaluative trifecta — **poke → press → pound** — escalates in intens
 | `/cicd` | Local CI/CD pipeline — lint, typecheck, test, build, deploy. Auto-fixes failures |
 | `/eli5` | Explain Like I'm 5 — distill current topic into simplest possible terms |
 | `/burn` | Token Burn — per-session token and estimated-cost report read from the harness's own transcripts |
-| `/cycle` | Opt-in auto-cycle (`auto` / `manual` / `status` / `cancel`) - writes a note, clears the session and resumes on the next piece of work (tmux only) |
+| `/pass` | Opt-in auto-pass (`auto` / `manual` / `status` / `cancel`) - writes a note, clears the session and resumes on the next piece of work (tmux only) |
 
 ---
 
@@ -249,10 +249,10 @@ forge/
 │   │   │   ├── fold-phase.md          # Phase 3 (fold) procedure
 │   │   │   ├── versioning.md          # Unit versioning standard
 │   │   │   └── pattern-skeleton.md    # Pattern document skeleton
-│   │   └── burn/ cicd/ cycle/ dig/ eli5/ monci/ ponci/ qt/ srs/ temper/ vsix/ wawa/ wrap/   # task skills
+│   │   └── burn/ cicd/ pass/ dig/ eli5/ monci/ ponci/ qt/ srs/ temper/ vsix/ wawa/ wrap/   # task skills
 │   ├── scripts/           # Tool-neutral runtime scripts (21)
 │   ├── rules/             # HARD RULES (development-discipline.md, forge-governance.md)
-│   └── hooks/             # Membrane hooks: tier work-router (tier-guard.sh, tier-routing.sh) + auto-cycle (cycle-stop.sh, cycle-start.sh)
+│   └── hooks/             # Membrane hooks: tier work-router (tier-guard.sh, tier-routing.sh) + auto-pass (pass-stop.sh, pass-start.sh)
 ├── bin/forge-build        # Emits build/.agents/ (FORGE.md, skills/, rules/) + build/scripts/
 ├── build/                 # Generated output (gitignored)
 ├── claude-helpers/        # Optional Claude Code reference docs + transient migration glue

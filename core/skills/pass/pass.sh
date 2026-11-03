@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# cycle.sh — opt-in auto-cycle helper (state keyed by tmux pane, bound to
+# pass.sh — opt-in auto-pass helper (state keyed by tmux pane, bound to
 # the Claude Code process that ran `auto`).
 # Subcommands: auto [name...] | manual | status | write [name...] (note on stdin)
 # | cancel. `on` / `off` are silent aliases of auto / manual.
@@ -18,28 +18,28 @@
 # title_at_optin key renames whenever the title differs from the name.
 # A one-shot opt-in is left in place after the clear (the hooks need it through
 # the resume); it dies with the Claude process (claude_pid binding). `status`
-# reports it as manual, so the model-initiated auto-cycle rule never fires on it.
-# State contract: see core/hooks/cycle-stop.sh header.
+# reports it as manual, so the model-initiated auto-pass rule never fires on it.
+# State contract: see core/hooks/pass-stop.sh header.
 set -euo pipefail
 umask 077
 
 # State root + one-time move of the legacy ~/.claude/handoffs dir. Keep in sync
-# with core/hooks/cycle-stop.sh and core/hooks/cycle-start.sh (same function).
-# CYCLE_DIR set → that dir, never migrate. Else ~/.claude/cycles; when it does
+# with core/hooks/pass-stop.sh and core/hooks/pass-start.sh (same function).
+# PASS_DIR set → that dir, never migrate. Else ~/.claude/passes; when it does
 # not exist yet and ~/.claude/handoffs is a real dir, rename it and leave a
 # relative symlink behind. Race-tolerant and silent; sets MIGRATED=1 only in
 # the process whose mv won. Nothing may create the new root before this runs.
 resolve_root() {
   MIGRATED=0
-  if [ -n "${CYCLE_DIR:-}" ]; then ROOT="$CYCLE_DIR"; return 0; fi
-  ROOT="$HOME/.claude/cycles"
+  if [ -n "${PASS_DIR:-}" ]; then ROOT="$PASS_DIR"; return 0; fi
+  ROOT="$HOME/.claude/passes"
   local old="$HOME/.claude/handoffs"
   if [ "${1:-}" != nomigrate ] && [ ! -e "$ROOT" ] && [ ! -L "$ROOT" ] \
      && [ -d "$old" ] && [ ! -L "$old" ]; then
     if mv -T "$old" "$ROOT" 2>/dev/null; then MIGRATED=1; fi
-    if ! ln -sT cycles "$old" 2>/dev/null && [ "$MIGRATED" = 1 ]; then
+    if ! ln -sT passes "$old" 2>/dev/null && [ "$MIGRATED" = 1 ]; then
       { mkdir -p "$ROOT/state" && printf '%s resolve_root pane=%s name=- legacy symlink not created (~/.claude/handoffs exists?)\n' \
-        "$(date +%FT%T%z)" "${TMUX_PANE:-?}" >>"$ROOT/state/cycle.log"; } 2>/dev/null || true
+        "$(date +%FT%T%z)" "${TMUX_PANE:-?}" >>"$ROOT/state/pass.log"; } 2>/dev/null || true
     fi
   fi
   return 0
@@ -47,16 +47,16 @@ resolve_root() {
 resolve_root
 STATE="$ROOT/state"
 if [ "$MIGRATED" = 1 ]; then
-  { mkdir -p "$STATE" && printf '%s cycle.sh pane=%s name=- migrated legacy state dir ~/.claude/handoffs -> ~/.claude/cycles\n' \
-    "$(date +%FT%T%z)" "${TMUX_PANE:-?}" >>"$STATE/cycle.log"; } 2>/dev/null || true
+  { mkdir -p "$STATE" && printf '%s pass.sh pane=%s name=- migrated legacy state dir ~/.claude/handoffs -> ~/.claude/passes\n' \
+    "$(date +%FT%T%z)" "${TMUX_PANE:-?}" >>"$STATE/pass.log"; } 2>/dev/null || true
 fi
 CAP=9000
 NAME_RE='^[A-Za-z0-9][A-Za-z0-9._ -]{0,63}$'
-read -r -a TMUXC <<< "${CYCLE_TMUX:-tmux}"
+read -r -a TMUXC <<< "${PASS_TMUX:-tmux}"
 [ "${#TMUXC[@]}" -gt 0 ] || TMUXC=(tmux)
 
 usage() {
-  echo "usage: cycle.sh auto [name...] | manual | status | write [name...] | cancel" >&2
+  echo "usage: pass.sh auto [name...] | manual | status | write [name...] | cancel" >&2
   exit 64
 }
 
@@ -73,7 +73,7 @@ sanitize_name() {
 # Session name when none is given. Prints "<tier> <name>" (tier: title|window|
 # session|default): the session title (last custom-title record in this
 # session's transcript, last 8 MB only), else the tmux window name unless it is
-# just a program name, else the tmux session name, else "cycle". Each candidate
+# just a program name, else the tmux session name, else "pass". Each candidate
 # is sanitised and must pass valid_name, else the next one is tried.
 # Sanitised session title when it is valid, else nothing (always exits 0).
 current_title() {
@@ -106,7 +106,7 @@ derive_name() {
   c="$("${TMUXC[@]}" display-message -p -t "$PANE" '#{session_name}' 2>/dev/null || true)"
   c="$(sanitize_name "$c")"
   if valid_name "$c"; then printf 'session %s' "$c"; return 0; fi
-  printf 'default cycle'
+  printf 'default pass'
   return 0
 }
 
@@ -121,22 +121,22 @@ case "$cmd" in
 esac
 
 if { [ "$cmd" = auto ] || [ "$cmd" = write ]; } && [ $# -gt 0 ] && ! valid_name "$*"; then
-  echo "cycle: invalid name; 1-64 chars of A-Za-z0-9._ - (space allowed), starting with a letter or digit, no trailing space" >&2
+  echo "pass: invalid name; 1-64 chars of A-Za-z0-9._ - (space allowed), starting with a letter or digit, no trailing space" >&2
   exit 64
 fi
 
 if ! command -v "${TMUXC[0]}" >/dev/null 2>&1; then
   if [ "$cmd" = status ]; then echo "manual (not in tmux)"; exit 1; fi
-  echo "cycle: tmux is required" >&2; exit 1
+  echo "pass: tmux is required" >&2; exit 1
 fi
 if [ -z "${TMUX_PANE:-}" ]; then
   if [ "$cmd" = status ]; then echo "manual (not in tmux)"; exit 1; fi
-  echo "cycle: not in a tmux pane (\$TMUX_PANE unset); auto-cycle needs tmux" >&2
+  echo "pass: not in a tmux pane (\$TMUX_PANE unset); auto-pass needs tmux" >&2
   exit 1
 fi
 
 PANE="$TMUX_PANE"
-[[ "$PANE" =~ ^%[0-9]+$ ]] || { echo "cycle: unparseable \$TMUX_PANE '$PANE'" >&2; exit 1; }
+[[ "$PANE" =~ ^%[0-9]+$ ]] || { echo "pass: unparseable \$TMUX_PANE '$PANE'" >&2; exit 1; }
 N="${PANE#%}"
 OPTIN="$STATE/pane-$N.optin"
 READY="$STATE/pane-$N.ready"
@@ -144,8 +144,8 @@ CLEARING="$STATE/pane-$N.clearing"
 
 log() { # log <subcommand> <name> <result>
   mkdir -p "$STATE" 2>/dev/null || return 0
-  printf '%s cycle.sh %s pane=%s name=%s %s\n' \
-    "$(date +%FT%T%z)" "$1" "$PANE" "$2" "$3" >>"$STATE/cycle.log" 2>/dev/null || true
+  printf '%s pass.sh %s pane=%s name=%s %s\n' \
+    "$(date +%FT%T%z)" "$1" "$PANE" "$2" "$3" >>"$STATE/pass.log" 2>/dev/null || true
 }
 
 cur_pid() { "${TMUXC[@]}" display-message -p -t "$PANE" '#{pane_pid}' 2>/dev/null || true; }
@@ -199,11 +199,11 @@ case "$cmd" in
     name="$*"
     if [ -z "$name" ]; then name="$(derive_name)"; name="${name#* }"; fi
     if [ -z "$CPID" ]; then
-      echo "cycle: no Claude Code process found above this shell; run /cycle from inside Claude Code" >&2
+      echo "pass: no Claude Code process found above this shell; run /pass from inside Claude Code" >&2
       exit 1
     fi
     live="$(cur_pid)"
-    [ -n "$live" ] || { echo "cycle: cannot read pane pid for $PANE" >&2; exit 1; }
+    [ -n "$live" ] || { echo "pass: cannot read pane pid for $PANE" >&2; exit 1; }
     mkdir -p "$STATE"
     chmod 700 "$ROOT" "$STATE"
     tmp="$(mktemp "$STATE/.optin.XXXXXX")"
@@ -212,14 +212,14 @@ case "$cmd" in
     mv -f "$tmp" "$OPTIN"
     rm -f "$READY" "$CLEARING"
     log auto "$name" "ok(claude_pid=$CPID)"
-    echo "cycle: auto — session '$name' (pane $PANE). /cycle writes a note; the session then clears itself and resumes from it."
+    echo "pass: auto — session '$name' (pane $PANE). /pass writes a note; the session then clears itself and resumes from it."
     ;;
   manual)
     name="-"
     if [ -f "$OPTIN" ]; then name="$(sed -n 's/^name=//p' "$OPTIN" | head -n1)"; fi
     rm -f "$OPTIN" "$READY" "$CLEARING"
     log manual "$name" ok
-    echo "cycle: manual — pane $PANE no longer auto-clears."
+    echo "pass: manual — pane $PANE no longer auto-clears."
     ;;
   status)
     rc=0
@@ -228,7 +228,7 @@ case "$cmd" in
       ready=no
       [ -f "$READY" ] && ready=yes
       if [ "$OPT_ONESHOT" = 1 ]; then
-        echo "manual (one-shot cycle pending name=$OPT_NAME ready=$ready)"
+        echo "manual (one-shot pass pending name=$OPT_NAME ready=$ready)"
         exit 1
       fi
       echo "auto name=$OPT_NAME pane=$PANE ready=$ready"
@@ -242,20 +242,20 @@ case "$cmd" in
     note="$(cat; printf x)"
     note="${note%x}"
     if [ -z "${note//[[:space:]]/}" ]; then
-      echo "cycle: empty note rejected" >&2; exit 1
+      echo "pass: empty note rejected" >&2; exit 1
     fi
     n="$(printf '%s' "$note" | wc -m | tr -d ' ')"
     if [ "$n" -gt "$CAP" ]; then
-      echo "cycle: note is $n chars; cap is $CAP. Shorten and retry." >&2
+      echo "pass: note is $n chars; cap is $CAP. Shorten and retry." >&2
       log write "-" "rejected-too-long($n)"
       exit 2
     fi
     argname="$*"
     rc=0
     load_optin || rc=$?
-    [ "$rc" -eq 2 ] && echo "cycle: stale opt-in removed" >&2
+    [ "$rc" -eq 2 ] && echo "pass: stale opt-in removed" >&2
     if ! printf '%s\n' "$note" | tr -d '\r' | grep -qx '## Done last session[[:space:]]*'; then
-      echo "cycle: nothing saved — add a line that is exactly '## Done last session' (right after the title is conventional) listing what was done/shipped + key decisions, then re-run write." >&2
+      echo "pass: nothing saved — add a line that is exactly '## Done last session' (right after the title is conventional) listing what was done/shipped + key decisions, then re-run write." >&2
       log write "${OPT_NAME:--}" "rejected-no-done-section"
       exit 4
     fi
@@ -264,11 +264,11 @@ case "$cmd" in
       name="$argname"
       if [ -z "$name" ]; then name="$(derive_name)"; name="${name#* }"; fi
       if [ -z "$CPID" ]; then
-        echo "cycle: no Claude Code process found above this shell; run /cycle from inside Claude Code" >&2
+        echo "pass: no Claude Code process found above this shell; run /pass from inside Claude Code" >&2
         exit 1
       fi
       live="$(cur_pid)"
-      [ -n "$live" ] || { echo "cycle: cannot read pane pid for $PANE" >&2; exit 1; }
+      [ -n "$live" ] || { echo "pass: cannot read pane pid for $PANE" >&2; exit 1; }
       mkdir -p "$STATE"
       chmod 700 "$ROOT" "$STATE"
       tmp="$(mktemp "$STATE/.optin.XXXXXX")"
@@ -278,7 +278,7 @@ case "$cmd" in
       OPT_NAME="$name"
       log write "$name" "oneshot-optin(claude_pid=$CPID)"
     elif [ -n "$argname" ] && [ "$argname" != "$OPT_NAME" ]; then
-      echo "cycle: session is opted in as '$OPT_NAME'; ignoring name '$argname'" >&2
+      echo "pass: session is opted in as '$OPT_NAME'; ignoring name '$argname'" >&2
     elif [ -z "$argname" ]; then
       # Refresh: only a session title set AFTER opting in (/rename) renames
       # an opt-in; a title that already existed at opt-in, and the tmux
@@ -310,27 +310,27 @@ case "$cmd" in
     mv -f "$tmp" "$dest"
     # Loop guard (same window as the Stop hook's): inside it, save the note but
     # set no ready marker, and say so — the model must not expect a clear.
-    min="${CYCLE_MIN_INTERVAL:-600}"
+    min="${PASS_MIN_INTERVAL:-600}"
     [[ "$min" =~ ^[0-9]{1,6}$ ]] || min=600
     last="$(sed -n 's/^epoch=//p' "$STATE/pane-$N.lastclear" 2>/dev/null | head -n1 || true)"
     now="$(date +%s)"
     if [[ "$last" =~ ^[0-9]+$ ]] && [ $((now - last)) -lt "$min" ] && [ $((now - last)) -ge 0 ]; then
       rm -f "$READY"
       log write "$OPT_NAME" "saved($n),cooldown($((now - last))s)"
-      echo "cycle: saved $dest; auto-clear is on cooldown for $((min - (now - last)))s (last auto-clear $((now - last))s ago) — nothing will clear this turn."
+      echo "pass: saved $dest; auto-clear is on cooldown for $((min - (now - last)))s (last auto-clear $((now - last))s ago) — nothing will clear this turn."
       exit 0
     fi
     rtmp="$(mktemp "$STATE/.ready.XXXXXX")"
     printf 'name=%s\nepoch=%s\n' "$OPT_NAME" "$(date +%s)" >"$rtmp"
     mv -f "$rtmp" "$READY"
     log write "$OPT_NAME" "saved($n)"
-    echo "cycle: saved $dest ($n chars). Auto-clear is queued for the end of this turn; /cycle cancel stops it until the clear is typed."
+    echo "pass: saved $dest ($n chars). Auto-clear is queued for the end of this turn; /pass cancel stops it until the clear is typed."
     ;;
   cancel)
     name="-"
     if [ -f "$OPTIN" ]; then name="$(sed -n 's/^name=//p' "$OPTIN" | head -n1)"; fi
     rm -f "$READY" "$CLEARING"
     log cancel "$name" ok
-    echo "cycle: cancelled — no auto-clear queued for pane $PANE."
+    echo "pass: cancelled — no auto-clear queued for pane $PANE."
     ;;
 esac

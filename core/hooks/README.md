@@ -1,7 +1,7 @@
 # core/hooks/
 
 Tool-neutral bodies of forge's hooks: the tier work-router pair and the
-opt-in auto-cycle pair.
+opt-in auto-pass pair.
 
 ## Tier pair
 
@@ -36,30 +36,30 @@ no `.message.model` line yet. Both hooks fail open there — and first prompts
 are exactly when large investigation fan-outs happen. No sturdier model
 signal is exposed to a hook payload today.
 
-## Cycle pair (opt-in, tmux only)
+## Pass pair (opt-in, tmux only)
 
 Lets a long-running tmux session clear its own context at a clean boundary
-without losing the thread. A session opts in to model-initiated cycle with `/cycle auto` (name derived from the /rename title); an explicit `/cycle` also works without it (`write` creates a one-shot opt-in, `oneshot=1`, that `status` reports as off); when
-a unit of work is complete the model runs `/cycle`, which writes a note to
-`~/.claude/cycles/pane-<N>.md` (N = the tmux pane id) plus a ready marker.
+without losing the thread. A session opts in to model-initiated pass with `/pass auto` (name derived from the /rename title); an explicit `/pass` also works without it (`write` creates a one-shot opt-in, `oneshot=1`, that `status` reports as off); when
+a unit of work is complete the model runs `/pass`, which writes a note to
+`~/.claude/passes/pane-<N>.md` (N = the tmux pane id) plus a ready marker.
 The note must contain a line that is exactly `## Done last session` (what was
 done or shipped, plus key decisions, at most about 5 bullets; trailing
 whitespace on the heading is accepted). It may appear anywhere in the note,
 right after the title by convention; position is not enforced. Decisions are
-written as what was decided, never as approvals for future actions. `cycle.sh write` rejects a note without it (exit 4, no note, no ready
+written as what was decided, never as approvals for future actions. `pass.sh write` rejects a note without it (exit 4, no note, no ready
 marker, no opt-in created). Old notes and archives without it still inject.
-The note is written via the skill's `cycle.sh` helper through Bash, not the
+The note is written via the skill's `pass.sh` helper through Bash, not the
 Write tool, because `tier-guard.sh` denies Write on top-tier sessions.
 
-- `cycle-stop.sh` — `Stop` hook, no matcher. At turn end, if a ready marker
+- `pass-stop.sh` — `Stop` hook, no matcher. At turn end, if a ready marker
   exists, it schedules a detached job that types `/clear <name>` into the
   pane via tmux and, once the note is injected and the pane idle, `/rename
   <name>` and then a resume prompt. `/rename` is needed because Claude Code
   titles a cleared session from its first prompt and `/clear`'s argument does
   not set the title.
-- `cycle-start.sh` — `SessionStart` hook, matcher `clear`. Injects the note
+- `pass-start.sh` — `SessionStart` hook, matcher `clear`. Injects the note
   as context, archives it to
-  `~/.claude/cycles/archive/<name>-pane-<N>-<YYYYmmdd-HHMMSS>.md` (spaces
+  `~/.claude/passes/archive/<name>-pane-<N>-<YYYYmmdd-HHMMSS>.md` (spaces
   in the name become `_`). Archives: newest 20 per pane, and any archive
   older than 30 days is deleted whatever its pane (judged by the timestamp in
   the file name; only names matching the archive pattern are touched). Then it
@@ -85,13 +85,13 @@ which fails safe (log, drop the token, type nothing):
   Before every keystroke the job re-checks that Claude is alive, that
   `#{pane_current_command}` is `claude` (or `node`), and that the pane is not
   in copy mode (`#{pane_in_mode}` 0).
-- **Ready marker with TTL**: nothing happens unless `/cycle` wrote one, and
-  a marker older than `CYCLE_READY_TTL` is dropped.
+- **Ready marker with TTL**: nothing happens unless `/pass` wrote one, and
+  a marker older than `PASS_READY_TTL` is dropped.
 - **Loop guard**: if this pane was auto-cleared less than
-  `CYCLE_MIN_INTERVAL` ago, `cycle.sh write` still saves the note but sets
+  `PASS_MIN_INTERVAL` ago, `pass.sh write` still saves the note but sets
   no ready marker and prints `auto-clear is on cooldown for <s>s … nothing
   will clear this turn`; the Stop hook refuses to schedule in that window too.
-  The resume prompt also tells the model not to run `/cycle` in that turn.
+  The resume prompt also tells the model not to run `/pass` in that turn.
 - **Transcript quiet check (authoritative, allowlist)**: the job records the
   transcript's size and the time the Stop hook started. Right before typing
   `/clear` it reads the bytes appended since then once, drops a trailing
@@ -129,15 +129,15 @@ which fails safe (log, drop the token, type nothing):
   lines. It is busy if `esc to interrupt` appears in the footer or in the 3
   lines directly above the top border, where the spinner renders. Text in
   the input box, placeholder text, or a multi-line input aborts. Before
-  `/clear` it is checked `CYCLE_POLL_TRIES` times, 1 s apart, with no
+  `/clear` it is checked `PASS_POLL_TRIES` times, 1 s apart, with no
   longer wait.
-- **Cancel**: `/cycle cancel` or `/cycle manual` deletes the ready marker and the
+- **Cancel**: `/pass cancel` or `/pass manual` deletes the ready marker and the
   clearing token. The job checks the token before each step, so cancel
   works until `/clear` is typed. The token carries a per-job id; a job whose
-  id no longer matches (cancel, then a fresh `/cycle`) exits without
+  id no longer matches (cancel, then a fresh `/pass`) exits without
   touching the newer token, so only one clear happens.
 - **Fresh token**: the start hook injects only if this pane's clearing token
-  is younger than `CYCLE_TOKEN_TTL` and names the same Claude pid, so a
+  is younger than `PASS_TOKEN_TTL` and names the same Claude pid, so a
   manual `/clear` never loads an old note.
 - **Injected marker**: the resume prompt is typed only if the start hook
   printed its context and wrote `state/pane-<N>.injected`. If the note
@@ -169,22 +169,22 @@ which fails safe (log, drop the token, type nothing):
   turn is never held open. If `setsid` fails, the token is removed.
 - **Fails open**: any error exits 0 silently; the session is never blocked.
 
-Log: `~/.claude/cycles/state/cycle.log` (`date +%FT%T%z` timestamps).
+Log: `~/.claude/passes/state/pass.log` (`date +%FT%T%z` timestamps).
 Env overrides (all three scripts read what applies):
 
 | Var | Default | Meaning |
 |---|---|---|
-| `CYCLE_DIR` | `~/.claude/cycles` | state root |
-| `CYCLE_TMUX` | `tmux` | tmux command, word-split (tests use `tmux -L <sock>`) |
-| `CYCLE_DELAY` | `3` | seconds after turn end before the first check |
-| `CYCLE_POLL_TRIES` | `4` | idle checks before `/clear`, 1 s apart |
-| `CYCLE_TOKEN_TTL` | `180` | seconds a clearing token stays valid for the start hook |
-| `CYCLE_READY_TTL` | `900` | seconds a ready marker stays valid for the Stop hook |
-| `CYCLE_MIN_INTERVAL` | `600` | minimum seconds between auto-clears of one pane |
+| `PASS_DIR` | `~/.claude/passes` | state root |
+| `PASS_TMUX` | `tmux` | tmux command, word-split (tests use `tmux -L <sock>`) |
+| `PASS_DELAY` | `3` | seconds after turn end before the first check |
+| `PASS_POLL_TRIES` | `4` | idle checks before `/clear`, 1 s apart |
+| `PASS_TOKEN_TTL` | `180` | seconds a clearing token stays valid for the start hook |
+| `PASS_READY_TTL` | `900` | seconds a ready marker stays valid for the Stop hook |
+| `PASS_MIN_INTERVAL` | `600` | minimum seconds between auto-clears of one pane |
 
 ### Migration from /handoff (2026-11-02)
 
-- The first run of the helper or either hook (with `CYCLE_DIR` unset) moves a real `~/.claude/handoffs` to `~/.claude/cycles` and leaves `handoffs` as a symlink, so old detached jobs and the old helper keep working.
+- The first run of the helper or either hook (with `PASS_DIR` unset) moves a real `~/.claude/handoffs` to `~/.claude/passes` and leaves `handoffs` as a symlink, so old detached jobs and the old helper keep working.
 - State-file names are unchanged, so opted-in sessions carry over.
 - The cast strips the retired `handoff-*` entries from `settings.json` (`FORGE_HOOK_RETIRED`) but leaves their bodies in place, unwired, for this release, so a live session that misses the settings hot-reload does not call a missing file on every Stop or clear; `--verify-hooks` reports them as a `RETIRED-BODY` warning. The next release unlinks them (`rm -f`, never an overwrite).
 - The `handoff` skill stays one release as an alias shim (`on` = `auto`, `off` = `manual`).
@@ -203,11 +203,11 @@ suggested prompt), which is read as empty; colour alone is never ignored. The
 resume guard's 2 s grace covers only the clear's own lines (no `promptId`);
 it relies on Claude Code keeping that field on real prompts.
 
-Verified against Claude Code 2.1.302. The screen check (prompt box rendering, `esc to interrupt` footer) and the transcript line types depend on the CLI version; after an upgrade, a rendering change makes the hook abort (safe, but silent apart from cycle.log) — re-run a live check.
+Verified against Claude Code 2.1.302. The screen check (prompt box rendering, `esc to interrupt` footer) and the transcript line types depend on the CLI version; after an upgrade, a rendering change makes the hook abort (safe, but silent apart from pass.log) — re-run a live check.
 
-Test the screen reading (dim suggestion vs typed text, spinner, `BOX_RAW`) with `bash core/hooks/tests/test-cycle-stop.sh`. It runs on a private `tmux -L` server and sources the hook with `CYCLE_SOURCE_ONLY=1`; it exits non-zero on any failure. Tests live in `core/hooks/tests/`, not beside the hooks, so cast-deploy's `core/hooks/*.sh` glob does not install them.
+Test the screen reading (dim suggestion vs typed text, spinner, `BOX_RAW`) with `bash core/hooks/tests/test-pass-stop.sh`. It runs on a private `tmux -L` server and sources the hook with `PASS_SOURCE_ONLY=1`; it exits non-zero on any failure. Tests live in `core/hooks/tests/`, not beside the hooks, so cast-deploy's `core/hooks/*.sh` glob does not install them.
 
-The transcript check (`test-cycle-quiet.sh`), the start hook's status-block instruction (`test-cycle-start.sh`) and the `write` section check (`test-cycle-write.sh`) have their own tests there; they need no tmux and use temp dirs and fake transcripts. The rename added `test-cycle-name.sh` (name derivation), `test-cycle-cmds.sh` (`auto`/`manual`/`on`/`off` commands), `test-cycle-migrate.sh` (legacy root migration) and `test-cycle-cast.sh` (cast retirement of the old hook entries).
+The transcript check (`test-pass-quiet.sh`), the start hook's status-block instruction (`test-pass-start.sh`) and the `write` section check (`test-pass-write.sh`) have their own tests there; they need no tmux and use temp dirs and fake transcripts. The rename added `test-pass-name.sh` (name derivation), `test-pass-cmds.sh` (`auto`/`manual`/`on`/`off` commands), `test-pass-migrate.sh` (legacy root migration) and `test-pass-cast.sh` (cast retirement of the old hook entries).
 
 ## Install
 

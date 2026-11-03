@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Test for cycle-start.sh: the status-block instruction is injected, and a
+# Test for pass-start.sh: the status-block instruction is injected, and a
 # note without a "Done last session" section still injects. Runs the hook under
-# a fake `claude` process (a copy of bash) in a temp CYCLE_DIR; no tmux, no
-# real session. Run:  bash core/hooks/tests/test-cycle-start.sh
+# a fake `claude` process (a copy of bash) in a temp PASS_DIR; no tmux, no
+# real session. Run:  bash core/hooks/tests/test-pass-start.sh
 HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.."
 TMPD="$(mktemp -d)"
 trap 'rm -rf "$TMPD"' EXIT
@@ -15,25 +15,25 @@ SESS="$(printf "n%.0s" $(seq 1 64))"   # longest valid name (64 chars)
 export SESS
 check() { if [ "$2" = 0 ]; then echo "PASS  $1"; else echo "FAIL  $1  (${3:-})"; FAILS=$((FAILS + 1)); fi; }
 
-# run_hook NOTEFILE -> prints the hook's stdout; CYCLE_DIR is fresh per call
+# run_hook NOTEFILE -> prints the hook's stdout; PASS_DIR is fresh per call
 run_hook() {
-  export CYCLE_DIR="$(mktemp -d "$TMPD/h.XXXXXX")" TMUX_PANE="%7"
-  printf "%s" "$CYCLE_DIR" > "$TMPD/lastdir"   # run_hook runs in a $(...) subshell
-  mkdir -p "$CYCLE_DIR/state"
-  cp "$1" "$CYCLE_DIR/pane-7.md"
-  [ -z "${SEED:-}" ] || "$SEED" "$CYCLE_DIR"
+  export PASS_DIR="$(mktemp -d "$TMPD/h.XXXXXX")" TMUX_PANE="%7"
+  printf "%s" "$PASS_DIR" > "$TMPD/lastdir"   # run_hook runs in a $(...) subshell
+  mkdir -p "$PASS_DIR/state"
+  cp "$1" "$PASS_DIR/pane-7.md"
+  [ -z "${SEED:-}" ] || "$SEED" "$PASS_DIR"
   # inside the fake claude: write the token naming its own pid, then run the hook
   "$TMPD/claude" -c '
-    printf "epoch=%s\nid=1.1\nname=%s\nclaude_pid=%s\n" "$(date +%s)" "$SESS" "$$" > "$CYCLE_DIR/state/pane-7.clearing"
-    printf "{\"source\":\"clear\",\"transcript_path\":\"/nonexistent/t.jsonl\"}" | bash "'"$HERE"'/cycle-start.sh"'
+    printf "epoch=%s\nid=1.1\nname=%s\nclaude_pid=%s\n" "$(date +%s)" "$SESS" "$$" > "$PASS_DIR/state/pane-7.clearing"
+    printf "{\"source\":\"clear\",\"transcript_path\":\"/nonexistent/t.jsonl\"}" | bash "'"$HERE"'/pass-start.sh"'
 }
 
-printf '# Cycle - sess - d\n## Done last session\n- shipped X\n## Next task\nDo Y\n' > "$TMPD/new.md"
-printf '# Cycle - sess - d\n## Next task\nDo Y (old note, no done section)\n' > "$TMPD/old.md"
+printf '# Pass - sess - d\n## Done last session\n- shipped X\n## Next task\nDo Y\n' > "$TMPD/new.md"
+printf '# Pass - sess - d\n## Next task\nDo Y (old note, no done section)\n' > "$TMPD/old.md"
 
 out="$(run_hook "$TMPD/new.md")"
 ctx="$(printf '%s' "$out" | jq -r '.hookSpecificOutput.additionalContext' 2>/dev/null)"
-[[ "$ctx" == *'Open your first reply with a brief status block'* && "$ctx" == *'Last session (per cycle note)'* && "$ctx" == *'run CronList'* && "$ctx" == *'history, not approval to act'* && "$ctx" == *'Last session'* && "$ctx" == *'Done last session'* && "$ctx" == *'Next task'* && "$ctx" == *'Open items'* && "$ctx" == *'shipped X'* ]] \
+[[ "$ctx" == *'Open your first reply with a brief status block'* && "$ctx" == *'Last session (per pass note)'* && "$ctx" == *'run CronList'* && "$ctx" == *'history, not approval to act'* && "$ctx" == *'Last session'* && "$ctx" == *'Done last session'* && "$ctx" == *'Next task'* && "$ctx" == *'Open items'* && "$ctx" == *'shipped X'* ]] \
   && check "1 new note: status-block instruction and note injected" 0 || check "1 new note: status-block instruction and note injected" 1 "$out"
 
 out="$(run_hook "$TMPD/old.md")"
@@ -74,7 +74,7 @@ ls "$AD"/recent-pane-3-* >/dev/null 2>&1 && check "7 10-day-old archive of anoth
 [ -f "$AD/notes.md" ] && [ -f "$AD/x-pane-3-garbage.md" ] && check "8 non-matching files kept" 0 || check "8 non-matching files kept" 1 "$(ls "$AD")"
 cnt="$(ls "$AD" | grep -c -- '-pane-7-')"
 [ "$cnt" = 20 ] && check "9 per-pane cap keeps newest 20 ($cnt)" 0 || check "9 per-pane cap keeps newest 20" 1 "cnt=$cnt"
-grep -q 'older than 30 days' "$(cat "$TMPD/lastdir")/state/cycle.log" && check "10 age deletion logged" 0 || check "10 age deletion logged" 1
+grep -q 'older than 30 days' "$(cat "$TMPD/lastdir")/state/pass.log" && check "10 age deletion logged" 0 || check "10 age deletion logged" 1
 
 if [ "$FAILS" -ne 0 ]; then echo "$FAILS FAILED"; exit 1; fi
 echo "all passed"

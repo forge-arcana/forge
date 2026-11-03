@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
-# Tests for cycle-stop.sh's tx_quiet (transcript quiet check). No tmux, no
+# Tests for pass-stop.sh's tx_quiet (transcript quiet check). No tmux, no
 # real sessions: fake transcripts in a temp dir.
-# Run:  bash core/hooks/tests/test-cycle-quiet.sh      (non-zero on failure)
+# Run:  bash core/hooks/tests/test-pass-quiet.sh      (non-zero on failure)
 
 HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.."
 TMPD="$(mktemp -d)"
 trap 'rm -rf "$TMPD"' EXIT
 mkdir -p "$TMPD/home"; export HOME="$TMPD/home"; unset CLAUDE_CODE_SESSION_ID   # never the real ~/.claude
-export CYCLE_DIR="$TMPD/h"
-mkdir -p "$CYCLE_DIR/state"
+export PASS_DIR="$TMPD/h"
+mkdir -p "$PASS_DIR/state"
 
-CYCLE_SOURCE_ONLY=1 source "$HERE/cycle-stop.sh"
+PASS_SOURCE_ONLY=1 source "$HERE/pass-stop.sh"
 set +u
 
 FAILS=0

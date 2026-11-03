@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 #
-# Test for cycle-stop.sh's screen reading (read_box / pane_state), notably
+# Test for pass-stop.sh's screen reading (read_box / pane_state), notably
 # that Claude Code's dim suggested prompt in an empty input box counts as empty.
 # Uses a PRIVATE tmux server (tmux -L); touches nothing else. Exit non-zero on
-# any failure.   Run:  bash core/hooks/tests/test-cycle-stop.sh
+# any failure.   Run:  bash core/hooks/tests/test-pass-stop.sh
 # Lives in core/hooks/tests/ so cast-deploy's core/hooks/*.sh glob skips it.
 
 HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.."
 command -v tmux >/dev/null 2>&1 || { echo "tmux not found"; exit 1; }
 
-SOCK="cycle-test-$$-$RANDOM"
+SOCK="pass-test-$$-$RANDOM"
 TMPD="$(mktemp -d)"
-export CYCLE_TMUX="tmux -u -L $SOCK"
+export PASS_TMUX="tmux -u -L $SOCK"
 cleanup() { tmux -u -L "$SOCK" kill-server >/dev/null 2>&1; rm -rf "$TMPD"; }
 trap cleanup EXIT
 mkdir -p "$TMPD/home"; export HOME="$TMPD/home"; unset CLAUDE_CODE_SESSION_ID   # never the real ~/.claude
 
-CYCLE_SOURCE_ONLY=1 source "$HERE/cycle-stop.sh"
+PASS_SOURCE_ONLY=1 source "$HERE/pass-stop.sh"
 set +u   # sourcing turned nounset on; the fixtures below don't need it
 
 # Fixture drawn in the pane: history, [spinner], border, prompt line, border, footer.

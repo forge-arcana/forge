@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# Tests cast-deploy.sh --hooks / --verify-hooks for the handoff-* → cycle-*
+# Tests cast-deploy.sh --hooks / --verify-hooks for the handoff-* → pass-*
 # rename: retired entries stripped from every event (exact filename match),
 # hand-written entries untouched, old bodies left in place (unwired) this
 # release, settings.json mode kept, idempotent, and verify fails while a
 # retired hook is still wired but only warns on a leftover body. Fully sandboxed: HOME and the
 # membrane live in a temp dir; the real membrane is never touched.
-# Run:  bash core/hooks/tests/test-cycle-cast.sh      (non-zero on failure)
+# Run:  bash core/hooks/tests/test-pass-cast.sh      (non-zero on failure)
 
 HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.."
 FORGE="$(readlink -f "$HERE/../..")"
@@ -29,12 +29,13 @@ t() { local name="$1"; shift; if "$@" >/dev/null 2>&1; then check "$name" 0; els
 
 NOTIFY='{"matcher":"","hooks":[{"type":"command","command":"/opt/x/notify-blocked.sh notification","async":true}]}'
 LOOKALIKE='{"matcher":"","hooks":[{"type":"command","command":"/opt/x/my-handoff-stop.sh.bak-runner"}]}'
+BYPASS='{"matcher":"Bash","hooks":[{"type":"command","command":"/opt/x/bypass-stop.sh"}]}'
 OLD_STOP="{\"matcher\":\"\",\"hooks\":[{\"type\":\"command\",\"command\":\"$H/handoff-stop.sh\"}]}"
 OLD_START="{\"matcher\":\"clear\",\"hooks\":[{\"type\":\"command\",\"command\":\"$H/handoff-start.sh\"}]}"
-jq -n --argjson n "$NOTIFY" --argjson l "$LOOKALIKE" --argjson os "$OLD_STOP" --argjson ost "$OLD_START" '{
+jq -n --argjson n "$NOTIFY" --argjson l "$LOOKALIKE" --argjson b "$BYPASS" --argjson os "$OLD_STOP" --argjson ost "$OLD_START" '{
   permissions: {allow: ["Bash(ls:*)"], deny: []},
   env: {FOO: "bar"},
-  hooks: {Stop: [$os, $l], SessionStart: [$ost], Notification: [$n]}
+  hooks: {Stop: [$b, $os, $l], SessionStart: [$ost], Notification: [$n]}
 }' > "$S"
 chmod 600 "$S"
 PERM_BEFORE="$(jq -S .permissions "$S")"
@@ -53,15 +54,16 @@ grep -q 'body removed' "$TMPD/out1"; [ $? -ne 0 ]; check "does not report old bo
 t "no handoff-stop.sh entry anywhere" jq -e '[.hooks[][].hooks[].command | select(endswith("/handoff-stop.sh"))] | length == 0' "$S"
 t "no handoff-start.sh entry anywhere" jq -e '[.hooks[][].hooks[].command | select(endswith("/handoff-start.sh"))] | length == 0' "$S"
 
-if [ -f "$FORGE/core/hooks/cycle-stop.sh" ]; then
-  t "cycle-stop.sh wired under Stop, matcher \"\"" jq -e --arg c "$H/cycle-stop.sh" '[.hooks.Stop[] | select(.hooks[].command == $c) | .matcher] == [""]' "$S"
-else skip "cycle-stop.sh wiring" "forge source core/hooks/cycle-stop.sh absent"; fi
-if [ -f "$FORGE/core/hooks/cycle-start.sh" ]; then
-  t "cycle-start.sh wired under SessionStart, matcher clear" jq -e --arg c "$H/cycle-start.sh" '[.hooks.SessionStart[] | select(.hooks[].command == $c) | .matcher] == ["clear"]' "$S"
-else skip "cycle-start.sh wiring" "forge source core/hooks/cycle-start.sh absent"; fi
+if [ -f "$FORGE/core/hooks/pass-stop.sh" ]; then
+  t "pass-stop.sh wired under Stop, matcher \"\"" jq -e --arg c "$H/pass-stop.sh" '[.hooks.Stop[] | select(.hooks[].command == $c) | .matcher] == [""]' "$S"
+else skip "pass-stop.sh wiring" "forge source core/hooks/pass-stop.sh absent"; fi
+if [ -f "$FORGE/core/hooks/pass-start.sh" ]; then
+  t "pass-start.sh wired under SessionStart, matcher clear" jq -e --arg c "$H/pass-start.sh" '[.hooks.SessionStart[] | select(.hooks[].command == $c) | .matcher] == ["clear"]' "$S"
+else skip "pass-start.sh wiring" "forge source core/hooks/pass-start.sh absent"; fi
 
 [ "$(jq -S .hooks.Notification "$S")" = "$NOTIFY_BEFORE" ]; check "Notification entry byte-identical" $?
 t "look-alike Stop entry kept" jq -e '[.hooks.Stop[].hooks[].command] | index("/opt/x/my-handoff-stop.sh.bak-runner") != null' "$S"
+t "bypass-stop.sh Stop entry survives --hooks (exact-basename match)" jq -e '[.hooks.Stop[] | select(.hooks[].command == "/opt/x/bypass-stop.sh") | .matcher] == ["Bash"]' "$S"
 [ "$(jq -S .permissions "$S")" = "$PERM_BEFORE" ]; check "permissions unchanged" $?
 [ "$(jq -S .env "$S")" = "$ENV_BEFORE" ]; check "env unchanged" $?
 [ -f "$H/handoff-stop.sh" ]; check "old handoff-stop.sh body left in place" $?
@@ -69,6 +71,7 @@ t "look-alike Stop entry kept" jq -e '[.hooks.Stop[].hooks[].command] | index("/
 
 bash "$CAST" --verify-hooks > "$TMPD/v1" 2>&1
 check "--verify-hooks exits 0 after cast (bodies left in place)" $? "$(grep -E 'MISSING|DIFFERS|UNWIRED|STALE|RETIRED-WIRED' "$TMPD/v1")"
+t "verify reports pass-stop.sh WIRED despite bypass-stop.sh" grep -q '| pass-stop.sh | WIRED | Stop matcher' "$TMPD/v1"
 t "verify warns RETIRED-BODY for handoff-stop.sh" grep -q '| handoff-stop.sh | RETIRED-BODY | warning: .*(unused; left in place this release; removed next release)' "$TMPD/v1"
 t "verify warns RETIRED-BODY for handoff-start.sh" grep -q '| handoff-start.sh | RETIRED-BODY |' "$TMPD/v1"
 

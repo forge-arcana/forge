@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# Stop hook — the trigger half of opt-in auto-cycle.
+# Stop hook — the trigger half of opt-in auto-pass.
 #
-# A session opts in with `/cycle on <name>`; when its work is done the model
-# runs `/cycle`, which writes <root>/pane-<N>.md (the note) and a per-pane
+# A session opts in with `/pass on <name>`; when its work is done the model
+# runs `/pass`, which writes <root>/pane-<N>.md (the note) and a per-pane
 # "ready" marker. When the turn then ends, this hook consumes the marker and
 # schedules a fully detached job that types `/clear <name>` and, once the fresh
 # context has had the note injected and is idle, `/rename <name>` and then a
 # resume prompt into the session's own tmux pane. /rename is needed because
 # Claude Code titles a cleared session from its first prompt and /clear's
-# argument does not set the title. The SessionStart(clear) twin, cycle-start.sh,
+# argument does not set the title. The SessionStart(clear) twin, pass-start.sh,
 # injects the note in between.
 #
 # Why keystrokes: there is no hook decision that clears context. Typing
@@ -22,7 +22,7 @@
 #     (a reused pane id, or a new Claude started in the same shell, never
 #     inherits an opt-in);
 #   - before every keystroke batch the job re-checks: token present and still
-#     carrying THIS job's id (cancel; a cancel + re-cycle leaves only the new
+#     carrying THIS job's id (cancel; a cancel + re-pass leaves only the new
 #     job alive), opt-in still valid, that Claude pid alive and still `claude`,
 #     the pane's foreground command is Claude, the pane is not in copy mode,
 #     and the input box is the LAST box on screen, empty and not busy (dim text
@@ -51,7 +51,7 @@
 #     erased); after Enter the box must be empty again within 2.5 s, or the
 #     step counts as failed (`Enter swallowed`) and nothing further happens;
 #   - lastclear is written only after `/clear` is confirmed submitted;
-#   - the resume prompt is typed only if cycle-start.sh left an `injected`
+#   - the resume prompt is typed only if pass-start.sh left an `injected`
 #     marker (the note really reached the new context) AND the new transcript
 #     shows no user activity since the clear (lines of the clear itself, i.e.
 #     user / attachment / file-history-snapshot timestamped <= injection + 2 s,
@@ -60,7 +60,7 @@
 #     before `/rename <name>` is typed, then the pane must be idle again
 #     (up to ~5 tries) before the resume prompt;
 #   - loop guard: no schedule if this pane was auto-cleared less than
-#     CYCLE_MIN_INTERVAL seconds ago (the helper refuses to set the ready
+#     PASS_MIN_INTERVAL seconds ago (the helper refuses to set the ready
 #     marker in that window too; this is defence in depth).
 # Wrong-abort costs the user one manual /clear; wrong-type corrupts their input.
 #
@@ -72,8 +72,8 @@
 #
 # Fail open: any unexpected state → exit 0, no output, nothing typed.
 #
-# State (shared contract with the /cycle helper and cycle-start.sh):
-#   root  ${CYCLE_DIR:-$HOME/.claude/cycles}, state dir <root>/state
+# State (shared contract with the /pass helper and pass-start.sh):
+#   root  ${PASS_DIR:-$HOME/.claude/passes}, state dir <root>/state
 #   <root>/pane-<N>.md   the note                                   (helper)
 #   pane-<N>.optin       name= / pane_pid= / claude_pid=            (helper)
 #                        [+ oneshot= / title_at_optin=, helper-only; hooks ignore them]
@@ -81,12 +81,12 @@
 #   pane-<N>.clearing    epoch= / id= / name= / claude_pid=  (this hook; consumed by start hook)
 #   pane-<N>.injected    epoch= / at= / transcript= / size=  (start hook; consumed by the job)
 #   pane-<N>.lastclear   epoch=                     (job, once /clear is confirmed submitted)
-#   cycle.log          one line per decision
-# Env: CYCLE_TMUX (default `tmux`, word-split; tests use `tmux -L <sock>`),
-#      CYCLE_DELAY (default 3 s before the first check),
-#      CYCLE_POLL_TRIES (default 4 idle checks 1 s apart before /clear),
-#      CYCLE_READY_TTL (default 900 s; older ready markers are dropped),
-#      CYCLE_MIN_INTERVAL (default 600 s between auto-clears of one pane).
+#   pass.log          one line per decision
+# Env: PASS_TMUX (default `tmux`, word-split; tests use `tmux -L <sock>`),
+#      PASS_DELAY (default 3 s before the first check),
+#      PASS_POLL_TRIES (default 4 idle checks 1 s apart before /clear),
+#      PASS_READY_TTL (default 900 s; older ready markers are dropped),
+#      PASS_MIN_INTERVAL (default 600 s between auto-clears of one pane).
 #
 # settings.json: Stop, no matcher.
 
@@ -100,50 +100,50 @@ export LC_ALL=C   # byte semantics: ASCII-only name regex, literal ❯/─ prefi
 umask 077
 
 # State root + one-time move of the legacy ~/.claude/handoffs dir. Keep in sync
-# with core/skills/cycle/cycle.sh (canonical comment there; same function).
+# with core/skills/pass/pass.sh (canonical comment there; same function).
 resolve_root() {
   MIGRATED=0
-  if [ -n "${CYCLE_DIR:-}" ]; then ROOT="$CYCLE_DIR"; return 0; fi
-  ROOT="$HOME/.claude/cycles"
+  if [ -n "${PASS_DIR:-}" ]; then ROOT="$PASS_DIR"; return 0; fi
+  ROOT="$HOME/.claude/passes"
   local old="$HOME/.claude/handoffs"
   if [ "${1:-}" != nomigrate ] && [ ! -e "$ROOT" ] && [ ! -L "$ROOT" ] \
      && [ -d "$old" ] && [ ! -L "$old" ]; then
     if mv -T "$old" "$ROOT" 2>/dev/null; then MIGRATED=1; fi
-    if ! ln -sT cycles "$old" 2>/dev/null && [ "$MIGRATED" = 1 ]; then
+    if ! ln -sT passes "$old" 2>/dev/null && [ "$MIGRATED" = 1 ]; then
       { mkdir -p "$ROOT/state" && printf '%s resolve_root pane=%s name=- legacy symlink not created (~/.claude/handoffs exists?)\n' \
-        "$(date +%FT%T%z)" "${TMUX_PANE:-?}" >>"$ROOT/state/cycle.log"; } 2>/dev/null || true
+        "$(date +%FT%T%z)" "${TMUX_PANE:-?}" >>"$ROOT/state/pass.log"; } 2>/dev/null || true
     fi
   fi
   return 0
 }
 resolve_root nomigrate   # side-effect free here; the hook path migrates below
 STATE="$ROOT/state"
-LOG="$STATE/cycle.log"
+LOG="$STATE/pass.log"
 NAME_RE='^[A-Za-z0-9][A-Za-z0-9._ -]{0,63}$'
 PROMPT_CHAR=$'\xe2\x9d\xaf'   # ❯ U+276F
 BORDER_CHAR=$'\xe2\x94\x80'   # ─ U+2500
 NBSP=$'\xc2\xa0'              # Claude Code renders the empty prompt as "❯" + U+00A0
-RESUME_PROMPT='[auto-cycle] Context was cleared by the cycle hook, not typed by the user. Resume from the injected cycle note: re-arm any session-only state it lists, then continue with its next task. Do not run /cycle in this turn.'
+RESUME_PROMPT='[auto-pass] Context was cleared by the pass hook, not typed by the user. Resume from the injected pass note: re-arm any session-only state it lists, then continue with its next task. Do not run /pass in this turn.'
 ELLIPSIS=$'\xe2\x80\xa6'      # … U+2026, in the working spinner "Computing… (40s"
 SPIN_RE="${ELLIPSIS}[[:space:]]*\\([0-9]"
 BG_RE='[0-9]+ (shells?|(background )?tasks?)'   # footer background-task segment
 GRACE=2                       # seconds of timestamp slack in tx_quiet
 
 num_or() { [[ "$1" =~ ^[0-9]{1,6}$ ]] && printf '%s' "$1" || printf '%s' "$2"; }
-DELAY="$(num_or "${CYCLE_DELAY:-3}" 3)"
-POLL_TRIES="$(num_or "${CYCLE_POLL_TRIES:-4}" 4)"
-READY_TTL="$(num_or "${CYCLE_READY_TTL:-900}" 900)"
-MIN_INTERVAL="$(num_or "${CYCLE_MIN_INTERVAL:-600}" 600)"
+DELAY="$(num_or "${PASS_DELAY:-3}" 3)"
+POLL_TRIES="$(num_or "${PASS_POLL_TRIES:-4}" 4)"
+READY_TTL="$(num_or "${PASS_READY_TTL:-900}" 900)"
+MIN_INTERVAL="$(num_or "${PASS_MIN_INTERVAL:-600}" 600)"
 POST_CLEAR_TRIES=20           # ~20 s for the injected marker + idle screen
 
-read -r -a TMUXC <<< "${CYCLE_TMUX:-tmux}"
+read -r -a TMUXC <<< "${PASS_TMUX:-tmux}"
 [ "${#TMUXC[@]}" -gt 0 ] || TMUXC=(tmux)
 
 PANE="" N="" NAME="-" CPID="" TID="" PANE_WHY=""
 
 log() {
   mkdir -p "$STATE" 2>/dev/null || return 0
-  printf '%s cycle-stop pane=%s name=%s %s\n' \
+  printf '%s pass-stop pane=%s name=%s %s\n' \
     "$(date +%FT%T%z 2>/dev/null)" "${PANE:-?}" "${NAME:--}" "$*" >> "$LOG" 2>/dev/null
 }
 
@@ -475,8 +475,8 @@ drop_token() { [ -f "$TOKEN" ] && [ "$(kv "$TOKEN" id)" = "$TID" ] && rm -f "$TO
 abort() { log "job: $*, abort"; drop_token; exit 0; }
 
 # Every precondition shared by both typing steps.
-# The token check is the cancel path: /cycle cancel or off deletes it, and a
-# re-cycle replaces it with a new id.
+# The token check is the cancel path: /pass cancel or off deletes it, and a
+# re-pass replaces it with a new id.
 precheck() {
   local on
   [ -f "$TOKEN" ] && [ "$(kv "$TOKEN" name)" = "$NAME" ] && [ "$(kv "$TOKEN" id)" = "$TID" ] \
@@ -601,7 +601,7 @@ run_job() {
     '["user","attachment","file-history-snapshot"]' 1 \
     || { log "job: resume skipped: transcript activity${TX_WHY:+: $TX_WHY}"; exit 0; }
   # Restore the session name: Claude Code titles a cleared session from its first
-  # prompt ("Auto-cycle context resume"); /clear's argument does not set it.
+  # prompt ("Auto-pass context resume"); /clear's argument does not set it.
   # The guard above ran first, so /rename's own transcript lines are never
   # mistaken for user activity.
   type_verified "/rename $NAME"; rc=$?
@@ -622,14 +622,14 @@ run_job() {
   exit 0
 }
 
-# Tests: `CYCLE_SOURCE_ONLY=1 source cycle-stop.sh` loads the functions only.
+# Tests: `PASS_SOURCE_ONLY=1 source pass-stop.sh` loads the functions only.
 # Everything above is side-effect free (variables, umask, set -uo pipefail).
-[ "${CYCLE_SOURCE_ONLY:-0}" = 1 ] && return 0 2>/dev/null
+[ "${PASS_SOURCE_ONLY:-0}" = 1 ] && return 0 2>/dev/null
 
 # Before any early exit, so the first Stop after a deploy migrates the legacy
 # state dir (silent; nothing created the new root above).
 resolve_root
-if [ "$MIGRATED" = 1 ]; then log "migrated legacy state dir ~/.claude/handoffs -> ~/.claude/cycles"; fi
+if [ "$MIGRATED" = 1 ]; then log "migrated legacy state dir ~/.claude/handoffs -> ~/.claude/passes"; fi
 
 if [ "${1:-}" = "--job" ]; then
   shift

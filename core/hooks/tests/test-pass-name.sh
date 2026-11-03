@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
-# Test for cycle.sh name derivation: session title (customTitle in the
+# Test for pass.sh name derivation: session title (customTitle in the
 # transcript) -> tmux window name (program names skipped) -> tmux session name
-# -> "cycle"; an explicit name wins; a no-arg write renames the opt-in after a
+# -> "pass"; an explicit name wins; a no-arg write renames the opt-in after a
 # title change made after opting in (title_at_optin), never to a title that
-# predates it; legacy opt-ins without that key still rename. Fake HOME, temp CYCLE_DIR, stub tmux, fake `claude` (copy of
+# predates it; legacy opt-ins without that key still rename. Fake HOME, temp PASS_DIR, stub tmux, fake `claude` (copy of
 # bash). No real pane, session or ~/.claude is touched.
-# Run:  bash core/hooks/tests/test-cycle-name.sh
-HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../../skills/cycle"
+# Run:  bash core/hooks/tests/test-pass-name.sh
+HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../../skills/pass"
 TMPD="$(mktemp -d)"
 trap 'rm -rf "$TMPD"' EXIT
 mkdir -p "$TMPD/home"
@@ -23,15 +23,15 @@ esac
 STUB
 chmod +x "$TMPD/tmux"
 SID="0123abcd-4567-89ef-0123-456789abcdef"
-export CYCLE_DIR="$TMPD/c" CYCLE_TMUX="$TMPD/tmux" TMUX_PANE="%5" CYCLE_MIN_INTERVAL=600
+export PASS_DIR="$TMPD/c" PASS_TMUX="$TMPD/tmux" TMUX_PANE="%5" PASS_MIN_INTERVAL=600
 export CLAUDE_CODE_SESSION_ID="$SID"
 TX="$HOME/.claude/projects/-x/$SID.jsonl"
-O="$CYCLE_DIR/state/pane-5.optin"; R="$CYCLE_DIR/state/pane-5.ready"
+O="$PASS_DIR/state/pane-5.optin"; R="$PASS_DIR/state/pane-5.ready"
 FAILS=0
 check() { if [ "$2" = 0 ]; then echo "PASS  $1"; else echo "FAIL  $1  (${3:-})"; FAILS=$((FAILS + 1)); fi; }
 # the trailing exit keeps bash from exec-ing the last command (the fake claude must stay the parent)
 in_claude() { OUT="$("$TMPD/claude" -c "$1"$'\n''exit $?' 2>&1)"; RC=$?; }
-reset() { rm -rf "$CYCLE_DIR" "$HOME/.claude/projects"; export STUB_WINDOW=win STUB_SESSION=sess; }
+reset() { rm -rf "$PASS_DIR" "$HOME/.claude/projects"; export STUB_WINDOW=win STUB_SESSION=sess; }
 title() { # title NAME... -> append custom-title records to the transcript
   mkdir -p "${TX%/*}"
   local t
@@ -40,10 +40,10 @@ title() { # title NAME... -> append custom-title records to the transcript
   done
 }
 auto_name() { # run `auto` with no name; NAME = stored opt-in name
-  in_claude 'bash "'"$HERE"'/cycle.sh" auto'
+  in_claude 'bash "'"$HERE"'/pass.sh" auto'
   NAME="$(sed -n 's/^name=//p' "$O" 2>/dev/null)"
 }
-printf '# Cycle\n## Done last session\n- did x\n' > "$TMPD/good.md"
+printf '# Pass\n## Done last session\n- did x\n' > "$TMPD/good.md"
 
 reset
 mkdir -p "${TX%/*}"
@@ -51,7 +51,7 @@ printf '{"type":"user","message":"mentions \\"custom-title\\" in text"}\n' > "$T
 title "first title" "afp work"
 printf '{"type":"assistant","text":"says \\"custom-title\\" too"}\n' >> "$TX"
 auto_name
-[ "$RC" = 0 ] && [ "$NAME" = "afp work" ] && [[ "$OUT" == "cycle: auto — session 'afp work' (pane %5)."* ]] \
+[ "$RC" = 0 ] && [ "$NAME" = "afp work" ] && [[ "$OUT" == "pass: auto — session 'afp work' (pane %5)."* ]] \
   && check "1 last customTitle wins (other lines mentioning it ignored)" 0 || check "1 last customTitle wins (other lines mentioning it ignored)" 1 "rc=$RC name=$NAME out=$OUT"
 
 reset
@@ -81,7 +81,7 @@ done
 reset
 export STUB_WINDOW="zsh" STUB_SESSION="!!!"
 auto_name
-[ "$NAME" = "cycle" ] && check "6 nothing usable: 'cycle'" 0 || check "6 nothing usable: 'cycle'" 1 "name=$NAME"
+[ "$NAME" = "pass" ] && check "6 nothing usable: 'pass'" 0 || check "6 nothing usable: 'pass'" 1 "name=$NAME"
 
 reset
 mkdir -p "$HOME/.claude/projects/-x"
@@ -91,42 +91,42 @@ CLAUDE_CODE_SESSION_ID="../../etc" STUB_WINDOW=zsh STUB_SESSION="s1" auto_name
 
 reset
 title "titled"
-in_claude 'bash "'"$HERE"'/cycle.sh" auto given'
+in_claude 'bash "'"$HERE"'/pass.sh" auto given'
 grep -qx 'name=given' "$O" && check "8 explicit auto name wins over the title" 0 || check "8 explicit auto name wins over the title" 1 "$(cat "$O" 2>&1)"
 
 reset
 title "before"
-in_claude 'bash "'"$HERE"'/cycle.sh" auto >/dev/null
+in_claude 'bash "'"$HERE"'/pass.sh" auto >/dev/null
   printf "%s\n" "{\"type\":\"custom-title\",\"customTitle\":\"after\",\"sessionId\":\"'"$SID"'\"}" >> "'"$TX"'"
-  bash "'"$HERE"'/cycle.sh" write < "'"$TMPD"'/good.md" >/dev/null
+  bash "'"$HERE"'/pass.sh" write < "'"$TMPD"'/good.md" >/dev/null
   echo "rc=$?"
-  bash "'"$HERE"'/cycle.sh" status'
+  bash "'"$HERE"'/pass.sh" status'
 [[ "$OUT" == *"rc=0"* ]] && grep -qx 'name=after' "$O" && grep -qx 'name=after' "$R" && ! grep -q oneshot "$O" \
   && grep -qx 'pane_pid=4242' "$O" && grep -q '^claude_pid=[0-9]' "$O" && [[ "$OUT" == *"auto name=after pane=%5 ready=yes"* ]] \
-  && grep -q 'renamed before -> after' "$CYCLE_DIR/state/cycle.log" \
+  && grep -q 'renamed before -> after' "$PASS_DIR/state/pass.log" \
   && check "9 write refresh: opt-in + ready marker carry the new title, logged" 0 || check "9 write refresh: opt-in + ready marker carry the new title, logged" 1 "out=$OUT $(cat "$O" "$R" 2>&1)"
 
 reset
-in_claude 'bash "'"$HERE"'/cycle.sh" auto given >/dev/null
-  bash "'"$HERE"'/cycle.sh" write < "'"$TMPD"'/good.md" >/dev/null'
+in_claude 'bash "'"$HERE"'/pass.sh" auto given >/dev/null
+  bash "'"$HERE"'/pass.sh" write < "'"$TMPD"'/good.md" >/dev/null'
 grep -qx 'name=given' "$O" && grep -qx 'name=given' "$R" \
   && check "10 no title: refresh keeps the explicit auto name (tmux names never override)" 0 || check "10 no title: refresh keeps the explicit auto name (tmux names never override)" 1 "$(cat "$O" "$R" 2>&1)"
 
 reset
 title "one-shot title"
-in_claude 'bash "'"$HERE"'/cycle.sh" write < "'"$TMPD"'/good.md" >/dev/null
+in_claude 'bash "'"$HERE"'/pass.sh" write < "'"$TMPD"'/good.md" >/dev/null
   printf "%s\n" "{\"type\":\"custom-title\",\"customTitle\":\"renamed\",\"sessionId\":\"'"$SID"'\"}" >> "'"$TX"'"
   rm -f "'"$R"'"
-  bash "'"$HERE"'/cycle.sh" write < "'"$TMPD"'/good.md" >/dev/null'
+  bash "'"$HERE"'/pass.sh" write < "'"$TMPD"'/good.md" >/dev/null'
 grep -qx 'name=renamed' "$O" && grep -qx 'oneshot=1' "$O" && grep -qx 'name=renamed' "$R" \
   && check "11 not opted in: one-shot uses the derived title; refresh keeps oneshot=1" 0 || check "11 not opted in: one-shot uses the derived title; refresh keeps oneshot=1" 1 "$(cat "$O" "$R" 2>&1)"
 
 addt() { printf '%s\n' "printf \"%s\\n\" \"{\\\"type\\\":\\\"custom-title\\\",\\\"customTitle\\\":\\\"$1\\\",\\\"sessionId\\\":\\\"$SID\\\"}\" >> \"$TX\""; }
-W='bash "'"$HERE"'/cycle.sh" write < "'"$TMPD"'/good.md" >/dev/null'
+W='bash "'"$HERE"'/pass.sh" write < "'"$TMPD"'/good.md" >/dev/null'
 
 reset
 title "bar"
-in_claude 'bash "'"$HERE"'/cycle.sh" auto foo >/dev/null
+in_claude 'bash "'"$HERE"'/pass.sh" auto foo >/dev/null
   '"$W"'
   sed -n "s/^name=//p" "'"$O"'" > "'"$TMPD"'/n1"
   '"$(addt baz)"'
@@ -139,7 +139,7 @@ in_claude 'bash "'"$HERE"'/cycle.sh" auto foo >/dev/null
 
 reset
 title "bar"
-in_claude 'bash "'"$HERE"'/cycle.sh" auto foo >/dev/null
+in_claude 'bash "'"$HERE"'/pass.sh" auto foo >/dev/null
   sed -i "/^title_at_optin=/d" "'"$O"'"
   '"$W"''
 grep -qx 'name=bar' "$O" && grep -qx 'name=bar' "$R" && grep -qx 'pane_pid=4242' "$O" && grep -q '^claude_pid=[0-9]' "$O" \
@@ -149,7 +149,7 @@ grep -qx 'name=bar' "$O" && grep -qx 'name=bar' "$R" && grep -qx 'pane_pid=4242'
 
 reset
 title "bar"
-in_claude 'bash "'"$HERE"'/cycle.sh" write foo < "'"$TMPD"'/good.md" >/dev/null
+in_claude 'bash "'"$HERE"'/pass.sh" write foo < "'"$TMPD"'/good.md" >/dev/null
   rm -f "'"$R"'"
   '"$W"''
 grep -qx 'name=foo' "$O" && grep -qx 'oneshot=1' "$O" && grep -qx 'title_at_optin=bar' "$O" && grep -qx 'name=foo' "$R" \

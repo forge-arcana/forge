@@ -321,11 +321,11 @@ verify_rules() {
 #     Scope discipline: the merge only ever touches the events named in
 #     FORGE_HOOK_WIRING (PreToolUse, UserPromptSubmit, Stop, SessionStart),
 #     and within those only array entries whose command matches a forge hook
-#     filename. The remove filter uses test($base), a REGEX (dots match any
-#     char, unanchored), so no forge hook filename may regex-match another's
-#     command — keep filenames distinct (cycle-stop.sh and cycle-start.sh do
-#     not match each other, and neither matches a FORGE_HOOK_RETIRED name).
-#     Retired names are matched exactly instead (see _retired_jq_defs).
+#     filename. Both the per-row remove and the verify lookup use refs_name (see
+#     _retired_jq_defs): a whitespace token, quotes stripped, whose last path
+#     component EXACTLY equals the filename — no regex, so a hand-written
+#     "/opt/x/bypass-stop.sh" is never mistaken for pass-stop.sh. Retired
+#     names are matched the same way.
 #     Permissions, env, model,
 #     statusline and any hand-written hooks are read and re-emitted verbatim.
 #     Remove-then-append makes it idempotent AND self-healing: a stale matcher
@@ -340,8 +340,8 @@ verify_rules() {
 FORGE_HOOK_WIRING=(
   "tier-guard.sh|PreToolUse|Edit|Write|NotebookEdit|Agent"
   "tier-routing.sh|UserPromptSubmit|"
-  "cycle-stop.sh|Stop|"
-  "cycle-start.sh|SessionStart|clear"
+  "pass-stop.sh|Stop|"
+  "pass-start.sh|SessionStart|clear"
 )
 
 # Hook bodies forge used to ship and no longer does (renamed or dropped). The
@@ -453,11 +453,11 @@ wire_hooks() {
     if jq --arg event "$_w_event" \
           --arg matcher "$_w_matcher" \
           --arg base "$_w_base" \
-          --arg cmd "$MEMBRANE_HOOKS/$_w_base" '
+          --arg cmd "$MEMBRANE_HOOKS/$_w_base" "$_retired_jq_defs"'
       .hooks //= {}
       | .hooks[$event] = (
           ((.hooks[$event] // [])
-             | map(select([.hooks[]?.command // ""] | any(test($base)) | not)))
+             | map(select([.hooks[]?.command // ""] | any(refs_name($base)) | not)))
           + [{matcher: $matcher, hooks: [{type: "command", command: $cmd}]}]
         )
     ' "$MEMBRANE_SETTINGS_FILE" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]] \
@@ -544,9 +544,9 @@ verify_hooks() {
     # so an entry with an empty matcher (tier-routing's "match everything")
     # stays distinguishable from no entry at all.
     local live
-    live=$(jq -r --arg event "$_w_event" --arg base "$_w_base" '
+    live=$(jq -r --arg event "$_w_event" --arg base "$_w_base" "$_retired_jq_defs"'
       [ (.hooks[$event] // [])[]
-        | select([.hooks[]?.command // ""] | any(test($base)))
+        | select([.hooks[]?.command // ""] | any(refs_name($base)))
         | .matcher // "" ] | first // "ABSENT"
     ' "$MEMBRANE_SETTINGS_FILE" 2>/dev/null)
     if [[ "$live" == "ABSENT" ]]; then
