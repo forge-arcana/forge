@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-10-31",
+  "lastRun": "2026-11-05",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -309,7 +309,9 @@
     "Measure an agent workflow's token spend from the session transcripts",
     "Selling a Subscription Globally: Fixed Local Prices, Tiered by Income Group, With No Silent Default",
     "Regional price tiers follow big tech (founder standing order, 2026-10-26)",
-    "Real-time transport: SSE by default, Ably to step up, Socket.IO only for a two-way app on one always-on server"
+    "Real-time transport: SSE by default, Ably to step up, Socket.IO only for a two-way app on one always-on server",
+    "A Clean HEAD Is Not a Clean History: Scan Every Commit Before a Private Repo Goes Public",
+    "A Missing GitHub Environment Is Created Unprotected on First Use"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

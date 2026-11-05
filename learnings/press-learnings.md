@@ -71,3 +71,15 @@
 (f) **All products share one scheme**: the survey, the tier lines, the rounding rules and the exception lists. A fix in one product goes to the others the same day.
 
 **Apply when**: Designing or reviewing any paid plan sold outside one country, adding countries to a sellable list, or changing a tier. Read the shared survey first, and change a tier only through a survey diff.
+
+## A Clean HEAD Is Not a Clean History: Scan Every Commit Before a Private Repo Goes Public (2026-11-03)
+
+**Learning**: Making a private repository public publishes every commit, message and tag, not just the current tree. A content guard that checks staged changes, and a cleanup commit that removed private material, both leave that material in history. Before the flip, grep the full `git log -p` of the branch to be published (and every commit message and author email) against the private word list and secret shapes. Decide between a fresh repo with squashed history, a history rewrite, or accepting what is there. Any rewrite invalidates signed tags, so do it before the first public signed release, and never push `--all` or `--mirror` from a working clone.
+
+**Apply when**: Any go-live review that includes changing a repository's visibility, or open-sourcing a project that was developed privately.
+
+## A Missing GitHub Environment Is Created Unprotected on First Use (2026-11-03)
+
+**Learning**: A workflow job that names an `environment:` which does not exist yet makes GitHub create it with no required reviewers and no branch or tag limits. A publish job gated "behind the release environment" is therefore ungated until someone creates that environment by hand. Create it with its protection rules before turning on the trigger that can reach the job.
+
+**Apply when**: Reviewing or enabling any release or deploy workflow that relies on an environment for human approval.
