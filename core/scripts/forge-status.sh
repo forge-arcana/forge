@@ -124,7 +124,7 @@ NEED_CAST=0
 NEED_FOLD=0
 CONFLICT=0
 ADDED=0
-REMOVED=0
+FORGE_REMOVED=0
 CHANGED_SKILLS=()
 ADDED_SKILLS=()
 
@@ -198,7 +198,13 @@ for skill_dir in "$FORGE_PATH"/core/skills/*/; do
           tmp_baseline=$(mktemp -d)
           git -C "$FORGE_PATH" archive --format=tar "$LAST_CAST_SHA" "core/skills/$skill/" 2>/dev/null \
             | tar -x -C "$tmp_baseline" 2>/dev/null || true
-          deployed_vs_baseline=$(skill_diff "$tmp_baseline/skills/$skill" "$deployed")
+          # git archive keeps the repo-relative path. Unknown must never mean
+          # "safe to overwrite": a missing baseline dir (archive failed) is CONFLICT.
+          if [[ -d "$tmp_baseline/core/skills/$skill" ]]; then
+            deployed_vs_baseline=$(skill_diff "$tmp_baseline/core/skills/$skill" "$deployed")
+          else
+            deployed_vs_baseline="baseline copy unavailable"
+          fi
           rm -rf "$tmp_baseline"
 
           if [[ -z "$deployed_vs_baseline" ]]; then
@@ -218,25 +224,53 @@ for skill_dir in "$FORGE_PATH"/core/skills/*/; do
   fi
 done
 
-# Check for deployed-only skills (not in forge)
+# Deployed-only skills (membrane dir with no forge core/skills/<name>/).
+# The membrane also holds personal skills that were never in forge (symlinks to
+# other repos, plugin skills, local dirs), and new skills are authored in forge,
+# never in the membrane. So classify by forge history at the last-cast baseline:
+#   existed at baseline, gone now  -> FORGE-REMOVED (incoming: delete deployed copy)
+#   never existed at baseline      -> local-only (no row, counted)
+#   symlinked dir                  -> personal (no row, not counted)
+#   no baseline                    -> no rows, local-only count only
+# Names in cast-deploy.sh FORGE_SKILL_RETIRED are skipped: the cast removes them.
+LOCAL_ONLY=0
+RETIRED_SKILLS=""
+if [[ -n "$LAST_CAST_SHA" && -f "$FORGE_PATH/core/scripts/cast-deploy.sh" ]]; then
+  RETIRED_SKILLS=$(FORGE_PATH="$FORGE_PATH" FORGE_MEMBRANE="$MEMBRANE" bash "$FORGE_PATH/core/scripts/cast-deploy.sh" --list-retired-skills 2>/dev/null | tr '\n' ' ' || true)
+fi
 if [[ -d "$MEMBRANE/skills" ]]; then
   for deployed_dir in "$MEMBRANE/skills"/*/; do
     [[ ! -d "$deployed_dir" ]] && continue
     skill=$(basename "$deployed_dir")
-    [[ ! -f "$FORGE_PATH/core/skills/$skill/SKILL.md" ]] && continue
-    if [[ ! -d "$FORGE_PATH/core/skills/$skill" ]]; then
-      echo "| $skill | REMOVED | outgoing (deployed only) |"
-      REMOVED=$((REMOVED + 1))
+    [[ -L "$MEMBRANE/skills/$skill" ]] && continue
+    [[ -d "$FORGE_PATH/core/skills/$skill" ]] && continue
+    if [[ -z "$LAST_CAST_SHA" ]]; then
+      LOCAL_ONLY=$((LOCAL_ONLY + 1))
+      continue
     fi
+    baseline_skill_exists=$(git -C "$FORGE_PATH" ls-tree "$LAST_CAST_SHA" "core/skills/$skill/" 2>/dev/null | head -1)
+    if [[ -z "$baseline_skill_exists" ]]; then
+      LOCAL_ONLY=$((LOCAL_ONLY + 1))
+      continue
+    fi
+    case " $RETIRED_SKILLS " in *" $skill "*) continue ;; esac
+    echo "| $skill | FORGE-REMOVED | incoming (delete deployed copy) |"
+    FORGE_REMOVED=$((FORGE_REMOVED + 1))
   done
 fi
 
 echo ""
+echo "Local-only skills (not tracked by forge): $LOCAL_ONLY"
+echo ""
 CONFLICT_MSG=""
+REMOVED_MSG=""
+if [[ "$FORGE_REMOVED" -gt 0 ]]; then
+  REMOVED_MSG=" ($FORGE_REMOVED FORGE-REMOVED)"
+fi
 if [[ "$CONFLICT" -gt 0 ]]; then
   CONFLICT_MSG=", $CONFLICT conflict"
 fi
-echo "**Summary**: $IDENTICAL identical, $((NEED_CAST + ADDED)) incoming, $NEED_FOLD outgoing${CONFLICT_MSG}, $REMOVED removed"
+echo "**Summary**: $IDENTICAL identical, $((NEED_CAST + ADDED + FORGE_REMOVED)) incoming${REMOVED_MSG}, $NEED_FOLD outgoing${CONFLICT_MSG}"
 echo ""
 
 # --- Step 3b: Change details for non-IDENTICAL skills ---
@@ -905,10 +939,10 @@ else
   echo "| Forge Remote | Up to date (pulled) | -- |"
 fi
 
-if [[ $((NEED_CAST + ADDED + NEED_FOLD + CONFLICT + REMOVED)) -eq 0 ]]; then
+if [[ $((NEED_CAST + ADDED + NEED_FOLD + CONFLICT + FORGE_REMOVED)) -eq 0 ]]; then
   echo "| Skills | $IDENTICAL identical | -- |"
 else
-  SKILL_STATUS="$((NEED_CAST + ADDED)) incoming, $NEED_FOLD outgoing"
+  SKILL_STATUS="$((NEED_CAST + ADDED + FORGE_REMOVED)) incoming, $NEED_FOLD outgoing"
   if [[ "$CONFLICT" -gt 0 ]]; then
     SKILL_STATUS="$SKILL_STATUS, $CONFLICT conflict"
   fi

@@ -184,11 +184,11 @@ while IFS='|' read -r _ skill status _; do
       section="OUT"
       [[ -z "$essence" ]] && essence="_model fills_ (deployed copy modified locally — describe the edit)"
       ;;
-    "REMOVED")
-      # A skill forge deliberately retired is removed by the cast, never absorbed back.
+    "FORGE-REMOVED")
+      # A skill forge deliberately retired is removed by the cast itself; keep the filter.
       if is_retired "$skill"; then continue; fi
-      section="OUT"
-      essence="_model fills_ (deployed-only skill, not present in forge — confirm removal or intentional local addition)"
+      section="INC"
+      essence="Removed from forge; apply deletes the deployed copy"
       ;;
     "CONFLICT"|"CONFLICT (no-baseline)")
       section="CONF"
@@ -238,7 +238,7 @@ done <<< "$GENERAL_BLOCK"
 
 # 5b: skill-specific learning files — per-entry detail from Learning Details.
 # direction: "new in forge" / "new file"  -> incoming (ADDED)
-#            "new in user"                -> outgoing (REMOVED)
+#            "new in user"                -> outgoing
 # CAST_DETAIL_FILES tracks (space-joined, bash-3.2-safe — no assoc arrays) every
 # file that got at least one INC row here, so 5c below can tell a genuine
 # cast-needed-with-detail file apart from a consolidated file whose Learning

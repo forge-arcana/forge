@@ -44,11 +44,11 @@ For each skill directory in `<forge>/core/skills/` (`forge/` is included — it 
 | Diff found, forge unchanged since baseline, deployed changed | `DEPLOYED-DIFFERS` | Deployed copy was modified — outgoing row |
 | Diff found, both changed since baseline | `CONFLICT` | Both sides changed — user must reconcile |
 | Skill exists in forge but not deployed | `ADDED` | New skill — incoming row |
-| Skill exists deployed but not in forge | `REMOVED` | Skill deleted from forge or membrane-local addition |
+| Skill exists deployed, not in forge, and existed in forge at the baseline | `FORGE-REMOVED` | Forge deleted it since the last cast — incoming row (apply deletes the deployed copy) |
 
 **Baseline**: The last-cast commit SHA stored in `<membrane>/.last-cast.json` (written by `/forge` after each cast phase). If no baseline exists (first cycle, or SHA unreachable after force push), falls back to a two-way heuristic (`git diff HEAD origin/main`).
 
-Also check the reverse — skills that exist in `<membrane>/skills/` but NOT in `<forge>/core/skills/` (the `forge` and `purge` entries route to CONFLICTS per the protected-skills rule below). These are `REMOVED` from forge's perspective or user-local additions. **Retired skills are not `REMOVED`**: a name listed in `FORGE_SKILL_RETIRED` in `cast-deploy.sh` (`cast-deploy.sh --list-retired-skills`) is a skill forge deliberately deleted, so it never becomes an outgoing row; drop it from the table. The cast removes it (Phase 2) when the membrane copy is unmodified; a modified copy is reported by the cast as `RETIRED-SKILL-KEPT` for the user to handle by hand.
+Also check the reverse — skills that exist in `<membrane>/skills/` but NOT in `<forge>/core/skills/`. Classify them by forge git history at the baseline: one that existed in forge at the baseline and is gone now is `FORGE-REMOVED` (forge deleted it; incoming row). One that never existed in forge is a personal/local skill (symlinks to other repos, plugin skills, local dirs): it is **never a row**, only counted in the line `Local-only skills (not tracked by forge): N` after the table. Symlinked skill dirs are always personal. With no baseline there are no `FORGE-REMOVED` rows. New skills are authored in forge `core/skills/`, never in the membrane, so a membrane-only skill is never an outgoing row. **Retired skills are not `FORGE-REMOVED`**: a name listed in `FORGE_SKILL_RETIRED` in `cast-deploy.sh` (`cast-deploy.sh --list-retired-skills`) is skipped (the `forge` and `purge` entries still route to CONFLICTS per the protected-skills rule below if they ever differ). The cast removes retired skills itself (Phase 2) when the membrane copy is unmodified; a modified copy is reported by the cast as `RETIRED-SKILL-KEPT` for the user to handle by hand.
 
 Output the standard drift table:
 
@@ -61,13 +61,16 @@ Output the standard drift table:
 | wrap | FORGE-UPDATED | incoming |
 | qt | DEPLOYED-DIFFERS | outgoing |
 | newskill | ADDED | incoming |
+| oldskill | FORGE-REMOVED | incoming (delete deployed copy) |
+
+Local-only skills (not tracked by forge): N
 
 **Summary**: X identical, Y incoming, Z outgoing
 ```
 
 The cycle uses these classifications to route each row into the PLAN table:
-- `FORGE-UPDATED` / `ADDED` → ↓ INCOMING section
-- `DEPLOYED-DIFFERS` / `REMOVED` → ↑ OUTGOING section
+- `FORGE-UPDATED` / `ADDED` / `FORGE-REMOVED` → ↓ INCOMING section
+- `DEPLOYED-DIFFERS` → ↑ OUTGOING section
 - `CONFLICT` / `CONFLICT (no-baseline)` → ⚠ CONFLICTS section
 
 In `--dry` mode the PLAN table is rendered read-only — no selection prompt.

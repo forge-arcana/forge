@@ -158,8 +158,8 @@ For each approved incoming row (and each conflict row where user chose `[↓]`):
 
 ### Skills
 - Run `bash <forge>/core/scripts/cast-deploy.sh skill1 skill2 ...` for approved `FORGE-UPDATED` / `ADDED`
-- Run `rm -rf <membrane>/skills/<name>/` for approved `REMOVED`
-- Always run `bash <forge>/core/scripts/cast-deploy.sh --retire-skills` (every cast, no PLAN row needed; `--all` includes it). It removes skills forge has retired (`FORGE_SKILL_RETIRED`) from `<membrane>/skills/` and `~/.agents/skills/`, only when the dir is a plain directory holding exactly the shipped files unmodified; otherwise it keeps it and reports `RETIRED-SKILL-KEPT`. A retired skill is never a `REMOVED` / outgoing row.
+- Run `rm -rf <membrane>/skills/<name>/` for approved `FORGE-REMOVED` (skills forge deleted since the last cast), and also remove `~/.agents/skills/<name>` if present. Local-only skills (never in forge) are never rows, so never deleted here
+- Always run `bash <forge>/core/scripts/cast-deploy.sh --retire-skills` (every cast, no PLAN row needed; `--all` includes it). It removes skills forge has retired (`FORGE_SKILL_RETIRED`) from `<membrane>/skills/` and `~/.agents/skills/`, only when the dir is a plain directory holding exactly the shipped files unmodified; otherwise it keeps it and reports `RETIRED-SKILL-KEPT`. A retired skill is never a `FORGE-REMOVED` / outgoing row.
 - Verify: `bash <forge>/core/scripts/cast-deploy.sh --verify`
 - Do not use `cp -r`; go through `cast-deploy.sh`.
 
