@@ -45,6 +45,17 @@ is_protected() {
   return 1
 }
 
+# Retired skills (cast-deploy.sh FORGE_SKILL_RETIRED): forge deleted them on
+# purpose, so a membrane-only copy is not an outgoing absorption candidate.
+RETIRED_SKILLS=""
+is_retired() {
+  local name="$1" r
+  for r in $RETIRED_SKILLS; do
+    [[ "$name" == "$r" ]] && return 0
+  done
+  return 1
+}
+
 trim() {
   local s="$1"
   s="${s#"${s%%[![:space:]]*}"}"
@@ -102,6 +113,9 @@ if [[ -n "$FORGE_PATH_FROM_REPORT" ]] && git -C "$FORGE_PATH_FROM_REPORT" rev-pa
   FORGE_SHA=$(git -C "$FORGE_PATH_FROM_REPORT" rev-parse --short HEAD)
 fi
 BASELINE_LABEL="${BASELINE_SHA:-none}"
+if [[ -n "$FORGE_PATH_FROM_REPORT" && -f "$FORGE_PATH_FROM_REPORT/core/scripts/cast-deploy.sh" ]]; then
+  RETIRED_SKILLS=$(FORGE_PATH="$FORGE_PATH_FROM_REPORT" bash "$FORGE_PATH_FROM_REPORT/core/scripts/cast-deploy.sh" --list-retired-skills 2>/dev/null | tr '\n' ' ' || true)
+fi
 
 # --- Step 3: slice the report into per-pillar sections ---
 SKILL_SECTION=$(sed -n '/^## Skill Drift Report$/,/^## Learning Status$/p' <<<"$STATUS_OUTPUT")
@@ -171,6 +185,8 @@ while IFS='|' read -r _ skill status _; do
       [[ -z "$essence" ]] && essence="_model fills_ (deployed copy modified locally — describe the edit)"
       ;;
     "REMOVED")
+      # A skill forge deliberately retired is removed by the cast, never absorbed back.
+      if is_retired "$skill"; then continue; fi
       section="OUT"
       essence="_model fills_ (deployed-only skill, not present in forge — confirm removal or intentional local addition)"
       ;;

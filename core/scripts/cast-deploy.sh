@@ -26,6 +26,8 @@
 #   cast-deploy.sh --verify-rules                     verify both blocks (AGENTS.md full rules, CLAUDE.md import pointer)
 #   cast-deploy.sh --hooks                            deploy forge core/hooks/*.sh → membrane hooks/ (+ wire forge's own entries into settings.json)
 #   cast-deploy.sh --verify-hooks                     verify membrane hook bodies match forge core/hooks
+#   cast-deploy.sh --retire-skills                    remove retired skills (FORGE_SKILL_RETIRED) from both stores, only when unmodified
+#   cast-deploy.sh --list-retired-skills              print the retired skill names, one per line
 #   cast-deploy.sh --settings                         apply forge settings defaults to membrane settings.json (SET-IF-ABSENT)
 #   cast-deploy.sh --verify-settings                  verify forge settings defaults are present in membrane settings.json
 #   cast-deploy.sh --bootstrap                        create dirs + symlinks (no skill deploy)
@@ -347,14 +349,28 @@ FORGE_HOOK_WIRING=(
 # Hook bodies forge used to ship and no longer does (renamed or dropped). The
 # cast strips their settings.json entries from EVERY event, not just the one
 # they were wired under, so a renamed hook never double-fires next to its new
-# name. The old bodies are LEFT IN PLACE, unwired, for one release: a live
-# session that misses the settings.json hot-reload still calls the old path on
-# every Stop / clear, and a missing file there errors each time. verify reports
-# them as a RETIRED-BODY warning only. The next release adds the unlink — by
-# rm -f only, never cp/overwrite in place: a detached job may still be
-# executing the old body and bash reads scripts incrementally; unlinking keeps
-# the open inode alive until that job exits.
+# name. After stripping, --hooks UNLINKS each retired body from the membrane
+# hooks/ dir (one RETIRED row per body actually removed). The removal is rm -f
+# only, never cp/overwrite in place: a detached job may still be executing the
+# old body and bash reads scripts incrementally; unlinking keeps the open inode
+# alive until that job exits. The settings-stripping stays so a stale entry on
+# a machine that never cast the previous release is still removed. verify
+# reports a body still on disk as a RETIRED-BODY warning (non-fatal: the next
+# --hooks removes it) and a body still wired as RETIRED-WIRED (an error).
 FORGE_HOOK_RETIRED=(handoff-stop.sh handoff-start.sh)
+
+# Skills forge used to ship and no longer does. The cast removes a retired skill
+# from BOTH stores (<membrane>/skills and <agents>/skills) so /forge never sees
+# it as a membrane-only skill and offers to absorb it back into forge. Guarded:
+# a store copy is removed only when it is a plain directory (not a symlink)
+# holding EXACTLY the listed files, each byte-identical to what forge shipped
+# (SKILL.md compared without its injected `model:` line). Anything else —
+# extra files, edited content, a symlink — is a user-modified dir: kept and
+# reported, never deleted.
+#   <name>|<file>:<sha256>|<file>:<sha256>...
+FORGE_SKILL_RETIRED=(
+  "handoff|SKILL.md:8b7907dd2aa24e41213c4b9a3b1464a70938d20dc955139cc21eb68933395957|handoff.sh:78769c4868df1912074c7cfbdbf88880ee6dade91e109acb891a435c17426c19"
+)
 
 # jq helpers shared by wire_hooks and verify_hooks. A command references a
 # retired body when any whitespace-separated token (quotes stripped) has a
@@ -470,6 +486,20 @@ wire_hooks() {
   done
   return 0
 }
+# Unlink retired hook bodies (see FORGE_HOOK_RETIRED). Runs AFTER wire_hooks has
+# stripped their settings.json entries, so nothing is wired to a missing file.
+# rm -f only; one RETIRED row per body actually removed, nothing for an absent one.
+unlink_retired_hooks() {
+  local name
+  for name in "${FORGE_HOOK_RETIRED[@]}"; do
+    if [[ -e "$MEMBRANE_HOOKS/$name" || -L "$MEMBRANE_HOOKS/$name" ]]; then
+      rm -f "$MEMBRANE_HOOKS/$name"
+      echo "| $name | RETIRED | body removed from $MEMBRANE_HOOKS |"
+    fi
+  done
+  return 0   # must end truthy: the script runs under `set -e`
+}
+
 deploy_hooks() {
   echo "## Deploying forge core/hooks → $MEMBRANE_HOOKS"
   echo ""
@@ -489,7 +519,6 @@ deploy_hooks() {
     chmod +x "$dest"
     echo "| $base | DEPLOYED | $(stat -c %s "$f") bytes |"
   done
-  # Retired bodies are left in place this release (see FORGE_HOOK_RETIRED).
   if [[ "$any" -eq 0 ]]; then
     echo "| hooks | SKIP | no *.sh files found in $FORGE_HOOKS |"
     echo ""
@@ -497,6 +526,7 @@ deploy_hooks() {
     return 0
   fi
   wire_hooks
+  unlink_retired_hooks
   echo ""
   echo "**Hooks deploy complete — bodies installed and forge hook entries wired in $MEMBRANE_SETTINGS_FILE**"
 }
@@ -562,7 +592,7 @@ verify_hooks() {
 
   # Retired hooks: still wired anywhere is an error (it fires next to, or
   # instead of, its replacement); a leftover body that nothing runs is only a
-  # warning and does not count.
+  # warning (the next --hooks unlinks it) and does not count.
   local name ev
   for name in "${FORGE_HOOK_RETIRED[@]}"; do
     if [[ -f "$MEMBRANE_SETTINGS_FILE" ]]; then
@@ -576,8 +606,8 @@ verify_hooks() {
         | select([.value[]?.hooks[]?.command] | any(refs_name($n)))
         | .key' "$MEMBRANE_SETTINGS_FILE" 2>/dev/null)
     fi
-    if [[ -e "$MEMBRANE_HOOKS/$name" ]]; then
-      echo "| $name | RETIRED-BODY | warning: retired body still in $MEMBRANE_HOOKS (unused; left in place this release; removed next release) |"
+    if [[ -e "$MEMBRANE_HOOKS/$name" || -L "$MEMBRANE_HOOKS/$name" ]]; then
+      echo "| $name | RETIRED-BODY | warning: retired body still in $MEMBRANE_HOOKS (unused; the next cast-deploy.sh --hooks removes it) |"
     fi
   done
 
@@ -678,6 +708,70 @@ verify_settings() {
   return $errors
 }
 
+# --- Retired skills (see FORGE_SKILL_RETIRED). ---
+# _retired_skill_state <dir> <spec>...: echo ok when <dir> is a plain directory
+# holding exactly the spec'd files with the spec'd sha256 (SKILL.md without its
+# injected `model:` line); otherwise echo the reason it is not safe to remove.
+_retired_skill_state() {
+  local d="$1" spec file want got listed expected
+  shift
+  if [[ -L "$d" || ! -d "$d" ]]; then echo "not a plain directory"; return 0; fi
+  listed=$(find "$d" -mindepth 1 -printf '%P\n' 2>/dev/null | LC_ALL=C sort)
+  expected=$(for spec in "$@"; do printf '%s\n' "${spec%%:*}"; done | LC_ALL=C sort)
+  if [[ "$listed" != "$expected" ]]; then echo "contents differ from what forge shipped"; return 0; fi
+  for spec in "$@"; do
+    file="${spec%%:*}"; want="${spec#*:}"
+    if [[ -L "$d/$file" || ! -f "$d/$file" ]]; then echo "$file is not a regular file"; return 0; fi
+    if [[ "$file" == "SKILL.md" ]]; then
+      got=$(grep -v '^model:[[:space:]]' "$d/$file" | sha256sum | cut -d' ' -f1)
+    else
+      got=$(sha256sum "$d/$file" | cut -d' ' -f1)
+    fi
+    if [[ "$got" != "$want" ]]; then echo "$file was modified"; return 0; fi
+  done
+  echo ok
+}
+
+# retire_skills: remove each retired skill from both stores when unmodified;
+# report a row per store actually touched. A modified dir is kept and reported.
+retire_skills() {
+  echo "## Removing retired skills"
+  echo ""
+  local row name rest store d state spec specs touched=0
+  for row in "${FORGE_SKILL_RETIRED[@]}"; do
+    name="${row%%|*}"; rest="${row#*|}"
+    IFS='|' read -r -a specs <<< "$rest"
+    [[ -n "$name" && "$name" != */* && "$name" != .* ]] || continue
+    for store in "$MEMBRANE_SKILLS" "$AGENTS_SKILLS"; do
+      d="$store/$name"
+      [[ -e "$d" || -L "$d" ]] || continue
+      touched=1
+      state=$(_retired_skill_state "$d" "${specs[@]}")
+      if [[ "$state" == ok ]]; then
+        for spec in "${specs[@]}"; do rm -f "$d/${spec%%:*}"; done
+        rmdir "$d"
+        echo "| $name | RETIRED-SKILL | removed $d |"
+      else
+        echo "| $name | RETIRED-SKILL-KEPT | $d not removed ($state) — review it and delete by hand if unwanted |"
+      fi
+    done
+  done
+  [[ "$touched" -eq 1 ]] || echo "| retired skills | OK | none present |"
+  echo ""
+  echo "**Retired skills processed**"
+  return 0
+}
+
+if [[ "${1:-}" == "--retire-skills" ]]; then
+  retire_skills
+  exit 0
+fi
+
+if [[ "${1:-}" == "--list-retired-skills" ]]; then
+  for row in "${FORGE_SKILL_RETIRED[@]}"; do echo "${row%%|*}"; done
+  exit 0
+fi
+
 if [[ "${1:-}" == "--hooks" ]]; then
   deploy_hooks
   exit 0
@@ -744,6 +838,14 @@ if [[ "${1:-}" == "--verify" ]]; then
     else
       echo "| $skill | OK | In sync |"
     fi
+  done
+  # Retired skills still on disk are a warning only (the next cast removes them).
+  for row in "${FORGE_SKILL_RETIRED[@]}"; do
+    for store in "$MEMBRANE_SKILLS" "$AGENTS_SKILLS"; do
+      if [[ -e "${store}/${row%%|*}" || -L "${store}/${row%%|*}" ]]; then
+        echo "| ${row%%|*} | RETIRED-SKILL | warning: retired skill still in $store (run cast-deploy.sh --retire-skills; the next cast removes it) |"
+      fi
+    done
   done
   echo ""
   verify_rules || errors=$((errors + 1))
@@ -850,7 +952,7 @@ else
 fi
 
 if [[ ${#skills[@]} -eq 0 ]]; then
-  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --rules | --verify-rules | --hooks | --verify-hooks | --settings | --verify-settings | --bootstrap" >&2
+  echo "Usage: cast-deploy.sh <skill-name> [...] | --all | --verify | --scripts | --verify-scripts | --rules | --verify-rules | --hooks | --verify-hooks | --retire-skills | --list-retired-skills | --settings | --verify-settings | --bootstrap" >&2
   exit 1
 fi
 
@@ -892,8 +994,10 @@ done
 echo ""
 echo "**Deploy complete**"
 
-# --all also deploys runtime scripts, the forge rules block, hook bodies, and settings defaults
+# --all also removes retired skills, deploys runtime scripts, the forge rules block, hook bodies, and settings defaults
 if [[ "${1:-}" == "--all" ]]; then
+  echo ""
+  retire_skills
   echo ""
   deploy_scripts
   echo ""

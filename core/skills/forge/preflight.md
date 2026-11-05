@@ -48,7 +48,7 @@ For each skill directory in `<forge>/core/skills/` (`forge/` is included — it 
 
 **Baseline**: The last-cast commit SHA stored in `<membrane>/.last-cast.json` (written by `/forge` after each cast phase). If no baseline exists (first cycle, or SHA unreachable after force push), falls back to a two-way heuristic (`git diff HEAD origin/main`).
 
-Also check the reverse — skills that exist in `<membrane>/skills/` but NOT in `<forge>/core/skills/` (the `forge` and `purge` entries route to CONFLICTS per the protected-skills rule below). These are `REMOVED` from forge's perspective or user-local additions.
+Also check the reverse — skills that exist in `<membrane>/skills/` but NOT in `<forge>/core/skills/` (the `forge` and `purge` entries route to CONFLICTS per the protected-skills rule below). These are `REMOVED` from forge's perspective or user-local additions. **Retired skills are not `REMOVED`**: a name listed in `FORGE_SKILL_RETIRED` in `cast-deploy.sh` (`cast-deploy.sh --list-retired-skills`) is a skill forge deliberately deleted, so it never becomes an outgoing row; drop it from the table. The cast removes it (Phase 2) when the membrane copy is unmodified; a modified copy is reported by the cast as `RETIRED-SKILL-KEPT` for the user to handle by hand.
 
 Output the standard drift table:
 

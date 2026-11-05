@@ -22,8 +22,6 @@ An explicit `/pass` works anytime in tmux; `auto` opts the session into MODEL-in
 | `cancel` | `bash "$HOME/.claude/skills/pass/pass.sh" cancel` |
 | (none) | write a note (below) |
 
-`on` and `off` still work as aliases of `auto` and `manual` for this release.
-
 Print the helper's output and stop. Names: 1-64 chars of `A-Za-z0-9._ -`, starting with a letter or digit, no trailing space. Quote a name with spaces in the command: `auto '<name>'`.
 
 Status semantics: `auto ...` with exit 0 means opted in; `manual ...` means not.

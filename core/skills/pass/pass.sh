@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # pass.sh — opt-in auto-pass helper (state keyed by tmux pane, bound to
 # the Claude Code process that ran `auto`).
-# Subcommands: auto [name...] | manual | status | write [name...] (note on stdin)
-# | cancel. `on` / `off` are silent aliases of auto / manual.
+# Subcommands: auto [name...] | manual | status | write [name...] (note on stdin) | cancel.
 # Exit codes: 0 ok, 1 error / empty note, 2 note over the length cap, 3 retired
 # (write no longer needs an opt-in), 4 note lacks a '## Done last session' line
 # (write), 64 usage / invalid name.
@@ -114,8 +113,6 @@ cmd="${1:-}"
 [ -n "$cmd" ] || usage
 shift || true
 case "$cmd" in
-  on) cmd=auto ;;
-  off) cmd=manual ;;
   auto|manual|status|write|cancel) ;;
   *) usage ;;
 esac

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Test for pass.sh subcommands: auto / manual (and the on / off aliases),
+# Test for pass.sh subcommands: auto / manual (on / off are no longer accepted),
 # status lines and exit codes, the one-shot status line, not-in-tmux, and the
 # usage error. Fake HOME, temp PASS_DIR, stub tmux, fake `claude` (copy of
 # bash). No real pane, session or ~/.claude is touched.
@@ -30,7 +30,7 @@ check() { if [ "$2" = 0 ]; then echo "PASS  $1"; else echo "FAIL  $1  (${3:-})";
 in_claude() { OUT="$("$TMPD/claude" -c "$1"$'\n''exit $?' 2>&1)"; RC=$?; }
 printf '# Pass\n## Done last session\n- did x\n' > "$TMPD/good.md"
 
-for pair in "auto manual" "on off"; do
+for pair in "auto manual"; do
   set -- $pair
   rm -rf "$PASS_DIR"
   in_claude "$C $1 tester; echo \"rc=\$?\"; $C status; echo \"rc=\$?\""
@@ -80,6 +80,12 @@ OUT="$(bash "$HERE/pass.sh" 2>&1)"; RC=$?
 [ "$RC" = 64 ] && check "11 no subcommand: exit 64" 0 || check "11 no subcommand: exit 64" 1 "rc=$RC"
 in_claude "$C auto -bad"
 [ "$RC" = 64 ] && check "12 'auto -bad': invalid name, exit 64" 0 || check "12 'auto -bad': exit 64" 1 "rc=$RC out=$OUT"
+for old in on off; do
+  rm -rf "$PASS_DIR"
+  in_claude "$C $old tester; echo \"rc=\$?\""
+  [[ "$OUT" == *"usage: pass.sh"* ]] && [[ "$OUT" == *"rc=64" ]] && [ ! -e "$PASS_DIR/state/pane-5.optin" ] \
+    && check "13 retired '$old' alias: usage error, exit 64, no opt-in" 0 || check "13 retired '$old' alias: usage error, exit 64, no opt-in" 1 "out=$OUT"
+done
 
 if [ "$FAILS" -ne 0 ]; then echo "$FAILS FAILED"; exit 1; fi
 echo "all passed"

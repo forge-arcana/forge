@@ -23,11 +23,11 @@ export PASS_DIR="$TMPD/h" PASS_TMUX="$TMPD/tmux" TMUX_PANE="%5" PASS_MIN_INTERVA
 FAILS=0
 check() { if [ "$2" = 0 ]; then echo "PASS  $1"; else echo "FAIL  $1  (${3:-})"; FAILS=$((FAILS + 1)); fi; }
 
-# helper SUBCMD NOTEFILE  -> runs `on` then `write` inside one fake claude; sets RC, ERR
+# helper SUBCMD NOTEFILE  -> runs `auto` then `write` inside one fake claude; sets RC, ERR
 write_note() {
   local note="$1"
   ERR="$("$TMPD/claude" -c '
-    bash "'"$HERE"'/pass.sh" on tester >/dev/null
+    bash "'"$HERE"'/pass.sh" auto tester >/dev/null
     bash "'"$HERE"'/pass.sh" write < "'"$note"'" 2>&1 >/dev/null
     exit $?' 2>&1)"
   RC=$?
@@ -94,7 +94,7 @@ in_claude 'bash "'"$HERE"'/pass.sh" write < "'"$TMPD"'/good.md" 2>&1'
   && check "C no name arg: falls back to sanitised tmux session name" 0 || check "C no name arg: falls back to sanitised tmux session name" 1 "rc=$RC out=$OUT $(cat "$O" 2>&1)"
 
 clean
-in_claude 'bash "'"$HERE"'/pass.sh" on tester >/dev/null
+in_claude 'bash "'"$HERE"'/pass.sh" auto tester >/dev/null
   bash "'"$HERE"'/pass.sh" write other < "'"$TMPD"'/good.md" >/dev/null 2>&1'
 [ "$RC" = 0 ] && grep -qx 'name=tester' "$O" && ! grep -q oneshot "$O" && grep -qx 'name=tester' "$R" \
   && check "D real opt-in keeps its name; name arg ignored, no oneshot" 0 || check "D real opt-in keeps its name; name arg ignored, no oneshot" 1 "rc=$RC out=$OUT $(cat "$O" 2>&1)"
@@ -108,10 +108,10 @@ clean
 in_claude 'bash "'"$HERE"'/pass.sh" write one < "'"$TMPD"'/good.md" >/dev/null 2>&1
   rm -f "'"$PASS_DIR"'/state/pane-5.lastclear" "'"$R"'"
   bash "'"$HERE"'/pass.sh" write two < "'"$TMPD"'/good.md" >/dev/null 2>&1
-  bash "'"$HERE"'/pass.sh" on real >/dev/null
+  bash "'"$HERE"'/pass.sh" auto real >/dev/null
   bash "'"$HERE"'/pass.sh" status; true'
 [[ "$OUT" == "auto name=real"* ]] && ! grep -q oneshot "$O" \
-  && check "F one-shot renamed by a differing arg; 'on' overwrites it" 0 || check "F one-shot renamed by a differing arg; 'on' overwrites it" 1 "out=$OUT"
+  && check "F one-shot renamed by a differing arg; 'auto' overwrites it" 0 || check "F one-shot renamed by a differing arg; 'on' overwrites it" 1 "out=$OUT"
 
 if [ "$FAILS" -ne 0 ]; then echo "$FAILS FAILED"; exit 1; fi
 echo "all passed"

@@ -186,8 +186,9 @@ Env overrides (all three scripts read what applies):
 
 - The first run of the helper or either hook (with `PASS_DIR` unset) moves a real `~/.claude/handoffs` to `~/.claude/passes` and leaves `handoffs` as a symlink, so old detached jobs and the old helper keep working.
 - State-file names are unchanged, so opted-in sessions carry over.
-- The cast strips the retired `handoff-*` entries from `settings.json` (`FORGE_HOOK_RETIRED`) but leaves their bodies in place, unwired, for this release, so a live session that misses the settings hot-reload does not call a missing file on every Stop or clear; `--verify-hooks` reports them as a `RETIRED-BODY` warning. The next release unlinks them (`rm -f`, never an overwrite).
-- The `handoff` skill stays one release as an alias shim (`on` = `auto`, `off` = `manual`).
+- Done (2026-11-05): the cast strips any retired `handoff-*` entry from `settings.json` (`FORGE_HOOK_RETIRED`) and then unlinks the leftover `handoff-stop.sh` and `handoff-start.sh` bodies from `<membrane>/hooks/` (`rm -f`, never an overwrite), with one `RETIRED` row per body removed. `--verify-hooks` reports a body still on disk as a non-fatal `RETIRED-BODY` warning (the next `--hooks` removes it) and a still-wired entry as `RETIRED-WIRED` (an error).
+- Done (2026-11-05): the `handoff` alias skill is deleted from forge, and `cast-deploy.sh` removes it from `<membrane>/skills` and `~/.agents/skills` (`FORGE_SKILL_RETIRED`, `--retire-skills`, also run by `--all`) only when the dir holds exactly the shipped files unmodified; a modified dir is kept and reported as `RETIRED-SKILL-KEPT`.
+- Done (2026-11-05): the `on` / `off` aliases of `auto` / `manual` are removed from `pass.sh`; they now print the usage error (exit 64).
 
 After `/clear` the job waits up to ~20 s for the injected marker and an idle
 pane before typing the resume prompt.
