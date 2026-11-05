@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # fold-purity-check.sh — Block project-specific leaks from entering the forge
 #
-# Scans staged or diffed forge content (learnings/, memory/ and the root AGENTS.md) for leak patterns that violate
+# Scans staged or diffed forge content (learnings/, memory/ and the root AGENTS.md, plus the two git-tracked JSON
+# trackers learnings/.fold-tracker.json and memory/.memory-tracker.json) for leak patterns that violate
 # the "No Project Names in Forge" HARD RULE. Designed to be invoked by /forge
 # fold phase (3e, 3g) and the commit gate (3i).
 #
@@ -74,14 +75,14 @@ ALLOWLIST_TERMS=(
   "NotAllowedError" "TypeError" "RangeError" "SyntaxError" "ReferenceError"
   "DevTools" "HttpOnly" "SameSite" "EventSource"
   # Android / iOS API names commonly referenced
-  "MainActivity" "BridgeActivity" "WindowCompat" "StatusBar" "ViewController" "AppDelegate" "ActivityResult"
+  "MainActivity" "BridgeActivity" "WindowCompat" "StatusBar" "SystemBars" "ViewController" "AppDelegate" "ActivityResult"
   # Common open-source projects / tools (referenced as examples, not project lock-in)
   "LibreOffice" "OpenOffice" "WordPress" "Drupal" "Joomla" "Shopify" "Magento"
   "TanStack" "TanStackQuery" "Zustand" "Jotai" "Recoil" "MobX"
   "PayMongo" "Xendit" "Razorpay" "Mollie" "Adyen" "Square" "Stripe" "Wise" "Revolut"
   "OpenAI" "DeepSeek" "GoogleAI" "AnthropicSDK" "HuggingFace" "LangChain" "LlamaIndex"
   "GitHub" "GitLab" "Bitbucket" "Bitwarden"
-  "Gotenberg" "Puppeteer" "Patchright" "CodeCov" "SonarQube"
+  "Gotenberg" "Puppeteer" "Patchright" "CodeCov" "SonarQube" "CocoaPods" "YouTube"
   # Generic CamelCase patterns that appear in code-heavy learning docs
   "ReadMe" "FullStack" "FrontEnd" "BackEnd" "DevOps" "MLOps" "DataOps" "FinOps" "GitOps"
   "GraphiQL" "Swagger" "OpenAPI" "AsyncAPI"
@@ -119,9 +120,38 @@ print_summary() {
   echo "purity: scanned $SCAN_FILES file(s), $SCAN_LINES line(s) [$MODE]"
 }
 
+# --- Scope: dotfiles are skipped except the two JSON trackers (allow-listed by exact path) ---
+# The trackers hold readable entry titles and filenames, so they are scanned like content.
+TRACKER_RE='^(learnings/\.fold-tracker\.json|memory/\.memory-tracker\.json)$'
+
+scope_filter() { # stdin: repo-relative paths; drops dotfiles except the trackers
+  awk -v tr="$TRACKER_RE" '$0 ~ tr { print; next } /\/\.[^\/]+$/ { next } { print }'
+}
+
+is_tracker() { # $1: a path, repo-relative or absolute
+  [[ "$1" =~ (^|/)(learnings/\.fold-tracker\.json|memory/\.memory-tracker\.json)$ ]]
+}
+
+# JSON lines are not prose: reduce each line to its string value (plus the key when the key is data,
+# not a plain identifier), unescape, and blank structural lines. Line count is preserved so reported
+# line numbers still point at the scanned lines.
+json_to_prose() {
+  sed -E '
+    s/^[[:space:]]*"[A-Za-z_][A-Za-z0-9_]*"[[:space:]]*:[[:space:]]*"(.*)"[[:space:]]*,?[[:space:]]*$/\1/;t u
+    s/^[[:space:]]*"(([^"\\]|\\.)*)"[[:space:]]*:[[:space:]]*"(.*)"[[:space:]]*,?[[:space:]]*$/\1 \3/;t u
+    s/^[[:space:]]*"[A-Za-z_][A-Za-z0-9_]*"[[:space:]]*:.*$//;t u
+    s/^[[:space:]]*"(([^"\\]|\\.)*)"[[:space:]]*:.*$/\1/;t u
+    s/^[[:space:]]*"(.*)"[[:space:]]*,?[[:space:]]*$/\1/;t u
+    s/^.*$//
+    :u
+    s/\\"/"/g
+    s/\\\\/\\/g'
+}
+
 scan_file_or_text() {
   local label="$1"   # display label (filename or "<commit message>")
   local content="$2" # the actual content to scan
+  local kind="${3:-prose}" # "json" for the tracker files: scan string values, not JSON syntax
 
   local file_violations=""
 
@@ -132,8 +162,12 @@ scan_file_or_text() {
 
   # Strip heading lines (start with #) and code-fenced blocks before name detection.
   # Headings have lots of Title Case False Positives; code blocks have legitimate identifiers.
+  local text="$content"
+  if [[ "$kind" == "json" ]]; then
+    text=$(printf '%s\n' "$content" | json_to_prose)
+  fi
   local body
-  body=$(echo "$content" | awk '
+  body=$(echo "$text" | awk '
     /^```/ { in_code = !in_code; next }
     in_code { next }
     /^[[:space:]]*#/ { next }
@@ -143,7 +177,7 @@ scan_file_or_text() {
   # 1. Currency-symbol prices: ₱ $ € £ ¥ followed by digits
   # The dollar/euro/pound sign + digits is a near-certain leak (no legitimate universal usage).
   local currency_hits
-  currency_hits=$(echo "$content" | grep -nE '[₱$€£¥][0-9]+' || true)
+  currency_hits=$(echo "$text" | grep -nE '[₱$€£¥][0-9]+' || true)
   if [[ -n "$currency_hits" ]]; then
     file_violations+="  CURRENCY (specific local price):"$'\n'
     file_violations+="$(echo "$currency_hits" | sed 's/^/    /')"$'\n'
@@ -151,7 +185,7 @@ scan_file_or_text() {
 
   # 2. Attribution lines: "Forge-worthy: ... contributor: <Name>" or "(<X> session, YYYY-MM-DD)"
   local attribution_hits
-  attribution_hits=$(echo "$content" | grep -nE 'Forge-worthy:.*contributor:|contributor:[[:space:]]*[A-Z][a-z]+ [A-Z][a-z]+|\(.*[Ss]ession,[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}\)' || true)
+  attribution_hits=$(echo "$text" | grep -nE 'Forge-worthy:.*contributor:|contributor:[[:space:]]*[A-Z][a-z]+ [A-Z][a-z]+|\(.*[Ss]ession,[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}\)' || true)
   if [[ -n "$attribution_hits" ]]; then
     file_violations+="  ATTRIBUTION (contributor/session metadata leaked into content):"$'\n'
     file_violations+="$(echo "$attribution_hits" | sed 's/^/    /')"$'\n'
@@ -196,8 +230,9 @@ scan_file_or_text() {
   #   - Leading verb + Word (commit-subject style) and verb + Word + digit
   # Whole-line exclusion stays only for structural markers (Apply when:, etc.).
   local allowed_phrases='Cloud Run|Cloud Tasks|Cloud Storage|Cloud Functions|Cloud SQL|Cloud Spanner|Cloud Pub|Cloud Build|Better Auth|Pub Sub|Service Bus|Lambda Function|Open Source|Active Directory|Big Query|Data Lake|Side Effect|Dead Letter|Last Known|Last Modified|Last Verified|First Class|First Party|Single Sign|Two Factor|Multi Factor|Plain Text|Rich Text|Cross Platform|Cross Origin|Same Origin|Source Of|Out Of|Ahead Of|Behind The|Day One|Phase One|Phase Two|Phase Three|Read Me|Markdown File|Test Driven|Domain Driven|Event Driven|Type Script|Java Script|Web Sockets|Server Sent|Edge Cases|Use Case|Side Project|Republic Act|Data Privacy|Personal Information|Personal Data|Sensitive Personal|Magic Link|Magic Links|Service Account|Service Accounts|Service Identity|Pre Generated|Per Event|Per Check|Per Request|Per Hour|Per Day|Per Year|Per Month|Per User|Per Tenant|Per Customer|Per Page|Auto Scaling|Cold Start|Hot Path|Happy Path|Edge Case|Best Practice|Anti Pattern|Black Box|Black List|White List|Open Source|Closed Source|Quality Gate|Quality Gates|Status Code|Status Codes|Token Refresh|Refresh Token|Republic Act|Firstname Lastname|Foo Bar|Master Builder|Master Aesthetic|Master Tender|Master of|The Smith|The Wedge|The Warden|The Master|The Masters|Smith Master|Wedge Master|Warden Master|Pre Flight|Post Flight|Soul Brief|Soul Briefs|Forbidden Defaults|Banned Defaults|Three Lenses|Council Verdict|Council Fan|Family Tone|Lens Beats|Beats Fielded|The Regenerate|Cloudflare Workers|Cloudflare Email Service|Workers Paid|Tail Worker|TanStack Query|Claude Code|Upgrade Required|Versioned Units|Builds Go|Forge Arts|Agent Skills|Workers Logs|Workers Issues|Key Learnings|Version You|You Can|Can Read|Current Context|Generic Forge|Swift Package|System Bars|Ten Arts|Membrane Goes|Earlier Pivot'
-  local personal_name_hits
-  personal_name_hits=$(echo "$body" \
+  # Not applied to JSON trackers: entry titles are Title Case, so every title would match.
+  local personal_name_hits=""
+  [[ "$kind" == "json" ]] || personal_name_hits=$(echo "$body" \
     | awk -v phrases="$allowed_phrases" '
         BEGIN {
           pre = "(^|[^A-Za-z0-9_])"
@@ -223,6 +258,16 @@ scan_file_or_text() {
     file_violations+="$(echo "$personal_name_hits" | sed 's/^/    /')"$'\n'
   fi
 
+  # 6. Trackers only: absolute/home paths, URLs, domains and e-mail addresses in titles or filenames.
+  if [[ "$kind" == "json" ]]; then
+    local locator_hits
+    locator_hits=$(echo "$text" | grep -nE "(^|[^A-Za-z0-9_])(~|/home|/Users|/srv|/opt|/mnt|/root|/var|/etc)/[A-Za-z0-9._-]|[A-Za-z]:\\\\|https?://|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}|[A-Za-z0-9-]+\.(com|net|org|io|dev|app|ai|co|uk|ph|au|me|xyz|site|cloud|page)([^A-Za-z0-9]|$)" || true)
+    if [[ -n "$locator_hits" ]]; then
+      file_violations+="  LOCATOR (path, URL, domain or e-mail in tracker entry):"$'\n'
+      file_violations+="$(echo "$locator_hits" | sed 's/^/    /')"$'\n'
+    fi
+  fi
+
   if [[ -n "$file_violations" ]]; then
     REPORT+=$'\n'"$label:"$'\n'"$file_violations"
     LEAKS_FOUND=1
@@ -241,7 +286,7 @@ if [[ "$1" == "--commit-msg" ]]; then
 
 elif [[ "$1" == "--staged" ]]; then
   MODE="staged"
-  # Scope is learnings/, memory/ and the repo-root AGENTS.md only. Skill, rule and hook sources legitimately name
+  # Scope is learnings/, memory/ and the repo-root AGENTS.md only (dotfiles skipped, except the two trackers). Skill, rule and hook sources legitimately name
   # functions and products, so they are reviewed by hand and by periodic sweeps, not by
   # this gate; explicit file arguments still scan any file.
   # FORGE_DIR is core/ (this script lives in core/scripts/), but git prints
@@ -251,7 +296,7 @@ elif [[ "$1" == "--staged" ]]; then
     echo "ERROR: cannot resolve the git repository root from $FORGE_DIR" >&2
     exit 2
   fi
-  STAGED_FILES=$(git -C "$REPO_ROOT" diff --cached --name-only | grep -E '^(learnings/|memory/|AGENTS\.md$)' | grep -vE '/\.[^/]+$' || true)
+  STAGED_FILES=$(git -C "$REPO_ROOT" diff --cached --name-only | grep -E '^(learnings/|memory/|AGENTS\.md$)' | scope_filter || true)
   if [[ -z "$STAGED_FILES" ]]; then
     print_summary
     exit 0  # nothing relevant staged
@@ -262,7 +307,8 @@ elif [[ "$1" == "--staged" ]]; then
     # Get only the staged hunks (additions) — we only care about new content
     added_lines=$(git -C "$REPO_ROOT" diff --cached -- "$f" | grep -E '^\+' | grep -vE '^\+\+\+' | sed 's/^+//')
     [[ -z "$added_lines" ]] && continue
-    scan_file_or_text "$f (staged additions)" "$added_lines"
+    kind=prose; is_tracker "$f" && kind=json
+    scan_file_or_text "$f (staged additions)" "$added_lines" "$kind"
   done <<< "$STAGED_FILES"
 
 elif [[ "$1" == "--diff" ]]; then
@@ -292,7 +338,7 @@ elif [[ "$1" == "--diff" ]]; then
     fi
   done
   CHANGED_FILES=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACM "$BASE_REF" "$HEAD_REF" -- learnings/ memory/ AGENTS.md \
-                  | grep -vE '/\.[^/]+$' || true)
+                  | scope_filter || true)
   if [[ -z "$CHANGED_FILES" ]]; then
     print_summary
     exit 0  # no relevant content changed in this range
@@ -301,7 +347,8 @@ elif [[ "$1" == "--diff" ]]; then
     [[ -z "$f" ]] && continue
     added_lines=$(git -C "$REPO_ROOT" diff "$BASE_REF" "$HEAD_REF" -- "$f" | grep -E '^\+' | grep -vE '^\+\+\+' | sed 's/^+//')
     [[ -z "$added_lines" ]] && continue
-    scan_file_or_text "$f (added lines)" "$added_lines"
+    kind=prose; is_tracker "$f" && kind=json
+    scan_file_or_text "$f (added lines)" "$added_lines" "$kind"
   done <<< "$CHANGED_FILES"
 
 else
@@ -311,7 +358,8 @@ else
       continue
     fi
     content=$(cat "$f")
-    scan_file_or_text "$f" "$content"
+    kind=prose; is_tracker "$f" && kind=json
+    scan_file_or_text "$f" "$content" "$kind"
   done
 fi
 
