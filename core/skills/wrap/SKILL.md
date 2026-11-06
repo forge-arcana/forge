@@ -34,6 +34,11 @@ Run the steps in order; the commit comes only after every earlier step.
 - If secrets are detected, warn the user
 - **Why before context/docs:** Now you see exactly what's going in — context and docs describe the final state.
 
+## Step 2b: Arts Gate
+- If `$HOME/.claude/hooks/arts-gate.sh` exists, run `bash "$HOME/.claude/hooks/arts-gate.sh" --check <repo>`; it judges the staged set exactly as the commit will be judged. If the file is absent, continue silently. A `note —` line about untracked files is information only.
+- `arts-gate: blocked — …`: stop here, before docs, compaction and commit, and tell the user which arts to run (/poke code, /pound security/identity/auth, /preen UI). If the user says to commit anyway, make the Step 5 commit as `FORGE_ARTS_SKIP='<their reason>' git commit ...`.
+- Invoked by `/smith`: never self-skip. Run `/poke` on the staged diff, then re-run the check.
+
 ## Step 3: Save Context + Locate Docs (parallel)
 
 Do both of these **in parallel** (independent operations — sequentially if your harness lacks parallel tool calls):

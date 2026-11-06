@@ -159,5 +159,5 @@ Never delete — archival is a move.
    Commit messages have leaked project names and contributor names in the past. The check catches `Absorb 7 learnings from <Person> (<Project> session, ...)` patterns and similar. If non-zero, rewrite the message until clean.
 5. **Update context** in `<forge>/AGENTS.md` Current Context section.
 6. **Size check**: if `AGENTS.md` is over ~20k chars (the target), note it in the DONE report; over ~25k, flag it and recommend `/purge`, which owns that compaction (oldest dated Current Context bullets → `memory/recent-history.md`). Do not compact here.
-7. **Commit**: descriptive message (what was absorbed, no project names, no contributor names). **No AI/agent attribution metadata (no `Co-Authored-By` lines).**
+7. **Commit**: descriptive message (what was absorbed, no project names, no contributor names). **No AI/agent attribution metadata (no `Co-Authored-By` lines).** Commit with `FORGE_ARTS_SKIP='forge cycle' git -C <forge> commit ...`: absorbing approved skill and learning changes is not a code build, and the PLAN table was its review, so the commit gate's skip is deliberate here.
 8. **Push decision**: ask the user — using your harness's multi-choice prompt if available, otherwise inline — options: "Push to origin" / "Keep local".

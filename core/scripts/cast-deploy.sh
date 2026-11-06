@@ -338,9 +338,12 @@ verify_rules() {
 # The forge-managed hook registrations. One row per hook body:
 #   <filename>|<event>|<matcher>
 # The matcher for tier-guard MUST include Agent — the spawn gate is dark
-# without it (see core/hooks/tier-guard.sh header).
+# without it (see core/hooks/tier-guard.sh header). Several rows may share an
+# event (tier-guard and arts-gate are both PreToolUse): wiring and verify key
+# each row on its exact hook basename, so each row owns its own entry.
 FORGE_HOOK_WIRING=(
   "tier-guard.sh|PreToolUse|Edit|Write|NotebookEdit|Agent"
+  "arts-gate.sh|PreToolUse|Bash"
   "tier-routing.sh|UserPromptSubmit|"
   "pass-stop.sh|Stop|"
   "pass-start.sh|SessionStart|clear"

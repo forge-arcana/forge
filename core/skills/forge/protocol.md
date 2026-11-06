@@ -251,8 +251,9 @@ Cache bookkeeping is script-tier work — `<forge>/core/scripts/web-cache.sh` im
    - **Forge-worthy**: [yes/no] — [reason: "universal pattern" or "project-specific"]
    ```
 2. Learnings marked `Forge-worthy: yes` will be promoted by `/forge`'s fold phase (3d) — scans project memories, genericizes, and promotes to the membrane's `learnings/general.md`
-3. **Present results** to the user
-4. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/forge` to absorb learnings
+3. **Record the run** (evaluative arts: /poke, /pound, /preen, /press, /probe, /temper): `bash <forge>/core/scripts/forge-art-record.sh <art> <project-path>`. It notes in the repo's git dir that this art reviewed the current HEAD; the commit gate reads it. Silent no-op outside a git repo or if the script is absent.
+4. **Present results** to the user
+5. **Suggest next steps**: fix findings (evaluative), run a complementary art, or `/forge` to absorb learnings
 
 ## The Masters
 

@@ -132,6 +132,8 @@ No docs/ directory — forge is a tooling repo. Skill documentation lives inside
 - **2026-11-01 one-shot /handoff**: an explicit `/handoff` no longer needs `/handoff on`; `handoff.sh write [name]` creates a one-shot opt-in (`oneshot=1`) that `status` reports as off, so model-initiated auto-handoff stays opt-in. Exit 3 retired; hooks unchanged.
 - **2026-11-02 /handoff renamed /pass**: `auto`/`manual` replace `on`/`off` (aliases kept one release), the name comes from the session's /rename title (then tmux window, then session name), state moves to `~/.claude/passes` (legacy dir migrated, symlink left), the cast strips retired handoff-* hook entries, and a `handoff` alias shim stays one release.
 
+- **2026-11-06 arts commit gate**: `core/hooks/arts-gate.sh` (PreToolUse on Bash, wired in `cast-deploy.sh`) denies a `git commit` of more than one source-code file unless an evaluative art recorded a run at the current HEAD (`core/scripts/forge-art-record.sh`, per worktree). It is a nudge, fails open on every uncertain input, and has escape hatches `FORGE_ARTS_SKIP='<reason>'` and `FORGE_ALLOW_UNGATED_COMMIT`. `/wrap` Step 2b runs `arts-gate.sh --check`; `/smith` and `/temper` write the records. The tier hooks and `/poke` also state that delegation never skips the arts. Takes effect on other sessions after `cast-deploy.sh --hooks`.
+
 ### Outstanding — Generic Forge v2 follow-ups
 
 - **Device-verify the Capacitor 8 / Xcode 27 block** in the stack guide: it is source-derived, and corrections from a device or simulator pass are applied in place.

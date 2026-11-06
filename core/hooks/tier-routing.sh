@@ -63,6 +63,8 @@ Read what you need to understand the problem and design the solution. Then deleg
 
 Keep for yourself only: the design, the delegation brief, review of what comes back, and the final verdict.
 
+Delegating does not skip the arts: a feature or multi-file change still goes through /smith (it delegates for you). Say in one line which arts will run, and gate with /poke, /pound (security, identity, auth) and /preen (UI) before /wrap.
+
 Writing to files is blocked on this tier — that is deliberate, not a malfunction. If a write is denied, spawn a subagent to make the edit."
 
 jq -n --arg text "$text" '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":$text}}' 2>/dev/null

@@ -146,7 +146,7 @@ case "$model" in
 esac
 
 if [ "$gate" = "write" ]; then
-  reason="Blocked: ${tool_name} on ${model}. Top-tier sessions plan and delegate; they do not write artifacts. Spawn a subagent to make this change and pass model: sonnet (or model: haiku if it is purely mechanical). Give it the exact change you want — you have already done the thinking. To override for a one-off, restart with FORGE_ALLOW_INLINE_EDITS=1 set."
+  reason="Blocked: ${tool_name} on ${model}. Top-tier sessions plan and delegate; they do not write artifacts. Spawn a subagent to make this change and pass model: sonnet (or model: haiku if it is purely mechanical). Give it the exact change you want — you have already done the thinking. Delegating does not skip the arts: a feature or multi-file change goes through /smith, and is gated by /poke, /pound (security, identity, auth) and /preen (UI) before /wrap. To override for a one-off, restart with FORGE_ALLOW_INLINE_EDITS=1 set."
 else
   reason="Blocked: Agent spawn with no model parameter on ${model}. A tier binds ONLY via the spawn's model parameter — without it this subagent inherits ${model}, the most expensive tier in the fleet. Triage the task first, then respawn with model set explicitly: model: haiku for mechanical work (grep, inventory, collation, formatting, scanning), model: sonnet for implementation-to-spec (writing code, editing files, running tests). Reserve the top tier for your own synthesis. Exempt without a parameter: subagent_type 'fork' (inherits by design) and agents whose .claude/agents/<name>.md frontmatter already pins a model. To override for a one-off, restart with FORGE_ALLOW_UNTRIAGED_SPAWN=1 set."
 fi

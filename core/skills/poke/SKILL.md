@@ -35,6 +35,8 @@ Use the script's output as your evidence base for the judgment phase below. The 
 
 After evidence is collected, apply the Parallel Execution Principle from the [Forge Protocol](../forge/protocol.md) — fan out one subagent per dimension with the shared evidence: spawn each dimension reviewer as a sonnet-tier subagent, except Dimension 2 (band-aids + actor-identity security), which spawns at opus tier. Then merge results into the final report at opus tier — the merge and the Gadfly Verdict are the review gate: dedup overlapping findings, drop findings the evidence does not support, and own the final severity ordering. Skip local-LLM fan-out entirely when the environment variable `FORGE_LLM_DISABLE` is set to `1` (protocol: User opt-out): route every dimension through Claude tiers as above. If your harness does not support parallel sub-agent spawning or per-spawn model selection, run the dimensions sequentially at your session model. For a scoped target (one diff, one module), collapse the non-carve-out dimensions into a single sonnet-tier reviewer carrying all their rubrics — carve-outs and the merge gate are unchanged (protocol Complexity Triage).
 
+Collapsing changes the reviewer count only: the protocol pre-flight and the forge-scan evidence step above still run in full, and a collapsed review without forge-scan evidence is not a /poke.
+
 ## Dimension 1: SOLID & Strategy Patterns
 
 Apply SOLID with its practical tests (SRP: describe the module without "and"; OCP: add a variant without editing the file; LSP: no overrides that throw or narrow contracts; ISP: no stubbed interface halves; DIP: inject concretions). Forge-specific flags:

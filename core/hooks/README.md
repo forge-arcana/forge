@@ -1,7 +1,7 @@
 # core/hooks/
 
-Tool-neutral bodies of forge's hooks: the tier work-router pair and the
-opt-in auto-pass pair.
+Tool-neutral bodies of forge's hooks: the tier work-router pair, the arts
+commit gate and the opt-in auto-pass pair.
 
 ## Tier pair
 
@@ -35,6 +35,63 @@ transcript tail, and on a session's *first* prompt the transcript may carry
 no `.message.model` line yet. Both hooks fail open there — and first prompts
 are exactly when large investigation fan-outs happen. No sturdier model
 signal is exposed to a hook payload today.
+
+## Arts commit gate
+
+`arts-gate.sh` — `PreToolUse` hook, matcher `Bash`. Enforces "Builds Go
+Through the Forge Arts" at the commit: a `git commit` carrying more than one
+changed source file (code and shell extensions only; docs, markup, styles,
+data, config and lockfiles never count; pure renames don't count) is denied
+unless an evaluative art has reviewed the repo since its last commit.
+Subagent calls are gated the same as the parent's: the gate is about the
+commit, not who types it.
+
+The gate is a nudge, not a lock: records are unauthenticated, any art
+recorded at this HEAD satisfies it (including edits made after that review),
+and `FORGE_ARTS_SKIP` is the visible, deliberate skip. An orphan branch
+inherits the whole index, so its first commit usually counts every staged
+source file.
+
+- **Records**: each art finishes with
+  `bash <forge>/core/scripts/forge-art-record.sh <art> <project-path>`, which
+  writes `<git-dir>/forge-arts/<art>` (`head=<sha>`, or `head=none` before
+  the first commit, plus `time=`). The dir is per worktree, so a review in
+  one worktree never unlocks another. The commit is allowed when any
+  record's `head=` equals the current HEAD. No time window: the next commit
+  expires every record. A failed write prints one warning line and exits 0.
+- **What is judged**: the first simple command of the Bash call. A commit
+  followed by `| tail`, `&& git push`, `;`, `|| true` or `# note` is still
+  judged; a commit after another command (`git add . && git commit`) is not
+  (known gap). Only the first simple command is judged, so
+  `FORGE_ARTS_SKIP=x; git commit` and `git add . && git commit` pass (known gap).
+  A record expires when HEAD moves (a pull or an intermediate commit) and
+  records do not carry across worktrees, so an apprentice worktree needs its
+  own art run or the named skip (known gap). Wrappers `command`, `time`, `nice`, `timeout <N>` and
+  `env VAR=val` are skipped; `-C` paths expand `~`, `$HOME` and `$PWD`.
+- **Escape hatches**: `FORGE_ARTS_SKIP='<reason>' git commit ...` (non-empty
+  reason, visible in the transcript, told to the user; the forge cycle's own
+  commit uses it), or `FORGE_ALLOW_UNGATED_COMMIT` set in the session env.
+- **Fails open** on anything uncertain: no jq, bad payload, payload over
+  64 KB or command over 8 KB, a token-heavy command past the scan budget,
+  subshells, command substitution outside a heredoc message, a repo-redirecting
+  `GIT_*=` prefix (`GIT_DIR`, `GIT_WORK_TREE`, `GIT_INDEX_FILE`,
+  `GIT_COMMON_DIR`, `GIT_OBJECT_DIRECTORY`, `GIT_NAMESPACE`,
+  `GIT_CEILING_DIRECTORIES`, `GIT_DISCOVERY_ACROSS_FILESYSTEM`,
+  `GIT_ALTERNATE_OBJECT_DIRECTORIES`, `GIT_CONFIG*`; other `GIT_*=` prefixes
+  are skipped like any `VAR=val`), a flag word over 64 chars, an empty `HOME`
+  when `-C` needs it, `--git-dir`/`--work-tree`, explicit pathspecs,
+  `--dry-run`/`-p`/`-i`/`-o`, status-style flags (`--short`, `--porcelain`,
+  `--long`, `-z`, `--help`), a merge/rebase/cherry-pick in progress, a
+  non-repo, git errors.
+- **Hot path**: the payload is checked for the substring `commit` with a bash
+  builtin before jq or git run; every other Bash call costs one `case`.
+- **Check mode**: `arts-gate.sh --check <path>` judges the staged set, the
+  same way the commit will, and prints `arts-gate: ok` (exit 0) or
+  `arts-gate: blocked — <reason>` (exit 1), plus a `note —` line when
+  untracked source files exist (never blocks). `/wrap` runs it at Step 2b,
+  after staging.
+
+Test: `bash core/hooks/tests/test-arts-gate.sh`.
 
 ## Pass pair (opt-in, tmux only)
 
@@ -239,8 +296,10 @@ What the merge touches, and nothing else:
   Your permissions, env, model, statusline and hand-written hooks are read
   and re-emitted verbatim.
 
-The filename match is a regex (`jq test()`; dots match any char), so no forge
-hook filename may regex-match another's. Keep filenames distinct.
+The filename match is exact: a command references a hook when one of its
+whitespace-separated tokens (quotes stripped) has that hook's basename as its
+final path component. Several forge hooks may share an event (tier-guard and
+arts-gate are both `PreToolUse`); each row owns only its own entry.
 
 Properties: **remove-then-append**, so repeated casts yield one entry and a
 stale matcher (e.g. the pre-Agent `Edit|Write|NotebookEdit`) self-heals;

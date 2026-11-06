@@ -261,6 +261,8 @@ Smith commits at every phase gate via `/wrap`. This is a bounded override of the
 
 When smith invokes `/wrap`, skip all of wrap's prompts (commit confirmation, push decision, doc updates): lint, stage, save context, commit. Do not push.
 
+After each gate art returns, the orchestrator itself runs `bash <forge>/core/scripts/forge-art-record.sh <art> <project-path>` for that art. A spawned art with a scoped brief may skip its post-flight, and without the record the commit gate blocks the phase-gate commit.
+
 ### The Final Gate — Convergence Loop
 
 The final gate is not a one-shot check. It's a bounded convergence loop:

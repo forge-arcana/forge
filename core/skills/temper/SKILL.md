@@ -139,6 +139,8 @@ Persist the report before displaying it.
 
 Write the full report to `memory/YYYY-MM-DD-temper-report.md` in the project directory (create `memory/` if needed). It survives context compaction and session breaks; the user can delete it when done.
 
+Then record the run for the commit gate: `bash <forge>/core/scripts/forge-art-record.sh temper <project-path>` (silent no-op outside a git repo or if the script is absent). Temper skips the protocol post-flight, so this is its only record.
+
 Produce a markdown report with these sections in order:
 
 1. **Header**: Project name, date, pass count, stack
