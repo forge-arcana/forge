@@ -37,3 +37,7 @@ These are universal aesthetic principles that survive across projects — not pr
 ## Theme Governs the Calm State; the Alarm State Is Theme-Independent (2026-09-23)
 **Learning**: For any product with a calm→alarm transition, the light/dark theme governs only the calm surface; the alarm state floods to ONE fixed critical palette in every theme. An alarm doesn't care about the viewer's colour preference, and a single alarm identity strengthens the "becomes a different object" signature.
 **Apply when**: Designing theming for a product with a critical/alarm state.
+
+## Art and Render Prototypes: Model and Brief Both Matter (2026-11-08)
+**Learning**: A visual prototype a founder must judge for appeal goes to the strongest model, not an implementation-tier model; a cheaper model tends to tweak framing instead of improving the subject. The brief names the verbatim complaint, asks for an art-director pass on what makes the audience love it, compares quality routes side by side (not only re-framing), renders under both the real in-product light and a studio light, and makes the agent look at every image and iterate to a stated bar. Each art task leaves the shared render tooling better than it found it.
+**Apply when**: Briefing an agent to produce art, render or visual prototypes that a founder will judge for appeal.

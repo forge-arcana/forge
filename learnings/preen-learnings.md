@@ -111,3 +111,34 @@ Accumulated UI/UX design evaluation learnings. Absorbed from project runs via th
 ## A "Waiting" Label Promises a Re-Drive That Must Exist (2026-09-20)
 **Learning**: A "waiting"/"queued" UI state tells the user the item will be processed. If no code path re-drives that queue when the blocking condition clears (quota resets, entitlement gained, connectivity returns), the label overpromises and items sit forever. Either wire the re-drive to the unblocking event, or make the copy state the manual step required.
 **Apply when**: Designing or reviewing any queued/pending/waiting status shown to a user.
+
+## Landing-Page Polish: Written Bars, a Design Lint in the Build, One Motion Token Set (2026-11-14)
+**Learning**: A reference landing page built with AI assistance stays polished because the AI is steered by artifacts, not taste prompts. Five practices; adopt them as checks, not as a house look.
+1. **A bars file and a rejected-options list per landing page, kept in the repo.** One short file per page holds the written quality bars (testable sentences) and the options tried and rejected, each with a reason. Agents read it before editing the page, so a rejected option is not re-proposed. Target: a new landing-page check in the preen surface checks, and the wedge Touchstone (its Do and Don't lists hold the rejected options).
+2. **Design lint that fails the build on banned patterns.** Make the greppable half of the preen scan a build step, with the banned list derived from the Touchstone's Don'ts. Candidate bans, all testable: tracked-caps eyebrows (small uppercase letter-spaced labels above headings); centred three-line stacks (eyebrow + heading + subline all centred); spring or overshoot easing; decorative gradients and glows (gradient only as a functional fade); a second accent colour; default bordered buttons. Target: preen-surface-scan.sh, the Touchstone scaffold's Do's and Don'ts section, and /smith's build gate.
+3. **One motion token set in the Touchstone.** Tokens, not per-component values: one ease-out curve, press about 120 ms, state change about 220 ms, enter about 450 ms, a 6 px rise, a 50 ms stagger; no springs or overshoot; crossfades may carry a slight blur; reduced motion honoured. Target: touchstone-md-scaffold.md (a `motion:` token block; the HTML token legend lists "motion timing" with no schema) and preen's motion check.
+4. **Web-perf budgets on landing pages.** Mobile LCP target and a per-image weight cap, checked at the landing page's screenshot pass (the /web-perf skill exists; preen section 2 does not call it). Target: preen surface-checks.md section 2.
+5. **Hero depth from optimised raster layers, not CSS effects.** Base plus overlay layers with desktop and mobile variants, preloaded, in modern formats, instead of gradient or blur effects. Target: preen landing checks (pairs with the effects ban in item 2) and the wedge hero-surface heat.
+
+Already covered, no change needed: one accent colour, one interface face, screenshots at phone and desktop in light and dark, prototype before any visual decision, Touchstone as single token source, dark mode, and glassmorphism and generic gradients as banned defaults.
+
+Conflicts for the founder to rule on at /forge (flagged, not overridden):
+- Stack: a framework-specific image component vs the stack guide's default framework; rule whether a marketing-site exception exists, and whether to list a motion library as the default.
+- No component library vs the guide's component library.
+- Monospace for labels and a handwritten accent face vs the one-face rule, where mono is only a declared code face. Keep the forge rule unless ruled otherwise.
+- "No decorative gradients or glows" as a universal ban vs wedge's tone tiers, which allow gradient mesh for atmospheric and maximalist directions. Suggest: a ban only where the Touchstone's tier is minimal or the Don'ts say so.
+- One fixed motion token set vs wedge's "never converge on a house style". Suggest: a shared token schema, per-project values; any reference curve is a reference value, not a default.
+- Layered raster hero vs preen's "product above the fold" check. Suggest: layers are allowed as the hero's depth around the product mock, not instead of it.
+**Apply when**: Building or reviewing any landing or marketing page, or writing the Touchstone's Do's and Don'ts and the build gate for one.
+
+## Landing Pages: the Method That Worked (2026-11-15)
+**Learning**:
+- One photographic hero object carries the product's thesis and brand colours with real light and depth. It is a picture, not product UI. Grade it to the page ground and mask its inner edge so no frame shows; run it full-bleed from the hero centre line to the viewport edge, behind the nav; dim it in dark mode; collapse it to a band between lede and product capture on small screens. Generate the master wide enough for the largest viewport (2400px or more); a 900px master looks soft at 1680.
+- Overlap the object with one large, full, real app capture (about 720px tall at 1680) showing a state with content all the way down. A blank or one-row screen adds nothing, and many small unaligned captures read as messy.
+- Every piece of product UI is a real capture from the real app, taken in a gitignored dogfood rig (dev server, mocked API, seeded data, no external requests), or a faithful copy of a real component cited by file and line. Invented UI is rejected on sight. Keep a truth file mapping each capture and each sentence to its source, and list what is not fully real.
+- Interaction is real or absent: an actual app state change, or a real screen recording of the real flow looping with an end hold, a pause control and a still frame under prefers-reduced-motion. No fake cursor, no motion the app does not have.
+- Words match the captures: use the app's own labels, never claim a feature the capture does not show.
+- First screen: wordmark, short nav, two-line headline, one-line lede, store badges and one text link. Each product wears its own app theme so siblings do not read as one template.
+- Process: the design director advises, the founder picks. Show variants side by side (current, move 1, moves 1+2) at desktop and phone sizes, light and dark, tested at the founder's actual viewport, with fonts embedded because the page viewer blocks external ones. Add one move at a time; type tweaks alone are not felt.
+- Known failures: wireframes ("no taste"), invented UI, pale pages with no picture or brand colour, and grids of unaligned captures.
+**Apply when**: Building or reviewing any product landing page, or briefing a design or build agent for one.

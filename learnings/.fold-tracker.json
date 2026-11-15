@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-11-05",
+  "lastRun": "2026-11-15",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -311,7 +311,14 @@
     "Regional price tiers follow big tech (founder standing order, 2026-10-26)",
     "Real-time transport: SSE by default, Ably to step up, Socket.IO only for a two-way app on one always-on server",
     "A Clean HEAD Is Not a Clean History: Scan Every Commit Before a Private Repo Goes Public",
-    "A Missing GitHub Environment Is Created Unprotected on First Use"
+    "A Missing GitHub Environment Is Created Unprotected on First Use",
+    "Headless triage: an unsettled reading is not-actionable, never a guess",
+    "Triage group mode: one plan for many related tasks",
+    "Art and render prototypes: model and brief both matter",
+    "Landing-page polish: written bars, a design lint in the build, one motion token set",
+    "Landing pages: the method that worked",
+    "Run test suites through testgate",
+    "Summaries of Whole-Blob Snapshots Belong at Write Time, Not on the Hottest Read"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",
