@@ -78,7 +78,8 @@ O="$PASS_DIR/state/pane-5.optin"; R="$PASS_DIR/state/pane-5.ready"
 in_claude() { OUT="$("$TMPD/claude" -c "$1"$'\n''exit $?' 2>&1)"; RC=$?; }
 
 clean
-in_claude 'bash "'"$HERE"'/pass.sh" write afp < "'"$TMPD"'/good.md" >/dev/null 2>&1
+mkdir -p "$PASS_DIR/state/optout"; printf 'name=afp\n' > "$PASS_DIR/state/optout/afp"   # opted out: write is one-shot
+in_claude 'bash "'"$HERE"'/pass.sh" write --explicit afp < "'"$TMPD"'/good.md" >/dev/null 2>&1
   rc=$?
   bash "'"$HERE"'/pass.sh" status
   echo "status_rc=$?"

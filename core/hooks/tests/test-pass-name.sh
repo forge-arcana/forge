@@ -114,7 +114,8 @@ grep -qx 'name=given' "$O" && grep -qx 'name=given' "$R" \
 
 reset
 title "one-shot title"
-in_claude 'bash "'"$HERE"'/pass.sh" write < "'"$TMPD"'/good.md" >/dev/null
+mkdir -p "$PASS_DIR/state/optout"; printf 'name=x\n' > "$PASS_DIR/state/optout/one-shot title"   # opted out: write is one-shot
+in_claude 'bash "'"$HERE"'/pass.sh" write --explicit < "'"$TMPD"'/good.md" >/dev/null
   printf "%s\n" "{\"type\":\"custom-title\",\"customTitle\":\"renamed\",\"sessionId\":\"'"$SID"'\"}" >> "'"$TX"'"
   rm -f "'"$R"'"
   bash "'"$HERE"'/pass.sh" write < "'"$TMPD"'/good.md" >/dev/null'
@@ -149,9 +150,10 @@ grep -qx 'name=bar' "$O" && grep -qx 'name=bar' "$R" && grep -qx 'pane_pid=4242'
 
 reset
 title "bar"
-in_claude 'bash "'"$HERE"'/pass.sh" write foo < "'"$TMPD"'/good.md" >/dev/null
+mkdir -p "$PASS_DIR/state/optout"; printf 'name=x\n' > "$PASS_DIR/state/optout/foo"   # opted out: write is one-shot
+in_claude 'bash "'"$HERE"'/pass.sh" write --explicit foo < "'"$TMPD"'/good.md" >/dev/null
   rm -f "'"$R"'"
-  '"$W"''
+  bash "'"$HERE"'/pass.sh" write --explicit < "'"$TMPD"'/good.md" >/dev/null'
 grep -qx 'name=foo' "$O" && grep -qx 'oneshot=1' "$O" && grep -qx 'title_at_optin=bar' "$O" && grep -qx 'name=foo' "$R" \
   && check "14 one-shot 'write foo' under title bar: no-arg write keeps foo" 0 \
   || check "14 one-shot 'write foo' under title bar: no-arg write keeps foo" 1 "$(cat "$O" "$R" 2>&1)"

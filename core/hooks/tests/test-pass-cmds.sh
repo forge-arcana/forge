@@ -43,7 +43,7 @@ rc=0"
   in_claude "$C $1 tester >/dev/null; $C write < \"$TMPD/good.md\" >/dev/null; $C status; echo \"rc=\$?\""
   [ "$OUT" = $'auto name=tester pane=%5 ready=yes\nrc=0' ] && check "2 '$1' + write: ready=yes" 0 || check "2 '$1' + write: ready=yes" 1 "out=$OUT"
   in_claude "$C $1 tester >/dev/null; $C $2; echo \"rc=\$?\"; $C status; echo \"rc=\$?\""
-  exp="pass: manual — pane %5 no longer auto-clears.
+  exp="pass: manual — pane %5 no longer auto-clears; opted out 'sess'.
 rc=0
 manual
 rc=1"
@@ -57,7 +57,8 @@ in_claude "$C auto; echo \"rc=\$?\""
   && check "5 bare 'auto' derives a name (session name here)" 0 || check "5 bare 'auto' derives a name" 1 "out=$OUT"
 
 rm -rf "$PASS_DIR"
-in_claude "$C write afp < \"$TMPD/good.md\" >/dev/null; $C status; echo \"rc=\$?\""
+mkdir -p "$PASS_DIR/state/optout"; printf 'name=afp\n' > "$PASS_DIR/state/optout/afp"   # opted out: write is one-shot
+in_claude "$C write --explicit afp < \"$TMPD/good.md\" >/dev/null; $C status; echo \"rc=\$?\""
 [ "$OUT" = $'manual (one-shot pass pending name=afp ready=yes)\nrc=1' ] \
   && check "6 one-shot status line, exit 1" 0 || check "6 one-shot status line, exit 1" 1 "out=$OUT"
 
@@ -65,8 +66,8 @@ rm -rf "$PASS_DIR"
 mkdir -p "$PASS_DIR/state"
 printf 'name=old\npane_pid=1\nclaude_pid=1\n' > "$PASS_DIR/state/pane-5.optin"
 in_claude "$C status; echo \"rc=\$?\""
-[ "$OUT" = $'stale opt-in removed\nmanual\nrc=1' ] && check "7 stale opt-in: 'stale opt-in removed' then 'manual', exit 1" 0 \
-  || check "7 stale opt-in: 'stale opt-in removed' then 'manual', exit 1" 1 "out=$OUT"
+[ "$OUT" = $'stale opt-in removed\nauto name=sess pane=%5 ready=no\nrc=0' ] && check "7 stale opt-in: 'stale opt-in removed' then default 'auto', exit 0" 0 \
+  || check "7 stale opt-in: 'stale opt-in removed' then default 'auto', exit 0" 1 "out=$OUT"
 
 OUT="$(env -u TMUX_PANE bash "$HERE/pass.sh" status 2>&1)"; RC=$?
 [ "$RC" = 1 ] && [ "$OUT" = "manual (not in tmux)" ] && check "8 no TMUX_PANE: 'manual (not in tmux)' exit 1" 0 || check "8 no TMUX_PANE" 1 "rc=$RC out=$OUT"
@@ -74,7 +75,7 @@ OUT="$(PASS_TMUX="$TMPD/no-such-tmux" bash "$HERE/pass.sh" status 2>&1)"; RC=$?
 [ "$RC" = 1 ] && [ "$OUT" = "manual (not in tmux)" ] && check "9 no tmux binary: 'manual (not in tmux)' exit 1" 0 || check "9 no tmux binary" 1 "rc=$RC out=$OUT"
 
 OUT="$(bash "$HERE/pass.sh" bogus 2>&1)"; RC=$?
-[ "$RC" = 64 ] && [ "$OUT" = "usage: pass.sh auto [name...] | manual | status | write [name...] | cancel" ] \
+[ "$RC" = 64 ] && [ "$OUT" = "usage: pass.sh auto [name...] | manual | status | write [--explicit] [name...] | cancel" ] \
   && check "10 unknown subcommand: usage, exit 64" 0 || check "10 unknown subcommand: usage, exit 64" 1 "rc=$RC out=$OUT"
 OUT="$(bash "$HERE/pass.sh" 2>&1)"; RC=$?
 [ "$RC" = 64 ] && check "11 no subcommand: exit 64" 0 || check "11 no subcommand: exit 64" 1 "rc=$RC"

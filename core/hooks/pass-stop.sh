@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# Stop hook — the trigger half of opt-in auto-pass.
+# Stop hook — the trigger half of auto-pass (default on; a session opts out by
+# name with `/pass manual`, stored as state/optout/<name>).
 #
-# A session opts in with `/pass on <name>`; when its work is done the model
+# When a session's work is done the model
 # runs `/pass`, which writes <root>/pane-<N>.md (the note) and a per-pane
 # "ready" marker. When the turn then ends, this hook consumes the marker and
 # schedules a fully detached job that types `/clear <name>` and, once the fresh
@@ -59,6 +60,16 @@
 #     which is a real prompt; any assistant line is activity). The guard runs
 #     before `/rename <name>` is typed, then the pane must be idle again
 #     (up to ~5 tries) before the resume prompt;
+#   - opt-out: a non-one-shot opt-in whose name has state/optout/<name> never
+#     clears (logged);
+#   - minimum context: unless the ready marker says explicit=1 (the user typed
+#     /pass), the last assistant message's usage (input + cache read + cache
+#     creation tokens) must reach PASS_MIN_CONTEXT, else the note stays saved,
+#     nothing is scheduled and `skip(min-context n < min)` is logged. Unreadable
+#     usage fails open (the clear proceeds; logged);
+#   - cancel window: the job waits PASS_DELAY seconds (default 25) and, every
+#     second of it, re-checks token/opt-in/process, pane busy and transcript
+#     activity, aborting on any;
 #   - loop guard: no schedule if this pane was auto-cleared less than
 #     PASS_MIN_INTERVAL seconds ago (the helper refuses to set the ready
 #     marker in that window too; this is defence in depth).
@@ -77,13 +88,15 @@
 #   <root>/pane-<N>.md   the note                                   (helper)
 #   pane-<N>.optin       name= / pane_pid= / claude_pid=            (helper)
 #                        [+ oneshot= / title_at_optin=, helper-only; hooks ignore them]
-#   pane-<N>.ready       name= / epoch=                             (helper)
+#   pane-<N>.ready       name= / epoch= [/ explicit=1]              (helper)
+#   optout/<name>        persistent opt-out by session name         (helper)
 #   pane-<N>.clearing    epoch= / id= / name= / claude_pid=  (this hook; consumed by start hook)
 #   pane-<N>.injected    epoch= / at= / transcript= / size=  (start hook; consumed by the job)
 #   pane-<N>.lastclear   epoch=                     (job, once /clear is confirmed submitted)
 #   pass.log          one line per decision
 # Env: PASS_TMUX (default `tmux`, word-split; tests use `tmux -L <sock>`),
-#      PASS_DELAY (default 3 s before the first check),
+#      PASS_DELAY (default 25 s cancel window, checked each second, before the idle checks),
+#      PASS_MIN_CONTEXT (default 90000 tokens; below it a model-initiated pass is skipped),
 #      PASS_POLL_TRIES (default 4 idle checks 1 s apart before /clear),
 #      PASS_READY_TTL (default 900 s; older ready markers are dropped),
 #      PASS_MIN_INTERVAL (default 600 s between auto-clears of one pane).
@@ -129,8 +142,21 @@ SPIN_RE="${ELLIPSIS}[[:space:]]*\\([0-9]"
 BG_RE='[0-9]+ (shells?|(background )?tasks?)'   # footer background-task segment
 GRACE=2                       # seconds of timestamp slack in tx_quiet
 
+# Context size of the last non-sidechain assistant entry with usage > 0.
+# TWIN: the same pipeline is in core/skills/pass/pass.sh (last_context);
+# test-pass-default.sh checks both agree. Keep them identical.
+last_context() {
+  command -v jq >/dev/null 2>&1 || return 0
+  tail -c 4000000 "$1" 2>/dev/null | grep -a '"usage"' \
+    | jq -rR 'fromjson? | select(.type? == "assistant") | select(.isSidechain != true) | .message.usage? | objects
+        | ((.input_tokens // 0) + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0))
+        | select(. > 0)' 2>/dev/null | tail -n1 || true
+  return 0
+}
+
 num_or() { [[ "$1" =~ ^[0-9]{1,6}$ ]] && printf '%s' "$1" || printf '%s' "$2"; }
-DELAY="$(num_or "${PASS_DELAY:-3}" 3)"
+DELAY="$(num_or "${PASS_DELAY:-25}" 25)"
+MIN_CONTEXT="$(num_or "${PASS_MIN_CONTEXT:-90000}" 90000)"
 POLL_TRIES="$(num_or "${PASS_POLL_TRIES:-4}" 4)"
 READY_TTL="$(num_or "${PASS_READY_TTL:-900}" 900)"
 MIN_INTERVAL="$(num_or "${PASS_MIN_INTERVAL:-600}" 600)"
@@ -543,8 +569,19 @@ run_job() {
   [[ "$TID" =~ ^[0-9]+\.[0-9]+$ ]] || { log "job: bad job id, abort"; exit 0; }
   [[ "$CPID" =~ ^[0-9]+$ ]] && [[ "$TBASE" =~ ^[0-9]+$ ]] && [[ "$TSTOP" =~ ^[0-9]+(\.[0-9]+)?$ ]] \
     && [ -n "$TPATH" ] || abort "bad job arguments"
-  log "job: started, sleeping ${DELAY}s"
-  sleep "$DELAY"
+  log "job: started, cancel window ${DELAY}s"
+  # Cancel window: every second re-check the token (cancel), opt-in, process,
+  # the pane (gone, or a new turn running) and the transcript (new activity).
+  local w
+  for ((w = 0; w < DELAY; w++)); do
+    sleep 1
+    precheck
+    pane_state; rc=$?
+    [ "$rc" -eq 2 ] && abort "pane gone"
+    if [ "$w" -ge 2 ] && [ "${BOX_BUSY:-0}" -eq 1 ]; then abort "aborted: pane busy during cancel window (${BOX_SIGNAL:-unknown})"; fi
+    tx_quiet "$TPATH" "$TBASE" "$(awk -v a="$TSTOP" -v g="$GRACE" 'BEGIN { printf "%.3f", a + g }')" '["assistant"]' 0 \
+      || abort "aborted: new activity in transcript during cancel window${TX_WHY:+: $TX_WHY}"
+  done
 
   # Idle check before /clear: a few tries over ~POLL_TRIES s, no long wait.
   rc=1
@@ -657,6 +694,7 @@ claimed="$ready.claim.$$"
 mv -f "$ready" "$claimed" 2>/dev/null || exit 0
 rname="$(kv "$claimed" name)"
 repoch="$(kv "$claimed" epoch)"
+rexplicit="$(kv "$claimed" explicit)"
 rm -f "$claimed"
 NAME="${rname:--}"
 now="$(date +%s)"
@@ -668,6 +706,9 @@ CPID="$(claude_ancestor)" || { log "no Claude Code ancestor process, ready marke
 if ! on="$(optin_name)"; then log "no valid opt-in (missing, pane/claude pid mismatch or bad name), ready marker dropped"; exit 0; fi
 if [ "$rname" != "$on" ]; then log "ready name != opt-in name '$on', ready marker dropped"; exit 0; fi
 NAME="$on"
+if [ "$rexplicit" != 1 ] && [ -f "$STATE/optout/$on" ]; then
+  log "session is opted out (optout/$on) and the pass is not explicit, not clearing"; exit 0
+fi
 if [ ! -s "$ROOT/pane-$N.md" ]; then log "note pane-$N.md missing or empty, ready marker dropped"; exit 0; fi
 
 last="$(kv "$STATE/pane-$N.lastclear" epoch)"
@@ -679,6 +720,16 @@ tpath="$(printf '%s' "$payload" | jq -r '.transcript_path // empty' 2>/dev/null)
 [ -n "$tpath" ] && [ -f "$tpath" ] || { log "no readable transcript_path in payload, not scheduling"; exit 0; }
 tsize="$(stat -c %s "$tpath" 2>/dev/null)"
 [[ "$tsize" =~ ^[0-9]+$ ]] || { log "cannot stat transcript, not scheduling"; exit 0; }
+if [ "$rexplicit" != 1 ]; then
+  ctx="$(last_context "$tpath")"
+  if [[ "$ctx" =~ ^[0-9]+$ ]]; then
+    if [ "$ctx" -lt "$MIN_CONTEXT" ]; then
+      log "skip(min-context $ctx < $MIN_CONTEXT), note kept, not clearing"; exit 0
+    fi
+  else
+    log "min-context: usage unreadable in transcript, proceeding"
+  fi
+fi
 command -v setsid >/dev/null 2>&1 || { log "setsid not found, not scheduling"; exit 0; }
 command -v awk >/dev/null 2>&1 || { log "awk not found, not scheduling"; exit 0; }
 

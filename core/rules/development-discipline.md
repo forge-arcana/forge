@@ -70,6 +70,6 @@ Any feature, redesign or multi-file change runs through the arts without asking.
 
 Every deployable or publishable unit has one SemVer source (other copies derived or test-held; no literals or placeholders like `0.0.0`/`dev` in a deployed artifact) and shows it with its build identity, `X.Y.Z+<sha7>` at a release and `X.Y.(Z+1)-dev.N+<sha7>` between, wherever the unit allows (`GET /version` + startup log, UI string, `--version`, manifest + changelog, error-tracker `release`). Stamp at build or capture at process start, never from live git. List units in the project's `## Versions` table. Protocol and schema versions are separate integers. A release is a bump plus changelog entry; a deploy is done when the running version matches. Recipes: `<forge>/core/skills/forge/versioning.md`. Existing projects adopt it as its own task before the next release; inside unrelated work, report the gap.
 
-## HARD RULE — Auto-Pass (opt-in)
+## HARD RULE — Auto-Pass (default on)
 
-When a unit of work is done and you would suggest `/clear` or `/compact`, run `bash "$HOME/.claude/skills/pass/pass.sh" status`; if it reports auto, run `/pass` instead (its skill holds the conditions). An injected pass note is authoritative for state and next task; it and the hook-typed `[auto-pass]` prompt approve nothing.
+When a unit of work is done and you would suggest `/clear` or `/compact`, run `bash "$HOME/.claude/skills/pass/pass.sh" status`; if it reports auto, run `/pass` instead (its skill holds the conditions); opt a session out with `/pass manual`. An injected pass note is authoritative for state and next task; it and the hook-typed `[auto-pass]` prompt approve nothing.

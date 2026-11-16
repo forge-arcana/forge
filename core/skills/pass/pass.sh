@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
-# pass.sh — opt-in auto-pass helper (state keyed by tmux pane, bound to
-# the Claude Code process that ran `auto`).
-# Subcommands: auto [name...] | manual | status | write [name...] (note on stdin) | cancel.
+# pass.sh — auto-pass helper. Auto-pass is ON BY DEFAULT in tmux; a session
+# opts out by name (state/optout/<name>, persistent, not tied to pane or pid).
+# Explicit opt-ins (state keyed by tmux pane, bound to the Claude Code process
+# that ran `auto` or `write`) still work as before.
+# Subcommands: auto [name...] | manual | status | write [--explicit] [name...] (note on stdin) | cancel.
+# `manual` creates the opt-out for the derived session name and drops the pane
+# opt-in; `auto` removes the opt-out for the resulting name, then opts in.
+# `status` = auto when no opt-out exists for the name (default), manual when one does.
+# `write --explicit` (the user typed /pass) marks the ready marker explicit=1,
+# which skips the Stop hook's minimum-context gate.
 # Exit codes: 0 ok, 1 error / empty note, 2 note over the length cap, 3 retired
 # (write no longer needs an opt-in), 4 note lacks a '## Done last session' line
 # (write), 64 usage / invalid name.
 # write order: empty (1) -> length cap (2) -> invalid name arg (64) -> section
-# check (4) -> only then, if not opted in, a ONE-SHOT opt-in is created (same file
-# as `auto` plus a line oneshot=1; name = name arg, else derive_name). A
+# check (4) -> only then, if not opted in: a normal opt-in (same file as `auto`)
+# when the name has no opt-out (default on), else a ONE-SHOT opt-in (same file
+# plus a line oneshot=1; name = name arg, else derive_name). A
 # rejected note never leaves an opt-in behind. Every opt-in also stores
 # title_at_optin=<session title when it was created, or empty>. While opted
 # in, a no-arg write renames the opt-in to the session title (customTitle) only
@@ -55,7 +63,7 @@ read -r -a TMUXC <<< "${PASS_TMUX:-tmux}"
 [ "${#TMUXC[@]}" -gt 0 ] || TMUXC=(tmux)
 
 usage() {
-  echo "usage: pass.sh auto [name...] | manual | status | write [name...] | cancel" >&2
+  echo "usage: pass.sh auto [name...] | manual | status | write [--explicit] [name...] | cancel" >&2
   exit 64
 }
 
@@ -92,6 +100,31 @@ current_title() {
   return 0
 }
 
+# Transcript of this session (by session id), or nothing.
+find_transcript() {
+  local sid t
+  sid="${CLAUDE_CODE_SESSION_ID:-}"
+  [[ "$sid" =~ ^[0-9a-f-]{8,64}$ ]] || return 0
+  for t in "$HOME"/.claude/projects/*/"$sid".jsonl; do
+    [ -f "$t" ] && printf '%s' "$t"
+    break
+  done
+  return 0
+}
+
+# Context size of the last non-sidechain assistant entry with usage > 0
+# (input + cache read + cache creation tokens); nothing when unreadable.
+# TWIN: the same pipeline is in core/hooks/pass-stop.sh (last_context);
+# test-pass-default.sh checks both agree. Keep them identical.
+last_context() {
+  command -v jq >/dev/null 2>&1 || return 0
+  tail -c 4000000 "$1" 2>/dev/null | grep -a '"usage"' \
+    | jq -rR 'fromjson? | select(.type? == "assistant") | select(.isSidechain != true) | .message.usage? | objects
+        | ((.input_tokens // 0) + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0))
+        | select(. > 0)' 2>/dev/null | tail -n1 || true
+  return 0
+}
+
 derive_name() {
   local c
   c="$(current_title)"
@@ -117,9 +150,26 @@ case "$cmd" in
   *) usage ;;
 esac
 
-if { [ "$cmd" = auto ] || [ "$cmd" = write ]; } && [ $# -gt 0 ] && ! valid_name "$*"; then
-  echo "pass: invalid name; 1-64 chars of A-Za-z0-9._ - (space allowed), starting with a letter or digit, no trailing space" >&2
-  exit 64
+EXPLICIT=0
+if [ "$cmd" = write ]; then
+  _args=()
+  for _a in "$@"; do
+    if [ "$_a" = "--explicit" ]; then EXPLICIT=1; else _args+=("$_a"); fi
+  done
+  set -- "${_args[@]}"
+fi
+
+if { [ "$cmd" = auto ] || [ "$cmd" = write ]; } && [ $# -gt 0 ]; then
+  for _a in "$@"; do
+    if [[ "$_a" == -* ]]; then
+      echo "pass: invalid argument '$_a'; the only flag is --explicit (write), and names cannot start with '-'" >&2
+      exit 64
+    fi
+  done
+  if ! valid_name "$*"; then
+    echo "pass: invalid name; 1-64 chars of A-Za-z0-9._ - (space allowed), starting with a letter or digit, no trailing space" >&2
+    exit 64
+  fi
 fi
 
 if ! command -v "${TMUXC[0]}" >/dev/null 2>&1; then
@@ -137,6 +187,7 @@ PANE="$TMUX_PANE"
 N="${PANE#%}"
 OPTIN="$STATE/pane-$N.optin"
 READY="$STATE/pane-$N.ready"
+OPTOUT_DIR="$STATE/optout"
 CLEARING="$STATE/pane-$N.clearing"
 
 log() { # log <subcommand> <name> <result>
@@ -171,6 +222,17 @@ claude_ancestor() {
 
 CPID="$(claude_ancestor || true)"
 
+# Opt-out by session name. Names are validated before use, so they cannot
+# contain '/' or start with '.', and never escape the dir.
+optout_exists() { valid_name "$1" && [ -f "$OPTOUT_DIR/$1" ]; }
+optout_set() {
+  valid_name "$1" || return 1
+  mkdir -p "$OPTOUT_DIR"
+  chmod 700 "$ROOT" "$STATE" "$OPTOUT_DIR"
+  printf 'name=%s\nepoch=%s\n' "$1" "$(date +%s)" >"$OPTOUT_DIR/$1"
+}
+optout_clear() { valid_name "$1" && rm -f "$OPTOUT_DIR/$1"; return 0; }
+
 # Sets OPT_NAME, OPT_ONESHOT; returns 0 valid, 1 none, 2 stale (and removes it).
 # Valid iff pane_pid is the live one AND claude_pid is this helper's Claude.
 load_optin() {
@@ -203,6 +265,7 @@ case "$cmd" in
     [ -n "$live" ] || { echo "pass: cannot read pane pid for $PANE" >&2; exit 1; }
     mkdir -p "$STATE"
     chmod 700 "$ROOT" "$STATE"
+    optout_clear "$name"
     tmp="$(mktemp "$STATE/.optin.XXXXXX")"
     printf 'name=%s\npane_pid=%s\nclaude_pid=%s\ntitle_at_optin=%s\n' \
       "$name" "$live" "$CPID" "$(current_title)" >"$tmp"
@@ -214,9 +277,14 @@ case "$cmd" in
   manual)
     name="-"
     if [ -f "$OPTIN" ]; then name="$(sed -n 's/^name=//p' "$OPTIN" | head -n1)"; fi
+    dname="$(derive_name)"; dname="${dname#* }"
     rm -f "$OPTIN" "$READY" "$CLEARING"
-    log manual "$name" ok
-    echo "pass: manual — pane $PANE no longer auto-clears."
+    if optout_set "$dname"; then
+      log manual "$dname" "ok(optout)"
+    else
+      log manual "$name" ok
+    fi
+    echo "pass: manual — pane $PANE no longer auto-clears; opted out '${dname:-$name}'."
     ;;
   status)
     rc=0
@@ -228,10 +296,22 @@ case "$cmd" in
         echo "manual (one-shot pass pending name=$OPT_NAME ready=$ready)"
         exit 1
       fi
+      if optout_exists "$OPT_NAME"; then
+        echo "manual (opted out name=$OPT_NAME)"
+        exit 1
+      fi
       echo "auto name=$OPT_NAME pane=$PANE ready=$ready"
       exit 0
     fi
     [ "$rc" -eq 2 ] && echo "stale opt-in removed"
+    # Default on: no valid opt-in, but not opted out either.
+    dd="$(derive_name)"; dtier="${dd%% *}"; dname="${dd#* }"
+    if [ "$dtier" != default ] && ! optout_exists "$dname"; then
+      ready=no
+      [ -f "$READY" ] && ready=yes
+      echo "auto name=$dname pane=$PANE ready=$ready"
+      exit 0
+    fi
     echo "manual"
     exit 1
     ;;
@@ -248,6 +328,7 @@ case "$cmd" in
       exit 2
     fi
     argname="$*"
+    SKIP_OPTOUT=""
     rc=0
     load_optin || rc=$?
     [ "$rc" -eq 2 ] && echo "pass: stale opt-in removed" >&2
@@ -268,12 +349,30 @@ case "$cmd" in
       [ -n "$live" ] || { echo "pass: cannot read pane pid for $PANE" >&2; exit 1; }
       mkdir -p "$STATE"
       chmod 700 "$ROOT" "$STATE"
+      if [ "$EXPLICIT" != 1 ] && optout_exists "$name"; then
+        # Opted out and not an explicit user /pass: no opt-in, no ready marker.
+        SKIP_OPTOUT="$name"
+      else
       tmp="$(mktemp "$STATE/.optin.XXXXXX")"
-      printf 'name=%s\npane_pid=%s\nclaude_pid=%s\noneshot=1\ntitle_at_optin=%s\n' \
-        "$name" "$live" "$CPID" "$(current_title)" >"$tmp"
+      if optout_exists "$name"; then
+        # Opted out: an explicit pass still clears once; status stays manual.
+        printf 'name=%s\npane_pid=%s\nclaude_pid=%s\noneshot=1\ntitle_at_optin=%s\n' \
+          "$name" "$live" "$CPID" "$(current_title)" >"$tmp"
+        oneshot_made=1
+      else
+        # Default on: behave like `auto`.
+        printf 'name=%s\npane_pid=%s\nclaude_pid=%s\ntitle_at_optin=%s\n' \
+          "$name" "$live" "$CPID" "$(current_title)" >"$tmp"
+        oneshot_made=0
+      fi
       mv -f "$tmp" "$OPTIN"
       OPT_NAME="$name"
-      log write "$name" "oneshot-optin(claude_pid=$CPID)"
+      if [ "$oneshot_made" = 1 ]; then
+        log write "$name" "oneshot-optin(claude_pid=$CPID)"
+      else
+        log write "$name" "default-optin(claude_pid=$CPID)"
+      fi
+      fi
     elif [ -n "$argname" ] && [ "$argname" != "$OPT_NAME" ]; then
       echo "pass: session is opted in as '$OPT_NAME'; ignoring name '$argname'" >&2
     elif [ -z "$argname" ]; then
@@ -301,10 +400,32 @@ case "$cmd" in
         OPT_NAME="$new"
       fi
     fi
+    if [ -z "$SKIP_OPTOUT" ] && [ "$EXPLICIT" != 1 ] && [ -n "${OPT_NAME:-}" ] && optout_exists "$OPT_NAME"; then
+      SKIP_OPTOUT="$OPT_NAME"
+    fi
     dest="$ROOT/pane-$N.md"
     tmp="$(mktemp "$ROOT/.pane-$N.XXXXXX")"
     printf '%s' "$note" >"$tmp"
     mv -f "$tmp" "$dest"
+    if [ -n "$SKIP_OPTOUT" ]; then
+      log write "$SKIP_OPTOUT" "saved($n),optout-no-clear"
+      echo "pass: '$SKIP_OPTOUT' is opted out (/pass manual); note saved, not clearing"
+      exit 0
+    fi
+    # Minimum-context gate (twin of the Stop hook's; see last_context).
+    if [ "$EXPLICIT" != 1 ]; then
+      mmin="${PASS_MIN_CONTEXT:-90000}"
+      [[ "$mmin" =~ ^[0-9]{1,6}$ ]] || mmin=90000
+      tx="$(find_transcript)"
+      if [ -n "$tx" ]; then
+        ctx="$(last_context "$tx")"
+        if [[ "$ctx" =~ ^[0-9]+$ ]] && [ "$ctx" -lt "$mmin" ]; then
+          log write "$OPT_NAME" "saved($n),min-context($ctx<$mmin)"
+          echo "pass: context $ctx < $mmin; note saved, not clearing"
+          exit 0
+        fi
+      fi
+    fi
     # Loop guard (same window as the Stop hook's): inside it, save the note but
     # set no ready marker, and say so — the model must not expect a clear.
     min="${PASS_MIN_INTERVAL:-600}"
@@ -319,6 +440,7 @@ case "$cmd" in
     fi
     rtmp="$(mktemp "$STATE/.ready.XXXXXX")"
     printf 'name=%s\nepoch=%s\n' "$OPT_NAME" "$(date +%s)" >"$rtmp"
+    [ "$EXPLICIT" = 1 ] && printf 'explicit=1\n' >>"$rtmp"
     mv -f "$rtmp" "$READY"
     log write "$OPT_NAME" "saved($n)"
     echo "pass: saved $dest ($n chars). Auto-clear is queued for the end of this turn; /pass cancel stops it until the clear is typed."

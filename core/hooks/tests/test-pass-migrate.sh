@@ -51,7 +51,7 @@ migrated() { # migrated LABEL -> checks the post-migration layout
 legacy_home
 OUT="$(bash "$SKILL/pass.sh" status 2>&1)"
 migrated "1 pass.sh status migrates: files moved, handoffs -> passes, one log line"
-[ "$OUT" = manual ] && check "1b status output unaffected ('manual')" 0 || check "1b status output unaffected" 1 "out=$OUT"
+[ "$OUT" = "auto name=sess pane=%5 ready=no" ] && check "1b status output unaffected (default auto)" 0 || check "1b status output unaffected" 1 "out=$OUT"
 bash "$SKILL/pass.sh" status >/dev/null 2>&1
 migrated "2 second run is a no-op (still one log line, symlink intact)"
 
