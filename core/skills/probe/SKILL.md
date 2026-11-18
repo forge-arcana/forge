@@ -69,6 +69,12 @@ Follow the [Forge Protocol](../forge/protocol.md) pre-flight, then resolve the *
 >
 > When recommending a deviation, the Pattern entry must include a `**Deviation signal**:` line naming the project signal that justifies it. Absent a signal, recommend the stack-guide default.
 
+### Bespoke check
+
+Any component the plan builds bespoke, where a standard, platform built-in, mature library or documented big-tech pattern exists, is a finding.
+Name the known solution and recommend adopting it.
+Bespoke stays only with the founder's approval (forge rule "Prior Art Before Bespoke").
+
 **Run the additional checks as a parallel sonnet-tier subagent** (or sequentially at your session model if parallel spawning or per-spawn model selection is unavailable) alongside the section reviews:
 
 Additionally, verify the blueprint includes:

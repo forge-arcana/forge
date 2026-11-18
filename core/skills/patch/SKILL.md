@@ -130,6 +130,8 @@ Structure (markdown, sections in this order):
 
 ### Step 5a: Change Brief
 
+Before writing the brief, run `/pry reframe` on the changes (`--lite` when every item is a minor fix). Each brief item names the known solution it adopts. List any bespoke item for the founder in Step 5b's confirmation, with why no known solution fits.
+
 Write the **Change Brief for /smith**, the input smith decomposes into heats. Open it with "Based on feedback received <date>", then list in priority order:
 - **Blueprint deltas first**: any Add or Update items from Phase 3, as `<Delta item> → <Section to update>`. They land before any code that depends on them.
 - **Priority 1 — Critical**: `<Finding> → <File:line> → <Fix> | Effort: S/M/L`.
@@ -140,7 +142,7 @@ Smith does its own heat decomposition, grading and parallelization. Patch suppli
 
 ### Step 5b: User Confirmation
 
-Ask the user with your harness's multi-choice prompt if available, otherwise inline. The recommended option comes first:
+Ask the user with your harness's multi-choice prompt if available, otherwise inline. The recommended option comes first. Show any bespoke items from 5a above the options, for approval:
 - "Yes — hand this brief to /smith"
 - "Just the criticals" (blueprint deltas plus Priority 1)
 - "Update the blueprint only"

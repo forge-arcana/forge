@@ -244,3 +244,7 @@
 ## Run Test Suites Through testgate (2026-11-15)
 **Learning**: On a shared box, run every test suite through `testgate -- <test command>` (for example `testgate -- npm test`, `testgate -- npx vitest run`, `testgate -- pytest`), not the bare command. Many sessions running suites at once can fill memory and make the out-of-memory killer take the user's browser and apps. testgate starts a suite only when free memory above the OOM killer's line covers that suite's measured peak, learned from its earlier runs. It never caps how many suites run and uses no fixed sizes. It marks each suite as the OOM killer's first target, so a test dies before anything else. A suite that waits prints one line saying why. Wait; do not work around it by running the bare command. `testgate status` lists what is running and waiting. If testgate is not on PATH, run the bare command and say so once.
 **Apply when**: Running any test suite, build-and-test script or test watcher, or briefing a subagent that will run tests.
+
+## Prior art before bespoke (2026-11-18)
+**Learning**: Agents repeatedly built bespoke fixes for problems that platforms, standards or mature open source already solved. The hand-rolled version cost more and broke in ways the known one would not. Reframing first (what is the problem class, who already solves it) catches this before code exists. The gate is now a forge HARD RULE carried by `/pry reframe`.
+**Apply when**: Starting any build, feature, redesign, multi-file change or non-trivial fix, or briefing a subagent that builds or fixes.

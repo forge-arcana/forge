@@ -53,6 +53,8 @@ Take a quick, read-only look at the repo (founding artifacts live in `opus/` fir
 
 **Escalation.** Security, auth, data-loss or money risk raises a `minor` to at least `standard` and always includes `/pound`. When torn between two tiers, take the higher.
 
+**Prior art.** Every tier except `not-actionable` reframes before it changes anything (forge rule "Prior Art Before Bespoke"): `minor` runs `/pry reframe --lite` before delegating the fix; `standard` gets it from `/patch` and `substantial` from `/smith`, so do not run it twice. A bespoke outcome needs the founder's approval; headless, record it in `$FORGE_OUT/decisions.md` and take the known-solution path.
+
 **Announce.** Interactive: in one line, say the tier, why, and which arts will run, then proceed. Ask (`AskUserQuestion`, recommended option first) only if the task is genuinely ambiguous, such as two readings that need different fixes. Headless: take the recommended reading and record it in `$FORGE_OUT/decisions.md`.
 
 ## Phase 4: Run the Tier

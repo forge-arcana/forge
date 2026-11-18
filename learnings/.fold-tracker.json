@@ -1,5 +1,5 @@
 {
-  "lastRun": "2026-11-15",
+  "lastRun": "2026-11-18",
   "processedEntries": [
     "Cloudflare Registrar + Email Routing Is the Default Bootstrap Stack",
     "Mock Auth in Staging Must Use the Real Auth Library, Not Manual Session Creation",
@@ -318,7 +318,8 @@
     "Landing-page polish: written bars, a design lint in the build, one motion token set",
     "Landing pages: the method that worked",
     "Run test suites through testgate",
-    "Summaries of Whole-Blob Snapshots Belong at Write Time, Not on the Hottest Read"
+    "Summaries of Whole-Blob Snapshots Belong at Write Time, Not on the Hottest Read",
+    "Prior art before bespoke: /pry reframes every build and fix (founder standing order, 2026-11-18)"
   ],
   "promotedEntries": [
     "Opus exists, cost analysis before blueprint",

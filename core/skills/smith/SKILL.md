@@ -80,6 +80,10 @@ Depending on input mode:
 
 For plan/conversation modes, persist the extracted spec to `memory/smith-workspec.md` with sections Source, Scope, Implementation Steps, Key Files, and Hash (sha256 of the content, for session-resume change detection) — schema in [ledger-schema.md](ledger-schema.md).
 
+### Prior-Art Gate
+
+Run `/pry reframe` on the work spec before estimating heats. Rewrite the work spec to adopt each known solution it finds, and record `Prior art: …` in the workspec (or ledger). Any part still bespoke needs the founder's approval through a multi-choice prompt that names the known solutions and why they do not fit, before heat 1. Headless: follow pry's headless rule. Every apprentice commission names the adopted solution and forbids hand-rolling what it provides; an apprentice that hand-rolls it is rejected and re-tasked.
+
 ### Heat Estimation
 
 Estimate the number of heats from the work spec:
@@ -92,7 +96,7 @@ Estimate the number of heats from the work spec:
 
 | Estimated Heats | Decision |
 |-----------------|----------|
-| **1–2 heats** | **Advise against smith.** Output: "This work is ~N heats — small enough to build directly without the full smith workflow. Just implement it." Exit unless `--force` flag was passed. |
+| **1–2 heats** | **Advise against smith.** Output: "This work is ~N heats — small enough to build directly without the full smith workflow. Run `/pry reframe --lite`, then implement it." Exit unless `--force` flag was passed. |
 | **3+ heats** | **Proceed.** The work benefits from smith's orchestration, evaluation, and checkpointing. Continue to Step 1. |
 
 The `--force` flag bypasses this gate — the user knows it's small but wants the ceremony (e.g., for learning, or because the work is deceptively complex).

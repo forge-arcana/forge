@@ -1,6 +1,6 @@
 ---
 name: pry
-description: "Relentless solution-finder — challenges 'can't be done' claims by decomposing blockers, scouring for alternatives, and reframing problems until a path forward emerges. Self-improving. TRIGGER when: user is stuck, blocked, or says something can't be done and needs alternative approaches."
+description: "Relentless solution-finder — challenges 'can't be done' claims by decomposing blockers, scouring for alternatives, and reframing problems until a path forward emerges. Self-improving. TRIGGER when: user is stuck, blocked, or says something can't be done and needs alternative approaches; also `/pry reframe <task>` before any build or fix, to find the well-known solution before building bespoke."
 ---
 <!-- model: opus | fan-out: assumption verification → sonnet; lateral paths → opus -->
 
@@ -22,6 +22,7 @@ You never say "it can't be done." You say "here's what I tried, here's what's le
 
 ## Arguments
 `$ARGUMENTS` — the claim, constraint, or problem to pry open. Can be:
+- `reframe <task>` (or `reframe --lite <task>`) → run Reframe Mode below instead of the wall process
 - A quoted statement ("the API doesn't support X")
 - A reference to a conversation ("the migration blocker we just discussed")
 - A file path with a specific problem (`src/auth.ts — can't refresh tokens without a redirect`)
@@ -74,6 +75,18 @@ If all direct and lateral paths are exhausted:
 1. **Restate the user's actual goal** — not the technical requirement, the business/user outcome
 2. **Propose alternative problems** — "You can't do X, but you can do Y, which gives the user the same result because..."
 3. **Cost-benefit the alternatives** — some reframes are better than the original ask
+
+## Reframe Mode
+
+**When**: before any build or fix (forge rule "Prior Art Before Bespoke"; `/smith`, `/patch` and `/parse` call it). There is no "can't" claim here. The wall is "we are about to build this ourselves".
+
+1. **Skeptic**: restate the problem as the user outcome, with the first-imagined solution removed. Name the problem class in the industry's words (for example "pane lookup by session name" becomes "process to terminal mapping").
+2. **Prospector**: search for who already solves this class, in this order: the platform or framework built-in the project already uses; published standards and RFCs; how major software companies do it (engineering blogs, docs); mature open-source libraries and tools (maintained, widely used). Batch every uncached web search in parallel and use the research cache per the [Forge Protocol](../forge/protocol.md#web-research-cache). Full mode fans out one sonnet-tier subagent per source class. `--lite` runs inline at the session model with one batched search and no fan-out.
+3. **Reframer**: if no known solution fits as is, reshape the problem so one does (adapt the requirement, compose two known pieces, or accept a degraded 80% version) before building anything new.
+
+**Output**: a table with columns Known solution | Source | Fit (adopt / adapt / does not fit) | Why. Then one Recommendation line. If nothing fits, end with a **Bespoke needed** block: what is missing from each known solution, the smallest bespoke piece, and the multi-choice question for the founder (adopt the closest known solution / build bespoke / reframe the goal). Headless callers cannot ask, so they record the block in `$FORGE_OUT/decisions.md` and proceed only with the known-solution path.
+
+**Lite output**: the same table with at most three rows, and one line.
 
 ## Output Format
 
