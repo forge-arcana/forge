@@ -151,7 +151,9 @@ Rules:
 
 ## Local LLM Delegation
 
-When a local Ollama instance is available, fan-out legs and code-generation work can be delegated to a local LLM at zero token cost. The local tier is an optimization — work routes through it when available and falls back to the pinned Claude tier silently when not.
+When a local Ollama instance is available, fan-out legs and code-generation work can be delegated to a local LLM. Local generation costs no plan tokens for the generated text; composing the prompt, reading the result and any redo after a non-zero exit do cost plan tokens. The local tier is an optimization — work routes through it when available and falls back to the pinned Claude tier when not.
+
+Every call is recorded as one JSON line in the usage ledger, `${FORGE_LLM_LEDGER:-${XDG_STATE_HOME:-$HOME/.local/state}/forge/llm-delegate/calls.jsonl}` (`FORGE_LLM_LEDGER=off` disables it). The ledger holds counts, timings, outcome and exit code, never prompt or response text. A daily scan (`core/scripts/llm-delegate-scan.py`) reports whether delegation is net helping.
 
 ### Detection
 
@@ -177,13 +179,13 @@ The orchestrating session spawns a haiku-tier subagent whose only job is to call
 Opus (orchestrate) → Haiku subagent (call llm-delegate.sh) → Local LLM ($0.00) → Opus (review)
 ```
 
-The local LLM output costs $0.00; Claude pays for the haiku relay, the orchestration prompt and the review pass.
+The local generation costs no plan tokens; Claude pays for the haiku relay, the orchestration prompt and the review pass.
 
 ### Rules
 
 1. **Security carve-outs never go local.** Any leg explicitly carved out at opus tier (security dimensions, auth/authz review, payment logic) stays on Claude regardless of the skill's local-delegable declaration.
 2. **Merge/verdict gates never go local.** The opus merge, consolidation, and final verdict steps that review subagent output stay on Claude.
-3. **Fallback is silent.** If `llm-delegate.sh` exits non-zero, the orchestrator spawns the leg at its pinned Claude tier without user intervention. Local delegation is an optimization, not a requirement.
+3. **Fallback needs no user step, and is recorded.** If `llm-delegate.sh` exits non-zero, the orchestrator spawns the leg at its pinned Claude tier without user intervention, and the failed call stays in the ledger. Local delegation is an optimization, not a requirement.
 4. **Quality gate.** The reviewing Claude (opus) treats local LLM output the same as sonnet output — it deduplicates, challenges unevidenced findings, and owns the final verdict. If the local output fails the quality gate, the orchestrator may retry on Claude.
 5. **User opt-out.** Setting `FORGE_LLM_DISABLE=1` skips local delegation entirely: `llm-delegate.sh` exits 1 at once and all work routes through Claude tiers as before.
 
