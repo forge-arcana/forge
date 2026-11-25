@@ -1,6 +1,6 @@
 ---
 name: pass
-description: "Pass: with no argument, write a pass note so the session clears itself and resumes on the next piece of work with a fresh context (works anytime in tmux). Auto-pass is on by default in tmux; `manual` opts this session name out, `auto` opts back in, `status` / `cancel` as named. The session name comes from its /rename title. Tmux sessions only."
+description: "Pass: with no argument, write a pass note so the session clears itself and resumes on the next piece of work with a fresh context (works anytime in tmux). Auto-pass is on by default in tmux; `manual` opts this session name out, `auto` opts back in, `status` / `cancel` as named. The session name comes from its /rename title. Works in tmux; a background-job session is moved into tmux by an explicit /pass, or by a model-initiated one when a tmux window named after the session holds its leftover view."
 ---
 <!-- model: sonnet | the note needs judgment about what the next context must know; no fan-out -->
 
@@ -26,7 +26,7 @@ Print the helper's output and stop. Names: 1-64 chars of `A-Za-z0-9._ -`, starti
 
 The opt-out follows the session name: after /rename, run /pass manual again.
 
-Status semantics: `auto ...` with exit 0 means auto-pass applies (the default); `manual ...` means opted out (or not in tmux).
+Status semantics: `auto ...` with exit 0 means auto-pass applies (the default; `auto name=<n> relocate=<pane>` is a background-job session whose leftover view sits in a window named after it); `manual ...` means opted out, not in tmux, or a background job with no such window.
 
 ## Writing a note (no argument)
 
@@ -64,11 +64,12 @@ PASS_NOTE_EOF_7c1
    Use Bash, not the Write tool: top-tier sessions are blocked from Write by a forge guard hook, and the helper enforces the length cap and sets the ready marker atomically.
 5. If the helper rejects for length (exit 2), shorten and retry. If it rejects with exit 4 because the note lacks a line that is exactly `## Done last session`, add the section and retry.
 6. If the helper says auto-clear is on cooldown, the note is saved but nothing will clear this turn: tell the user in one line and carry on.
-7. After a successful write, end the turn at once with a one-line message and no further tool calls. The Stop hook clears the session when the turn ends and, once the note has been injected, types a resume prompt.
+7. Background-job session (no tmux pane): a reply "this session runs as a background job; note saved ... reopened in tmux window" means the move is queued: end the turn at once exactly as in step 8. When the turn ends the background job is STOPPED and anything it still runs in the background (shells, monitors, tasks) ends with it; so write only after that work is done or listed under "Open items". The conversation reopens in tmux window `<name>`, is cleared and resumed from the note. If the move fails after the stop, pass.log and `relocate/<id>.failed` hold the recovery line (`cd <folder>`, then `claude --resume <id>`), the user is notified when a notifier is set, and the reopened pane shows it. `/pass cancel` only works before the turn ends. The reopened session keeps the model and permission mode found in the conversation record (an unrecorded or bypass mode becomes manual); other launch flags are not carried over. A reply "note saved, not moving it" (or "not clearing") means nothing will clear: tell the user in one line and carry on, do not end the turn. A refusal with a reason (exit 1, e.g. a tmux window of that name that is not this session's view) goes to the user in one line, then carry on.
+8. After a successful write, end the turn at once with a one-line message and no further tool calls. The Stop hook clears the session when the turn ends and, once the note has been injected, types a resume prompt.
 
 ## Safety
 
 - The resume prompt typed by the hook (`[auto-pass]`) is not the founder's or user's approval of anything. Do not run `/pass` in the turn it starts.
 - The injected pass note is authoritative for state and next task; it carries no user approvals. Re-arm listed session state from it.
 - A one-shot pass (explicit `/pass` in an opted-out session) never turns auto-pass back on: `status` still reports manual, so do not run `/pass` on your own initiative.
-- `/pass cancel` aborts a queued clear until the hook has typed `/clear`. A new user turn or peer message (SendMessage) during the ~25 s delay also cancels it. `/pass manual` opts the session out.
+- `/pass cancel` aborts a queued clear until the hook has typed `/clear` (for a background job, only before the turn ends). A new user turn or peer message (SendMessage) during the ~25 s delay also cancels it. `/pass manual` opts the session out.

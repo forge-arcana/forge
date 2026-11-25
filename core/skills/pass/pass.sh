@@ -26,6 +26,10 @@
 # A one-shot opt-in is left in place after the clear (the hooks need it through
 # the resume); it dies with the Claude process (claude_pid binding). `status`
 # reports it as manual, so the model-initiated auto-pass rule never fires on it.
+# A background-job session (no $TMUX_PANE) is handled by bg_handle below via
+# pass-relocate.sh: status reports `auto ... relocate=<pane>` when a tmux window
+# named after the session can take it, write queues the move (exit 1 with a
+# reason when it cannot), cancel drops the queued move.
 # State contract: see core/hooks/pass-stop.sh header.
 set -euo pipefail
 umask 077
@@ -176,7 +180,211 @@ if ! command -v "${TMUXC[0]}" >/dev/null 2>&1; then
   if [ "$cmd" = status ]; then echo "manual (not in tmux)"; exit 1; fi
   echo "pass: tmux is required" >&2; exit 1
 fi
+is_claude_pid() {
+  local comm args
+  [[ "${1:-}" =~ ^[0-9]+$ ]] || return 1
+  comm="$(ps -o comm= -p "$1" 2>/dev/null)" || return 1
+  [ "$comm" = claude ] && return 0
+  [ "$comm" = node ] || return 1
+  args="$(ps -o args= -p "$1" 2>/dev/null)" || return 1
+  [[ "$args" == *claude* ]]
+}
+
+# ---- Background-job sessions (no $TMUX_PANE) --------------------------------
+# A conversation running as a Claude Code background job has no tmux pane. For
+# status / write / cancel in such a session (a valid $CLAUDE_CODE_SESSION_ID that
+# `claude agents --json` lists with kind=background), pass-relocate.sh does the
+# pass: it stops the job (anything the job still runs in the background ends
+# with it), reopens the conversation in a tmux window named after the session
+# (a new window, or the leftover view of this session respawned in place;
+# nothing is ever typed into a shell), binds pass state there and hands over to
+# the Stop hook's clear job. Anything else returns from bg_handle and gets
+# today's messages.
+bg_log() { # bg_log <subcommand> <name> <result>
+  mkdir -p "$STATE" 2>/dev/null || return 0
+  printf '%s pass.sh %s pane=- name=%s %s\n' "$(date +%FT%T%z)" "$1" "$2" "$3" >>"$STATE/pass.log" 2>/dev/null || true
+}
+
+bg_save_note() { # bg_save_note <sid> <note>; prints the reason and returns 1 on failure
+  local t
+  mkdir -p "$ROOT/relocate" "$STATE" 2>/dev/null || { echo "pass: cannot create $ROOT/relocate" >&2; return 1; }
+  chmod 700 "$ROOT" "$STATE" "$ROOT/relocate" 2>/dev/null || true
+  t="$(mktemp "$ROOT/relocate/.note.XXXXXX" 2>/dev/null)" || { echo "pass: cannot write in $ROOT/relocate" >&2; return 1; }
+  if ! printf '%s' "$2" >"$t" 2>/dev/null || ! mv -f "$t" "$ROOT/relocate/$1.md" 2>/dev/null; then
+    rm -f "$t"; echo "pass: cannot save the note in $ROOT/relocate" >&2; return 1
+  fi
+}
+
+# A request file older than an hour is dead: ignore and remove it.
+bg_req_stale() { # bg_req_stale <file>: 0 iff stale or without a valid epoch
+  local e
+  e="$(sed -n 's/^epoch=//p' "$1" 2>/dev/null | head -n 1)"
+  [[ "$e" =~ ^[0-9]+$ ]] || return 0
+  [ $(($(date +%s) - e)) -gt 3600 ]
+}
+
+# The checks write makes before relocating, shared with status so the two never
+# disagree: sets BG_REFUSE (reason) and returns 1 when the move cannot happen.
+bg_checks() { # bg_checks <name> <sid>
+  BG_REFUSE=""
+  if ! [[ "$BG_CWD" =~ ^/[A-Za-z0-9._/-]+$ ]] || [ ! -d "$BG_CWD" ]; then
+    BG_REFUSE="this session runs as a background job and its working directory ('$BG_CWD') is not a plain existing path (letters, digits, . _ - /); it cannot be reopened in tmux automatically."
+    BG_REFUSE_LOG="cwd"
+    return 1
+  fi
+  if ! command -v setsid >/dev/null 2>&1; then
+    BG_REFUSE="setsid not found; cannot move a background job into tmux."; BG_REFUSE_LOG="setsid"; return 1
+  fi
+  if ! rl_target "$1" "$2" "$BG_CWD"; then
+    BG_REFUSE="this session runs as a background job and cannot be moved into tmux: $RL_WHY"
+    BG_REFUSE_LOG="$RL_WHY${RL_DETAIL:+; $RL_DETAIL}"
+    return 1
+  fi
+  return 0
+}
+
+bg_handle() {
+  local sid req lib name c note n ctx mmin tx job t where launcher sysst ev v val
+  local -a sdargs
+  case "$cmd" in status|write|cancel) ;; *) return 0 ;; esac
+  sid="${CLAUDE_CODE_SESSION_ID:-}"
+  [[ "$sid" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] || return 0
+  req="$STATE/relocate-$sid.req"
+  if [ -f "$req" ] && bg_req_stale "$req"; then
+    rm -f "$req"; bg_log "$cmd" "-" "stale-relocate-request-removed"
+  fi
+  if [ "$cmd" = cancel ]; then
+    [ -f "$req" ] || return 0
+    rm -f "$req"
+    bg_log cancel "-" "relocate-cancelled"
+    echo "pass: cancelled — this background job will not be moved into tmux (the saved note is kept in $ROOT/relocate/$sid.md)."
+    exit 0
+  fi
+  lib="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/pass-relocate.sh"
+  [ -f "$lib" ] || return 0
+  PASS_RELOCATE_LIB=1
+  # shellcheck disable=SC1090
+  . "$lib" || { unset PASS_RELOCATE_LIB; return 0; }
+  unset PASS_RELOCATE_LIB
+  rl_detect "$sid" || return 0
+
+  name=""
+  if [ "$cmd" = write ]; then name="$*"; fi
+  [ -n "$name" ] || name="$(current_title)"
+  if [ -z "$name" ]; then
+    c="$(sanitize_name "$BG_NAME")"
+    if valid_name "$c"; then name="$c"; fi
+  fi
+
+  if [ "$cmd" = status ]; then
+    if [ -n "$name" ] && [ ! -f "$STATE/optout/$name" ] && bg_checks "$name" "$sid" && [ "$RL_KIND" = pane ]; then
+      echo "auto name=$name relocate=$RL_PANE"
+      exit 0
+    fi
+    echo "manual (background job; an explicit /pass moves it into tmux)"
+    exit 1
+  fi
+
+  # write: same validation order and exit codes as the tmux path, before any relocation step
+  note="$(cat; printf x)"
+  note="${note%x}"
+  if [ -z "${note//[[:space:]]/}" ]; then
+    echo "pass: empty note rejected" >&2; exit 1
+  fi
+  n="$(printf '%s' "$note" | wc -m | tr -d ' ')"
+  if [ "$n" -gt "$CAP" ]; then
+    echo "pass: note is $n chars; cap is $CAP. Shorten and retry." >&2
+    bg_log write "-" "rejected-too-long($n)"
+    exit 2
+  fi
+  if ! printf '%s\n' "$note" | tr -d '\r' | grep -qx '## Done last session[[:space:]]*'; then
+    echo "pass: nothing saved — add a line that is exactly '## Done last session' (right after the title is conventional) listing what was done/shipped + key decisions, then re-run write." >&2
+    bg_log write "-" "rejected-no-done-section"
+    exit 4
+  fi
+  if [ -z "$name" ]; then
+    echo "pass: this session runs as a background job but has no usable name; /rename it, then run /pass again." >&2
+    bg_log write "-" "bg-refused(no-name)"
+    exit 1
+  fi
+  if [ "$EXPLICIT" != 1 ] && [ -f "$STATE/optout/$name" ]; then
+    bg_save_note "$sid" "$note" || exit 1
+    bg_log write "$name" "saved($n),optout-no-clear,bg"
+    echo "pass: '$name' is opted out (/pass manual); note saved, not clearing"
+    exit 0
+  fi
+  if [ "$EXPLICIT" != 1 ]; then
+    mmin="${PASS_MIN_CONTEXT:-90000}"
+    [[ "$mmin" =~ ^[0-9]{1,6}$ ]] || mmin=90000
+    tx="$(find_transcript)"
+    if [ -n "$tx" ]; then
+      ctx="$(last_context "$tx")"
+      if [[ "$ctx" =~ ^[0-9]+$ ]] && [ "$ctx" -lt "$mmin" ]; then
+        bg_save_note "$sid" "$note" || exit 1
+        bg_log write "$name" "saved($n),min-context($ctx<$mmin),bg"
+        echo "pass: context $ctx < $mmin; note saved, not clearing"
+        exit 0
+      fi
+    fi
+  fi
+  if ! bg_checks "$name" "$sid"; then
+    echo "pass: $BG_REFUSE" >&2
+    bg_log write "$name" "bg-refused($BG_REFUSE_LOG)"
+    exit 1
+  fi
+  if [ "$RL_KIND" = new ]; then
+    if [ "$EXPLICIT" != 1 ]; then
+      bg_save_note "$sid" "$note" || exit 1
+      bg_log write "$name" "saved($n),bg-no-window"
+      echo "pass: this session runs as a background job and no tmux window named '$name' exists; note saved ($n chars), not moving it. An explicit /pass moves it into tmux."
+      exit 0
+    fi
+  fi
+  bg_save_note "$sid" "$note" || exit 1
+  job="$(date +%s%N 2>/dev/null).$$"
+  [[ "$job" =~ ^[0-9]+\.[0-9]+$ ]] || job="$(date +%s)$RANDOM.$$"
+  if [ "$RL_KIND" = pane ]; then where="$RL_PANE"; else where="new window"; fi
+  t="$(mktemp "$STATE/.relocate.XXXXXX")"
+  {
+    printf 'name=%s\nsid=%s\nshort=%s\ncwd=%s\n' "$name" "$sid" "$BG_SHORT" "$BG_CWD"
+    printf 'pane=%s\n' "$([ "$RL_KIND" = pane ] && echo "$RL_PANE" || echo new)"
+    printf 'explicit=%s\nepoch=%s\njob=%s\nbgpid=%s\ntitle=%s\n' "$EXPLICIT" "$(date +%s)" "$job" "$BG_PID" "$(current_title)"
+  } >"$t"
+  mv -f "$t" "$req"
+  launcher=""
+  if [ "${PASS_RELOCATE_NO_SYSTEMD:-0}" != 1 ] && command -v systemd-run >/dev/null 2>&1 && command -v systemctl >/dev/null 2>&1; then
+    # Outlive `claude stop`: a transient user unit is not a descendant of the session.
+    sysst="$(systemctl --user is-system-running 2>&1 || true)"
+    case "$sysst" in
+      running|degraded|starting|initializing|stopping|maintenance)
+        sdargs=(--user --collect --quiet --unit "pass-relocate-$BG_SHORT-$(date +%s)")
+        sdargs+=("--setenv=HOME=$HOME" "--setenv=PATH=$PATH")
+        [ -n "${XDG_RUNTIME_DIR:-}" ] && sdargs+=("--setenv=XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR")
+        [ -n "${TMUX_TMPDIR:-}" ] && sdargs+=("--setenv=TMUX_TMPDIR=$TMUX_TMPDIR")
+        for v in $(compgen -e); do
+          case "$v" in PASS_*) val="${!v}"; [[ "$val" == *$'\n'* ]] || sdargs+=("--setenv=$v=$val") ;; esac
+        done
+        if systemd-run "${sdargs[@]}" bash "$(dirname "$lib")/pass-relocate.sh" --job "$sid" "$job" </dev/null >/dev/null 2>&1; then
+          launcher=systemd-run
+        fi ;;
+    esac
+  fi
+  if [ -z "$launcher" ] && setsid -f bash "$(dirname "$lib")/pass-relocate.sh" --job "$sid" "$job" </dev/null >/dev/null 2>&1; then
+    launcher=setsid
+  fi
+  if [ -z "$launcher" ]; then
+    rm -f "$req"
+    echo "pass: could not start the relocation job; note saved in $ROOT/relocate/$sid.md." >&2
+    bg_log write "$name" "saved($n),bg-launch-failed"
+    exit 1
+  fi
+  bg_log write "$name" "saved($n),bg-relocate-queued($where),launcher=$launcher"
+  echo "pass: this session runs as a background job; note saved ($n chars). When this turn ends the job is stopped (anything it still runs in the background ends with it) and the conversation is reopened in tmux window '$name' ($where), then cleared and resumed from the note. /pass cancel stops it, but only before this turn ends."
+  exit 0
+}
+
 if [ -z "${TMUX_PANE:-}" ]; then
+  bg_handle "$@"
   if [ "$cmd" = status ]; then echo "manual (not in tmux)"; exit 1; fi
   echo "pass: not in a tmux pane (\$TMUX_PANE unset); auto-pass needs tmux" >&2
   exit 1
@@ -197,16 +405,6 @@ log() { # log <subcommand> <name> <result>
 }
 
 cur_pid() { "${TMUXC[@]}" display-message -p -t "$PANE" '#{pane_pid}' 2>/dev/null || true; }
-
-is_claude_pid() {
-  local comm args
-  [[ "${1:-}" =~ ^[0-9]+$ ]] || return 1
-  comm="$(ps -o comm= -p "$1" 2>/dev/null)" || return 1
-  [ "$comm" = claude ] && return 0
-  [ "$comm" = node ] || return 1
-  args="$(ps -o args= -p "$1" 2>/dev/null)" || return 1
-  [[ "$args" == *claude* ]]
-}
 
 # Nearest Claude Code ancestor of this helper (it runs under Claude's Bash tool).
 claude_ancestor() {
