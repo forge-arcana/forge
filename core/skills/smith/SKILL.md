@@ -131,6 +131,7 @@ When working from a blueprint: the **Consumption Guide** (Section 22 footer) def
 - CI/CD pipeline (Section 19)
 - Compliance checks (Sections 9, 20)
 - Documentation
+- A `/pare` pass on the build's scope, before the final gate, so `/temper` and `/pound` review pared code. It runs only when `python3 -I <forge>/core/scripts/pare-ledger.py hook-status` exits 0 (the switch file is absent by default and stays off until the pilot's verdict reads Pays). Never per heat: mid-build an unused export is often scaffolding for the next heat.
 
 ### Plan/Conversation Mode
 

@@ -125,7 +125,7 @@ Do not flag fluent/builder APIs, DTOs, standard-library chains (`filter().map().
 Code built by several agents or apprentices drifts in ways human-written code does not. Flag:
 - Duplicated helpers across modules (the same util written twice under different names)
 - Swallowed or over-broad error handling (empty `catch`, `except: pass`, catch-all that returns a default)
-- Dead code left from earlier iterations (unused exports, `_old`/`_legacy` variants, unreachable branches)
+- Dead code left from earlier iterations (unused exports, `_old`/`_legacy` variants, unreachable branches). Report it, but do not fix it in the poke fix pass: hand dead-code findings to `/pare`, so they are not fixed twice
 - Comments that narrate the change ("changed to", "updated to") instead of explaining the code
 - Tautological tests that assert mocks or their own setup, so they cannot fail
 - Unneeded or non-existent dependencies (hallucinated or slopsquatted package names): check each unfamiliar import against the registry and the lockfile

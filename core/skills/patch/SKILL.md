@@ -47,6 +47,7 @@ Parse all feedback and classify into one or more categories. A single feedback i
 | **Code Quality** | Bug reports, unexpected behavior, regressions, error handling gaps | `/poke` |
 | **Readiness / Operations** | Auth failures, security concerns, deployment issues, compliance flags | `/press` |
 | **Blueprint Gap** | Feature requests, missing workflows, out-of-scope asks, product pivots | Blueprint Delta only |
+| **Bloat / Dead Code** | Too much code, dead code, unused exports or packages, over-built layers, "can we delete this?" | `/pare` |
 | **Performance** | Slow load times, timeouts, memory issues | `/poke` + `/press` |
 
 > Present the classification to the user before proceeding: a **Feedback Classification** block headed with the project, listing each detected category with its item count and the art it routes to (e.g. `UX / Design: [count] → /preen`), then "Proceeding with analysis...".

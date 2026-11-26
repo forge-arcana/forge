@@ -201,6 +201,10 @@ The local generation costs no plan tokens; Claude pays for the haiku relay, the 
 
 Install Ollama and pull a coding model (default `qwen3-coder:30b`); `llm-delegate.sh` auto-detects `localhost:11434`. Its header documents the flags, the env vars (`OLLAMA_URL`, `FORGE_LLM_MODEL`, `FORGE_LLM_SYSTEM`, `FORGE_LLM_REMOTE_URL`, timeouts) and the endpoint order (`OLLAMA_URL` → `--url` → localhost → `FORGE_LLM_REMOTE_URL`). `FORGE_LLM_DISABLE=1` makes the script exit 1 at once with a message, so the normal fallback applies; orchestrators may also check it before delegating.
 
+## Pare Ledgers
+
+`/pare` writes two ledgers outside the repo: the runs ledger `${FORGE_PARE_LEDGER:-${XDG_STATE_HOME:-$HOME/.local/state}/forge/pare/runs.jsonl}` and `bench.jsonl` beside it (`FORGE_PARE_LEDGER=off` disables both). They hold counts and names only, never file contents. `core/scripts/pare-ledger.py` is the only writer, `pare-measure.py` and `pare-bench.py` produce the numbers, and `pare-scan.py` derives the daily snapshot.
+
 ## Execution (art-specific)
 
 Each art defines its own execution in its SKILL.md:
